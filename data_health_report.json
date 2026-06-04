@@ -1,13 +1,13 @@
 {
   "balances": {
     "diesel": {
-      "generated_at": "2026-06-03T12:25:22.698Z",
+      "generated_at": "2026-06-04T02:02:04.952Z",
       "latest_monthly": "2026-03-15",
       "latest_weekly": "2026-05-22",
       "path": "Diesel_Balance/manifest.json"
     },
     "jet": {
-      "generated_at": "2026-06-03T12:25:22.814Z",
+      "generated_at": "2026-06-04T02:02:05.072Z",
       "latest_monthly": "2026-03-15",
       "latest_weekly": "2026-05-22",
       "path": "Jet_Balance/manifest.json"
@@ -281,7 +281,7 @@
       "rows": 543
     }
   },
-  "generated_at": "2026-06-03T12:25:29.813328+00:00",
+  "generated_at": "2026-06-04T02:02:22.941781+00:00",
   "jodi": {
     "generated_at": "2026-05-31T13:55:13.440926+00:00",
     "latest_period_month": "2026-03-01",

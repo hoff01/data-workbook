@@ -1,7 +1,7 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-06-03T12:25:22.814Z",
+  "generatedAt": "2026-06-04T02:02:05.072Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through 2026-12-31.",
   "latestMonthly": "2026-03-15",
