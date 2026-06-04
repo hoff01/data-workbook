@@ -1,0 +1,2 @@
+series_id,period_month,source_year,geography_code,geography,geography_type,capacity_group,capacity_detail,capacity_basis,value_kbd,source_value,source_unit,last_updated,series_name,aggregate_eligible
+manual_us_fcc_capacity_stream_day,2026-01,2026,NUS,U.S.,us,FCC Capacity,"Catalytic Cracking, Fresh Feed",stream_day,0.000,0.000,Thousand Barrels per Day,,"Manual U.S. Refinery Catalytic Cracking, Fresh Feed Downstream Charge Capacity",true

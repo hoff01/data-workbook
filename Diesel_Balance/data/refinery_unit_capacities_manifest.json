@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-05-31T16:25:09.771252+00:00",
+  "output_path": "eia_capacity/refinery_unit_capacities_2025.csv",
+  "refineries": 126,
+  "rows": 311,
+  "source_path": "eia_capacity/raw/refcap25.xlsx",
+  "source_sha256": "abf164b2cd1351c7d601a268c8cf072e7bf5ade89cd7766a3bd49972d8759c27",
+  "source_url": "https://www.eia.gov/petroleum/refinerycapacity/refcap25.xlsx",
+  "source_year": 2025,
+  "units": [
+    "atmos_distillation",
+    "distillate_hydrocracking",
+    "gasoil_resid_hydrocracking",
+    "fcc",
+    "coking"
+  ]
+}

@@ -1,0 +1,10 @@
+products:
+  diesel:
+    kpler_product: Gasoil/Diesel
+    label: Diesel
+  jet:
+    kpler_product: Kero/Jet
+    label: Jet
+  gasoline:
+    kpler_product: Light Ends
+    label: Gasoline

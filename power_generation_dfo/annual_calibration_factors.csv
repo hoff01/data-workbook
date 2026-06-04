@@ -1,0 +1,8 @@
+calibration_as_of_year,available_months,selected_months,selection_window_months,target_dfo_consumption_per_oil_mwh,selected_subset_correlation,factor_target_error,calibration_dfo_consumption,calibration_oil_mwh,dfo_consumption_per_oil_mwh,method
+2020,36,20,12,1.150000000000,0.59205472,-0.087602972794,3256385.000000,3065130.000000,1.062397027206,2018_forward_recalibrated_global_ratio_top_20_target_1p15_correlation_months
+2021,48,20,12,1.150000000000,0.68707739,0.000414555568,3737583.000000,3248901.000000,1.150414555568,2018_forward_recalibrated_global_ratio_top_20_target_1p15_correlation_months
+2022,60,20,12,1.150000000000,0.96780484,-0.000181816503,5480429.000000,4766344.000000,1.149818183497,2018_forward_recalibrated_global_ratio_top_20_target_1p15_correlation_months
+2023,72,20,12,1.150000000000,0.98048997,0.000391601696,7117650.000000,6187154.000000,1.150391601696,2018_forward_recalibrated_global_ratio_top_20_target_1p15_correlation_months
+2024,84,20,12,1.150000000000,0.98048997,0.000391601696,7117650.000000,6187154.000000,1.150391601696,2018_forward_recalibrated_global_ratio_top_20_target_1p15_correlation_months
+2025,96,20,12,1.150000000000,0.98386727,0.000096654931,8238270.000000,7163111.000000,1.150096654931,2018_forward_recalibrated_global_ratio_top_20_target_1p15_correlation_months
+2026,99,20,12,1.150000000000,0.98814409,0.000005404270,10682345.000000,9288952.000000,1.150005404270,2018_forward_recalibrated_global_ratio_top_20_target_1p15_correlation_months

@@ -1,0 +1,535 @@
+{
+  "downloads": [
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2017.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2017.csv"
+      ],
+      "bytes": 26704904,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2017.csv",
+      "sha256": "949d7092b88b0c73b3a904490974e9e9c17c79d83dc20fa47fab16943af97237",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2017.csv",
+      "year": 2017
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2018.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2018.csv"
+      ],
+      "bytes": 26681503,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2018.csv",
+      "sha256": "459ef2062cb058d904a6bf002f04abc1700319478e2a7e9542909f06801bb806",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2018.csv",
+      "year": 2018
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2019.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2019.csv"
+      ],
+      "bytes": 26634398,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2019.csv",
+      "sha256": "61b6e497ebb0f787acf1ad24a209e5eaa8d8d28a5acbc8ca9a28849ca454efbd",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2019.csv",
+      "year": 2019
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2020.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2020.csv"
+      ],
+      "bytes": 26641965,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2020.csv",
+      "sha256": "a924bf08f16f31005e88a58deaa6ac4e713f5d88d94fe7ed615f437da9207fdd",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2020.csv",
+      "year": 2020
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2021.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2021.csv"
+      ],
+      "bytes": 26593925,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2021.csv",
+      "sha256": "aebdb99e88841fe6b72354690a291f51daf1ab0b3e53c907d14fb75d1a498b9a",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2021.csv",
+      "year": 2021
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2022.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2022.csv"
+      ],
+      "bytes": 26573808,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2022.csv",
+      "sha256": "c4d588151e533fa8c20d476c81ea7d0e18cec5ea062d86cb57a4dcf94d6cdfb2",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2022.csv",
+      "year": 2022
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2023.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2023.csv"
+      ],
+      "bytes": 26556073,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2023.csv",
+      "sha256": "58a394d7a1a9276bef36533f6f1e43e642c749cb583afb9d1e226ecf27770cf8",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2023.csv",
+      "year": 2023
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2024.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2024.csv"
+      ],
+      "bytes": 26450440,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2024.csv",
+      "sha256": "a6f6d90bb498b27d8b72ddcc79e482e18504084150d9cca719c0d0ccb435d280",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2024.csv",
+      "year": 2024
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2025.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2025.csv"
+      ],
+      "bytes": 25245634,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2025.csv",
+      "sha256": "155a208f6b943e083b523b9aae15059c6b4809002f8761fa0ba7b2407007213f",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2025.csv",
+      "year": 2025
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2026.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2026.csv"
+      ],
+      "bytes": 5394141,
+      "error": "",
+      "path": "Jodi_Data/raw/secondaryyear2026.csv",
+      "sha256": "081dbff5d3971d269b6cb710448a7aaedcc36694b3d78203c4736832c5acb9f4",
+      "status": "downloaded",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2026.csv",
+      "year": 2026
+    },
+    {
+      "attempted_urls": [
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2027.csv",
+        "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2027.csv"
+      ],
+      "bytes": 0,
+      "error": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2027.csv: HTTP 404: Not Found; https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/2027.csv: HTTP 404: Not Found",
+      "path": "",
+      "sha256": "",
+      "status": "missing_future",
+      "url": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear2027.csv",
+      "year": 2027
+    }
+  ],
+  "end_year_attempted": 2027,
+  "future_year_probe_count": 1,
+  "generated_at": "2026-05-31T13:55:13.440926+00:00",
+  "item_name_source": "https://www.jodidata.org/_resources/files/downloads/oil-data/jodi-oil-wdb-item-names-ver2017.pdf",
+  "item_names": {
+    "ASSESSMENT_CODE": {
+      "1": "Results of the assessment show reasonable levels of comparability",
+      "2": "Consult metadata/Use with caution",
+      "3": "Data has not been assessed",
+      "4": "Data under verification"
+    },
+    "ENERGY_PRODUCT": {
+      "GASDIES": "Gas/diesel oil",
+      "GASOLINE": "Motor and aviation gasoline",
+      "JETKERO": "Kerosene type jet fuel",
+      "KEROSENE": "Kerosenes"
+    },
+    "FLOW_BREAKDOWN": {
+      "CLOSTLV": "Closing stocks",
+      "IPTRANSF": "Interproduct transfers",
+      "PTRANSF": "Products transferred",
+      "RECEIPTS": "Receipts",
+      "REFGROUT": "Refinery output",
+      "STATDIFF": "Statistical difference",
+      "STOCKCH": "Stock change",
+      "TOTDEMO": "Demand",
+      "TOTEXPSB": "Exports",
+      "TOTIMPSB": "Imports"
+    },
+    "UNIT_MEASURE": {
+      "CONVBBL": "Conversion factor barrels/ktons",
+      "KBBL": "Thousand Barrels (kbbl)",
+      "KBD": "Thousand Barrels per day (kb/d)",
+      "KL": "Thousand Kilolitres (kl)",
+      "KTONS": "Thousand Metric Tons (kmt)"
+    }
+  },
+  "outputs": {
+    "Africa_Diesel": {
+      "bytes": 14001740,
+      "countries": [
+        "AO",
+        "DZ",
+        "EG",
+        "GA",
+        "GM",
+        "GQ",
+        "LY",
+        "MA",
+        "MU",
+        "NE",
+        "NG",
+        "SD",
+        "SZ",
+        "TN",
+        "ZA"
+      ],
+      "max_period_month": "2026-03-01",
+      "min_period_month": "2017-01-01",
+      "path": "Jodi_Data/africa_diesel.csv",
+      "region_details": [
+        "East Africa",
+        "North Africa",
+        "Other Africa",
+        "West Africa"
+      ],
+      "rows": 83250
+    },
+    "Africa_Gasoline": {
+      "bytes": 15327588,
+      "countries": [
+        "AO",
+        "DZ",
+        "EG",
+        "GA",
+        "GM",
+        "GQ",
+        "LY",
+        "MA",
+        "MU",
+        "NE",
+        "NG",
+        "SD",
+        "SZ",
+        "TN",
+        "ZA"
+      ],
+      "max_period_month": "2026-03-01",
+      "min_period_month": "2017-01-01",
+      "path": "Jodi_Data/africa_gasoline.csv",
+      "region_details": [
+        "East Africa",
+        "North Africa",
+        "Other Africa",
+        "West Africa"
+      ],
+      "rows": 83250
+    },
+    "Africa_Jet": {
+      "bytes": 27799514,
+      "countries": [
+        "AO",
+        "DZ",
+        "EG",
+        "GA",
+        "GM",
+        "GQ",
+        "LY",
+        "MA",
+        "MU",
+        "NE",
+        "NG",
+        "SD",
+        "SZ",
+        "TN",
+        "ZA"
+      ],
+      "max_period_month": "2026-03-01",
+      "min_period_month": "2017-01-01",
+      "path": "Jodi_Data/africa_jet.csv",
+      "region_details": [
+        "East Africa",
+        "North Africa",
+        "Other Africa",
+        "West Africa"
+      ],
+      "rows": 166500
+    },
+    "Europe_Diesel": {
+      "bytes": 42322390,
+      "countries": [
+        "AL",
+        "AM",
+        "AT",
+        "AZ",
+        "BE",
+        "BG",
+        "BY",
+        "CH",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GB",
+        "GE",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IS",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MD",
+        "MK",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "RS",
+        "RU",
+        "SE",
+        "SI",
+        "SK",
+        "TR",
+        "UA"
+      ],
+      "max_period_month": "2026-03-01",
+      "min_period_month": "2017-01-01",
+      "path": "Jodi_Data/europe_diesel.csv",
+      "region_details": [
+        "MED",
+        "NWE",
+        "Other Europe"
+      ],
+      "rows": 233100
+    },
+    "Europe_Gasoline": {
+      "bytes": 46000531,
+      "countries": [
+        "AL",
+        "AM",
+        "AT",
+        "AZ",
+        "BE",
+        "BG",
+        "BY",
+        "CH",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GB",
+        "GE",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IS",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MD",
+        "MK",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "RS",
+        "RU",
+        "SE",
+        "SI",
+        "SK",
+        "TR",
+        "UA"
+      ],
+      "max_period_month": "2026-03-01",
+      "min_period_month": "2017-01-01",
+      "path": "Jodi_Data/europe_gasoline.csv",
+      "region_details": [
+        "MED",
+        "NWE",
+        "Other Europe"
+      ],
+      "rows": 233100
+    },
+    "Europe_Jet": {
+      "bytes": 83594770,
+      "countries": [
+        "AL",
+        "AM",
+        "AT",
+        "AZ",
+        "BE",
+        "BG",
+        "BY",
+        "CH",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GB",
+        "GE",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IS",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MD",
+        "MK",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "RS",
+        "RU",
+        "SE",
+        "SI",
+        "SK",
+        "TR",
+        "UA"
+      ],
+      "max_period_month": "2026-03-01",
+      "min_period_month": "2017-01-01",
+      "path": "Jodi_Data/europe_jet.csv",
+      "region_details": [
+        "MED",
+        "NWE",
+        "Other Europe"
+      ],
+      "rows": 466200
+    }
+  },
+  "pipeline_name": "jodi_secondary",
+  "product_mapping": {
+    "GASDIES": "Diesel",
+    "GASOLINE": "Gasoline",
+    "JETKERO": "Jet",
+    "KEROSENE": "Jet"
+  },
+  "region_mapping": {
+    "Africa": {
+      "East Africa": [
+        "MU",
+        "SD"
+      ],
+      "North Africa": [
+        "DZ",
+        "EG",
+        "LY",
+        "MA",
+        "TN"
+      ],
+      "Other Africa": [
+        "SZ",
+        "ZA"
+      ],
+      "West Africa": [
+        "AO",
+        "GA",
+        "GM",
+        "GQ",
+        "NE",
+        "NG"
+      ]
+    },
+    "Europe": {
+      "MED": [
+        "AL",
+        "BG",
+        "CY",
+        "ES",
+        "GR",
+        "HR",
+        "IT",
+        "MK",
+        "MT",
+        "PT",
+        "RO",
+        "RS",
+        "SI",
+        "TR"
+      ],
+      "NWE": [
+        "AT",
+        "BE",
+        "CH",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "GB",
+        "IE",
+        "IS",
+        "LT",
+        "LU",
+        "LV",
+        "NL",
+        "NO",
+        "PL",
+        "SE",
+        "SK"
+      ],
+      "Other Europe": [
+        "AM",
+        "AZ",
+        "BY",
+        "GE",
+        "HU",
+        "MD",
+        "RU",
+        "UA"
+      ]
+    }
+  },
+  "schema_version": 1,
+  "source_page": "https://www.jodidata.org/oil/database/data-downloads.aspx",
+  "start_year": 2017,
+  "url_patterns": {
+    "current_and_future_first": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/secondaryyear{year}.csv",
+    "historical_fallback": "https://www.jodidata.org/_resources/files/downloads/oil-data/annual-csv/secondary/{year}.csv"
+  }
+}

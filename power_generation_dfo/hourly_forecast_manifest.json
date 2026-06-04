@@ -1,0 +1,318 @@
+{
+  "chronos2_note": "Uses AutoGluon Chronos-2 when autogluon.timeseries is installed; otherwise falls back to a load/weather/hour-profile model.",
+  "dfo_factor": 1.15000540427,
+  "dfo_factor_source": "2026",
+  "fallback_model_note": "Fallback uses a larger recent hourly history window and blends toward higher historical oil-to-load ratios when forecast demand is elevated.",
+  "forecast_hours": 24,
+  "generated_at": "2026-05-31T13:55:32.626206+00:00",
+  "history_windows": {
+    "max_oil_rows": 20000,
+    "max_region_rows": 40000,
+    "profile_history_hours": 2160,
+    "recent_default_hours": 336
+  },
+  "model": "fallback_hourly_load_weather_profile",
+  "outputs": {
+    "forecast_24h": "/Users/alexhoffmann/python_pulls/power_generation_dfo/dfo_generation_forecast_24h.csv",
+    "forecast_chart": "/Users/alexhoffmann/python_pulls/power_generation_dfo/dfo_generation_forecast_24h.jpg",
+    "hourly_model_input": "/Users/alexhoffmann/python_pulls/power_generation_dfo/hourly_dfo_model_input.csv",
+    "hourly_oil_raw": "/Users/alexhoffmann/python_pulls/power_generation_dfo/hourly_oil_generation_raw.csv",
+    "hourly_region_raw": "/Users/alexhoffmann/python_pulls/power_generation_dfo/hourly_region_data_raw.csv",
+    "weather_14d": "/Users/alexhoffmann/python_pulls/power_generation_dfo/weather_14d_padd1_cities.csv"
+  },
+  "pipeline_name": "power_generation_dfo_hourly_forecast",
+  "row_counts": {
+    "forecast_rows": 24,
+    "model_input": 10775,
+    "oil_raw": 20000,
+    "region_raw": 40000,
+    "weather_rows": 336
+  },
+  "sources": [
+    {
+      "offset": 0,
+      "row_count": 5000,
+      "total": 518812,
+      "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
+    },
+    {
+      "offset": 5000,
+      "row_count": 5000,
+      "total": 518812,
+      "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
+    },
+    {
+      "offset": 10000,
+      "row_count": 5000,
+      "total": 518812,
+      "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
+    },
+    {
+      "offset": 15000,
+      "row_count": 5000,
+      "total": 518812,
+      "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
+    },
+    {
+      "offset": 20000,
+      "row_count": 5000,
+      "total": 518812,
+      "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
+    },
+    {
+      "offset": 25000,
+      "row_count": 5000,
+      "total": 518812,
+      "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
+    },
+    {
+      "offset": 30000,
+      "row_count": 5000,
+      "total": 518812,
+      "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
+    },
+    {
+      "offset": 35000,
+      "row_count": 5000,
+      "total": 518812,
+      "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
+    },
+    {
+      "offset": 0,
+      "row_count": 5000,
+      "total": 128226,
+      "url": "https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/"
+    },
+    {
+      "offset": 5000,
+      "row_count": 5000,
+      "total": 128226,
+      "url": "https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/"
+    },
+    {
+      "offset": 10000,
+      "row_count": 5000,
+      "total": 128226,
+      "url": "https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/"
+    },
+    {
+      "offset": 15000,
+      "row_count": 5000,
+      "total": 128226,
+      "url": "https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/"
+    },
+    {
+      "city": "Hartford",
+      "city_key": "ct_hartford",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/BOX/22,65/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "41.7658,-72.6734",
+      "state": "CT"
+    },
+    {
+      "city": "Washington",
+      "city_key": "dc_washington",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/LWX/96,72/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "38.9072,-77.0369",
+      "state": "DC"
+    },
+    {
+      "city": "Wilmington",
+      "city_key": "de_wilmington",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/PHI/38,67/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "39.7391,-75.5398",
+      "state": "DE"
+    },
+    {
+      "city": "Boston",
+      "city_key": "ma_boston",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/BOX/71,101/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "42.3601,-71.0589",
+      "state": "MA"
+    },
+    {
+      "city": "Baltimore",
+      "city_key": "md_baltimore",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/LWX/109,91/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "39.2904,-76.6122",
+      "state": "MD"
+    },
+    {
+      "city": "Portland",
+      "city_key": "me_portland",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/GYX/72,58/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "43.6591,-70.2568",
+      "state": "ME"
+    },
+    {
+      "city": "Manchester",
+      "city_key": "nh_manchester",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/GYX/38,20/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "42.9956,-71.4548",
+      "state": "NH"
+    },
+    {
+      "city": "Newark",
+      "city_key": "nj_newark",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/OKX/27,42/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "40.7357,-74.1724",
+      "state": "NJ"
+    },
+    {
+      "city": "New York",
+      "city_key": "ny_new_york",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/OKX/33,42/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "40.7128,-74.0060",
+      "state": "NY"
+    },
+    {
+      "city": "Philadelphia",
+      "city_key": "pa_philadelphia",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/PHI/50,79/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "39.9526,-75.1652",
+      "state": "PA"
+    },
+    {
+      "city": "Providence",
+      "city_key": "ri_providence",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/BOX/64,75/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "41.8240,-71.4128",
+      "state": "RI"
+    },
+    {
+      "city": "Richmond",
+      "city_key": "va_richmond",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/AKQ/46,77/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "37.5407,-77.4360",
+      "state": "VA"
+    },
+    {
+      "city": "Burlington",
+      "city_key": "vt_burlington",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/BTV/89,56/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "44.4759,-73.2121",
+      "state": "VT"
+    },
+    {
+      "city": "Charleston",
+      "city_key": "wv_charleston",
+      "forecast_hourly_url": "https://api.weather.gov/gridpoints/RLX/63,67/forecast/hourly",
+      "hourly_rows": 156,
+      "points": "38.3498,-81.6326",
+      "state": "WV"
+    }
+  ],
+  "weather_days_requested": 14,
+  "weather_locations": [
+    {
+      "city": "Hartford",
+      "city_key": "ct_hartford",
+      "latitude": 41.7658,
+      "longitude": -72.6734,
+      "state": "CT"
+    },
+    {
+      "city": "Washington",
+      "city_key": "dc_washington",
+      "latitude": 38.9072,
+      "longitude": -77.0369,
+      "state": "DC"
+    },
+    {
+      "city": "Wilmington",
+      "city_key": "de_wilmington",
+      "latitude": 39.7391,
+      "longitude": -75.5398,
+      "state": "DE"
+    },
+    {
+      "city": "Boston",
+      "city_key": "ma_boston",
+      "latitude": 42.3601,
+      "longitude": -71.0589,
+      "state": "MA"
+    },
+    {
+      "city": "Baltimore",
+      "city_key": "md_baltimore",
+      "latitude": 39.2904,
+      "longitude": -76.6122,
+      "state": "MD"
+    },
+    {
+      "city": "Portland",
+      "city_key": "me_portland",
+      "latitude": 43.6591,
+      "longitude": -70.2568,
+      "state": "ME"
+    },
+    {
+      "city": "Manchester",
+      "city_key": "nh_manchester",
+      "latitude": 42.9956,
+      "longitude": -71.4548,
+      "state": "NH"
+    },
+    {
+      "city": "Newark",
+      "city_key": "nj_newark",
+      "latitude": 40.7357,
+      "longitude": -74.1724,
+      "state": "NJ"
+    },
+    {
+      "city": "New York",
+      "city_key": "ny_new_york",
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "state": "NY"
+    },
+    {
+      "city": "Philadelphia",
+      "city_key": "pa_philadelphia",
+      "latitude": 39.9526,
+      "longitude": -75.1652,
+      "state": "PA"
+    },
+    {
+      "city": "Providence",
+      "city_key": "ri_providence",
+      "latitude": 41.824,
+      "longitude": -71.4128,
+      "state": "RI"
+    },
+    {
+      "city": "Richmond",
+      "city_key": "va_richmond",
+      "latitude": 37.5407,
+      "longitude": -77.436,
+      "state": "VA"
+    },
+    {
+      "city": "Burlington",
+      "city_key": "vt_burlington",
+      "latitude": 44.4759,
+      "longitude": -73.2121,
+      "state": "VT"
+    },
+    {
+      "city": "Charleston",
+      "city_key": "wv_charleston",
+      "latitude": 38.3498,
+      "longitude": -81.6326,
+      "state": "WV"
+    }
+  ]
+}

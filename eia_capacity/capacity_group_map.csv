@@ -1,0 +1,43 @@
+capacity_type,capacity_detail,capacity_group_id,capacity_group,aggregate_eligible,source_series_count
+thermal_cracking_coking,"Thermal Cracking, Coking",coking_capacity,Coking Capacity,true,50
+thermal_cracking_delayed_coking,"Thermal Cracking, Delayed Coking",coking_capacity,Coking Capacity,false,24
+thermal_cracking_fluid_coking,"Thermal Cracking, Fluid Coking",coking_capacity,Coking Capacity,false,11
+thermal_cracking_coking,Thermal Cracking/Coking,coking_capacity,Coking Capacity,true,48
+thermal_cracking_delayed_coking,Thermal Cracking/Delayed Coking,coking_capacity,Coking Capacity,false,25
+thermal_cracking_fluid_coking,Thermal Cracking/Fluid Coking,coking_capacity,Coking Capacity,false,38
+desulfurization_gasoline,"Desulfurization, Gasoline",desulfurization_capacity,Desulfurization Capacity,true,49
+catalytic_cracking_fresh_feed,"Catalytic Cracking, Fresh Feed",fcc_capacity,FCC Capacity,true,74
+catalytic_cracking_recycle_feed,"Catalytic Cracking, Recycle Feed",fcc_capacity,FCC Capacity,false,38
+catalytic_cracking_fresh_feed,Catalytic Cracking/Fresh Feed,fcc_capacity,FCC Capacity,true,24
+catalytic_cracking_recycle_feed,Catalytic Cracking/Recycle Feed,fcc_capacity,FCC Capacity,false,11
+catalytic_hydrocracking,Catalytic Hydrocracking,hydrocracking_capacity,Hydrocracking Capacity,true,98
+catalytic_hydrocracking_distillate,"Catalytic Hydrocracking, Distillate",hydrocracking_capacity,Hydrocracking Capacity,false,6
+catalytic_hydrocracking_gas_oil,"Catalytic Hydrocracking, Gas Oil",hydrocracking_capacity,Hydrocracking Capacity,false,17
+catalytic_hydrocracking_residual,"Catalytic Hydrocracking, Residual",hydrocracking_capacity,Hydrocracking Capacity,false,10
+catalytic_hydrocracking_residual_fuel_oil,Catalytic Hydrocracking/ Residual Fuel Oil,hydrocracking_capacity,Hydrocracking Capacity,false,39
+catalytic_hydrocracking_distillate,Catalytic Hydrocracking/Distillate,hydrocracking_capacity,Hydrocracking Capacity,false,43
+catalytic_hydrocracking_gas_oil,Catalytic Hydrocracking/Gas Oil,hydrocracking_capacity,Hydrocracking Capacity,false,32
+catalytic_hydrotreating_diesel,"Catalytic Hydrotreating, Diesel",hydrotreating_capacity,Hydrotreating Capacity,true,15
+catalytic_hydrotreating_diesel_fuel,"Catalytic Hydrotreating, Diesel Fuel",hydrotreating_capacity,Hydrotreating Capacity,true,34
+catalytic_hydrotreating_distillate,"Catalytic Hydrotreating, Distillate",hydrotreating_capacity,Hydrotreating Capacity,true,49
+catalytic_hydrotreating_heavy_gas_oil,"Catalytic Hydrotreating, Heavy Gas Oil",hydrotreating_capacity,Hydrotreating Capacity,true,49
+catalytic_hydrotreating_kerosene_jet_fuel,"Catalytic Hydrotreating, Kerosene/Jet Fuel",hydrotreating_capacity,Hydrotreating Capacity,true,49
+catalytic_hydrotreating_naphtha_reformer_feed,"Catalytic Hydrotreating, Naphtha/Reformer Feed",hydrotreating_capacity,Hydrotreating Capacity,true,49
+catalytic_hydrotreating_other_distillate,"Catalytic Hydrotreating, Other Distillate",hydrotreating_capacity,Hydrotreating Capacity,true,26
+catalytic_hydrotreating_other_distillate_fuel,"Catalytic Hydrotreating, Other Distillate Fuel",hydrotreating_capacity,Hydrotreating Capacity,true,23
+catalytic_hydrotreating_other_oils,"Catalytic Hydrotreating, Other Oils",hydrotreating_capacity,Hydrotreating Capacity,true,49
+catalytic_hydrotreating_other_residual_fuel_oil,"Catalytic Hydrotreating, Other/Residual Fuel Oil",hydrotreating_capacity,Hydrotreating Capacity,true,49
+catalytic_hydrotreating_residual_fuel,"Catalytic Hydrotreating, Residual Fuel",hydrotreating_capacity,Hydrotreating Capacity,true,11
+catalytic_hydrotreating_residual_fuel_oil,"Catalytic Hydrotreating, Residual Fuel Oil",hydrotreating_capacity,Hydrotreating Capacity,true,38
+desulfurization_including_catalytic_hydrotreating,Desulfurization (including Catalytic Hydrotreating),hydrotreating_capacity,Hydrotreating Capacity,true,49
+catalytic_reforming,Catalytic Reforming,reforming_capacity,Reforming Capacity,true,98
+catalytic_reforming_high_pressure,Catalytic Reforming/High Pressure,reforming_capacity,Reforming Capacity,false,49
+catalytic_reforming_low_pressure,Catalytic Reforming/Low Pressure,reforming_capacity,Reforming Capacity,false,49
+fuels_solvent_deaspalting,Fuels Solvent Deaspalting,solvent_deasphalting_capacity,Solvent Deasphalting Capacity,true,29
+fuels_solvent_deasphalting,Fuels Solvent Deasphalting,solvent_deasphalting_capacity,Solvent Deasphalting Capacity,true,20
+thermal_cracking,Thermal Cracking,thermal_cracking_capacity,Thermal Cracking Capacity,true,49
+thermal_cracking_other_including_gas_oil,Thermal Cracking/Other (including Gas Oil),thermal_cracking_other_including_gas_oil_capacity,Thermal Cracking Other (including Gas Oil) Capacity,true,36
+thermal_cracking_other_including_gas_oil,"Thermal Cracking, Other (including Gas Oil)",thermal_cracking_other_including_gas_oil_capacity,"Thermal Cracking, Other (including Gas Oil) Capacity",true,13
+vacuum_distillation,Vacuum Distillation,vacuum_distillation_capacity,Vacuum Distillation Capacity,true,49
+thermal_cracking_visbreaking,"Thermal Cracking, Visbreaking",visbreaking_capacity,Visbreaking Capacity,true,13
+thermal_cracking_visbreaking,Thermal Cracking/Visbreaking,visbreaking_capacity,Visbreaking Capacity,true,36

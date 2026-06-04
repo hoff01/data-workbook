@@ -1,0 +1,23 @@
+{
+  "actual_share_periods": 147,
+  "estimate_rows": 123,
+  "generated_at": "2026-05-31T13:54:39.534297+00:00",
+  "outputs": {
+    "estimates": "padd_1/padd_1_distillate_estimates.csv",
+    "monthly_diesel_backup": "eia_monthly/diesel.csv.bak",
+    "raw": "padd_1/prime_supplier_raw.csv",
+    "shares": "padd_1/padd_1_distillate_shares.csv",
+    "updated_monthly_diesel": "eia_monthly/diesel.csv"
+  },
+  "pipeline_name": "padd_1_distillate",
+  "raw_rows": 588,
+  "source": "https://api.eia.gov/v2/petroleum/cons/prim/data/",
+  "sources": [
+    {
+      "row_count": 588,
+      "source": "padd_1/prime_supplier_raw.csv",
+      "status": "cached"
+    }
+  ],
+  "total_share_periods": 195
+}

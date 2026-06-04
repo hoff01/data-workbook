@@ -1,0 +1,1367 @@
+{
+  "generated_at": "2026-05-31T13:54:44.999690+00:00",
+  "kpler_access_mode": "eia_fallback_no_credentials",
+  "mode": "eia_fallback",
+  "normalized_long": {
+    "path": "Kpler/raw/daily/normalized_long.csv",
+    "rows": 18332
+  },
+  "outputs": {
+    "europe_diesel": {
+      "daily_path": "Kpler/output/daily/europe_diesel_daily.csv",
+      "daily_rows": 3118,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/europe_diesel_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/europe_diesel_weekly.csv",
+      "weekly_rows": 444
+    },
+    "europe_gasoline": {
+      "daily_path": "Kpler/output/daily/europe_gasoline_daily.csv",
+      "daily_rows": 3118,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/europe_gasoline_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/europe_gasoline_weekly.csv",
+      "weekly_rows": 444
+    },
+    "europe_jet": {
+      "daily_path": "Kpler/output/daily/europe_jet_daily.csv",
+      "daily_rows": 3118,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/europe_jet_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/europe_jet_weekly.csv",
+      "weekly_rows": 444
+    },
+    "us_diesel": {
+      "daily_path": "Kpler/output/daily/us_diesel_daily.csv",
+      "daily_rows": 3118,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/us_diesel_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/us_diesel_weekly.csv",
+      "weekly_rows": 444
+    },
+    "us_diesel_padd_movements": {
+      "daily_path": "Kpler/output/daily/us_diesel_padd_movements_daily.csv",
+      "daily_rows": 3118,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/us_diesel_padd_movements_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/us_diesel_padd_movements_weekly.csv",
+      "weekly_rows": 444
+    },
+    "us_gasoline": {
+      "daily_path": "Kpler/output/daily/us_gasoline_daily.csv",
+      "daily_rows": 3118,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/us_gasoline_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/us_gasoline_weekly.csv",
+      "weekly_rows": 444
+    },
+    "us_gasoline_padd_movements": {
+      "daily_path": "Kpler/output/daily/us_gasoline_padd_movements_daily.csv",
+      "daily_rows": 3118,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/us_gasoline_padd_movements_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/us_gasoline_padd_movements_weekly.csv",
+      "weekly_rows": 444
+    },
+    "us_jet": {
+      "daily_path": "Kpler/output/daily/us_jet_daily.csv",
+      "daily_rows": 3118,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/us_jet_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/us_jet_weekly.csv",
+      "weekly_rows": 444
+    },
+    "us_jet_padd_movements": {
+      "daily_path": "Kpler/output/daily/us_jet_padd_movements_daily.csv",
+      "daily_rows": 3118,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/us_jet_padd_movements_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/us_jet_padd_movements_weekly.csv",
+      "weekly_rows": 444
+    },
+    "us_padd_movements": {
+      "daily_path": "Kpler/output/daily/us_padd_movements_daily.csv",
+      "daily_rows": 9354,
+      "max_date": "2026-07-15",
+      "min_date": "2018-01-01",
+      "monthly_path": "Kpler/output/monthly/us_padd_movements_monthly.csv",
+      "monthly_rows": 103,
+      "weekly_path": "Kpler/output/weekly/us_padd_movements_weekly.csv",
+      "weekly_rows": 0
+    }
+  },
+  "pipeline_name": "kpler_flows",
+  "pull_count": 27,
+  "pull_status": {
+    "us_diesel_exports": {
+      "assumption": "no Kpler credentials; EIA import/export values are staged as Kpler-shaped rows",
+      "rows": 3064,
+      "source": "EIA clean weekly/monthly exports",
+      "status": "eia_fallback"
+    },
+    "us_diesel_imports": {
+      "assumption": "no Kpler credentials; EIA import/export values are staged as Kpler-shaped rows",
+      "rows": 3064,
+      "source": "EIA clean weekly/monthly exports",
+      "status": "eia_fallback"
+    },
+    "us_gasoline_exports": {
+      "assumption": "no Kpler credentials; EIA import/export values are staged as Kpler-shaped rows",
+      "rows": 3012,
+      "source": "EIA clean weekly/monthly exports",
+      "status": "eia_fallback"
+    },
+    "us_gasoline_imports": {
+      "assumption": "no Kpler credentials; EIA import/export values are staged as Kpler-shaped rows",
+      "rows": 3064,
+      "source": "EIA clean weekly/monthly exports",
+      "status": "eia_fallback"
+    },
+    "us_jet_exports": {
+      "assumption": "no Kpler credentials; EIA import/export values are staged as Kpler-shaped rows",
+      "rows": 3064,
+      "source": "EIA clean weekly/monthly exports",
+      "status": "eia_fallback"
+    },
+    "us_jet_imports": {
+      "assumption": "no Kpler credentials; EIA import/export values are staged as Kpler-shaped rows",
+      "rows": 3064,
+      "source": "EIA clean weekly/monthly exports",
+      "status": "eia_fallback"
+    }
+  },
+  "pulls": [
+    {
+      "commodity": "diesel",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "daily",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_imports",
+      "only_realized": false,
+      "region_detail": "",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "daily",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_exports",
+      "only_realized": false,
+      "region_detail": "",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "europe_nwe_diesel_imports",
+      "only_realized": false,
+      "region_detail": "nwe",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "Austria",
+        "Belgium",
+        "Czechia",
+        "Denmark",
+        "Estonia",
+        "Finland",
+        "France",
+        "Germany",
+        "Iceland",
+        "Ireland",
+        "Latvia",
+        "Lithuania",
+        "Luxembourg",
+        "Netherlands",
+        "Norway",
+        "Poland",
+        "Slovakia",
+        "Sweden",
+        "Switzerland",
+        "United Kingdom"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "Austria",
+        "Belgium",
+        "Czechia",
+        "Denmark",
+        "Estonia",
+        "Finland",
+        "France",
+        "Germany",
+        "Iceland",
+        "Ireland",
+        "Latvia",
+        "Lithuania",
+        "Luxembourg",
+        "Netherlands",
+        "Norway",
+        "Poland",
+        "Slovakia",
+        "Sweden",
+        "Switzerland",
+        "United Kingdom"
+      ],
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "europe_nwe_diesel_exports",
+      "only_realized": false,
+      "region_detail": "nwe",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "europe_med_diesel_imports",
+      "only_realized": false,
+      "region_detail": "med",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "Albania",
+        "Bulgaria",
+        "Croatia",
+        "Cyprus",
+        "Greece",
+        "Italy",
+        "Malta",
+        "Montenegro",
+        "North Macedonia",
+        "Portugal",
+        "Romania",
+        "Serbia",
+        "Slovenia",
+        "Spain",
+        "Turkey"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "Albania",
+        "Bulgaria",
+        "Croatia",
+        "Cyprus",
+        "Greece",
+        "Italy",
+        "Malta",
+        "Montenegro",
+        "North Macedonia",
+        "Portugal",
+        "Romania",
+        "Serbia",
+        "Slovenia",
+        "Spain",
+        "Turkey"
+      ],
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "europe_med_diesel_exports",
+      "only_realized": false,
+      "region_detail": "med",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "europe_other_europe_diesel_imports",
+      "only_realized": false,
+      "region_detail": "other_europe",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "Armenia",
+        "Azerbaijan",
+        "Belarus",
+        "Bosnia and Herzegovina",
+        "Georgia",
+        "Hungary",
+        "Moldova",
+        "Russia",
+        "Ukraine"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "Armenia",
+        "Azerbaijan",
+        "Belarus",
+        "Bosnia and Herzegovina",
+        "Georgia",
+        "Hungary",
+        "Moldova",
+        "Russia",
+        "Ukraine"
+      ],
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "europe_other_europe_diesel_exports",
+      "only_realized": false,
+      "region_detail": "other_europe",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-07-15",
+      "family": "domestic_padd",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "daily",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "domestic_padd_diesel",
+      "only_realized": false,
+      "region_detail": "",
+      "route_group": "",
+      "split": [
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": true,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "daily",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_imports",
+      "only_realized": false,
+      "region_detail": "",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "daily",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_exports",
+      "only_realized": false,
+      "region_detail": "",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Kero/Jet",
+      "name": "europe_nwe_jet_imports",
+      "only_realized": false,
+      "region_detail": "nwe",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "Austria",
+        "Belgium",
+        "Czechia",
+        "Denmark",
+        "Estonia",
+        "Finland",
+        "France",
+        "Germany",
+        "Iceland",
+        "Ireland",
+        "Latvia",
+        "Lithuania",
+        "Luxembourg",
+        "Netherlands",
+        "Norway",
+        "Poland",
+        "Slovakia",
+        "Sweden",
+        "Switzerland",
+        "United Kingdom"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "Austria",
+        "Belgium",
+        "Czechia",
+        "Denmark",
+        "Estonia",
+        "Finland",
+        "France",
+        "Germany",
+        "Iceland",
+        "Ireland",
+        "Latvia",
+        "Lithuania",
+        "Luxembourg",
+        "Netherlands",
+        "Norway",
+        "Poland",
+        "Slovakia",
+        "Sweden",
+        "Switzerland",
+        "United Kingdom"
+      ],
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Kero/Jet",
+      "name": "europe_nwe_jet_exports",
+      "only_realized": false,
+      "region_detail": "nwe",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Kero/Jet",
+      "name": "europe_med_jet_imports",
+      "only_realized": false,
+      "region_detail": "med",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "Albania",
+        "Bulgaria",
+        "Croatia",
+        "Cyprus",
+        "Greece",
+        "Italy",
+        "Malta",
+        "Montenegro",
+        "North Macedonia",
+        "Portugal",
+        "Romania",
+        "Serbia",
+        "Slovenia",
+        "Spain",
+        "Turkey"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "Albania",
+        "Bulgaria",
+        "Croatia",
+        "Cyprus",
+        "Greece",
+        "Italy",
+        "Malta",
+        "Montenegro",
+        "North Macedonia",
+        "Portugal",
+        "Romania",
+        "Serbia",
+        "Slovenia",
+        "Spain",
+        "Turkey"
+      ],
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Kero/Jet",
+      "name": "europe_med_jet_exports",
+      "only_realized": false,
+      "region_detail": "med",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Kero/Jet",
+      "name": "europe_other_europe_jet_imports",
+      "only_realized": false,
+      "region_detail": "other_europe",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "Armenia",
+        "Azerbaijan",
+        "Belarus",
+        "Bosnia and Herzegovina",
+        "Georgia",
+        "Hungary",
+        "Moldova",
+        "Russia",
+        "Ukraine"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "Armenia",
+        "Azerbaijan",
+        "Belarus",
+        "Bosnia and Herzegovina",
+        "Georgia",
+        "Hungary",
+        "Moldova",
+        "Russia",
+        "Ukraine"
+      ],
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Kero/Jet",
+      "name": "europe_other_europe_jet_exports",
+      "only_realized": false,
+      "region_detail": "other_europe",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-07-15",
+      "family": "domestic_padd",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "daily",
+      "kpler_product": "Kero/Jet",
+      "name": "domestic_padd_jet",
+      "only_realized": false,
+      "region_detail": "",
+      "route_group": "",
+      "split": [
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": true,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "gasoline",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "daily",
+      "kpler_product": "Light Ends",
+      "name": "us_gasoline_imports",
+      "only_realized": false,
+      "region_detail": "",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "gasoline",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "daily",
+      "kpler_product": "Light Ends",
+      "name": "us_gasoline_exports",
+      "only_realized": false,
+      "region_detail": "",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "gasoline",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Light Ends",
+      "name": "europe_nwe_gasoline_imports",
+      "only_realized": false,
+      "region_detail": "nwe",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "Austria",
+        "Belgium",
+        "Czechia",
+        "Denmark",
+        "Estonia",
+        "Finland",
+        "France",
+        "Germany",
+        "Iceland",
+        "Ireland",
+        "Latvia",
+        "Lithuania",
+        "Luxembourg",
+        "Netherlands",
+        "Norway",
+        "Poland",
+        "Slovakia",
+        "Sweden",
+        "Switzerland",
+        "United Kingdom"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "gasoline",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "Austria",
+        "Belgium",
+        "Czechia",
+        "Denmark",
+        "Estonia",
+        "Finland",
+        "France",
+        "Germany",
+        "Iceland",
+        "Ireland",
+        "Latvia",
+        "Lithuania",
+        "Luxembourg",
+        "Netherlands",
+        "Norway",
+        "Poland",
+        "Slovakia",
+        "Sweden",
+        "Switzerland",
+        "United Kingdom"
+      ],
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Light Ends",
+      "name": "europe_nwe_gasoline_exports",
+      "only_realized": false,
+      "region_detail": "nwe",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "gasoline",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Light Ends",
+      "name": "europe_med_gasoline_imports",
+      "only_realized": false,
+      "region_detail": "med",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "Albania",
+        "Bulgaria",
+        "Croatia",
+        "Cyprus",
+        "Greece",
+        "Italy",
+        "Malta",
+        "Montenegro",
+        "North Macedonia",
+        "Portugal",
+        "Romania",
+        "Serbia",
+        "Slovenia",
+        "Spain",
+        "Turkey"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "gasoline",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "Albania",
+        "Bulgaria",
+        "Croatia",
+        "Cyprus",
+        "Greece",
+        "Italy",
+        "Malta",
+        "Montenegro",
+        "North Macedonia",
+        "Portugal",
+        "Romania",
+        "Serbia",
+        "Slovenia",
+        "Spain",
+        "Turkey"
+      ],
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Light Ends",
+      "name": "europe_med_gasoline_exports",
+      "only_realized": false,
+      "region_detail": "med",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "gasoline",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Light Ends",
+      "name": "europe_other_europe_gasoline_imports",
+      "only_realized": false,
+      "region_detail": "other_europe",
+      "route_group": "",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "Armenia",
+        "Azerbaijan",
+        "Belarus",
+        "Bosnia and Herzegovina",
+        "Georgia",
+        "Hungary",
+        "Moldova",
+        "Russia",
+        "Ukraine"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "gasoline",
+      "end_date": "2026-07-15",
+      "family": "external",
+      "flow_direction": "export",
+      "from_zones": [
+        "Armenia",
+        "Azerbaijan",
+        "Belarus",
+        "Bosnia and Herzegovina",
+        "Georgia",
+        "Hungary",
+        "Moldova",
+        "Russia",
+        "Ukraine"
+      ],
+      "geography": "europe",
+      "granularity": "daily",
+      "kpler_product": "Light Ends",
+      "name": "europe_other_europe_gasoline_exports",
+      "only_realized": false,
+      "region_detail": "other_europe",
+      "route_group": "",
+      "split": [
+        "destination countries",
+        "destination trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "gasoline",
+      "end_date": "2026-07-15",
+      "family": "domestic_padd",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "daily",
+      "kpler_product": "Light Ends",
+      "name": "domestic_padd_gasoline",
+      "only_realized": false,
+      "region_detail": "",
+      "route_group": "",
+      "split": [
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": true,
+      "with_intra_region": true
+    }
+  ],
+  "runtime_config": {
+    "concurrency": 2,
+    "end_date": "2026-07-15",
+    "granularity": "daily",
+    "only_realized": false,
+    "retry_backoff_seconds": 10.0,
+    "retry_count": 3,
+    "snapshot_date": "",
+    "start_date": "2018-01-01",
+    "unit": "kbd",
+    "verify_tls": true,
+    "with_forecast": true,
+    "with_freight_view": false,
+    "with_intra_region": true,
+    "with_product_estimation": false
+  },
+  "validation": {
+    "all_weekly_dates_friday": true,
+    "file_checks": [
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/us_diesel_daily.csv",
+        "rows": 3118
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/us_diesel_weekly.csv",
+        "rows": 444
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/us_diesel_monthly.csv",
+        "rows": 103
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/us_jet_daily.csv",
+        "rows": 3118
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/us_jet_weekly.csv",
+        "rows": 444
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/us_jet_monthly.csv",
+        "rows": 103
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/us_gasoline_daily.csv",
+        "rows": 3118
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/us_gasoline_weekly.csv",
+        "rows": 444
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/us_gasoline_monthly.csv",
+        "rows": 103
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/europe_diesel_daily.csv",
+        "rows": 3118
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/europe_diesel_weekly.csv",
+        "rows": 444
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/europe_diesel_monthly.csv",
+        "rows": 103
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/europe_jet_daily.csv",
+        "rows": 3118
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/europe_jet_weekly.csv",
+        "rows": 444
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/europe_jet_monthly.csv",
+        "rows": 103
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/europe_gasoline_daily.csv",
+        "rows": 3118
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/europe_gasoline_weekly.csv",
+        "rows": 444
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/europe_gasoline_monthly.csv",
+        "rows": 103
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/us_diesel_padd_movements_daily.csv",
+        "rows": 3118
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/us_diesel_padd_movements_weekly.csv",
+        "rows": 444
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/us_diesel_padd_movements_monthly.csv",
+        "rows": 103
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/us_jet_padd_movements_daily.csv",
+        "rows": 3118
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/us_jet_padd_movements_weekly.csv",
+        "rows": 444
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/us_jet_padd_movements_monthly.csv",
+        "rows": 103
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/us_gasoline_padd_movements_daily.csv",
+        "rows": 3118
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/us_gasoline_padd_movements_weekly.csv",
+        "rows": 444
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/us_gasoline_padd_movements_monthly.csv",
+        "rows": 103
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/daily/us_padd_movements_daily.csv",
+        "rows": 9354
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/weekly/us_padd_movements_weekly.csv",
+        "rows": 0
+      },
+      {
+        "all_weekly_dates_friday": true,
+        "duplicate_dates": false,
+        "numeric_kbd_columns": true,
+        "path": "Kpler/output/monthly/us_padd_movements_monthly.csv",
+        "rows": 103
+      }
+    ],
+    "no_duplicate_dates": true,
+    "numeric_kbd_columns": true
+  }
+}

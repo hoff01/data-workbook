@@ -1,0 +1,41 @@
+defaults:
+  start_date: "2018-01-01"
+  granularity: daily
+  unit: kbd
+  only_realized: false
+  with_forecast: true
+  with_intra_region: true
+  with_freight_view: false
+  with_product_estimation: false
+
+external:
+  with_intra_country: false
+  us_zone: United States
+  us_import_splits:
+    - origin countries
+    - origin trading regions
+    - products
+  us_export_splits:
+    - destination countries
+    - destination trading regions
+    - products
+  europe_import_splits:
+    - origin countries
+    - origin trading regions
+    - products
+  europe_export_splits:
+    - destination countries
+    - destination trading regions
+    - products
+
+domestic_padd:
+  with_intra_country: true
+  from_zones:
+    - United States
+  to_zones:
+    - United States
+  flow_direction: export
+  splits:
+    - origin padds
+    - destination padds
+    - products

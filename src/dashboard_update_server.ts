@@ -1,0 +1,425 @@
+import { createReadStream, existsSync, readFileSync, statSync, writeFileSync, type Stats } from "node:fs";
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { extname, join, normalize, relative, resolve } from "node:path";
+import { spawn } from "node:child_process";
+import { createGzip } from "node:zlib";
+
+type UpdateGroup = "weekly" | "monthly" | "other" | "all";
+type JobStatus = "running" | "succeeded" | "failed";
+
+type Job = {
+  id: string;
+  group: UpdateGroup;
+  status: JobStatus;
+  command: string;
+  args: string[];
+  startedAt: string;
+  endedAt: string | null;
+  durationMs: number | null;
+  exitCode: number | null;
+  signal: NodeJS.Signals | null;
+  lines: string[];
+};
+
+type BalanceAdjustment = {
+  frequency: "monthly" | "weekly";
+  period: string;
+  regionKey: string;
+  lineId: string;
+  valueKbd: number;
+  note?: string;
+  updatedAt?: string;
+};
+
+type CrudeOutage = {
+  id: string;
+  regionKey: string;
+  refineryId?: string;
+  refineryName?: string;
+  unitKey?: string;
+  unitLabel?: string;
+  refinery: string;
+  capacityOfflineKbd: number;
+  startDate: string;
+  endDate: string;
+  type: "Planned" | "Unplanned" | "Other";
+  note?: string;
+  updatedAt?: string;
+};
+
+type RefineryCapacityAdjustment = {
+  id: string;
+  periodMonth: string;
+  regionKey?: string;
+  refineryId: string;
+  refineryName?: string;
+  unitKey: string;
+  unitLabel?: string;
+  capacityKbd: number;
+  note?: string;
+  updatedAt?: string;
+};
+
+type DashboardSettings = {
+  forecastEnd: string;
+  adjustments: Record<"diesel" | "jet", BalanceAdjustment[]>;
+  crudeOutages: CrudeOutage[];
+  refineryCapacityAdjustments: RefineryCapacityAdjustment[];
+  updatedAt: string;
+};
+
+const ROOT = process.cwd();
+const HOST = process.env.DASHBOARD_UPDATE_HOST || "127.0.0.1";
+const PORT = Number(process.env.DASHBOARD_UPDATE_PORT || 8787);
+const SERVER_APP_ID = "balance-dashboard-update-server";
+const SERVER_STARTED_AT = new Date().toISOString();
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const validGroups = new Set<UpdateGroup>(["weekly", "monthly", "other", "all"]);
+const maxLines = 600;
+const settingsPath = join(ROOT, "balance_dashboard_settings.json");
+
+let currentProcess: ReturnType<typeof spawn> | null = null;
+let currentJob: Job | null = null;
+
+function mimeType(pathname: string): string {
+  return {
+    ".css": "text/css; charset=utf-8",
+    ".csv": "text/csv; charset=utf-8",
+    ".html": "text/html; charset=utf-8",
+    ".jpeg": "image/jpeg",
+    ".jpg": "image/jpeg",
+    ".js": "text/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+    ".txt": "text/plain; charset=utf-8",
+  }[extname(pathname).toLowerCase()] || "application/octet-stream";
+}
+
+function writeJson(response: ServerResponse, statusCode: number, payload: unknown): void {
+  response.writeHead(statusCode, {
+    "content-type": "application/json; charset=utf-8",
+    "access-control-allow-origin": "*",
+    "access-control-allow-methods": "GET,POST,OPTIONS",
+    "access-control-allow-headers": "content-type",
+  });
+  response.end(JSON.stringify(payload));
+}
+
+function normalizeForecastEnd(value: unknown): string {
+  const raw = String(value || "2026-12-31").trim();
+  if (/^\d{4}$/.test(raw)) return `${raw}-12-31`;
+  if (/^\d{4}-\d{2}$/.test(raw)) {
+    const year = Number(raw.slice(0, 4));
+    const month = Number(raw.slice(5, 7));
+    const day = new Date(year, month, 0).getDate();
+    return `${raw}-${String(day).padStart(2, "0")}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  return "2026-12-31";
+}
+
+function defaultSettings(): DashboardSettings {
+  return {
+    forecastEnd: "2026-12-31",
+    adjustments: { diesel: [], jet: [] },
+    crudeOutages: [],
+    refineryCapacityAdjustments: [],
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function roundCapacity(value: unknown): number {
+  return Math.round(Math.max(0, Number(value || 0)) * 10) / 10;
+}
+
+function normalizeCrudeOutages(rows: CrudeOutage[]): CrudeOutage[] {
+  return rows.map((row) => ({
+    ...row,
+    capacityOfflineKbd: roundCapacity(row.capacityOfflineKbd),
+  }));
+}
+
+function normalizeRefineryCapacityAdjustments(rows: RefineryCapacityAdjustment[]): RefineryCapacityAdjustment[] {
+  return rows.map((row) => ({
+    ...row,
+    capacityKbd: roundCapacity(row.capacityKbd),
+  }));
+}
+
+function readSettings(): DashboardSettings {
+  const fallback = defaultSettings();
+  if (!existsSync(settingsPath)) {
+    writeSettings(fallback);
+    return fallback;
+  }
+  try {
+    const raw = JSON.parse(readFileSync(settingsPath, "utf8")) as Partial<DashboardSettings>;
+    return {
+      forecastEnd: normalizeForecastEnd(raw.forecastEnd),
+      adjustments: {
+        diesel: Array.isArray(raw.adjustments?.diesel) ? raw.adjustments.diesel : [],
+        jet: Array.isArray(raw.adjustments?.jet) ? raw.adjustments.jet : [],
+      },
+      crudeOutages: normalizeCrudeOutages(Array.isArray(raw.crudeOutages) ? raw.crudeOutages : []),
+      refineryCapacityAdjustments: normalizeRefineryCapacityAdjustments(
+        Array.isArray(raw.refineryCapacityAdjustments) ? raw.refineryCapacityAdjustments : [],
+      ),
+      updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : fallback.updatedAt,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function writeSettings(settings: DashboardSettings): void {
+  writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+}
+
+function landingPage(): string {
+  return `<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Balance Dashboards</title>
+<style>body{margin:0;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#eef2f6;color:#151c2c}.wrap{max-width:820px;margin:48px auto;padding:0 20px}h1{font-size:28px;margin:0 0 10px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}a{display:block;background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:18px;color:#1d4ed8;text-decoration:none;font-weight:800;box-shadow:0 12px 28px rgba(26,39,65,.08)}p{color:#667085;line-height:1.5}.note{background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:14px 16px;margin-top:18px;color:#475467;font-size:13px}@media(max-width:620px){.grid{grid-template-columns:1fr}}</style></head>
+<body><main class="wrap"><h1>Balance Dashboards</h1><p>The local update runner is active. Open a workbook and use the Reference tab for background refreshes.</p><div class="grid"><a href="/Diesel_Balance/index.html">Diesel Balance</a><a href="/Jet_Balance/index.html">Jet Balance</a><a href="/Diesel_Balance/index.html?sheet=reference">Diesel Reference</a><a href="/Jet_Balance/index.html?sheet=reference">Jet Reference</a></div><div class="note">For one-click launch from the file system, use <strong>Open_Balance_Dashboards.command</strong> on Mac or <strong>Open_Balance_Dashboards.bat</strong> on Windows from the repo folder.</div></main></body>
+</html>`;
+}
+
+function appendJobLine(job: Job, stream: "stdout" | "stderr", text: string): void {
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    job.lines.push(`[${stream}] ${line}`);
+  }
+  if (job.lines.length > maxLines) job.lines.splice(0, job.lines.length - maxLines);
+}
+
+function publicJob(): Job | null {
+  return currentJob ? { ...currentJob, lines: [...currentJob.lines] } : null;
+}
+
+function parseGroup(value: unknown): UpdateGroup | null {
+  return typeof value === "string" && validGroups.has(value as UpdateGroup) ? (value as UpdateGroup) : null;
+}
+
+function startJob(group: UpdateGroup): Job {
+  if (currentProcess && currentJob?.status === "running") return currentJob;
+  const args = ["run", `update:${group}`];
+  const started = Date.now();
+  const job: Job = {
+    id: `${group}-${started}`,
+    group,
+    status: "running",
+    command: npmCommand,
+    args,
+    startedAt: new Date(started).toISOString(),
+    endedAt: null,
+    durationMs: null,
+    exitCode: null,
+    signal: null,
+    lines: [],
+  };
+  currentJob = job;
+  const child = spawn(npmCommand, args, {
+    cwd: ROOT,
+    env: { ...process.env, FORCE_COLOR: "0" },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  currentProcess = child;
+  appendJobLine(job, "stdout", `started ${npmCommand} ${args.join(" ")}`);
+  child.stdout.on("data", (chunk: Buffer) => appendJobLine(job, "stdout", chunk.toString("utf8")));
+  child.stderr.on("data", (chunk: Buffer) => appendJobLine(job, "stderr", chunk.toString("utf8")));
+  child.on("error", (error) => {
+    job.status = "failed";
+    job.endedAt = new Date().toISOString();
+    job.durationMs = Date.now() - started;
+    appendJobLine(job, "stderr", error.message);
+    currentProcess = null;
+  });
+  child.on("close", (code, signal) => {
+    job.status = code === 0 ? "succeeded" : "failed";
+    job.exitCode = code;
+    job.signal = signal;
+    job.endedAt = new Date().toISOString();
+    job.durationMs = Date.now() - started;
+    appendJobLine(job, code === 0 ? "stdout" : "stderr", `finished status=${job.status} code=${code ?? "n/a"} signal=${signal ?? "n/a"}`);
+    currentProcess = null;
+  });
+  return job;
+}
+
+async function readBody(request: IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+async function handleApi(request: IncomingMessage, response: ServerResponse, pathname: string): Promise<void> {
+  if (request.method === "OPTIONS") {
+    writeJson(response, 204, {});
+    return;
+  }
+  if (pathname === "/api/settings" && request.method === "GET") {
+    writeJson(response, 200, { settings: readSettings() });
+    return;
+  }
+  if (pathname === "/api/health" && request.method === "GET") {
+    writeJson(response, 200, {
+      ok: true,
+      app: SERVER_APP_ID,
+      root: ROOT,
+      host: HOST,
+      port: PORT,
+      pid: process.pid,
+      startedAt: SERVER_STARTED_AT,
+      currentJob: publicJob(),
+    });
+    return;
+  }
+  if (pathname === "/api/settings" && request.method === "POST") {
+    try {
+      const body = JSON.parse(await readBody(request) || "{}") as {
+        forecastEnd?: unknown;
+        product?: unknown;
+        adjustments?: unknown;
+        crudeOutages?: unknown;
+        refineryCapacityAdjustments?: unknown;
+      };
+      const settings = readSettings();
+      if (body.forecastEnd !== undefined) settings.forecastEnd = normalizeForecastEnd(body.forecastEnd);
+      if (body.product === "diesel" || body.product === "jet") {
+        settings.adjustments[body.product] = Array.isArray(body.adjustments) ? (body.adjustments as BalanceAdjustment[]) : settings.adjustments[body.product];
+      }
+      if (Array.isArray(body.crudeOutages)) settings.crudeOutages = normalizeCrudeOutages(body.crudeOutages as CrudeOutage[]);
+      if (Array.isArray(body.refineryCapacityAdjustments)) {
+        settings.refineryCapacityAdjustments = normalizeRefineryCapacityAdjustments(
+          body.refineryCapacityAdjustments as RefineryCapacityAdjustment[],
+        );
+      }
+      settings.updatedAt = new Date().toISOString();
+      writeSettings(settings);
+      writeJson(response, 200, { settings });
+    } catch (error) {
+      writeJson(response, 400, { error: error instanceof Error ? error.message : "invalid settings payload" });
+    }
+    return;
+  }
+  if (pathname === "/api/update/status" && request.method === "GET") {
+    writeJson(response, 200, { job: publicJob() });
+    return;
+  }
+  if (pathname === "/api/update/start" && request.method === "POST") {
+    let group: UpdateGroup | null = null;
+    try {
+      const body = await readBody(request);
+      group = parseGroup(JSON.parse(body || "{}").group);
+    } catch {
+      group = null;
+    }
+    if (!group) {
+      writeJson(response, 400, { error: "group must be weekly, monthly, other, or all" });
+      return;
+    }
+    const alreadyRunning = currentJob?.status === "running";
+    const job = startJob(group);
+    writeJson(response, alreadyRunning ? 409 : 202, { job: publicJob() ?? job });
+    return;
+  }
+  writeJson(response, 404, { error: "not found" });
+}
+
+function shouldGzip(request: IncomingMessage, path: string, fileStat: Stats): boolean {
+  if (fileStat.size < 1024) return false;
+  const acceptsGzip = String(request.headers["accept-encoding"] || "").split(",").some(value => value.trim().toLowerCase().startsWith("gzip"));
+  if (!acceptsGzip) return false;
+  return /\.(?:css|csv|html|js|json|map|svg|txt|xml)$/i.test(path);
+}
+
+function staticHeaders(path: string, fileStat: Stats, encoding: "identity" | "gzip" = "identity"): Record<string, string> {
+  const etag = `W/"${fileStat.size}-${Math.round(fileStat.mtimeMs)}${encoding === "gzip" ? "-gzip" : ""}"`;
+  const isHtml = extname(path).toLowerCase() === ".html";
+  const headers: Record<string, string> = {
+    "content-type": mimeType(path),
+    "last-modified": fileStat.mtime.toUTCString(),
+    "etag": etag,
+    "cache-control": isHtml ? "no-cache" : "public, max-age=0, must-revalidate",
+    "vary": "Accept-Encoding",
+  };
+  if (encoding === "gzip") headers["content-encoding"] = "gzip";
+  else headers["content-length"] = String(fileStat.size);
+  return headers;
+}
+
+function serveStatic(request: IncomingMessage, response: ServerResponse, pathname: string): void {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    response.writeHead(405, { "content-type": "text/plain; charset=utf-8" });
+    response.end("Method not allowed");
+    return;
+  }
+  if (pathname === "/favicon.ico") {
+    response.writeHead(204);
+    response.end();
+    return;
+  }
+  if (pathname === "/") {
+    const body = landingPage();
+    response.writeHead(200, { "content-type": "text/html; charset=utf-8", "content-length": String(Buffer.byteLength(body)), "cache-control": "no-cache" });
+    response.end(request.method === "HEAD" ? undefined : body);
+    return;
+  }
+  const decoded = decodeURIComponent(pathname.split("?")[0] || "/");
+  const candidate = resolve(ROOT, `.${normalize(decoded)}`);
+  const rel = relative(ROOT, candidate);
+  if (rel.startsWith("..") || rel === "" || rel.includes("..")) {
+    response.writeHead(403, { "content-type": "text/plain; charset=utf-8" });
+    response.end("Forbidden");
+    return;
+  }
+  const path = existsSync(candidate) && statSync(candidate).isDirectory() ? join(candidate, "index.html") : candidate;
+  if (!existsSync(path) || !statSync(path).isFile()) {
+    response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+    response.end("Not found");
+    return;
+  }
+  const stat = statSync(path);
+  const gzip = shouldGzip(request, path, stat);
+  const headers = staticHeaders(path, stat, gzip ? "gzip" : "identity");
+  const ifNoneMatch = request.headers["if-none-match"];
+  const ifModifiedSince = request.headers["if-modified-since"];
+  const matchesEtag = typeof ifNoneMatch === "string" && ifNoneMatch.split(",").map(value => value.trim()).includes(headers.etag);
+  const modifiedSince = typeof ifModifiedSince === "string" ? Date.parse(ifModifiedSince) : NaN;
+  const notModified = matchesEtag || (Number.isFinite(modifiedSince) && modifiedSince >= Math.floor(stat.mtimeMs / 1000) * 1000);
+  if (notModified) {
+    response.writeHead(304, headers);
+    response.end();
+    return;
+  }
+  response.writeHead(200, headers);
+  if (request.method === "HEAD") {
+    response.end();
+    return;
+  }
+  const stream = createReadStream(path);
+  if (gzip) stream.pipe(createGzip()).pipe(response);
+  else stream.pipe(response);
+}
+
+const server = createServer((request, response) => {
+  const url = new URL(request.url || "/", `http://${HOST}:${PORT}`);
+  if (url.pathname.startsWith("/api/")) {
+    handleApi(request, response, url.pathname).catch((error: unknown) => {
+      writeJson(response, 500, { error: error instanceof Error ? error.message : String(error) });
+    });
+    return;
+  }
+  serveStatic(request, response, url.pathname);
+});
+
+server.on("error", (error: NodeJS.ErrnoException) => {
+  const code = error.code ? `${error.code}: ` : "";
+  console.error(`Balance dashboard update server failed to start on http://${HOST}:${PORT}/ (${code}${error.message})`);
+  process.exitCode = 1;
+});
+
+server.listen(PORT, HOST, () => {
+  console.log(`Balance dashboard update server: http://${HOST}:${PORT}/`);
+});

@@ -1,0 +1,56 @@
+{
+  "forecastEnd": "2026-12-31",
+  "adjustments": {
+    "diesel": [
+      {
+        "frequency": "monthly",
+        "period": "2026-04",
+        "regionKey": "padd1ab",
+        "lineId": "yieldPct",
+        "valueKbd": 32,
+        "note": "Manual cell override",
+        "updatedAt": "2026-06-01T04:11:39.061Z"
+      },
+      {
+        "frequency": "monthly",
+        "period": "2026-05",
+        "regionKey": "padd1ab",
+        "lineId": "yieldPct",
+        "valueKbd": 31,
+        "note": "Manual cell override",
+        "updatedAt": "2026-06-01T04:11:41.839Z"
+      },
+      {
+        "frequency": "monthly",
+        "period": "2026-06",
+        "regionKey": "padd1ab",
+        "lineId": "yieldPct",
+        "valueKbd": 33,
+        "note": "Manual cell override",
+        "updatedAt": "2026-06-01T04:11:46.449Z"
+      },
+      {
+        "frequency": "monthly",
+        "period": "2026-07",
+        "regionKey": "padd1ab",
+        "lineId": "yieldPct",
+        "valueKbd": 32,
+        "note": "Manual cell override",
+        "updatedAt": "2026-06-01T04:11:49.920Z"
+      },
+      {
+        "frequency": "monthly",
+        "period": "2026-08",
+        "regionKey": "padd1ab",
+        "lineId": "yieldPct",
+        "valueKbd": 33,
+        "note": "Manual cell override",
+        "updatedAt": "2026-06-01T04:11:55.476Z"
+      }
+    ],
+    "jet": []
+  },
+  "crudeOutages": [],
+  "refineryCapacityAdjustments": [],
+  "updatedAt": "2026-06-01T04:12:14.613Z"
+}

@@ -1,0 +1,49 @@
+us_external_columns:
+  - date
+  - commodity
+  - imports_total_kbd
+  - imports_canada_kbd
+  - imports_latin_america_kbd
+  - imports_europe_kbd
+  - imports_asia_kbd
+  - imports_middle_east_kbd
+  - imports_africa_kbd
+  - imports_other_kbd
+  - exports_total_kbd
+  - exports_canada_kbd
+  - exports_latin_america_kbd
+  - exports_europe_kbd
+  - exports_asia_kbd
+  - exports_middle_east_kbd
+  - exports_africa_kbd
+  - exports_other_kbd
+  - net_imports_kbd
+  - net_exports_kbd
+
+europe_external_columns:
+  - date
+  - commodity
+  - nwe_imports_total_kbd
+  - nwe_exports_total_kbd
+  - nwe_net_imports_kbd
+  - nwe_net_exports_kbd
+  - med_imports_total_kbd
+  - med_exports_total_kbd
+  - med_net_imports_kbd
+  - med_net_exports_kbd
+  - other_europe_imports_total_kbd
+  - other_europe_exports_total_kbd
+  - other_europe_net_imports_kbd
+  - other_europe_net_exports_kbd
+  - europe_imports_total_kbd
+  - europe_exports_total_kbd
+  - europe_net_imports_kbd
+  - europe_net_exports_kbd
+
+domestic_padd_columns:
+  - date
+  - commodity
+  - padd3_to_padd1ab_kbd
+  - padd3_to_padd1c_kbd
+  - padd3_to_padd5_kbd
+  - padd3_total_selected_kbd

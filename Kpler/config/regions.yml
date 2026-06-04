@@ -1,0 +1,255 @@
+us_trade_groups:
+  canada:
+    countries:
+      - Canada
+  latin_america:
+    countries:
+      - Mexico
+      - Belize
+      - Costa Rica
+      - El Salvador
+      - Guatemala
+      - Honduras
+      - Nicaragua
+      - Panama
+      - Antigua and Barbuda
+      - Aruba
+      - Bahamas
+      - Barbados
+      - Bermuda
+      - Bonaire
+      - British Virgin Islands
+      - Cayman Islands
+      - Cuba
+      - Curacao
+      - Dominica
+      - Dominican Republic
+      - Grenada
+      - Guadeloupe
+      - Haiti
+      - Jamaica
+      - Martinique
+      - Puerto Rico
+      - Saint Kitts and Nevis
+      - Saint Lucia
+      - Saint Vincent and the Grenadines
+      - Sint Maarten
+      - Trinidad and Tobago
+      - United States Virgin Islands
+      - Argentina
+      - Bolivia
+      - Brazil
+      - Chile
+      - Colombia
+      - Ecuador
+      - Guyana
+      - Paraguay
+      - Peru
+      - Suriname
+      - Uruguay
+      - Venezuela
+    trading_regions:
+      - Caribbean
+      - Central America
+      - Latin America
+      - South America
+  europe:
+    trading_regions:
+      - Europe
+      - Northwest Europe
+      - Mediterranean
+    countries:
+      - Albania
+      - Armenia
+      - Austria
+      - Azerbaijan
+      - Belarus
+      - Belgium
+      - Bosnia and Herzegovina
+      - Bulgaria
+      - Croatia
+      - Cyprus
+      - Czechia
+      - Denmark
+      - Estonia
+      - Finland
+      - France
+      - Georgia
+      - Germany
+      - Greece
+      - Hungary
+      - Iceland
+      - Ireland
+      - Italy
+      - Latvia
+      - Lithuania
+      - Luxembourg
+      - Malta
+      - Moldova
+      - Montenegro
+      - Netherlands
+      - North Macedonia
+      - Norway
+      - Poland
+      - Portugal
+      - Romania
+      - Russia
+      - Serbia
+      - Slovakia
+      - Slovenia
+      - Spain
+      - Sweden
+      - Switzerland
+      - Turkey
+      - Ukraine
+      - United Kingdom
+  asia:
+    trading_regions:
+      - Asia
+      - Far East
+      - Indian Subcontinent
+      - Southeast Asia
+    countries:
+      - China
+      - Hong Kong
+      - India
+      - Indonesia
+      - Japan
+      - Malaysia
+      - Pakistan
+      - Philippines
+      - Singapore
+      - South Korea
+      - Taiwan
+      - Thailand
+      - Vietnam
+  middle_east:
+    trading_regions:
+      - Middle East
+      - Persian Gulf
+    countries:
+      - Bahrain
+      - Iran
+      - Iraq
+      - Israel
+      - Jordan
+      - Kuwait
+      - Lebanon
+      - Oman
+      - Qatar
+      - Saudi Arabia
+      - Syria
+      - United Arab Emirates
+      - Yemen
+  africa:
+    trading_regions:
+      - Africa
+      - East Africa
+      - North Africa
+      - Southern Africa
+      - West Africa
+    countries:
+      - Algeria
+      - Angola
+      - Cameroon
+      - Egypt
+      - Equatorial Guinea
+      - Gabon
+      - Gambia
+      - Ghana
+      - Libya
+      - Morocco
+      - Mozambique
+      - Nigeria
+      - Senegal
+      - South Africa
+      - Sudan
+      - Tanzania
+      - Togo
+      - Tunisia
+
+europe_regions:
+  nwe:
+    label: NWE
+    countries:
+      - Austria
+      - Belgium
+      - Czechia
+      - Denmark
+      - Estonia
+      - Finland
+      - France
+      - Germany
+      - Iceland
+      - Ireland
+      - Latvia
+      - Lithuania
+      - Luxembourg
+      - Netherlands
+      - Norway
+      - Poland
+      - Slovakia
+      - Sweden
+      - Switzerland
+      - United Kingdom
+  med:
+    label: MED
+    countries:
+      - Albania
+      - Bulgaria
+      - Croatia
+      - Cyprus
+      - Greece
+      - Italy
+      - Malta
+      - Montenegro
+      - North Macedonia
+      - Portugal
+      - Romania
+      - Serbia
+      - Slovenia
+      - Spain
+      - Turkey
+  other_europe:
+    label: Other Europe
+    countries:
+      - Armenia
+      - Azerbaijan
+      - Belarus
+      - Bosnia and Herzegovina
+      - Georgia
+      - Hungary
+      - Moldova
+      - Russia
+      - Ukraine
+
+domestic_padd_routes:
+  padd3_to_padd1ab:
+    label: PADD 3 to PADD 1A/1B
+    origin_padds:
+      - PADD 3
+      - PADD III
+    destination_padds:
+      - PADD 1A
+      - PADD 1 A
+      - PADD IA
+      - PADD 1B
+      - PADD 1 B
+      - PADD IB
+  padd3_to_padd1c:
+    label: PADD 3 to PADD 1C
+    origin_padds:
+      - PADD 3
+      - PADD III
+    destination_padds:
+      - PADD 1C
+      - PADD 1 C
+      - PADD IC
+  padd3_to_padd5:
+    label: PADD 3 to PADD 5
+    origin_padds:
+      - PADD 3
+      - PADD III
+    destination_padds:
+      - PADD 5
+      - PADD V

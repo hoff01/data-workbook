@@ -1,0 +1,44 @@
+{
+  "product": "jet",
+  "title": "Jet Balance",
+  "generatedAt": "2026-06-03T12:25:22.814Z",
+  "folder": "Jet_Balance",
+  "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through 2026-12-31.",
+  "latestMonthly": "2026-03-15",
+  "latestWeekly": "2026-05-22",
+  "sourceFiles": [
+    {
+      "role": "eia_monthly",
+      "path": "eia_monthly/jet.csv",
+      "rows": 123,
+      "checksum": "28901da8adbccbc4cb94e26bc08ba33458e0a3b943b9fbf47e009582c057e31e",
+      "modifiedAt": "2026-05-31T13:54:45.641Z"
+    },
+    {
+      "role": "eia_weekly",
+      "path": "eia_weekly/jet.csv",
+      "rows": 543,
+      "checksum": "8957fb88d45015bdeaf9935b00f6d6ead501aaa1f4d697357d8f4da2e7e9b402",
+      "modifiedAt": "2026-05-31T13:54:45.649Z"
+    },
+    {
+      "role": "kpler_manifest",
+      "path": "kpler/manifest.json",
+      "checksum": "ea1b611065e410372610def7b7ec5c0744722ba8651a0847ec741bdaaa61990c",
+      "modifiedAt": "2026-05-31T13:54:45.001Z"
+    },
+    {
+      "role": "refinery_unit_capacity",
+      "path": "data/refinery_unit_capacities_2025.csv",
+      "rows": 311,
+      "checksum": "46bd4ad27709f4cfb40c81aeee64267585e0afe74ee917dd371eabc7ff157538",
+      "modifiedAt": "2026-05-31T16:25:09.771Z"
+    }
+  ],
+  "checksums": {
+    "eia_monthly": "28901da8adbccbc4cb94e26bc08ba33458e0a3b943b9fbf47e009582c057e31e",
+    "eia_weekly": "8957fb88d45015bdeaf9935b00f6d6ead501aaa1f4d697357d8f4da2e7e9b402",
+    "kpler_manifest": "ea1b611065e410372610def7b7ec5c0744722ba8651a0847ec741bdaaa61990c",
+    "refinery_unit_capacity": "46bd4ad27709f4cfb40c81aeee64267585e0afe74ee917dd371eabc7ff157538"
+  }
+}
