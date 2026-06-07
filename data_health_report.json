@@ -1,13 +1,13 @@
 {
   "balances": {
     "diesel": {
-      "generated_at": "2026-06-04T02:02:04.952Z",
+      "generated_at": "2026-06-05T08:19:18.390Z",
       "latest_monthly": "2026-03-15",
       "latest_weekly": "2026-05-22",
       "path": "Diesel_Balance/manifest.json"
     },
     "jet": {
-      "generated_at": "2026-06-04T02:02:05.072Z",
+      "generated_at": "2026-06-05T08:19:18.478Z",
       "latest_monthly": "2026-03-15",
       "latest_weekly": "2026-05-22",
       "path": "Jet_Balance/manifest.json"
@@ -15,7 +15,7 @@
   },
   "checks": [
     {
-      "columns": 53,
+      "columns": 49,
       "exists": true,
       "max_date": "2026-05-22",
       "min_date": "2016-01-01",
@@ -25,7 +25,7 @@
       "status": "pass"
     },
     {
-      "columns": 50,
+      "columns": 45,
       "exists": true,
       "max_date": "2026-05-22",
       "min_date": "2016-01-01",
@@ -57,8 +57,8 @@
       "latest": "2026-05-22",
       "max_allowed_age_days": 14,
       "name": "eia_weekly_freshness",
-      "status": "pass",
-      "today": "2026-06-03"
+      "status": "fail",
+      "today": "2026-06-07"
     },
     {
       "columns": 232,
@@ -104,7 +104,7 @@
       "max_allowed_age_days": 150,
       "name": "eia_monthly_freshness",
       "status": "pass",
-      "today": "2026-06-03"
+      "today": "2026-06-07"
     },
     {
       "mode": "eia_fallback",
@@ -183,13 +183,13 @@
       "name": "power_generation_dfo",
       "run_end": "2026-05-31",
       "status": "pass",
-      "today": "2026-06-03"
+      "today": "2026-06-07"
     },
     {
       "generated_day": "2026-05-31",
       "name": "power_generation_dfo_hourly",
       "status": "pass",
-      "today": "2026-06-03"
+      "today": "2026-06-07"
     }
   ],
   "eia_capacity": {
@@ -257,7 +257,7 @@
   },
   "eia_weekly": {
     "diesel": {
-      "columns": 53,
+      "columns": 49,
       "exists": true,
       "max_date": "2026-05-22",
       "min_date": "2016-01-01",
@@ -273,7 +273,7 @@
       "rows": 543
     },
     "jet": {
-      "columns": 50,
+      "columns": 45,
       "exists": true,
       "max_date": "2026-05-22",
       "min_date": "2016-01-01",
@@ -281,7 +281,7 @@
       "rows": 543
     }
   },
-  "generated_at": "2026-06-04T02:02:22.941781+00:00",
+  "generated_at": "2026-06-07T15:50:31.905684+00:00",
   "jodi": {
     "generated_at": "2026-05-31T13:55:13.440926+00:00",
     "latest_period_month": "2026-03-01",
@@ -328,9 +328,10 @@
       "weather_rows": 336
     }
   },
-  "status": "pass",
+  "status": "fail",
   "summary": {
-    "pass": 22
+    "fail": 1,
+    "pass": 21
   },
-  "today": "2026-06-03"
+  "today": "2026-06-07"
 }

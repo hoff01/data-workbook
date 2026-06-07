@@ -1,9 +1,9 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-06-04T02:02:05.072Z",
+  "generatedAt": "2026-06-07T16:35:17.007Z",
   "folder": "Jet_Balance",
-  "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through 2026-12-31.",
+  "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-03-15",
   "latestWeekly": "2026-05-22",
   "sourceFiles": [
@@ -12,14 +12,14 @@
       "path": "eia_monthly/jet.csv",
       "rows": 123,
       "checksum": "28901da8adbccbc4cb94e26bc08ba33458e0a3b943b9fbf47e009582c057e31e",
-      "modifiedAt": "2026-05-31T13:54:45.641Z"
+      "modifiedAt": "2026-06-04T04:50:08.578Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/jet.csv",
       "rows": 543,
-      "checksum": "8957fb88d45015bdeaf9935b00f6d6ead501aaa1f4d697357d8f4da2e7e9b402",
-      "modifiedAt": "2026-05-31T13:54:45.649Z"
+      "checksum": "53a2a49943a26048aca7d5e5d812e31c9f8d3b20dd50062787f6a54a7a67bf13",
+      "modifiedAt": "2026-06-04T04:51:09.118Z"
     },
     {
       "role": "kpler_manifest",
@@ -37,7 +37,7 @@
   ],
   "checksums": {
     "eia_monthly": "28901da8adbccbc4cb94e26bc08ba33458e0a3b943b9fbf47e009582c057e31e",
-    "eia_weekly": "8957fb88d45015bdeaf9935b00f6d6ead501aaa1f4d697357d8f4da2e7e9b402",
+    "eia_weekly": "53a2a49943a26048aca7d5e5d812e31c9f8d3b20dd50062787f6a54a7a67bf13",
     "kpler_manifest": "ea1b611065e410372610def7b7ec5c0744722ba8651a0847ec741bdaaa61990c",
     "refinery_unit_capacity": "46bd4ad27709f4cfb40c81aeee64267585e0afe74ee917dd371eabc7ff157538"
   }

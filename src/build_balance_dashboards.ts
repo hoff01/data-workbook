@@ -7,6 +7,7 @@ const CSV_HEADER_LOOKUP: unique symbol = Symbol("csvHeaderLookup");
 type CsvRow = Record<string, string> & { [CSV_HEADER_LOOKUP]?: Map<string, string> };
 
 type ProductKey = "diesel" | "jet";
+type PaddAreaKey = "padd1" | "padd2" | "padd3" | "padd4" | "padd5";
 
 type ProductConfig = {
   key: ProductKey;
@@ -102,6 +103,10 @@ type RegionalBalancePoint = {
   canadaImportsKbd: number;
   nonCanadaImportsKbd: number;
   exportsKbd: number;
+  exportsLatinAmericaKbd: number;
+  exportsEuropeKbd: number;
+  exportsAfricaKbd: number;
+  exportsOtherKbd: number;
   netReceiptsKbd: number;
   stockChangeKbd: number;
   stocksKb: number;
@@ -303,7 +308,7 @@ type RuntimeBaseBundle = {
   settings: DashboardBundle["settings"];
   regionalBalance: {
     regions: DashboardBundle["regionalBalance"]["regions"];
-    monthly: DashboardBundle["regionalBalance"]["monthly"];
+    monthly: Array<Omit<RegionalBalancePoint, "regionName">>;
     weeklyGuideMonthly: DashboardBundle["regionalBalance"]["weeklyGuideMonthly"];
     movementFlows: Array<Omit<RegionalMovementFlow, "weekly"> & { weekly?: RegionalMovementFlow["weekly"] }>;
   };
@@ -311,18 +316,18 @@ type RuntimeBaseBundle = {
     note: CrudeRunsBundle["note"];
     regions: CrudeRunsBundle["regions"];
     metrics: CrudeRunsBundle["metrics"];
-    monthly: CrudeRunsBundle["monthly"];
-    weekly?: CrudeRunsBundle["weekly"];
+    monthly: Array<Omit<CrudeRunsPoint, "regionName">>;
+    weekly?: Array<Omit<CrudeRunsPoint, "regionName">>;
   };
 };
 
 type RuntimeWeeklyChunk = {
   regionalBalance: {
-    weekly: DashboardBundle["regionalBalance"]["weekly"];
+    weekly: Array<Omit<RegionalBalancePoint, "regionName">>;
     movementFlows: Array<Pick<RegionalMovementFlow, "id" | "weekly">>;
   };
   crudeRuns: {
-    weekly: CrudeRunsBundle["weekly"];
+    weekly: Array<Omit<CrudeRunsPoint, "regionName">>;
   };
 };
 
@@ -522,13 +527,14 @@ function readDashboardSettings(): BalanceDashboardSettings {
 
 const DASHBOARD_SETTINGS = readDashboardSettings();
 const MONTHLY_FORECAST_THROUGH = DASHBOARD_SETTINGS.forecastEnd.slice(0, 7);
-const WEEKLY_FORECAST_THROUGH = DASHBOARD_SETTINGS.forecastEnd;
+const WEEKLY_FORECAST_WEEKS = 22;
 const SEASON_YEARS = [2023, 2024, 2025];
 const BAND_YEARS = [2019, 2022, 2023, 2024, 2025];
 
 const REGION_DEFS = [
   { key: "padd1ab", label: "P1-A/B Northeast" },
   { key: "padd1c", label: "P1-C Lower Atlantic" },
+  { key: "padd1", label: "P1 East Coast" },
   { key: "padd2", label: "P2 Midwest" },
   { key: "padd3", label: "P3 Gulf Coast" },
   { key: "padd4", label: "P4 Rocky Mountain" },
@@ -538,7 +544,10 @@ const REGION_DEFS = [
   { key: "p13", label: "PADDs 1,3" },
 ] as const;
 
-const BASE_REGION_KEYS = ["padd1ab", "padd1c", "padd2", "padd3", "padd4", "padd5"] as const;
+const DIESEL_REGION_KEYS = ["padd1ab", "padd1c", "padd2", "padd3", "padd4", "padd5", "us", "p123", "p13"] as const;
+const JET_REGION_KEYS = ["padd1", "padd2", "padd3", "padd4", "padd5", "us", "p123", "p13"] as const;
+const DIESEL_BASE_REGION_KEYS = ["padd1ab", "padd1c", "padd2", "padd3", "padd4", "padd5"] as const;
+const JET_BASE_REGION_KEYS = ["padd1", "padd2", "padd3", "padd4", "padd5"] as const;
 const PADD1_KEYS = ["padd1ab", "padd1c"] as const;
 const CRUDE_PADD_REGION_KEYS = ["padd1", "padd2", "padd3", "padd4", "padd5"] as const;
 const CRUDE_RUN_REGION_DEFS = [
@@ -566,6 +575,27 @@ const CRUDE_RUN_METRICS: CrudeRunsBundle["metrics"] = [
   { key: "operatingUtilizationPct", label: "Operating utilization", unit: "%", digits: 1 },
   { key: "exPlannedUtilizationPct", label: "Operating (ex-planned) utilization", unit: "%", digits: 1 },
 ];
+
+function regionDefByKey(regionKey: string): { key: string; label: string } | undefined {
+  return REGION_DEFS.find((region) => region.key === regionKey);
+}
+
+function regionalRegionDefs(config: ProductConfig): Array<{ key: string; label: string }> {
+  const keys = config.key === "jet" ? JET_REGION_KEYS : DIESEL_REGION_KEYS;
+  return keys.map((key) => regionDefByKey(key)).filter((region): region is { key: string; label: string } => Boolean(region));
+}
+
+function baseRegionKeys(config: ProductConfig): string[] {
+  return [...(config.key === "jet" ? JET_BASE_REGION_KEYS : DIESEL_BASE_REGION_KEYS)];
+}
+
+function padd1BalanceKeys(config: ProductConfig): string[] {
+  return config.key === "jet" ? ["padd1"] : [...PADD1_KEYS];
+}
+
+function balanceRegionKeysForPaddArea(config: ProductConfig, area: PaddAreaKey): string[] {
+  return area === "padd1" ? padd1BalanceKeys(config) : [area];
+}
 
 function parseCsv(text: string): CsvRow[] {
   const rows: string[][] = [];
@@ -723,6 +753,13 @@ function scriptPayload(value: unknown): string {
   return JSON.stringify(value).replaceAll("</", "<\\/");
 }
 
+function stripRuntimeRegionNames<T extends { regionName?: string }>(rows: T[]): Array<Omit<T, "regionName">> {
+  return rows.map((row) => {
+    const { regionName: _regionName, ...rest } = row;
+    return rest;
+  });
+}
+
 function runtimeBaseBundle(bundle: DashboardBundle): RuntimeBaseBundle {
   return {
     product: bundle.product,
@@ -732,7 +769,7 @@ function runtimeBaseBundle(bundle: DashboardBundle): RuntimeBaseBundle {
     settings: bundle.settings,
     regionalBalance: {
       regions: bundle.regionalBalance.regions,
-      monthly: bundle.regionalBalance.monthly,
+      monthly: stripRuntimeRegionNames(bundle.regionalBalance.monthly),
       weeklyGuideMonthly: bundle.regionalBalance.weeklyGuideMonthly,
       movementFlows: bundle.regionalBalance.movementFlows.map((flow) => ({
         id: flow.id,
@@ -747,7 +784,7 @@ function runtimeBaseBundle(bundle: DashboardBundle): RuntimeBaseBundle {
       note: bundle.crudeRuns.note,
       regions: bundle.crudeRuns.regions,
       metrics: bundle.crudeRuns.metrics,
-      monthly: bundle.crudeRuns.monthly,
+      monthly: stripRuntimeRegionNames(bundle.crudeRuns.monthly),
     },
   };
 }
@@ -755,14 +792,14 @@ function runtimeBaseBundle(bundle: DashboardBundle): RuntimeBaseBundle {
 function runtimeWeeklyChunk(bundle: DashboardBundle): RuntimeWeeklyChunk {
   return {
     regionalBalance: {
-      weekly: bundle.regionalBalance.weekly,
+      weekly: stripRuntimeRegionNames(bundle.regionalBalance.weekly),
       movementFlows: bundle.regionalBalance.movementFlows.map((flow) => ({
         id: flow.id,
         weekly: flow.weekly,
       })),
     },
     crudeRuns: {
-      weekly: bundle.crudeRuns.weekly,
+      weekly: stripRuntimeRegionNames(bundle.crudeRuns.weekly),
     },
   };
 }
@@ -853,6 +890,10 @@ function monthlyImportOriginColumn(config: ProductConfig, area: "padd1" | "padd2
   return `${monthlyArea(area)} Imports of ${config.fuelLabel} from ${origin} (Thousand Barrels per Day)`;
 }
 
+function monthlyExportDestinationColumn(config: ProductConfig, area: "padd1" | "padd2" | "padd3" | "padd4" | "padd5", destination: "Latin America" | "Europe" | "Africa" | "Other"): string {
+  return `${monthlyArea(area)} Exports of ${config.fuelLabel} to ${destination} (Thousand Barrels per Day)`;
+}
+
 function monthlyPadd1ImportShareColumn(regionKey: "padd1ab" | "padd1c"): string {
   return `Kpler PADD ${regionKey === "padd1ab" ? "1A/B" : "1C"} Share of PADD 1 Imports`;
 }
@@ -877,6 +918,55 @@ function importComponentsForTotal(importsKbd: number, canadaImportsKbd: number):
 
 function importComponentsForShare(importsKbd: number, totalCanadaImportsKbd: number, share: number): Pick<RegionalBalancePoint, "canadaImportsKbd" | "nonCanadaImportsKbd"> {
   return importComponentsForTotal(importsKbd, Math.max(0, totalCanadaImportsKbd) * boundedShare(share, 0));
+}
+
+type ExportDestinationValues = Pick<
+  RegionalBalancePoint,
+  "exportsLatinAmericaKbd" | "exportsEuropeKbd" | "exportsAfricaKbd" | "exportsOtherKbd"
+>;
+
+function exportDestinationComponentsForTotal(exportsKbd: number, values: Partial<ExportDestinationValues> = {}): ExportDestinationValues {
+  const total = round(Math.max(0, exportsKbd));
+  let exportsLatinAmericaKbd = round(Math.max(0, values.exportsLatinAmericaKbd ?? 0));
+  let exportsEuropeKbd = round(Math.max(0, values.exportsEuropeKbd ?? 0));
+  let exportsAfricaKbd = round(Math.max(0, values.exportsAfricaKbd ?? 0));
+  let exportsOtherKbd = round(Math.max(0, values.exportsOtherKbd ?? Math.max(0, total - exportsLatinAmericaKbd - exportsEuropeKbd - exportsAfricaKbd)));
+  const sum = exportsLatinAmericaKbd + exportsEuropeKbd + exportsAfricaKbd + exportsOtherKbd;
+  if (sum <= 0 && total > 0) {
+    exportsOtherKbd = total;
+  } else if (sum > 0 && Math.abs(sum - total) > 0.01) {
+    const ratio = total / sum;
+    exportsLatinAmericaKbd = round(exportsLatinAmericaKbd * ratio);
+    exportsEuropeKbd = round(exportsEuropeKbd * ratio);
+    exportsAfricaKbd = round(exportsAfricaKbd * ratio);
+    exportsOtherKbd = round(exportsOtherKbd * ratio);
+  }
+  const drift = round(total - exportsLatinAmericaKbd - exportsEuropeKbd - exportsAfricaKbd - exportsOtherKbd);
+  exportsOtherKbd = round(Math.max(0, exportsOtherKbd + drift));
+  return { exportsLatinAmericaKbd, exportsEuropeKbd, exportsAfricaKbd, exportsOtherKbd };
+}
+
+function exportDestinationComponentsForRow(config: ProductConfig, row: CsvRow, area: "padd1" | "padd2" | "padd3" | "padd4" | "padd5", exportsKbd: number): ExportDestinationValues {
+  const destinationValue = (destination: "Latin America" | "Europe" | "Africa" | "Other") => {
+    const column = monthlyExportDestinationColumn(config, area, destination);
+    return hasColumn(row, column) ? valueByColumn(row, column) : 0;
+  };
+  return exportDestinationComponentsForTotal(exportsKbd, {
+    exportsLatinAmericaKbd: destinationValue("Latin America"),
+    exportsEuropeKbd: destinationValue("Europe"),
+    exportsAfricaKbd: destinationValue("Africa"),
+    exportsOtherKbd: destinationValue("Other"),
+  });
+}
+
+function scaledExportDestinationComponents(point: RegionalBalancePoint, share: number): ExportDestinationValues {
+  const bounded = boundedShare(share, 0);
+  return exportDestinationComponentsForTotal(point.exportsKbd * bounded, {
+    exportsLatinAmericaKbd: point.exportsLatinAmericaKbd * bounded,
+    exportsEuropeKbd: point.exportsEuropeKbd * bounded,
+    exportsAfricaKbd: point.exportsAfricaKbd * bounded,
+    exportsOtherKbd: point.exportsOtherKbd * bounded,
+  });
 }
 
 function proratedImportComponents(importsKbd: number, sourcePoint: RegionalBalancePoint | undefined): Pick<RegionalBalancePoint, "canadaImportsKbd" | "nonCanadaImportsKbd"> {
@@ -906,13 +996,38 @@ function weeklyProductColumn(config: ProductConfig, area: "padd1" | "padd2" | "p
   return `weekly ${label} Imports of ${fuel}`;
 }
 
+function weeklyImportMultiplier(_config: ProductConfig, _regionKey: string, _period: string): number {
+  return 1;
+}
+
+function weeklyImportValue(config: ProductConfig, sourceRow: CsvRow | undefined, area: PaddAreaKey, regionKey: string, period: string, fallback: number): number {
+  if (!sourceRow) return fallback;
+  const rawImports = valueByColumn(sourceRow, weeklyProductColumn(config, area, "imports"));
+  return rawImports * weeklyImportMultiplier(config, regionKey, period);
+}
+
 type RegionPointValues = Omit<
   RegionalBalancePoint,
-  "period" | "status" | "regionKey" | "regionName" | "stockChangeKbd" | "balanceKbd" | "canadaImportsKbd" | "nonCanadaImportsKbd"
+  | "period"
+  | "status"
+  | "regionKey"
+  | "regionName"
+  | "stockChangeKbd"
+  | "balanceKbd"
+  | "canadaImportsKbd"
+  | "nonCanadaImportsKbd"
+  | "exportsLatinAmericaKbd"
+  | "exportsEuropeKbd"
+  | "exportsAfricaKbd"
+  | "exportsOtherKbd"
 > & {
   stockChangeKbd?: number;
   canadaImportsKbd?: number;
   nonCanadaImportsKbd?: number;
+  exportsLatinAmericaKbd?: number;
+  exportsEuropeKbd?: number;
+  exportsAfricaKbd?: number;
+  exportsOtherKbd?: number;
 };
 
 function regionPoint(period: string, status: "actual" | "forecast", regionKey: string, regionName: string, values: RegionPointValues): RegionalBalancePoint {
@@ -920,6 +1035,7 @@ function regionPoint(period: string, status: "actual" | "forecast", regionKey: s
   const inferredComponents = importComponentsForTotal(importsKbd, values.canadaImportsKbd ?? 0);
   const canadaImportsKbd = round(values.canadaImportsKbd ?? inferredComponents.canadaImportsKbd);
   const nonCanadaImportsKbd = round(values.nonCanadaImportsKbd ?? Math.max(0, importsKbd - canadaImportsKbd));
+  const exportDestinations = exportDestinationComponentsForTotal(values.exportsKbd, values);
   const balanceKbd = round(values.productionKbd + importsKbd + values.netReceiptsKbd - values.exportsKbd - values.demandKbd);
   return {
     period,
@@ -932,6 +1048,7 @@ function regionPoint(period: string, status: "actual" | "forecast", regionKey: s
     canadaImportsKbd,
     nonCanadaImportsKbd,
     exportsKbd: round(values.exportsKbd),
+    ...exportDestinations,
     netReceiptsKbd: round(values.netReceiptsKbd),
     stockChangeKbd: round(values.stockChangeKbd ?? 0),
     stocksKb: round(values.stocksKb),
@@ -947,6 +1064,10 @@ function aggregateRegion(period: string, status: "actual" | "forecast", regionKe
     canadaImportsKbd: parts.reduce((sum, point) => sum + point.canadaImportsKbd, 0),
     nonCanadaImportsKbd: parts.reduce((sum, point) => sum + point.nonCanadaImportsKbd, 0),
     exportsKbd: parts.reduce((sum, point) => sum + point.exportsKbd, 0),
+    exportsLatinAmericaKbd: parts.reduce((sum, point) => sum + point.exportsLatinAmericaKbd, 0),
+    exportsEuropeKbd: parts.reduce((sum, point) => sum + point.exportsEuropeKbd, 0),
+    exportsAfricaKbd: parts.reduce((sum, point) => sum + point.exportsAfricaKbd, 0),
+    exportsOtherKbd: parts.reduce((sum, point) => sum + point.exportsOtherKbd, 0),
     netReceiptsKbd: parts.reduce((sum, point) => sum + point.netReceiptsKbd, 0),
     stockChangeKbd: parts.reduce((sum, point) => sum + point.stockChangeKbd, 0),
     stocksKb: parts.reduce((sum, point) => sum + point.stocksKb, 0),
@@ -957,16 +1078,17 @@ function aggregateRegion(period: string, status: "actual" | "forecast", regionKe
   };
 }
 
-function addRegionalAggregates(period: string, status: "actual" | "forecast", points: Map<string, RegionalBalancePoint>): void {
-  const p1 = PADD1_KEYS.map((key) => points.get(key)).filter((point): point is RegionalBalancePoint => Boolean(point));
+function addRegionalAggregates(config: ProductConfig, period: string, status: "actual" | "forecast", points: Map<string, RegionalBalancePoint>): void {
+  const p1 = padd1BalanceKeys(config).map((key) => points.get(key)).filter((point): point is RegionalBalancePoint => Boolean(point));
   const p2 = points.get("padd2");
   const p3 = points.get("padd3");
   const p4 = points.get("padd4");
   const p5 = points.get("padd5");
-  if (p1.length === 2 && p2 && p3 && p4 && p5) {
+  const hasP1 = p1.length === padd1BalanceKeys(config).length;
+  if (hasP1 && p2 && p3 && p4 && p5) {
     points.set("us", aggregateRegion(period, status, "us", "U.S.", [...p1, p2, p3, p4, p5]));
   }
-  if (p1.length === 2 && p2 && p3) {
+  if (hasP1 && p2 && p3) {
     points.set("p123", aggregateRegion(period, status, "p123", "PADDs 1, 2, 3", [...p1, p2, p3]));
     points.set("p13", aggregateRegion(period, status, "p13", "PADDs 1,3", [...p1, p3]));
   }
@@ -1080,10 +1202,16 @@ function weeklyActual(config: ProductConfig, rows: CsvRow[]): WeeklyPoint[] {
     .sort((a, b) => a.weekEnding.localeCompare(b.weekEnding));
 }
 
+function weeklyForecastThrough(actual: WeeklyPoint[]): string {
+  const latestActual = actual[actual.length - 1]?.weekEnding ?? "2026-05-08";
+  return addDays(latestActual, WEEKLY_FORECAST_WEEKS * 7);
+}
+
 function weeklyForecast(actual: WeeklyPoint[], monthly: BalancePoint[]): WeeklyPoint[] {
   const latestActual = actual[actual.length - 1]?.weekEnding ?? "2026-05-08";
+  const weeklyForecastThroughDate = weeklyForecastThrough(actual);
   const forecastWeeks: string[] = [];
-  for (let week = addDays(latestActual, 7); week <= WEEKLY_FORECAST_THROUGH; week = addDays(week, 7)) {
+  for (let week = addDays(latestActual, 7); week <= weeklyForecastThroughDate; week = addDays(week, 7)) {
     forecastWeeks.push(week);
   }
 
@@ -1210,14 +1338,17 @@ function directMonthlyRegion(config: ProductConfig, row: CsvRow, period: string,
   const netReceiptsCol = monthlyProductColumn(config, area, "netReceipts");
   const isUs = area === "us";
   const importsKbd = isUs ? sumColumns(row, config.monthlyColumns.imports) : valueByColumn(row, importsCol);
+  const exportsKbd = isUs ? sumColumns(row, config.monthlyColumns.exports) : hasColumn(row, exportsCol) ? valueByColumn(row, exportsCol) : 0;
   const canadaOriginCol = isUs ? undefined : monthlyImportOriginColumn(config, area, "Canada");
   const importComponents = importComponentsForTotal(importsKbd, canadaOriginCol && hasColumn(row, canadaOriginCol) ? valueByColumn(row, canadaOriginCol) : 0);
+  const exportDestinations = isUs ? exportDestinationComponentsForTotal(exportsKbd) : exportDestinationComponentsForRow(config, row, area, exportsKbd);
   return regionPoint(period, "actual", regionKey, regionName, {
     demandKbd: valueByColumn(row, demandCol),
     productionKbd: valueByColumn(row, productionCol),
     importsKbd,
     ...importComponents,
-    exportsKbd: isUs ? sumColumns(row, config.monthlyColumns.exports) : hasColumn(row, exportsCol) ? valueByColumn(row, exportsCol) : 0,
+    exportsKbd,
+    ...exportDestinations,
     netReceiptsKbd: isUs ? 0 : valueByColumn(row, netReceiptsCol),
     stocksKb: valueByColumn(row, stocksCol),
   });
@@ -1247,6 +1378,8 @@ function monthlyPadd1Splits(config: ProductConfig, row: CsvRow, period: string):
   const importC = hasKplerImportVolumes ? kplerImportC : p1.importsKbd * importShareC;
   const importComponentsAB = importComponentsForShare(importAB, p1.canadaImportsKbd, importShareAB);
   const importComponentsC = importComponentsForShare(importC, p1.canadaImportsKbd, importShareC);
+  const exportDestinationsAB = exportDestinationComponentsForTotal(p1.exportsKbd, p1);
+  const exportDestinationsC = exportDestinationComponentsForTotal(0);
   const stocksAB =
     valueByColumn(row, `New England (PADD 1A) Ending Stocks of ${config.fuelLabel} (Thousand Barrels)`) +
       valueByColumn(row, `Central Atlantic (PADD 1B) Ending Stocks of ${config.fuelLabel} (Thousand Barrels)`) ||
@@ -1258,19 +1391,21 @@ function monthlyPadd1Splits(config: ProductConfig, row: CsvRow, period: string):
   return [
     regionPoint(period, "actual", "padd1ab", "P1-A/B Northeast", {
       demandKbd: demandAB,
-      productionKbd: p1.productionKbd * shareAB,
+      productionKbd: p1.productionKbd,
       importsKbd: importAB,
       ...importComponentsAB,
-      exportsKbd: p1.exportsKbd * shareAB,
+      exportsKbd: p1.exportsKbd,
+      ...exportDestinationsAB,
       netReceiptsKbd: p1.netReceiptsKbd * shareAB,
       stocksKb: stocksAB,
     }),
     regionPoint(period, "actual", "padd1c", "P1-C Lower Atlantic", {
       demandKbd: demandC,
-      productionKbd: p1.productionKbd * shareC,
+      productionKbd: 0,
       importsKbd: importC,
       ...importComponentsC,
-      exportsKbd: p1.exportsKbd * shareC,
+      exportsKbd: 0,
+      ...exportDestinationsC,
       netReceiptsKbd: p1.netReceiptsKbd * shareC,
       stocksKb: stocksC,
     }),
@@ -1280,9 +1415,13 @@ function monthlyPadd1Splits(config: ProductConfig, row: CsvRow, period: string):
 function monthlyRegionRecord(config: ProductConfig, row: CsvRow): { period: string; status: "actual" | "forecast"; points: Map<string, RegionalBalancePoint> } {
   const period = monthKey(row.Date);
   const points = new Map<string, RegionalBalancePoint>();
-  const [padd1ab, padd1c] = monthlyPadd1Splits(config, row, period);
-  points.set("padd1ab", padd1ab);
-  points.set("padd1c", padd1c);
+  if (config.key === "jet") {
+    points.set("padd1", directMonthlyRegion(config, row, period, "padd1", "padd1", "P1 East Coast"));
+  } else {
+    const [padd1ab, padd1c] = monthlyPadd1Splits(config, row, period);
+    points.set("padd1ab", padd1ab);
+    points.set("padd1c", padd1c);
+  }
   points.set("padd2", directMonthlyRegion(config, row, period, "padd2", "padd2", "P2 Midwest"));
   points.set("padd3", directMonthlyRegion(config, row, period, "padd3", "padd3", "P3 Gulf Coast"));
   points.set("padd4", directMonthlyRegion(config, row, period, "padd4", "padd4", "P4 Rocky Mountain"));
@@ -1290,17 +1429,32 @@ function monthlyRegionRecord(config: ProductConfig, row: CsvRow): { period: stri
   return { period, status: "actual", points };
 }
 
-function updateRegionalStockChanges(records: Array<{ period: string; status: "actual" | "forecast"; points: Map<string, RegionalBalancePoint> }>, divisor: (period: string) => number): void {
+function recomputeRegionalBalance(point: RegionalBalancePoint): void {
+  point.balanceKbd = round(point.productionKbd + point.importsKbd + point.netReceiptsKbd - point.exportsKbd - point.demandKbd);
+}
+
+function solveDemandFromStockChange(point: RegionalBalancePoint): void {
+  point.demandKbd = round(point.productionKbd + point.importsKbd + point.netReceiptsKbd - point.exportsKbd - point.stockChangeKbd);
+  recomputeRegionalBalance(point);
+}
+
+function updateRegionalStockChanges(
+  config: ProductConfig,
+  records: Array<{ period: string; status: "actual" | "forecast"; points: Map<string, RegionalBalancePoint> }>,
+  divisor: (period: string) => number,
+  beforeAggregates?: (record: { period: string; status: "actual" | "forecast"; points: Map<string, RegionalBalancePoint> }) => void,
+): void {
   const previous = new Map<string, RegionalBalancePoint>();
   records.forEach((record) => {
-    BASE_REGION_KEYS.forEach((key) => {
+    baseRegionKeys(config).forEach((key) => {
       const point = record.points.get(key);
       if (!point) return;
       const prior = previous.get(key);
       point.stockChangeKbd = prior ? round((point.stocksKb - prior.stocksKb) / divisor(record.period)) : 0;
       previous.set(key, point);
     });
-    addRegionalAggregates(record.period, record.status, record.points);
+    beforeAggregates?.(record);
+    addRegionalAggregates(config, record.period, record.status, record.points);
   });
 }
 
@@ -1309,7 +1463,7 @@ function monthlyRegionalBalances(config: ProductConfig, rows: CsvRow[]): Regiona
   const actualRecords = rows
     .map((row) => monthlyRegionRecord(config, row))
     .sort((a, b) => a.period.localeCompare(b.period));
-  updateRegionalStockChanges(actualRecords, daysInMonth);
+  updateRegionalStockChanges(config, actualRecords, daysInMonth);
 
   const actualPoints = actualRecords.flatMap((record) => Array.from(record.points.values()));
   const seasonalPointsByRegionMonth = new Map<string, RegionalBalancePoint[]>();
@@ -1325,8 +1479,8 @@ function monthlyRegionalBalances(config: ProductConfig, rows: CsvRow[]): Regiona
 
   for (let period = addMonths(latest, 1); period <= MONTHLY_FORECAST_THROUGH; period = addMonths(period, 1)) {
     const points = new Map<string, RegionalBalancePoint>();
-    BASE_REGION_KEYS.forEach((key) => {
-      const region = REGION_DEFS.find((item) => item.key === key);
+    baseRegionKeys(config).forEach((key) => {
+      const region = regionDefByKey(key);
       const season = seasonalPointsByRegionMonth.get(`${key}|${monthOf(period)}`) ?? [];
       const previous = records.at(-1)?.points.get(key);
       const demandKbd = round(average(season.map((point) => point.demandKbd)) || previous?.demandKbd || 0);
@@ -1334,7 +1488,24 @@ function monthlyRegionalBalances(config: ProductConfig, rows: CsvRow[]): Regiona
       const canadaImportsKbd = round(average(season.map((point) => point.canadaImportsKbd)) || previous?.canadaImportsKbd || 0);
       const nonCanadaImportsKbd = round(average(season.map((point) => point.nonCanadaImportsKbd)) || previous?.nonCanadaImportsKbd || 0);
       const importsKbd = round(canadaImportsKbd + nonCanadaImportsKbd || average(season.map((point) => point.importsKbd)) || previous?.importsKbd || 0);
-      const exportsKbd = round(average(season.map((point) => point.exportsKbd)) || previous?.exportsKbd || 0);
+      const exportSeasonalAverage = (selector: (point: RegionalBalancePoint) => number, fallback: number | undefined) =>
+        round(season.length ? average(season.map(selector)) : fallback ?? 0);
+      const rawExportDestinations = {
+        exportsLatinAmericaKbd: exportSeasonalAverage((point) => point.exportsLatinAmericaKbd, previous?.exportsLatinAmericaKbd),
+        exportsEuropeKbd: exportSeasonalAverage((point) => point.exportsEuropeKbd, previous?.exportsEuropeKbd),
+        exportsAfricaKbd: exportSeasonalAverage((point) => point.exportsAfricaKbd, previous?.exportsAfricaKbd),
+        exportsOtherKbd: exportSeasonalAverage((point) => point.exportsOtherKbd, previous?.exportsOtherKbd),
+      };
+      const rawExportDestinationTotal = round(
+        rawExportDestinations.exportsLatinAmericaKbd +
+          rawExportDestinations.exportsEuropeKbd +
+          rawExportDestinations.exportsAfricaKbd +
+          rawExportDestinations.exportsOtherKbd,
+      );
+      const exportsKbd = key === "padd3"
+        ? rawExportDestinationTotal
+        : round(average(season.map((point) => point.exportsKbd)) || previous?.exportsKbd || 0);
+      const exportDestinations = exportDestinationComponentsForTotal(exportsKbd, rawExportDestinations);
       const netReceiptsKbd = round(average(season.map((point) => point.netReceiptsKbd)) || previous?.netReceiptsKbd || 0);
       const balanceKbd = round(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd);
       const stocksKb = round((previous?.stocksKb ?? 0) + balanceKbd * daysInMonth(period));
@@ -1345,17 +1516,18 @@ function monthlyRegionalBalances(config: ProductConfig, rows: CsvRow[]): Regiona
         canadaImportsKbd,
         nonCanadaImportsKbd,
         exportsKbd,
+        ...exportDestinations,
         netReceiptsKbd,
         stockChangeKbd: balanceKbd,
         stocksKb,
       }));
     });
-    addRegionalAggregates(period, "forecast", points);
+    addRegionalAggregates(config, period, "forecast", points);
     records.push({ period, status: "forecast", points });
   }
 
   return records.flatMap((record) =>
-    REGION_DEFS.map((region) => record.points.get(region.key)).filter((point): point is RegionalBalancePoint => Boolean(point)),
+    regionalRegionDefs(config).map((region) => record.points.get(region.key)).filter((point): point is RegionalBalancePoint => Boolean(point)),
   );
 }
 
@@ -1369,67 +1541,98 @@ function regionalMonthlyMap(points: RegionalBalancePoint[]): Map<string, Map<str
   return out;
 }
 
+function weeklyPadd3ExportsKbd(config: ProductConfig, weekPoint: WeeklyPoint, monthlyPoints: Map<string, RegionalBalancePoint> | undefined): number {
+  const monthlyP3 = monthlyPoints?.get("padd3");
+  if (!config.weeklyColumns.exports) return monthlyP3?.exportsKbd ?? 0;
+  const nonP3ExportsKbd = baseRegionKeys(config)
+    .filter((key) => key !== "padd3")
+    .reduce((sum, key) => sum + (monthlyPoints?.get(key)?.exportsKbd ?? 0), 0);
+  return round(Math.max(0, weekPoint.exportsKbd - nonP3ExportsKbd));
+}
+
 function weeklyRegionRecord(config: ProductConfig, weekPoint: WeeklyPoint, sourceRow: CsvRow | undefined, monthlyPoints: Map<string, RegionalBalancePoint> | undefined): { period: string; status: "actual" | "forecast"; points: Map<string, RegionalBalancePoint> } {
   const period = weekPoint.weekEnding;
   const points = new Map<string, RegionalBalancePoint>();
-  const monthP1Ab = monthlyPoints?.get("padd1ab");
-  const monthP1C = monthlyPoints?.get("padd1c");
-  const p1Demand = (monthP1Ab?.demandKbd ?? 0) + (monthP1C?.demandKbd ?? 0);
-  const shareAB = p1Demand ? (monthP1Ab?.demandKbd ?? 0) / p1Demand : 1;
-  const shareC = p1Demand ? (monthP1C?.demandKbd ?? 0) / p1Demand : 0;
-  const p1MonthlyImports = (monthP1Ab?.importsKbd ?? 0) + (monthP1C?.importsKbd ?? 0);
-  const importShareAB = p1MonthlyImports ? (monthP1Ab?.importsKbd ?? 0) / p1MonthlyImports : shareAB;
-  const importShareC = p1MonthlyImports ? (monthP1C?.importsKbd ?? 0) / p1MonthlyImports : shareC;
-  const p1Production = sourceRow ? valueByColumn(sourceRow, weeklyProductColumn(config, "padd1", "production")) : (monthP1Ab?.productionKbd ?? 0) + (monthP1C?.productionKbd ?? 0);
-  const p1Imports = sourceRow ? valueByColumn(sourceRow, weeklyProductColumn(config, "padd1", "imports")) : (monthP1Ab?.importsKbd ?? 0) + (monthP1C?.importsKbd ?? 0);
-  const p1ImportsAB = p1Imports * importShareAB;
-  const p1ImportsC = p1Imports * importShareC;
-  const importComponentsAB = proratedImportComponents(p1ImportsAB, monthP1Ab);
-  const importComponentsC = proratedImportComponents(p1ImportsC, monthP1C);
-  const p1StocksAB = sourceRow
-    ? valueByColumn(sourceRow, `weekly PADD 1 New England (A) Ending Stocks of ${config.fuelLabel}`) +
-      valueByColumn(sourceRow, `weekly PADD 1 Central Atlantic (B) Ending Stocks of ${config.fuelLabel}`)
-    : monthP1Ab?.stocksKb ?? 0;
-  const p1StocksC = sourceRow ? valueByColumn(sourceRow, `weekly PADD 1 Lower Atlantic (C) Ending Stocks of ${config.fuelLabel}`) : monthP1C?.stocksKb ?? 0;
-  points.set("padd1ab", regionPoint(period, weekPoint.status, "padd1ab", "P1-A/B Northeast", {
-    demandKbd: monthP1Ab?.demandKbd ?? 0,
-    productionKbd: p1Production * shareAB,
-    importsKbd: p1ImportsAB,
-    ...importComponentsAB,
-    exportsKbd: monthP1Ab?.exportsKbd ?? 0,
-    netReceiptsKbd: monthP1Ab?.netReceiptsKbd ?? 0,
-    stocksKb: p1StocksAB || monthP1Ab?.stocksKb || 0,
-  }));
-  points.set("padd1c", regionPoint(period, weekPoint.status, "padd1c", "P1-C Lower Atlantic", {
-    demandKbd: monthP1C?.demandKbd ?? 0,
-    productionKbd: p1Production * shareC,
-    importsKbd: p1ImportsC,
-    ...importComponentsC,
-    exportsKbd: monthP1C?.exportsKbd ?? 0,
-    netReceiptsKbd: monthP1C?.netReceiptsKbd ?? 0,
-    stocksKb: p1StocksC || monthP1C?.stocksKb || 0,
-  }));
+  if (config.key === "jet") {
+    const monthP1 = monthlyPoints?.get("padd1");
+    const p1Production = sourceRow ? valueByColumn(sourceRow, weeklyProductColumn(config, "padd1", "production")) : monthP1?.productionKbd ?? 0;
+    const p1Imports = weeklyImportValue(config, sourceRow, "padd1", "padd1", period, monthP1?.importsKbd ?? 0);
+    const importComponents = proratedImportComponents(p1Imports, monthP1);
+    const p1Stocks = sourceRow ? valueByColumn(sourceRow, weeklyProductColumn(config, "padd1", "stocks")) : monthP1?.stocksKb ?? 0;
+    points.set("padd1", regionPoint(period, weekPoint.status, "padd1", "P1 East Coast", {
+      demandKbd: monthP1?.demandKbd ?? 0,
+      productionKbd: p1Production,
+      importsKbd: p1Imports,
+      ...importComponents,
+      exportsKbd: monthP1?.exportsKbd ?? 0,
+      ...exportDestinationComponentsForTotal(monthP1?.exportsKbd ?? 0, monthP1 ?? {}),
+      netReceiptsKbd: monthP1?.netReceiptsKbd ?? 0,
+      stocksKb: p1Stocks || monthP1?.stocksKb || 0,
+    }));
+  } else {
+    const monthP1Ab = monthlyPoints?.get("padd1ab");
+    const monthP1C = monthlyPoints?.get("padd1c");
+    const p1Demand = (monthP1Ab?.demandKbd ?? 0) + (monthP1C?.demandKbd ?? 0);
+    const shareAB = p1Demand ? (monthP1Ab?.demandKbd ?? 0) / p1Demand : 1;
+    const shareC = p1Demand ? (monthP1C?.demandKbd ?? 0) / p1Demand : 0;
+    const p1MonthlyImports = (monthP1Ab?.importsKbd ?? 0) + (monthP1C?.importsKbd ?? 0);
+    const importShareAB = p1MonthlyImports ? (monthP1Ab?.importsKbd ?? 0) / p1MonthlyImports : shareAB;
+    const importShareC = p1MonthlyImports ? (monthP1C?.importsKbd ?? 0) / p1MonthlyImports : shareC;
+    const p1Production = sourceRow ? valueByColumn(sourceRow, weeklyProductColumn(config, "padd1", "production")) : (monthP1Ab?.productionKbd ?? 0) + (monthP1C?.productionKbd ?? 0);
+    const p1Imports = weeklyImportValue(config, sourceRow, "padd1", "padd1", period, (monthP1Ab?.importsKbd ?? 0) + (monthP1C?.importsKbd ?? 0));
+    const p1ImportsAB = p1Imports * importShareAB * weeklyImportMultiplier(config, "padd1ab", period);
+    const p1ImportsC = p1Imports * importShareC * weeklyImportMultiplier(config, "padd1c", period);
+    const importComponentsAB = proratedImportComponents(p1ImportsAB, monthP1Ab);
+    const importComponentsC = proratedImportComponents(p1ImportsC, monthP1C);
+    const p1StocksAB = sourceRow
+      ? valueByColumn(sourceRow, `weekly PADD 1 New England (A) Ending Stocks of ${config.fuelLabel}`) +
+        valueByColumn(sourceRow, `weekly PADD 1 Central Atlantic (B) Ending Stocks of ${config.fuelLabel}`)
+      : monthP1Ab?.stocksKb ?? 0;
+    const p1StocksC = sourceRow ? valueByColumn(sourceRow, `weekly PADD 1 Lower Atlantic (C) Ending Stocks of ${config.fuelLabel}`) : monthP1C?.stocksKb ?? 0;
+    points.set("padd1ab", regionPoint(period, weekPoint.status, "padd1ab", "P1-A/B Northeast", {
+      demandKbd: monthP1Ab?.demandKbd ?? 0,
+      productionKbd: p1Production,
+      importsKbd: p1ImportsAB,
+      ...importComponentsAB,
+      exportsKbd: monthP1Ab?.exportsKbd ?? 0,
+      ...exportDestinationComponentsForTotal(monthP1Ab?.exportsKbd ?? 0, monthP1Ab ?? {}),
+      netReceiptsKbd: monthP1Ab?.netReceiptsKbd ?? 0,
+      stocksKb: p1StocksAB || monthP1Ab?.stocksKb || 0,
+    }));
+    points.set("padd1c", regionPoint(period, weekPoint.status, "padd1c", "P1-C Lower Atlantic", {
+      demandKbd: monthP1C?.demandKbd ?? 0,
+      productionKbd: 0,
+      importsKbd: p1ImportsC,
+      ...importComponentsC,
+      exportsKbd: monthP1C?.exportsKbd ?? 0,
+      ...exportDestinationComponentsForTotal(monthP1C?.exportsKbd ?? 0, monthP1C ?? {}),
+      netReceiptsKbd: monthP1C?.netReceiptsKbd ?? 0,
+      stocksKb: p1StocksC || monthP1C?.stocksKb || 0,
+    }));
+  }
 
   (["padd2", "padd3", "padd4", "padd5"] as const).forEach((key) => {
     const area = key;
     const monthPoint = monthlyPoints?.get(key);
-    const region = REGION_DEFS.find((item) => item.key === key);
+    const region = regionDefByKey(key);
     const productionKbd = sourceRow ? valueByColumn(sourceRow, weeklyProductColumn(config, area, "production")) : monthPoint?.productionKbd ?? 0;
-    const importsKbd = sourceRow ? valueByColumn(sourceRow, weeklyProductColumn(config, area, "imports")) : monthPoint?.importsKbd ?? 0;
+    const importsKbd = weeklyImportValue(config, sourceRow, area, key, period, monthPoint?.importsKbd ?? 0);
     const importComponents = proratedImportComponents(importsKbd, monthPoint);
     const stocksKb = sourceRow ? valueByColumn(sourceRow, weeklyProductColumn(config, area, "stocks")) : monthPoint?.stocksKb ?? 0;
+    const exportsKbd = key === "padd3" ? weeklyPadd3ExportsKbd(config, weekPoint, monthlyPoints) : monthPoint?.exportsKbd ?? 0;
     points.set(key, regionPoint(period, weekPoint.status, key, region?.label ?? key.toUpperCase(), {
       demandKbd: monthPoint?.demandKbd ?? 0,
       productionKbd,
       importsKbd,
       ...importComponents,
-      exportsKbd: monthPoint?.exportsKbd ?? 0,
+      exportsKbd,
+      ...exportDestinationComponentsForTotal(exportsKbd, monthPoint ?? {}),
       netReceiptsKbd: monthPoint?.netReceiptsKbd ?? 0,
       stocksKb,
     }));
   });
 
-  addRegionalAggregates(period, weekPoint.status, points);
+  addRegionalAggregates(config, period, weekPoint.status, points);
   return { period, status: weekPoint.status, points };
 }
 
@@ -1437,9 +1640,19 @@ function weeklyRegionalBalances(config: ProductConfig, rows: CsvRow[], weekly: W
   const rowsByWeek = new Map(rows.map((row) => [row.week_ending, row]));
   const monthlyByPeriod = regionalMonthlyMap(monthlyRegional);
   const records = weekly.map((point) => weeklyRegionRecord(config, point, rowsByWeek.get(point.weekEnding), monthlyByPeriod.get(point.month)));
-  updateRegionalStockChanges(records, () => 7);
+  updateRegionalStockChanges(config, records, () => 7, (record) => {
+    if (record.status !== "actual") return;
+    const monthlyBucket = monthlyByPeriod.get(monthKey(record.period));
+    baseRegionKeys(config).forEach((key) => {
+      const monthlyPoint = monthlyBucket?.get(key);
+      if (monthlyPoint?.status === "actual") return;
+      const point = record.points.get(key);
+      if (!point) return;
+      solveDemandFromStockChange(point);
+    });
+  });
   return records.flatMap((record) =>
-    REGION_DEFS.map((region) => record.points.get(region.key)).filter((point): point is RegionalBalancePoint => Boolean(point)),
+    regionalRegionDefs(config).map((region) => record.points.get(region.key)).filter((point): point is RegionalBalancePoint => Boolean(point)),
   );
 }
 
@@ -1462,6 +1675,7 @@ function weeklyGuideCrudeRunsKbd(regionKey: string, regionalBucket: Map<string, 
   const crudePoint = crudeBucket.get(crudeRegion);
   if (!crudePoint) return 0;
   if (crudeRegion !== "padd1") return crudePoint.crudeRunsKbd;
+  if (regionKey === "padd1") return crudePoint.crudeRunsKbd;
   const row = regionalBucket.get(regionKey);
   const abProduction = regionalBucket.get("padd1ab")?.productionKbd ?? 0;
   const cProduction = regionalBucket.get("padd1c")?.productionKbd ?? 0;
@@ -1477,7 +1691,7 @@ function weeklyGuideCrudeRunsKbd(regionKey: string, regionalBucket: Map<string, 
   return round(crudePoint.crudeRunsKbd * Math.max(0, Math.min(1, share)));
 }
 
-function buildWeeklyGuideMonthly(regionalWeekly: RegionalBalancePoint[], crudeWeekly: CrudeRunsPoint[]): WeeklyGuideMonthlyPoint[] {
+function buildWeeklyGuideMonthly(config: ProductConfig, regionalWeekly: RegionalBalancePoint[], crudeWeekly: CrudeRunsPoint[]): WeeklyGuideMonthlyPoint[] {
   const regionalByPeriod = bucketRegionalRows(regionalWeekly);
   const crudeByPeriod = bucketRegionalRows(crudeWeekly);
   const accum = new Map<string, { productionKbd: number; crudeRunsKbd: number; yieldPct: number; balanceKbd: number; count: number }>();
@@ -1485,7 +1699,7 @@ function buildWeeklyGuideMonthly(regionalWeekly: RegionalBalancePoint[], crudeWe
     const regionalBucket = regionalByPeriod.get(period);
     if (!regionalBucket) return;
     const crudeBucket = crudeByPeriod.get(period) ?? new Map<string, CrudeRunsPoint>();
-    REGION_DEFS.forEach((region) => {
+    regionalRegionDefs(config).forEach((region) => {
       const row = regionalBucket.get(region.key);
       if (!row || row.status !== "actual") return;
       const crudeRunsKbd = weeklyGuideCrudeRunsKbd(region.key, regionalBucket, crudeBucket);
@@ -1498,7 +1712,7 @@ function buildWeeklyGuideMonthly(regionalWeekly: RegionalBalancePoint[], crudeWe
         current.productionKbd += row.productionKbd;
         current.crudeRunsKbd += crudeRunsKbd;
         current.yieldPct += guideYieldPct;
-        current.balanceKbd += row.balanceKbd;
+        current.balanceKbd += row.stockChangeKbd;
         current.count += 1;
         accum.set(key, current);
       }
@@ -1520,7 +1734,6 @@ function buildWeeklyGuideMonthly(regionalWeekly: RegionalBalancePoint[], crudeWe
 }
 
 type MovementModeKey = "pipeline" | "tankerBarge";
-type PaddAreaKey = "padd1" | "padd2" | "padd3" | "padd4" | "padd5";
 
 type MovementSource = {
   columns: string[];
@@ -1529,6 +1742,7 @@ type MovementSource = {
 
 type MovementDefinition = Omit<RegionalMovementFlow, "monthly" | "weekly"> & {
   sources: MovementSource[];
+  solve?: "dieselPadd1P3Pipeline";
 };
 
 const PADD_AREA_KEYS: PaddAreaKey[] = ["padd1", "padd2", "padd3", "padd4", "padd5"];
@@ -1571,6 +1785,7 @@ function flowDefinition(
   toRegionKey: string,
   mode: { key: MovementModeKey; label: string },
   sources: MovementSource[],
+  solve?: MovementDefinition["solve"],
 ): MovementDefinition {
   return {
     id: flowId(fromRegionKey, toRegionKey, mode.key),
@@ -1579,6 +1794,7 @@ function flowDefinition(
     modeKey: mode.key,
     modeLabel: mode.label,
     sources,
+    solve,
   };
 }
 
@@ -1589,7 +1805,32 @@ function buildMovementDefinitions(config: ProductConfig, sampleRow: CsvRow | und
     PADD_AREA_KEYS.forEach((fromArea) => {
       if (toArea === fromArea) return;
       MOVEMENT_MODES.forEach((mode) => {
-        if (toArea === "padd1" && fromArea === "padd3" && mode.key === "tankerBarge") {
+        if (config.key === "diesel" && toArea === "padd1" && fromArea === "padd2") {
+          const column = receiptColumn(config, monthlyArea(toArea), monthlyArea(fromArea), mode.key);
+          if (hasColumn(sampleRow, column)) {
+            addMovementDefinition(defs, flowDefinition("padd2", "padd1ab", mode, [{ columns: [column] }]));
+          }
+          return;
+        }
+
+        if (config.key === "diesel" && toArea === "padd1" && fromArea === "padd5" && mode.key === "tankerBarge") {
+          const column = receiptColumn(config, monthlyArea(toArea), monthlyArea(fromArea), mode.key);
+          if (hasColumn(sampleRow, column)) {
+            addMovementDefinition(defs, flowDefinition("padd5", "padd1ab", mode, [{ columns: [column] }]));
+          }
+          return;
+        }
+
+        if (config.key === "diesel" && toArea === "padd1" && fromArea === "padd3" && mode.key === "pipeline") {
+          const column = receiptColumn(config, monthlyArea(toArea), monthlyArea(fromArea), mode.key);
+          if (hasColumn(sampleRow, column)) {
+            addMovementDefinition(defs, flowDefinition("padd3", "padd1ab", mode, [{ columns: [column] }], "dieselPadd1P3Pipeline"));
+            addMovementDefinition(defs, flowDefinition("padd3", "padd1c", mode, [{ columns: [column] }], "dieselPadd1P3Pipeline"));
+          }
+          return;
+        }
+
+        if (config.key === "diesel" && toArea === "padd1" && fromArea === "padd3" && mode.key === "tankerBarge") {
           const ne = receiptColumn(config, "New England (PADD 1A)", monthlyArea(fromArea), mode.key);
           const ca = receiptColumn(config, "Central Atlantic (PADD 1B)", monthlyArea(fromArea), mode.key);
           const lower = receiptColumn(config, "Lower Atlantic (PADD 1C)", monthlyArea(fromArea), mode.key);
@@ -1604,8 +1845,13 @@ function buildMovementDefinitions(config: ProductConfig, sampleRow: CsvRow | und
 
         const column = receiptColumn(config, monthlyArea(toArea), monthlyArea(fromArea), mode.key);
         if (!hasColumn(sampleRow, column)) return;
-        const toRegions = toArea === "padd1" ? [...PADD1_KEYS] : [toArea];
-        const fromRegions = fromArea === "padd1" ? [...PADD1_KEYS] : [fromArea];
+        if (config.key === "diesel" && fromArea === "padd1") {
+          const fromRegionKey = toArea === "padd5" && mode.key === "tankerBarge" ? "padd1ab" : "padd1c";
+          addMovementDefinition(defs, flowDefinition(fromRegionKey, toArea, mode, [{ columns: [column] }]));
+          return;
+        }
+        const toRegions = balanceRegionKeysForPaddArea(config, toArea);
+        const fromRegions = balanceRegionKeysForPaddArea(config, fromArea);
         toRegions.forEach((toRegionKey) => {
           fromRegions.forEach((fromRegionKey) => {
             const splitRegionKey = toRegionKey === "padd1ab" || toRegionKey === "padd1c" ? toRegionKey : fromRegionKey === "padd1ab" || fromRegionKey === "padd1c" ? fromRegionKey : undefined;
@@ -1628,11 +1874,42 @@ function movementSourceValue(row: CsvRow, source: MovementSource, regionalByPeri
   return base * share;
 }
 
-function movementDefinitionValue(def: MovementDefinition, row: CsvRow, regionalByPeriod: Map<string, Map<string, RegionalBalancePoint>>, period: string): number {
+function movementValueAt(values: Map<string, RegionalMovementFlow["monthly"]>, flowId: string, period: string): number {
+  return values.get(flowId)?.find((row) => row.period === period)?.valueKbd ?? 0;
+}
+
+function dieselPadd1P3PipelineSolvedValue(
+  def: MovementDefinition,
+  definitions: MovementDefinition[],
+  values: Map<string, RegionalMovementFlow["monthly"]>,
+  regionalByPeriod: Map<string, Map<string, RegionalBalancePoint>>,
+  period: string,
+): number {
+  const point = regionalByPeriod.get(period)?.get(def.toRegionKey);
+  if (!point) return 0;
+  const knownReceipts = definitions
+    .filter((candidate) => candidate.id !== def.id && !candidate.solve && candidate.toRegionKey === def.toRegionKey)
+    .reduce((sum, candidate) => sum + movementValueAt(values, candidate.id, period), 0);
+  const shipments = definitions
+    .filter((candidate) => !candidate.solve && candidate.fromRegionKey === def.toRegionKey)
+    .reduce((sum, candidate) => sum + movementValueAt(values, candidate.id, period), 0);
+  const solved =
+    Number(point.stockChangeKbd || 0) +
+    Number(point.demandKbd || 0) +
+    Number(point.exportsKbd || 0) +
+    shipments -
+    Number(point.productionKbd || 0) -
+    Number(point.importsKbd || 0) -
+    knownReceipts;
+  return round(Math.max(0, solved));
+}
+
+function movementDefinitionValue(config: ProductConfig, def: MovementDefinition, row: CsvRow, regionalByPeriod: Map<string, Map<string, RegionalBalancePoint>>, period: string): number {
   return round(def.sources.reduce((sum, source) => sum + movementSourceValue(row, source, regionalByPeriod, period), 0));
 }
 
 function buildMovementMonthlyValues(
+  config: ProductConfig,
   definitions: MovementDefinition[],
   monthlyRows: CsvRow[],
   regionalMonthly: RegionalBalancePoint[],
@@ -1644,8 +1921,14 @@ function buildMovementMonthlyValues(
   actualPeriods.forEach((period) => {
     const row = rowsByPeriod.get(period);
     if (!row) return;
-    definitions.forEach((def) => {
-      values.get(def.id)?.push({ period, status: "actual", valueKbd: movementDefinitionValue(def, row, regionalByPeriod, period) });
+    definitions.filter((def) => !def.solve).forEach((def) => {
+      values.get(def.id)?.push({ period, status: "actual", valueKbd: movementDefinitionValue(config, def, row, regionalByPeriod, period) });
+    });
+    definitions.filter((def) => def.solve).forEach((def) => {
+      const valueKbd = def.solve === "dieselPadd1P3Pipeline"
+        ? dieselPadd1P3PipelineSolvedValue(def, definitions, values, regionalByPeriod, period)
+        : 0;
+      values.get(def.id)?.push({ period, status: "actual", valueKbd });
     });
   });
 
@@ -1689,7 +1972,7 @@ function buildMovementWeeklyValues(monthlyValues: RegionalMovementFlow["monthly"
 
 function buildRegionalMovementFlows(config: ProductConfig, monthlyRows: CsvRow[], regionalMonthly: RegionalBalancePoint[], regionalWeekly: RegionalBalancePoint[]): RegionalMovementFlow[] {
   const definitions = buildMovementDefinitions(config, monthlyRows[0]);
-  const monthlyValues = buildMovementMonthlyValues(definitions, monthlyRows, regionalMonthly);
+  const monthlyValues = buildMovementMonthlyValues(config, definitions, monthlyRows, regionalMonthly);
   return definitions.map((def) => {
     const monthly = monthlyValues.get(def.id) ?? [];
     const weekly = buildMovementWeeklyValues(monthly, regionalWeekly);
@@ -2919,8 +3202,8 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
     const STORAGE_KEY = D.product.key + ':regional-balance-views:v1';
     const BAND_YEARS = ${JSON.stringify(BAND_YEARS)};
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const METRICS = [{key:'balanceKbd',label:'Balance',unit:'kbd',digits:0},{key:'demandKbd',label:'Demand',unit:'kbd',digits:0},{key:'productionKbd',label:'Production',unit:'kbd',digits:0},{key:'importsKbd',label:'Imports',unit:'kbd',digits:0},{key:'exportsKbd',label:'Exports',unit:'kbd',digits:0},{key:'netReceiptsKbd',label:'Net receipts',unit:'kbd',digits:0},{key:'stockChangeKbd',label:'Stock change',unit:'kbd',digits:0},{key:'stocksKb',label:'Stocks',unit:'kb',digits:0}];
-    const CHART_METRICS = ['balanceKbd','demandKbd','productionKbd','importsKbd','exportsKbd','netReceiptsKbd','stocksKb'];
+    const METRICS = [{key:'balanceKbd',label:'Balance',unit:'kbd',digits:0},{key:'demandKbd',label:'Demand',unit:'kbd',digits:0},{key:'productionKbd',label:'Production',unit:'kbd',digits:0},{key:'importsKbd',label:'Imports',unit:'kbd',digits:0},{key:'exportsKbd',label:'Exports',unit:'kbd',digits:0},{key:'netReceiptsKbd',label:'Net receipts',unit:'kbd',digits:0},{key:'stockChangeKbd',label:'Stock change',unit:'kbd',digits:0},{key:'stocksKb',label:'Stocks',unit:'kb',digits:0},{key:'daysForwardCover',label:'Days of Forward Cover',unit:'days',digits:1}];
+    const CHART_METRICS = ['balanceKbd','demandKbd','productionKbd','importsKbd','exportsKbd','netReceiptsKbd','stocksKb','daysForwardCover'];
     const REGION_ORDER = D.regionalBalance.regions.map(r => r.key);
     const fmt = (n, d=0) => Number(n || 0).toLocaleString(navigator.language || 'en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
     const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -2946,18 +3229,24 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
     function renderHistoryChips(){ document.getElementById('historyChips').innerHTML = [2019,2020,2021,2022,2023,2024,2025].map(year => '<span class="chip"><input type="checkbox" '+(BAND_YEARS.includes(year)?'checked':'')+' disabled><span style="display:inline-block;width:22px;height:2px;background:#1f2937"></span>'+year+'</span>').join(''); }
     function renderLatestGrid(){ const {latestRows, priorRows, latest} = latestRowsByRegion(); const row = latestRows.get(state.region); const prior = priorRows.get(state.region); document.getElementById('latestGrid').innerHTML = METRICS.filter(m => ['balanceKbd','demandKbd','productionKbd','importsKbd','exportsKbd','stocksKb'].includes(m.key)).map(metric => { const value = row ? row[metric.key] : 0; const diff = prior ? value - prior[metric.key] : 0; return '<div class="miniMetric"><span>'+esc(metric.label)+'</span><b>'+fmt(value, metric.digits)+'</b><i>'+(diff>=0?'+':'')+fmt(diff, metric.digits)+' vs prior period</i></div>'; }).join(''); document.getElementById('loadedLine').textContent = 'Loaded '+state.frequency.charAt(0).toUpperCase()+state.frequency.slice(1)+': '+groupedByPeriod().length+' periods, '+D.regionalBalance.regions.length+' regions. Latest selected period '+latest+'.'; }
     function renderBalanceTable(){ const metric = metricByKey(state.metric); document.getElementById('balanceTitle').textContent = state.frequency.charAt(0).toUpperCase()+state.frequency.slice(1)+' | Regional '+metric.label; document.getElementById('balanceSubtitle').textContent = 'Columns match PADD 1 A/B, PADD 1-C, PADD 2, PADD 3, PADD 4, PADD 5, U.S., PADDs 1, 2, 3, and PADDs 1,3.'; const header = '<thead><tr><th>Period</th><th>Status</th>'+D.regionalBalance.regions.map(r => '<th>'+esc(r.label)+'</th>').join('')+'</tr></thead>'; const body = groupedByPeriod().map(([period, bucket]) => { const status = REGION_ORDER.map(key => bucket[key]?.status).find(Boolean) || ''; return '<tr class="'+esc(status)+'"><td>'+esc(period)+'</td><td class="status">'+esc(status)+'</td>'+REGION_ORDER.map(key => '<td>'+fmt(bucket[key]?.[state.metric] || 0, metric.digits)+'</td>').join('')+'</tr>'; }).join(''); document.getElementById('balanceTable').innerHTML = header + '<tbody>' + body + '</tbody>'; }
-    function weekSlot(period){ const date = new Date(period + 'T00:00:00Z'); const start = new Date(Date.UTC(date.getUTCFullYear(),0,1)); return Math.min(53, Math.floor((date.getTime() - start.getTime()) / 604800000) + 1); }
+    function isoWeekInfo(period){ const date = new Date(String(period || '').slice(0,10) + 'T00:00:00Z'); if (!Number.isFinite(date.getTime())) return {year:yearOf(String(period || '')),week:1}; const day = date.getUTCDay() || 7; const thursday = new Date(date); thursday.setUTCDate(date.getUTCDate() + 4 - day); const isoYear = thursday.getUTCFullYear(); const yearStart = new Date(Date.UTC(isoYear,0,1)); const week = Math.ceil((((thursday.getTime() - yearStart.getTime()) / 86400000) + 1) / 7); return {year:isoYear,week:Math.min(53, Math.max(1, week))}; }
+    function weekSlot(period){ return isoWeekInfo(period).week; }
+    function chartPeriodYear(period, frequency=state.frequency){ return frequency === 'weekly' ? isoWeekInfo(period).year : yearOf(period); }
     function slotOf(period, frequency){ return frequency === 'weekly' ? weekSlot(period) : monthOf(period); }
-    function weeklyMonthLabelSlots(){ return MONTHS.map((_, month) => Math.min(53, Math.max(1, Math.round((Date.UTC(2026, month, 15) - Date.UTC(2026, 0, 1)) / 604800000) + 1))); }
-    function slotLabel(slot, frequency){ if (frequency === 'monthly') return MONTHS[slot - 1] || ''; const date = new Date(Date.UTC(2026,0,1 + (slot - 1) * 7)); return MONTHS[date.getUTCMonth()]; }
-    function valueByYearSlot(rows, metric, frequency){ const map = new Map(); rows.forEach(row => { if (!state.showForecast && row.status === 'forecast') return; const key = yearOf(row.period) + ':' + slotOf(row.period, frequency); const list = map.get(key) || []; list.push(Number(row[metric] || 0)); map.set(key, list); }); const out = new Map(); map.forEach((values, key) => out.set(key, average(values))); return out; }
-    function drawSeasonChart(svg, rows, metricKey, frequency){ const w = svg.clientWidth || 520, h = svg.clientHeight || 286, pad = {l:45,r:16,t:20,b:33}; const slots = frequency === 'weekly' ? 53 : 12; const values = valueByYearSlot(rows, metricKey, frequency); const years = Array.from(new Set(rows.map(row => yearOf(row.period)))).sort((a,b)=>a-b); const currentYear = years.at(-1), priorYear = currentYear - 1; const slotList = Array.from({length:slots}, (_,i)=>i+1); const x = slot => pad.l + ((slot - 1) / Math.max(slots - 1, 1)) * (w - pad.l - pad.r); const raw = []; const band = slotList.map(slot => { const yearValues = BAND_YEARS.map(year => values.get(year+':'+slot)).filter(v => Number.isFinite(v)); const min = yearValues.length ? Math.min(...yearValues) : null; const max = yearValues.length ? Math.max(...yearValues) : null; const avg = average(yearValues); if (min !== null) raw.push(min, max, avg); return {slot,min,max,avg}; }); [priorYear,currentYear].forEach(year => slotList.forEach(slot => { const value = values.get(year+':'+slot); if (Number.isFinite(value)) raw.push(value); })); const minRaw = Math.min(...raw,0), maxRaw = Math.max(...raw,1), spanRaw = maxRaw - minRaw || 1, min = minRaw - spanRaw*.08, max = maxRaw + spanRaw*.08; const y = value => h - pad.b - ((value - min) / (max - min || 1)) * (h - pad.t - pad.b); const line = points => points.map((point, idx) => (idx ? 'L' : 'M') + x(point.slot).toFixed(1) + ' ' + y(point.value).toFixed(1)).join(' '); const byYear = year => slotList.map(slot => ({slot,value:values.get(year+':'+slot)})).filter(point => Number.isFinite(point.value)); const currentActual = rows.filter(row => yearOf(row.period) === currentYear && row.status === 'actual').map(row => ({slot:slotOf(row.period, frequency), value:Number(row[metricKey] || 0)})); const currentForecast = state.showForecast ? rows.filter(row => yearOf(row.period) === currentYear && row.status === 'forecast').map(row => ({slot:slotOf(row.period, frequency), value:Number(row[metricKey] || 0)})) : []; const bandPoints = band.filter(point => point.min !== null && point.max !== null); const bandPath = bandPoints.length ? bandPoints.map((point, idx) => (idx ? 'L' : 'M') + x(point.slot).toFixed(1) + ' ' + y(point.max).toFixed(1)).join(' ') + ' ' + bandPoints.slice().reverse().map(point => 'L' + x(point.slot).toFixed(1) + ' ' + y(point.min).toFixed(1)).join(' ') + ' Z' : ''; const grid = [0,.25,.5,.75,1].map(t => { const gy = pad.t + t * (h - pad.t - pad.b); const val = max - t * (max - min); return '<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+gy+'" y2="'+gy+'" stroke="#cbd3df"/><text x="6" y="'+(gy+4)+'" font-size="10" fill="#647083">'+fmt(val)+'</text>'; }).join(''); const labels = (frequency === 'weekly' ? weeklyMonthLabelSlots() : slotList).map(slot => '<text x="'+x(slot)+'" y="'+(h-10)+'" font-size="10" text-anchor="middle" fill="#475569">'+slotLabel(slot, frequency)+'</text>').join(''); const avgLine = line(band.filter(point => Number.isFinite(point.avg)).map(point => ({slot:point.slot,value:point.avg}))); svg.setAttribute('viewBox','0 0 '+w+' '+h); svg.innerHTML = grid + (bandPath ? '<path d="'+bandPath+'" fill="var(--band)" opacity=".54"/>' : '') + labels + (avgLine ? '<path d="'+avgLine+'" fill="none" stroke="#1f2937" stroke-width="1.4" stroke-dasharray="5 5"/>' : '') + '<path d="'+line(byYear(priorYear))+'" fill="none" stroke="#315b99" stroke-width="2.2"/><path d="'+line(currentActual)+'" fill="none" stroke="#b42318" stroke-width="2.3"/><path d="'+line(currentForecast)+'" fill="none" stroke="#b42318" stroke-width="2.3" stroke-dasharray="5 5"/>'; }
-    function chartTableHtml(rows, metricKey){ const years = Array.from(new Set([...BAND_YEARS, ...rows.map(row => yearOf(row.period)).slice(-80)])).sort((a,b)=>a-b).filter(year => rows.some(row => yearOf(row.period) === year)); const monthValue = (year, month) => average(rows.filter(row => yearOf(row.period) === year && monthOf(row.period) === month && (state.showForecast || row.status !== 'forecast')).map(row => Number(row[metricKey] || 0))); const fyValue = year => average(MONTHS.map((_, idx) => monthValue(year, idx + 1)).filter(v => Number.isFinite(v))); const header = '<thead><tr><th>Year</th>'+MONTHS.map(m => '<th>'+m+'</th>').join('')+'<th>FY</th><th>+/-</th><th>+/-%</th></tr></thead>'; const body = years.map((year, idx) => { const fy = fyValue(year), prior = idx ? fyValue(years[idx-1]) : null; const diff = Number.isFinite(fy) && Number.isFinite(prior) ? fy - prior : null; const pct = diff !== null && prior ? diff / prior * 100 : null; return '<tr><td>'+year+'</td>'+MONTHS.map((_, m) => { const value = monthValue(year, m + 1); return '<td>'+(Number.isFinite(value) ? fmt(value) : '')+'</td>'; }).join('')+'<td>'+(Number.isFinite(fy) ? fmt(fy) : '')+'</td><td>'+(diff === null ? '' : (diff>=0?'+':'')+fmt(diff))+'</td><td>'+(pct === null ? '' : (pct>=0?'+':'')+fmt(pct,1)+'%')+'</td></tr>'; }).join(''); return '<table class="miniTable">'+header+'<tbody>'+body+'</tbody></table>'; }
+    function shortDateLabel(period){ const date = new Date(String(period || '').slice(0,10) + 'T00:00:00Z'); return Number.isFinite(date.getTime()) ? MONTHS[date.getUTCMonth()] + ' ' + String(date.getUTCDate()).padStart(2,'0') + ", '" + String(date.getUTCFullYear()).slice(2) : String(period || ''); }
+    function isoWeekEndPeriod(year, week){ const jan4 = new Date(Date.UTC(year, 0, 4)); const day = jan4.getUTCDay() || 7; jan4.setUTCDate(jan4.getUTCDate() - day + 1 + (Math.max(1, week) - 1) * 7 + 4); return jan4.toISOString().slice(0,10); }
+    function weeklySlotDateLabel(slot, year=2026){ return shortDateLabel(isoWeekEndPeriod(year, slot)); }
+    function weeklyAxisLabelEntries(_year=2026, slots=53){ return MONTHS.map((label, index) => ({slot:1 + index * (slots - 1) / Math.max(MONTHS.length - 1, 1),label})); }
+    function slotLabel(slot, frequency){ return frequency === 'monthly' ? (MONTHS[slot - 1] || '') : 'ISO W' + String(slot).padStart(2,'0'); }
+    function chartPeriodLabel(period, frequency=state.frequency){ if (!period) return ''; return frequency === 'weekly' ? shortDateLabel(period) : periodHeaderLabel(period, 'monthly'); }
+    function valueByYearSlot(rows, metric, frequency){ const map = new Map(); rows.forEach(row => { if (!state.showForecast && row.status === 'forecast') return; const value = Number(row[metric]); if (!Number.isFinite(value)) return; const key = chartPeriodYear(row.period, frequency) + ':' + slotOf(row.period, frequency); const list = map.get(key) || []; list.push(value); map.set(key, list); }); const out = new Map(); map.forEach((values, key) => out.set(key, average(values))); return out; }
+    function drawSeasonChart(svg, rows, metricKey, frequency){ const w = svg.clientWidth || 520, h = svg.clientHeight || 286, pad = {l:45,r:16,t:20,b:33}; const slots = frequency === 'weekly' ? 53 : 12; const values = valueByYearSlot(rows, metricKey, frequency); const years = Array.from(new Set(rows.map(row => chartPeriodYear(row.period, frequency)))).sort((a,b)=>a-b); const currentYear = years.at(-1), priorYear = currentYear - 1; const slotList = Array.from({length:slots}, (_,i)=>i+1); const x = slot => pad.l + ((slot - 1) / Math.max(slots - 1, 1)) * (w - pad.l - pad.r); const raw = []; const band = slotList.map(slot => { const yearValues = BAND_YEARS.map(year => values.get(year+':'+slot)).filter(v => Number.isFinite(v)); const min = yearValues.length ? Math.min(...yearValues) : null; const max = yearValues.length ? Math.max(...yearValues) : null; const avg = average(yearValues); if (min !== null) raw.push(min, max, avg); return {slot,min,max,avg}; }); [priorYear,currentYear].forEach(year => slotList.forEach(slot => { const value = values.get(year+':'+slot); if (Number.isFinite(value)) raw.push(value); })); const minRaw = Math.min(...raw,0), maxRaw = Math.max(...raw,1), spanRaw = maxRaw - minRaw || 1, min = minRaw - spanRaw*.08, max = maxRaw + spanRaw*.08; const y = value => h - pad.b - ((value - min) / (max - min || 1)) * (h - pad.t - pad.b); const line = points => points.map((point, idx) => (idx ? 'L' : 'M') + x(point.slot).toFixed(1) + ' ' + y(point.value).toFixed(1)).join(' '); const byYear = year => slotList.map(slot => ({slot,value:values.get(year+':'+slot)})).filter(point => Number.isFinite(point.value)); const currentActual = rows.filter(row => chartPeriodYear(row.period, frequency) === currentYear && row.status === 'actual').map(row => ({slot:slotOf(row.period, frequency), value:Number(row[metricKey])})).filter(point => Number.isFinite(point.value)); const currentForecast = state.showForecast ? rows.filter(row => chartPeriodYear(row.period, frequency) === currentYear && row.status === 'forecast').map(row => ({slot:slotOf(row.period, frequency), value:Number(row[metricKey])})).filter(point => Number.isFinite(point.value)) : []; const bandPoints = band.filter(point => point.min !== null && point.max !== null); const bandPath = bandPoints.length ? bandPoints.map((point, idx) => (idx ? 'L' : 'M') + x(point.slot).toFixed(1) + ' ' + y(point.max).toFixed(1)).join(' ') + ' ' + bandPoints.slice().reverse().map(point => 'L' + x(point.slot).toFixed(1) + ' ' + y(point.min).toFixed(1)).join(' ') + ' Z' : ''; const grid = [0,.25,.5,.75,1].map(t => { const gy = pad.t + t * (h - pad.t - pad.b); const val = max - t * (max - min); return '<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+gy+'" y2="'+gy+'" stroke="#cbd3df"/><text x="6" y="'+(gy+4)+'" font-size="10" fill="#647083">'+fmt(val)+'</text>'; }).join(''); const labelEntries = frequency === 'weekly' ? weeklyAxisLabelEntries(currentYear || 2026, slots) : slotList.map(slot => ({slot,label:slotLabel(slot, frequency)})); const labels = labelEntries.map(row => '<text x="'+x(row.slot)+'" y="'+(h-10)+'" font-size="10" text-anchor="middle" fill="#475569">'+esc(row.label)+'</text>').join(''); const avgLine = line(band.filter(point => Number.isFinite(point.avg)).map(point => ({slot:point.slot,value:point.avg}))); svg.setAttribute('viewBox','0 0 '+w+' '+h); svg.innerHTML = grid + (bandPath ? '<path d="'+bandPath+'" fill="var(--band)" opacity=".54"/>' : '') + labels + (avgLine ? '<path d="'+avgLine+'" fill="none" stroke="#1f2937" stroke-width="1.4" stroke-dasharray="5 5"/>' : '') + '<path d="'+line(byYear(priorYear))+'" fill="none" stroke="#315b99" stroke-width="2.2"/><path d="'+line(currentActual)+'" fill="none" stroke="#b42318" stroke-width="2.3"/><path d="'+line(currentForecast)+'" fill="none" stroke="#b42318" stroke-width="2.3" stroke-dasharray="5 5"/>'; }
+    function chartTableHtml(rows, metricKey){ const years = Array.from(new Set([...BAND_YEARS, ...rows.map(row => yearOf(row.period)).slice(-80)])).sort((a,b)=>a-b).filter(year => rows.some(row => yearOf(row.period) === year)); const monthValue = (year, month) => average(rows.filter(row => yearOf(row.period) === year && monthOf(row.period) === month && (state.showForecast || row.status !== 'forecast')).map(row => Number(row[metricKey])).filter(value => Number.isFinite(value))); const fyValue = year => average(MONTHS.map((_, idx) => monthValue(year, idx + 1)).filter(v => Number.isFinite(v))); const header = '<thead><tr><th>Year</th>'+MONTHS.map(m => '<th>'+m+'</th>').join('')+'<th>FY</th><th>+/-</th><th>+/-%</th></tr></thead>'; const body = years.map((year, idx) => { const fy = fyValue(year), prior = idx ? fyValue(years[idx-1]) : null; const diff = Number.isFinite(fy) && Number.isFinite(prior) ? fy - prior : null; const pct = diff !== null && prior ? diff / prior * 100 : null; return '<tr><td>'+year+'</td>'+MONTHS.map((_, m) => { const value = monthValue(year, m + 1); return '<td>'+(Number.isFinite(value) ? fmt(value) : '')+'</td>'; }).join('')+'<td>'+(Number.isFinite(fy) ? fmt(fy) : '')+'</td><td>'+(diff === null ? '' : (diff>=0?'+':'')+fmt(diff))+'</td><td>'+(pct === null ? '' : (pct>=0?'+':'')+fmt(pct,1)+'%')+'</td></tr>'; }).join(''); return '<table class="miniTable">'+header+'<tbody>'+body+'</tbody></table>'; }
     function renderCharts(){ const region = regionByKey(state.region); document.getElementById('chartsTitle').textContent = state.frequency.charAt(0).toUpperCase()+state.frequency.slice(1)+' | '+region.label+' Charts'; document.getElementById('chartCount').textContent = CHART_METRICS.length + ' charts'; const rows = rowsForRegion(state.region, state.frequency); document.getElementById('chartGrid').innerHTML = CHART_METRICS.map(metricKey => { const metric = metricByKey(metricKey); const title = (state.showRegionTitles ? region.label + ' | ' : '') + metric.label; return '<article class="chartCard" data-chart-metric="'+esc(metricKey)+'"><div class="cardTools"><div class="toolGroup"><button class="toolBtn" data-zoom="'+esc(metricKey)+'" type="button">Zoom</button><button class="toolBtn" data-export-chart="'+esc(metricKey)+'" type="button">Export CSV</button></div><div class="toolGroup"><button class="toolBtn" data-copy-chart="'+esc(metricKey)+'" type="button">Copy</button><button class="toolBtn" data-save-chart="'+esc(metricKey)+'" type="button">Save</button></div></div><h3 class="chartTitle">'+esc(title)+'</h3><svg class="seasonChart" role="img" aria-label="'+esc(title)+' chart"></svg><div class="legend" '+(state.showLegends?'':'hidden')+'><span><i class="swatch" style="background:#315b99"></i>Prior year</span><span><i class="swatch" style="background:#b42318"></i>Current/forecast</span><span><i class="swatch" style="background:#d7d9d2;height:8px"></i>5-year range</span><span><i class="swatch" style="background:#1f2937"></i>5-year avg</span></div><div class="miniWrap">'+chartTableHtml(rows, metricKey)+'</div></article>'; }).join(''); document.querySelectorAll('.seasonChart').forEach(svg => drawSeasonChart(svg, rows, svg.closest('.chartCard').dataset.chartMetric, state.frequency)); }
-    function currentBalanceRowsForExport(){ return groupedByPeriod().map(([period, bucket]) => { const out = {frequency:state.frequency, metric:metricByKey(state.metric).label, period, status:REGION_ORDER.map(key => bucket[key]?.status).find(Boolean) || ''}; D.regionalBalance.regions.forEach(region => { out[region.label.toLowerCase().replaceAll(' ','_').replaceAll('/','_').replaceAll('+','plus')] = round2(bucket[region.key]?.[state.metric] || 0); }); return out; }); }
+    function currentBalanceRowsForExport(){ return groupedByPeriod().map(([period, bucket]) => { const out = {frequency:state.frequency, metric:metricByKey(state.metric).label, period, status:REGION_ORDER.map(key => bucket[key]?.status).find(Boolean) || ''}; D.regionalBalance.regions.forEach(region => { const value = Number(bucket[region.key]?.[state.metric]); out[region.label.toLowerCase().replaceAll(' ','_').replaceAll('/','_').replaceAll('+','plus')] = Number.isFinite(value) ? round2(value) : NaN; }); return out; }); }
     function toCsv(rows){ const cols = Object.keys(rows[0] || {}); const clean = v => /[",\\n\\r]/.test(String(v ?? '')) ? '"' + String(v ?? '').replaceAll('"','""') + '"' : String(v ?? ''); return [cols.join(','),...rows.map(r=>cols.map(c=>clean(r[c])).join(','))].join('\\n') + '\\n'; }
     function downloadBlob(filename, type, content){ const url = URL.createObjectURL(new Blob([content],{type})); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(url), 250); }
-    function chartRows(metricKey){ return rowsForRegion(state.region, state.frequency).map(row => ({frequency:state.frequency, region:regionByKey(state.region).label, metric:metricByKey(metricKey).label, period:row.period, status:row.status, value:round2(row[metricKey] || 0)})); }
+    function chartRows(metricKey){ return rowsForRegion(state.region, state.frequency).map(row => { const value = Number(row[metricKey]); return {frequency:state.frequency, region:regionByKey(state.region).label, metric:metricByKey(metricKey).label, period:row.period, status:row.status, value:Number.isFinite(value) ? round2(value) : NaN}; }); }
     function queueRender(){ if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
     function render(){ renderControls(); renderLatestGrid(); renderBalanceTable(); renderCharts(); writeStateUrl(); }
     document.getElementById('regionSelect').addEventListener('change', e => { if (state.sheet === 'charts') state.chartRegion = validChartRegionKey(e.target.value) ? e.target.value : state.chartRegion; else state.region = e.target.value; queueRender(); });
@@ -2997,18 +3286,29 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
   <style>
     :root{--bg:#e9eef4;--panel:#fff;--ink:#151c2c;--muted:#667085;--line:#cfd7e3;--grid:#9da8b7;--grid-soft:#8792a3;--soft:#f8fafc;--blue:#294f88;--red:#b42318;--gold:#d8b400;--cream:#fff6bf;--black:#252525;--band:#b8bec8;--shadow:0 16px 36px rgba(26,39,65,.08);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--ink);font-size:14px;letter-spacing:0}button,select,input{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #7db7ff;outline-offset:2px}.shell{max-width:1620px;margin:0 auto;padding:16px 18px 34px}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:12px;position:relative;width:calc(100vw - 36px);max-width:1584px;z-index:40;will-change:transform}.title h1{font-size:24px;line-height:1.1;margin:0;font-weight:800}.title p{margin:6px 0 0;color:var(--muted);font-size:12px;max-width:980px}.actions,.chiprow,.seg{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.actions{justify-content:flex-end}.btn,.select,.chip,.toggle,.bandChipButton{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:720;min-height:32px}.btn{border-radius:7px}.btn.primary,.btn.active,.toggle.active{background:#1d4ed8;border-color:#1d4ed8;color:#fff;box-shadow:0 8px 18px rgba(29,78,216,.2)}.btn.full{width:100%;min-height:36px}.select{border-radius:8px;min-width:190px;max-width:100%;appearance:none;-webkit-appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M3.5 5.25 7 8.75l3.5-3.5' stroke='%23566174' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\");background-position:right 12px center;background-repeat:no-repeat;background-size:14px 14px;padding-right:34px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.panel>.select,.viewPresetGrid>.select,.settingsGrid .select,.outageGrid .select,.scenarioDraftGrid .select{display:block;width:100%;min-width:0}.chip{display:inline-flex}.chip input{margin:0 5px 0 0}.historyChip,.bandChipButton{cursor:pointer;user-select:none}.historyChip.active,.bandChipButton.active{background:#edf4ff;border-color:#b7c7de}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);min-width:0}.options{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px;margin-bottom:12px}.pad{padding:13px 15px}.caption{font-size:11px;color:#566174;text-transform:uppercase;font-weight:800;margin-bottom:9px}.small{font-size:12px;color:var(--muted);line-height:1.45}.controlbar{display:grid;grid-template-columns:205px 185px minmax(190px,1fr) minmax(190px,1fr) 310px;gap:10px;margin-bottom:10px;align-items:start}.balanceControlbar{grid-template-columns:205px minmax(260px,330px)}.controlbar .small{max-height:61px;overflow:auto}.layoutControls{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:10px}.rangeField{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px;align-items:center}.rangeField span{font-size:10px;color:#566174;text-transform:uppercase;font-weight:850}.rangeField output{font-size:10px;color:#111827;font-weight:850}.rangeField input{grid-column:1/-1;width:100%;accent-color:#294f88}.statusline{display:flex;justify-content:space-between;gap:12px;align-items:center;color:#4b5566;font-size:12px;margin:8px 0 12px}.sheetHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:10px}.sheetHead h2{margin:0;font-size:22px;line-height:1.15}.sheetHead p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:1050px}.pill{display:inline-flex;align-items:center;border-radius:999px;background:#edf3ff;color:#244a87;padding:5px 9px;font-size:11px;font-weight:800;white-space:nowrap}.latestGrid{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:10px;margin:10px 0 12px}.miniMetric{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 11px}.miniMetric span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;font-weight:800}.miniMetric b{display:block;font-size:19px;margin-top:5px}.miniMetric i{display:block;font-style:normal;color:var(--muted);font-size:11px;margin-top:2px}
-    .tablewrap{overflow:auto;max-height:72vh;border-radius:8px;border:1px solid #9aa6b7;background:#fff}#crudeRunsTableWrap{display:inline-block;min-width:100%;width:max-content;max-width:none;max-height:none;overflow:visible;vertical-align:top}.tablewrap:focus{outline:2px solid #7db7ff;outline-offset:2px}.balanceMatrix{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;white-space:nowrap}.balanceMatrix th,.balanceMatrix td{border-bottom:1px solid var(--grid);border-right:1px solid var(--grid-soft);padding:8px 10px;text-align:right;min-height:34px}.balanceMatrix th:first-child,.balanceMatrix td:first-child{text-align:left;position:sticky;left:0;z-index:2}.balanceMatrix th{position:sticky;top:var(--table-head-sticky-top,0px);background:#f2f5f9;color:#384557;font-size:11px;text-transform:uppercase;z-index:12}.balanceMatrix th:first-child{z-index:36;background:#fff;min-width:280px}.balanceMatrix th[data-period]{text-align:center;overflow:hidden}.periodHead{display:grid;gap:2px;justify-items:center;align-items:center;text-align:center}.periodHead b{font-size:13px;color:#111827}.periodHead span{font-size:10px;color:#667085;text-transform:uppercase;letter-spacing:.06em}.rowLabel{font-size:var(--row-label-size,11px);font-weight:740;line-height:1.18;white-space:normal}.item td:first-child{background:#fff}.item.forecast td:not(:first-child){background:#fffdf4}.mutedRow td{color:#5f6877;font-style:italic}.sectionRow td{background:#252525!important;color:#fff;border-top:5px solid #e9eef4;border-bottom:3px solid #111827;border-color:#252525;font-weight:900;text-transform:uppercase;letter-spacing:.02em;height:38px}.subtotalRow td{background:#252525!important;color:#fff;border-top:2px solid #111827;border-bottom:4px solid #111827;border-color:#252525;font-weight:900}.highlightRow td{background:#fff4a8!important;color:#1f2937;font-weight:860;border-top:2px solid #c8b458}.drawRow.positive td:not(:first-child){color:#146c43}.drawRow.negative td:not(:first-child){color:#b42318}.stockRow td{background:#eef6ff!important;font-weight:800;border-bottom:5px solid #7e8795}.groupRow td{padding:0;border-top:9px solid #e9eef4;border-bottom:4px solid #4b5563;border-right:0;background:var(--gold)!important;color:var(--groupText,#fff)}.groupInner{display:grid;grid-template-columns:78px minmax(220px,1fr) auto auto;align-items:center;gap:12px;min-height:42px;padding:8px 12px;background:linear-gradient(90deg,var(--group,#d8b400),var(--group2,#e9c900));color:var(--groupText,#fff)}.groupPeriodCell{height:58px}.groupCode{font-size:calc(var(--row-label-size,11px) + 2px);font-weight:940;text-shadow:var(--groupShadow,0 1px 0 rgba(0,0,0,.22))}.groupName{font-size:calc(var(--row-label-size,11px) + 1px);font-weight:880}.groupMeta{font-size:10px;font-weight:850;opacity:.9}.groupBtn,.groupChartBtn{border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.18);color:var(--groupText,#fff);border-radius:999px;padding:5px 9px;font-size:10px;font-weight:900}.collapsedRow{display:none}.region-padd1{--group:#007f86;--group2:#24b7b3;--softBand:#e6fbfa}.region-padd1ab{--group:#c99f00;--group2:#f0c922;--softBand:#fff9d6}.region-padd1c{--group:#007f86;--group2:#24b7b3;--softBand:#e6fbfa}.region-padd2{--group:#2568a9;--group2:#4a90d1;--softBand:#edf7ff}.region-padd3{--group:#6d28d9;--group2:#a78bfa;--softBand:#f3edff}.region-padd4{--group:#15803d;--group2:#4ade80;--softBand:#ecfdf3}.region-padd5{--group:#b38600;--group2:#f2c94c;--softBand:#fff8d6;--groupText:#1f2937;--groupShadow:none}.region-us{--group:#4b5563;--group2:#9ca3af;--softBand:#f4f5f7}.region-p123{--group:#be123c;--group2:#fb7185;--softBand:#fff1f2}.region-p13{--group:#db2777;--group2:#f9a8d4;--softBand:#fdf2f8}
+    .tablewrap{overflow:auto;max-height:72vh;border-radius:8px;border:1px solid #9aa6b7;background:#fff}#crudeRunsTableWrap{display:inline-block;min-width:100%;width:max-content;max-width:none;max-height:none;overflow:visible;vertical-align:top}.tablewrap:focus{outline:2px solid #7db7ff;outline-offset:2px}.balanceMatrix{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;white-space:nowrap}.balanceMatrix th,.balanceMatrix td{border-bottom:1px solid var(--grid);border-right:1px solid var(--grid-soft);padding:8px 10px;text-align:right;min-height:34px}.balanceMatrix th:first-child,.balanceMatrix td:first-child{text-align:left;position:sticky;left:0;z-index:2}.balanceMatrix th{position:sticky;top:var(--table-head-sticky-top,0px);background:#f2f5f9;color:#384557;font-size:11px;text-transform:uppercase;z-index:12}.balanceMatrix th:first-child{z-index:36;background:#fff;min-width:280px}.balanceMatrix th[data-period]{text-align:center;overflow:hidden}.periodHead{display:grid;gap:2px;justify-items:center;align-items:center;text-align:center}.periodHead b{font-size:13px;color:#111827}.periodHead span{font-size:10px;color:#667085;text-transform:uppercase;letter-spacing:.06em}.rowLabel{font-size:var(--row-label-size,11px);font-weight:740;line-height:1.18;white-space:normal}.item td:first-child{background:#fff}.item.forecast td:not(:first-child){background:#fffdf4}.mutedRow td{color:#5f6877;font-style:italic}.sectionRow td{background:#252525!important;color:#fff;border-top:5px solid #e9eef4;border-bottom:3px solid #111827;border-color:#252525;font-weight:900;text-transform:uppercase;letter-spacing:.02em;height:38px}.subtotalRow td{background:#252525!important;color:#fff;border-top:2px solid #111827;border-bottom:4px solid #111827;border-color:#252525;font-weight:900}.highlightRow td{background:#fff4a8!important;color:#1f2937;font-weight:860;border-top:2px solid #c8b458}.drawRow.positive td:not(:first-child){color:#146c43}.drawRow.negative td:not(:first-child){color:#b42318}.stockRow td{background:#eef6ff!important;font-weight:800;border-bottom:5px solid #7e8795}.groupRow td{padding:0;border-top:9px solid #e9eef4;border-bottom:4px solid #4b5563;border-right:0;background:var(--gold)!important;color:var(--groupText,#fff)}.groupInner{display:grid;grid-template-columns:78px minmax(220px,1fr) auto auto;align-items:center;gap:12px;min-height:42px;padding:8px 12px;background:linear-gradient(90deg,var(--group,#d8b400),var(--group2,#e9c900));color:var(--groupText,#fff)}.groupPeriodCell{height:58px}.groupCode{font-size:calc(var(--row-label-size,11px) + 2px);font-weight:940;text-shadow:var(--groupShadow,0 1px 0 rgba(0,0,0,.22))}.groupName{font-size:calc(var(--row-label-size,11px) + 1px);font-weight:880}.groupMeta{font-size:10px;font-weight:850;opacity:.9}.groupBtn,.groupChartBtn{border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.18);color:var(--groupText,#fff);border-radius:999px;padding:5px 9px;font-size:10px;font-weight:900}.collapsedRow{display:none}.region-padd1{--group:#007f86;--group2:#24b7b3;--softBand:#e6fbfa}.region-padd1ab{--group:#007f86;--group2:#24b7b3;--softBand:#e6fbfa}.region-padd1c{--group:#c99f00;--group2:#f0c922;--softBand:#fff9d6}.region-padd2{--group:#2568a9;--group2:#4a90d1;--softBand:#edf7ff}.region-padd3{--group:#6d28d9;--group2:#a78bfa;--softBand:#f3edff}.region-padd4{--group:#15803d;--group2:#4ade80;--softBand:#ecfdf3}.region-padd5{--group:#b38600;--group2:#f2c94c;--softBand:#fff8d6;--groupText:#1f2937;--groupShadow:none}.region-us{--group:#4b5563;--group2:#9ca3af;--softBand:#f4f5f7}.region-p123{--group:#be123c;--group2:#fb7185;--softBand:#fff1f2}.region-p13{--group:#db2777;--group2:#f9a8d4;--softBand:#fdf2f8}
     .balanceMatrix{width:max-content;min-width:100%}.balanceMatrix th,.balanceMatrix td{min-width:132px}.balanceMatrix th:first-child,.balanceMatrix td:first-child{z-index:6;width:var(--label-col-width,360px);min-width:var(--label-col-width,360px);max-width:var(--label-col-width,360px);overflow:visible;text-overflow:clip;box-shadow:5px 0 0 rgba(86,94,108,.2)}.balanceMatrix td:first-child{background:#fff}.balanceMatrix th:first-child{z-index:36;background:#fff}.balanceMatrix .groupRow .groupLockCell{position:sticky;left:0;top:var(--group-sticky-top,52px);z-index:18;background:linear-gradient(90deg,var(--group,#d8b400),var(--group2,#e9c900))!important;box-shadow:5px 0 0 rgba(86,94,108,.24)}.balanceMatrix .groupRow .groupPeriodCell{position:sticky;top:var(--group-sticky-top,52px);z-index:3;background:linear-gradient(90deg,var(--group2,#e9c900),var(--group,#d8b400))!important}.regionLine:not(.sectionRow):not(.subtotalRow):not(.highlightRow):not(.stockRow) td:first-child{border-left:8px solid var(--group);background:linear-gradient(90deg,var(--softBand),#fff 70%)!important;color:#202838}.regionLine.mutedRow:not(.sectionRow) td:first-child{background:linear-gradient(90deg,var(--softBand),#f8fafc 72%)!important;color:#303846}.regionLine.stockRow td:first-child{border-left:8px solid var(--group)}.periodHead span{text-transform:uppercase;letter-spacing:.06em;font-size:10px}.mutedRow td:first-child{background:#f8fafc;color:#303846}
-    .chartGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:6px 0 0;position:sticky;left:18px;width:calc(100vw - 36px);max-width:1584px;z-index:1;will-change:transform}#chartControls{grid-template-columns:205px minmax(240px,340px) minmax(280px,1fr)}.chartRegionHeading{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;margin:16px 0 -2px;padding:8px 11px;border-left:8px solid var(--group,#4b5563);border-top:1px solid #cfd7e3;border-bottom:1px solid #dce3ee;background:linear-gradient(90deg,var(--softBand,#f8fafc),rgba(255,255,255,.78));color:#1f2937}.chartRegionHeading:first-child{margin-top:0}.chartRegionHeading span{display:block;color:#566174;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.chartRegionHeading strong{display:block;font-size:13px;line-height:1.15;font-weight:900}.chartRegionHeading i{font-style:normal;color:#667085;font-size:10px;font-weight:850;white-space:nowrap}.crudeViewportLock{position:relative;width:calc(100vw - 36px);max-width:1584px;z-index:29;will-change:transform}.crudeStickyControls{position:sticky;top:0;z-index:31;background:var(--bg);padding:0 0 10px;margin:0 0 10px;box-shadow:0 8px 18px rgba(15,23,42,.06)}.crudeActiveRegionHeader{position:fixed;display:none;z-index:34;pointer-events:auto;overflow:hidden;border-bottom:4px solid #4b5563;background:linear-gradient(90deg,var(--group,#d8b400),var(--group2,#e9c900));color:var(--groupText,#fff);box-shadow:0 10px 18px rgba(15,23,42,.16)}.crudeActiveRegionHeader.visible{display:block}.crudeActiveRegionHeader .groupInner{min-height:42px}.chartCard{position:relative;background:#fff;border:1px solid #d7dee8;border-radius:10px;box-shadow:0 2px 8px rgba(15,23,42,.08);min-width:0;overflow:hidden;padding:0 10px 12px}.chartCard.scenarioAdjustable:after{content:"";position:absolute;right:0;bottom:0;border-style:solid;border-width:0 0 35px 35px;border-color:transparent transparent #c4372f transparent;pointer-events:none}.chartCard.scenarioAdjustable:before{content:"";position:absolute;right:7px;bottom:7px;width:6px;height:6px;border-radius:50%;background:#fff;z-index:2;pointer-events:none}.chartScenarioLaunch{position:absolute;right:0;bottom:0;width:42px;height:42px;border:0;background:transparent;border-radius:0 0 10px 0;z-index:3;padding:0}.chartScenarioLaunch:focus-visible{outline:2px solid #fff;outline-offset:-4px}.chartCard.zoomed{grid-column:1 / -1}.cardTools{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 0 7px;border-bottom:1px solid #d9dee7}.toolGroup{display:flex;gap:6px;flex-wrap:wrap}.toolBtn{border:1px solid #dce2ec;background:#fbfcfe;border-radius:999px;padding:4px 9px;font-size:10px;font-weight:820;color:#2c3748;box-shadow:0 1px 2px rgba(15,23,42,.05)}.chartTitle{font-size:17px;line-height:1.15;text-align:center;margin:5px 8px 4px;font-weight:820;color:#202838;min-height:39px;display:flex;align-items:center;justify-content:center}.chartSummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 3px 8px}.chartSummaryItem{min-width:0;border:1px solid #e0e6ef;background:#f8fafc;border-radius:7px;padding:6px 7px;text-align:center}.chartSummaryItem span{display:block;color:#667085;font-size:9px;font-weight:850;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chartSummaryItem b{display:block;color:#111827;font-size:12px;line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chartSummaryItem i{display:block;color:#667085;font-size:9px;font-style:normal;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chartSummaryItem.positive b{color:#14764d}.chartSummaryItem.negative b{color:#b42318}.seasonChart{width:100%;height:278px;display:block}.chartCard.zoomed .seasonChart{height:430px}.chartNotice{display:flex;align-items:center;justify-content:center;min-height:118px;padding:22px 14px;color:#667085;font-size:12px;text-align:center;line-height:1.45}.legend{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;color:#3f4d61;font-size:10px;padding:0 14px 8px}.swatch{width:24px;height:3px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}.swatch.dashed{background:repeating-linear-gradient(90deg,currentColor 0 7px,transparent 7px 12px)}.swatch.band{height:8px;background:#d7d9d2}.seasonBand{paint-order:stroke fill}.miniWrap{display:none;overflow:auto;max-height:230px;border-top:1px solid var(--grid)}.chartCard.zoomed .miniWrap{display:block}.miniTable{border-collapse:collapse;width:100%;font-size:10px;white-space:nowrap}.miniTable th,.miniTable td{border-bottom:1px solid var(--grid-soft);padding:5px 6px;text-align:right}.miniTable th:first-child,.miniTable td:first-child{text-align:left;position:sticky;left:0;background:#fff}.miniTable th{background:#f8fafc;color:#566174;text-transform:uppercase}.chartTooltip{position:absolute;z-index:10;display:none;min-width:190px;max-width:260px;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;background:rgba(255,255,255,.96);box-shadow:0 14px 30px rgba(15,23,42,.16);font-size:11px;color:#1f2937;pointer-events:none}.chartTooltip b{display:block;font-size:12px;margin-bottom:4px}.chartTooltip div{display:flex;justify-content:space-between;gap:14px}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;border-radius:8px;padding:9px 12px;font-size:12px;box-shadow:0 14px 34px rgba(0,0,0,.24);opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s ease}.toast.show{opacity:1;transform:translateY(0)}
+    .chartGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:6px 0 0;position:sticky;left:18px;width:calc(100vw - 36px);max-width:1584px;z-index:1;will-change:transform}#chartControls{grid-template-columns:205px minmax(240px,340px) minmax(280px,1fr)}.chartRegionHeading{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;margin:16px 0 -2px;padding:8px 11px;border-left:8px solid var(--group,#4b5563);border-top:1px solid #cfd7e3;border-bottom:1px solid #dce3ee;background:linear-gradient(90deg,var(--softBand,#f8fafc),rgba(255,255,255,.78));color:#1f2937}.chartRegionHeading:first-child{margin-top:0}.chartRegionHeading span{display:block;color:#566174;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.chartRegionHeading strong{display:block;font-size:13px;line-height:1.15;font-weight:900}.chartRegionHeading i{font-style:normal;color:#667085;font-size:10px;font-weight:850;white-space:nowrap}.crudeViewportLock{position:relative;width:calc(100vw - 36px);max-width:1584px;z-index:29;will-change:transform}.crudeStickyControls{position:sticky;top:0;z-index:31;background:var(--bg);padding:0 0 10px;margin:0 0 10px;box-shadow:0 8px 18px rgba(15,23,42,.06)}.crudeActiveRegionHeader{position:fixed;display:none;z-index:34;pointer-events:auto;overflow:hidden;border-bottom:4px solid #4b5563;background:linear-gradient(90deg,var(--group,#d8b400),var(--group2,#e9c900));color:var(--groupText,#fff);box-shadow:0 10px 18px rgba(15,23,42,.16)}.crudeActiveRegionHeader.visible{display:block}.crudeActiveRegionHeader .groupInner{min-height:42px}.chartCard{position:relative;background:#fff;border:1px solid #d7dee8;border-radius:10px;box-shadow:0 2px 8px rgba(15,23,42,.08);min-width:0;overflow:hidden;padding:0 10px 12px}.chartCard.scenarioAdjustable:after{content:"";position:absolute;right:0;bottom:0;border-style:solid;border-width:0 0 35px 35px;border-color:transparent transparent #c4372f transparent;pointer-events:none}.chartCard.scenarioAdjustable:before{content:"";position:absolute;right:7px;bottom:7px;width:6px;height:6px;border-radius:50%;background:#fff;z-index:2;pointer-events:none}.chartScenarioLaunch{position:absolute;right:0;bottom:0;width:42px;height:42px;border:0;background:transparent;border-radius:0 0 10px 0;z-index:3;padding:0}.chartScenarioLaunch:focus-visible{outline:2px solid #fff;outline-offset:-4px}.chartCard.zoomed{grid-column:1 / -1}.cardTools{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 0 7px;border-bottom:1px solid #d9dee7}.toolGroup{display:flex;gap:6px;flex-wrap:wrap}.toolBtn{border:1px solid #dce2ec;background:#fbfcfe;border-radius:999px;padding:4px 9px;font-size:10px;font-weight:820;color:#2c3748;box-shadow:0 1px 2px rgba(15,23,42,.05)}.chartTitle{font-size:17px;line-height:1.15;text-align:center;margin:5px 8px 4px;font-weight:820;color:#202838;min-height:39px;display:flex;align-items:center;justify-content:center}.chartSummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 3px 8px}.chartSummaryItem{min-width:0;border:1px solid #e0e6ef;background:#f8fafc;border-radius:7px;padding:6px 7px;text-align:center}.chartSummaryItem span{display:block;color:#667085;font-size:9px;font-weight:850;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chartSummaryItem b{display:block;color:#111827;font-size:12px;line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chartSummaryItem i{display:block;color:#667085;font-size:9px;font-style:normal;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chartSummaryItem.positive b{color:#14764d}.chartSummaryItem.negative b{color:#b42318}.seasonChart{width:100%;height:278px;display:block}.chartCard.zoomed .seasonChart{height:430px}.chartNotice{display:flex;align-items:center;justify-content:center;min-height:118px;padding:22px 14px;color:#667085;font-size:12px;text-align:center;line-height:1.45}.legend{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;color:#3f4d61;font-size:10px;padding:0 14px 8px}.swatch{width:24px;height:3px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}.swatch.dashed{background:repeating-linear-gradient(90deg,currentColor 0 7px,transparent 7px 12px)}.swatch.band{height:8px;background:#d7d9d2}.seasonBand{paint-order:stroke fill}.miniWrap{display:none;overflow:auto;max-height:230px;border-top:1px solid var(--grid)}.chartCard.zoomed .miniWrap{display:block}.miniTable{border-collapse:collapse;width:100%;font-size:10px;white-space:nowrap}.miniTable th,.miniTable td{border-bottom:1px solid var(--grid-soft);padding:5px 6px;text-align:right}.miniTable th:first-child,.miniTable td:first-child{text-align:left;position:sticky;left:0;background:#fff}.miniTable th{background:#f8fafc;color:#566174;text-transform:uppercase}.chartTooltip{position:absolute;z-index:10;display:none;min-width:190px;max-width:260px;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;background:rgba(255,255,255,.96);box-shadow:0 14px 30px rgba(15,23,42,.16);font-size:11px;color:#1f2937;pointer-events:none}.chartTooltip b{display:block;font-size:12px;margin-bottom:4px}.chartTooltip div{display:flex;justify-content:space-between;align-items:center;gap:14px}.chartTooltip span{display:inline-flex;align-items:center;gap:6px;min-width:0}.chartTooltip span i{display:inline-block;width:10px;height:10px;border-radius:999px;flex:0 0 auto}.chartTooltip strong{white-space:nowrap}.chartTooltip em{display:block;margin-top:5px;color:#667085;font-size:10px;font-style:normal}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;border-radius:8px;padding:9px 12px;font-size:12px;box-shadow:0 14px 34px rgba(0,0,0,.24);opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s ease}.toast.show{opacity:1;transform:translateY(0)}
     .swatch.band{background:var(--band)}
     .scenarioTool{background:#fff7ed;border-color:#fdba74;color:#9a3412}.scenarioPresetRow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}.scenarioPresetBtn{border:1px solid #d7dee8;background:#fff;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:850;color:#344054}.scenarioPresetBtn.active{background:#1d4ed8;border-color:#1d4ed8;color:#fff}.scenarioImpactGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}.scenarioImpactCard{min-width:0;border:1px solid #e0e6ef;background:#fbfcfe;border-radius:8px;padding:9px 10px}.scenarioImpactCard span{display:block;color:#667085;font-size:9px;font-weight:850;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scenarioImpactCard b{display:block;color:#111827;font-size:15px;line-height:1.2;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scenarioImpactCard i{display:block;color:#667085;font-size:10px;font-style:normal;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scenarioImpactCard.positive b{color:#14764d}.scenarioImpactCard.negative b{color:#b42318}
     @media(max-width:1220px){.options,.controlbar{grid-template-columns:1fr 1fr}.chartGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.latestGrid{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){#chartControls{grid-template-columns:1fr}.shell{padding:12px}.topbar,.sheetHead,.statusline{flex-direction:column;align-items:flex-start}.options,.controlbar,.chartGrid{grid-template-columns:1fr}.chartGrid{left:12px;width:calc(100vw - 24px)}.topbar,.crudeViewportLock{width:calc(100vw - 24px)}.actions{justify-content:flex-start}.select{width:100%;min-width:0}.latestGrid{grid-template-columns:1fr 1fr}.seasonChart{height:250px}.tablewrap{max-height:58vh}.groupInner{grid-template-columns:1fr auto}.groupCode,.groupMeta{display:none}}@media(max-width:460px){.latestGrid{grid-template-columns:1fr}.btn,.chip,.toggle{font-size:11px;padding:7px 9px}}
     .btn,.chip,.toggle,.toolBtn,.groupBtn,.groupChartBtn,.headerBtn{white-space:nowrap}.topbar>*{min-width:0}.title{min-width:min(100%,560px)}.actions{min-width:0}.controlbar .small{max-height:none;overflow:visible}.sheetHead>div{min-width:0}.workbookHeaderActions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.headerBtn{border:1px solid #cfd7e3;background:#fff;color:#294f88;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:840;min-height:28px}.groupInner{grid-template-columns:auto minmax(0,1fr) auto auto}.groupInner>div{min-width:0;display:flex;align-items:baseline;gap:8px;overflow:hidden}.groupActions{display:flex!important;align-items:center!important;justify-content:flex-end;gap:8px!important;overflow:visible!important;flex:0 0 auto}.groupCode{flex:0 0 auto}.groupName{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cardTools{align-items:center}.chartTitle{padding:0 8px}.seasonChart text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.chartTooltip{min-width:min(190px,calc(100% - 20px));max-width:min(260px,calc(100% - 20px))}
-    .marketMonitor{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 12px}.monitorCard{min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:11px 12px}.monitorCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.monitorCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.monitorCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.monitorCard.positive b{color:#14764d}.monitorCard.negative b{color:#b42318}.viewPresetGrid{display:grid;gap:8px;margin-top:8px}.viewPresetActions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.viewPresetActions .btn{padding:6px 7px;min-height:30px}.quickActionGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.quickActionGrid .btn{width:100%;min-height:34px}.quickActionGrid .btn.full{min-height:34px}.balanceMatrix td.heatCell{background:rgba(37,99,235,calc(.05 + var(--heat,0) * .18))!important;font-weight:760}.balanceMatrix td.heatPos{background:rgba(20,108,67,calc(.05 + var(--heat,0) * .18))!important;color:#0b5d3a}.balanceMatrix td.heatNeg{background:rgba(180,35,24,calc(.06 + var(--heat,0) * .22))!important;color:#8f1d17}.balanceMatrix td.heatStock{background:rgba(37,99,235,calc(.05 + var(--heat,0) * .2))!important;color:#1d4ed8}.contextPulse{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin:0 0 12px}.signalGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.signalCard{min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 11px}.signalCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.signalCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px}.signalCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:2px}.sourceRibbon{display:flex;gap:8px;flex-wrap:wrap}.sourceBadge{display:inline-flex;align-items:center;gap:6px;border:1px solid #d7dfeb;background:#f8fafc;border-radius:999px;padding:6px 8px;font-size:11px;font-weight:800;color:#2f3b4f}.sourceDot{width:8px;height:8px;border-radius:50%;background:#94a3b8}.sourceDot.active,.sourceDot.packaged{background:#16a34a}.sourceDot.dry_run{background:#d97706}.sourceDot.candidate{background:#2563eb}.sourceGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.sourceCard{min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:12px}.sourceCard h3{margin:0;font-size:15px;line-height:1.2}.sourceMeta{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.sourceStatus{border-radius:999px;padding:3px 7px;font-size:10px;font-weight:850;text-transform:uppercase;background:#eef6ff;color:#294f88}.sourceStatus.active,.sourceStatus.packaged{background:#eaf8ef;color:#137047}.sourceStatus.dry_run{background:#fff6df;color:#976100}.sourceStatus.candidate{background:#edf3ff;color:#2452a6}.sourceCard dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 10px;margin:9px 0 0;font-size:12px}.sourceCard dt{color:#667085;font-weight:800}.sourceCard dd{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis}.sourceCard p{font-size:12px;color:#566174;line-height:1.45;margin:9px 0 0}.sourceLink{font-size:11px;color:#1d4ed8;text-decoration:none;font-weight:800;word-break:break-word}.contextTableWrap{overflow:auto;border:1px solid #e1e7f0;border-radius:8px;background:#fff}.contextTable{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}.contextTable th,.contextTable td{border-bottom:1px solid #edf1f6;padding:7px 8px;text-align:right}.contextTable th:first-child,.contextTable td:first-child{text-align:left}.contextTable th{background:#f8fafc;color:#566174;text-transform:uppercase;font-size:10px}.settingsPanel{margin:0 0 12px}.settingsGrid{display:grid;grid-template-columns:minmax(180px,230px) auto minmax(220px,1fr);gap:10px;align-items:end}.settingsInput{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:7px;padding:8px 10px;font-size:12px;font-weight:760;min-height:34px}.settingsStatus{font-size:12px;color:#566174;line-height:1.45}.settingsStatus b{color:#111827}.disclosurePanel{padding:0}.disclosureSummary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;cursor:pointer}.disclosureSummary::-webkit-details-marker{display:none}.disclosureSummary:after{content:'+';display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;border:1px solid #cfd7e3;color:#294f88;font-weight:900;flex:0 0 auto}.disclosurePanel[open] .disclosureSummary:after{content:'-'}.disclosureSummary .caption{margin-bottom:3px}.disclosureBody{border-top:1px solid #edf1f6}.updatePanel{margin:0 0 12px}.updateHeader{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.updateHeader h3{margin:0;font-size:18px;line-height:1.15}.updateButtons{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.updateButtons .btn[disabled]{opacity:.55;cursor:not-allowed}.updateSteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.updateStep{border:1px solid #dce3ee;border-radius:8px;background:#f8fafc;padding:9px}.updateStep b{display:block;font-size:12px}.updateStep span{display:block;color:#667085;font-size:11px;line-height:1.35;margin-top:3px}.updateLog{margin:10px 0 0;max-height:210px;overflow:auto;background:#101828;color:#e5edf8;border-radius:8px;padding:10px;font-size:11px;line-height:1.45;white-space:pre-wrap}.updateStatus.running{background:#fff6df;color:#976100}.updateStatus.succeeded{background:#eaf8ef;color:#137047}.updateStatus.failed,.updateStatus.unavailable{background:#fee4e2;color:#981b1b}.outageForm{margin:0 0 12px}.outageGrid{display:grid;grid-template-columns:minmax(130px,180px) minmax(240px,1.3fr) minmax(240px,1fr) repeat(3,minmax(130px,170px));gap:10px;align-items:end}.outageGrid label{display:grid;gap:5px}.outageGrid label.wide{grid-column:1/-1}.outageActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.outageTable{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}.outageTable th,.outageTable td{border-bottom:1px solid #edf1f6;padding:8px 9px;text-align:left;vertical-align:top}.outageTable th{background:#f8fafc;color:#566174;text-transform:uppercase;font-size:10px}.outageTable td.num{text-align:right}.outageNote{white-space:normal;min-width:210px;color:#566174}.typePill{display:inline-flex;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:850;text-transform:uppercase;background:#edf3ff;color:#244a87}.typePill.planned{background:#eaf8ef;color:#137047}.typePill.unplanned{background:#fee4e2;color:#981b1b}.typePill.other{background:#fff6df;color:#976100}.maintenanceRow td:not(:first-child){color:#8f4c12}.forecastCell{background:#fffdf4}.editableCell{cursor:text;box-shadow:inset 0 0 0 1px rgba(37,99,235,.18)}.manualCell{background:#dcfce7!important;color:#14532d!important;font-weight:900}.cellEditor{width:100%;border:1px solid #16a34a;border-radius:5px;background:#f0fdf4;color:#14532d;text-align:right;font:inherit;font-weight:850;padding:4px 6px}.adjustableTag{font-size:9px;color:#1d6b45;font-style:normal;font-weight:900;text-transform:uppercase;margin-left:5px}.adjustableRow td{font-weight:900}.operatingRow td{font-weight:840}.emptyRow td{text-align:center;color:#667085;padding:18px}.chartScenarioWorkbench{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:26px;background:rgba(15,23,42,.42)}.scenarioModalPanel{width:min(1180px,calc(100vw - 36px));max-height:min(88vh,920px);overflow:auto;background:#fff;border:1px solid #d7dee8;border-radius:14px;box-shadow:0 24px 64px rgba(15,23,42,.28);padding:18px 18px 16px}.scenarioModalHeader{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.scenarioModalHeader h3{margin:0;font-size:22px;line-height:1.1}.scenarioModalHeader p{margin:5px 0 0;color:#667085;font-size:12px;line-height:1.45;max-width:760px}.scenarioWorkbenchGrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:14px;align-items:start}.scenarioSummaryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 12px}.scenarioSummaryCard{background:#f8fafc;border:1px solid #d7dee8;border-radius:8px;padding:11px 12px}.scenarioSummaryCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.scenarioSummaryCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px}.scenarioSummaryCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:3px}.scenarioSummaryCard.positive b{color:#14764d}.scenarioSummaryCard.negative b{color:#b42318}.scenarioDraftGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.scenarioDraftGrid label{display:grid;gap:5px}.scenarioDraftGrid label.wide{grid-column:1/-1}.scenarioReadOnly{display:flex;align-items:center;min-height:34px;padding:8px 10px;border:1px solid #d7dee8;border-radius:7px;background:#f8fafc;color:#1f2937;font-size:12px;font-weight:760}.scenarioRangeRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.scenarioRangeRow output{font-size:12px;font-weight:850;color:#1f2937;white-space:nowrap}.scenarioHint{font-size:12px;color:#566174;line-height:1.45;margin-top:10px}.scenarioActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.scenarioStatus{font-size:12px;color:#566174;line-height:1.45;min-height:18px}.scenarioList{display:grid;gap:8px}.scenarioListEmpty{border:1px dashed #cfd7e3;border-radius:8px;padding:16px;color:#667085;font-size:12px;text-align:center;background:#f8fafc}.scenarioRow{border:1px solid #dce3ee;border-radius:8px;padding:10px 11px;background:#fff}.scenarioRowTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.scenarioRowTop strong{display:block;font-size:13px;line-height:1.25}.scenarioRowTop span{display:block;color:#667085;font-size:11px;margin-top:2px}.scenarioRowMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.scenarioMetaPill{display:inline-flex;align-items:center;border-radius:999px;background:#f8fafc;border:1px solid #dce3ee;padding:4px 8px;font-size:10px;font-weight:820;color:#344054}.scenarioRowActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.scenarioCheck{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:760;color:#1f2937}.scenarioCheck input{margin:0}.scenarioDraftPill{display:inline-flex;align-items:center;border-radius:999px;background:#fff6df;color:#976100;padding:4px 8px;font-size:10px;font-weight:850}.scenarioScopeNote{font-size:11px;color:#667085;line-height:1.4;margin-top:8px}
+    .marketMonitor{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 12px}.monitorCard{min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:11px 12px}.monitorCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.monitorCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.monitorCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.monitorCard.positive b{color:#14764d}.monitorCard.negative b{color:#b42318}.viewPresetGrid{display:grid;gap:8px;margin-top:8px}.viewPresetActions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.viewPresetActions .btn{padding:6px 7px;min-height:30px}.quickActionGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.quickActionGrid .btn{width:100%;min-height:34px}.quickActionGrid .btn.full{min-height:34px}.balanceMatrix td.heatCell{background:rgba(37,99,235,calc(.05 + var(--heat,0) * .18))!important;font-weight:760}.balanceMatrix td.heatPos{background:rgba(20,108,67,calc(.05 + var(--heat,0) * .18))!important;color:#0b5d3a}.balanceMatrix td.heatNeg{background:rgba(180,35,24,calc(.06 + var(--heat,0) * .22))!important;color:#8f1d17}.balanceMatrix td.heatStock{background:rgba(37,99,235,calc(.05 + var(--heat,0) * .2))!important;color:#1d4ed8}.contextPulse{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin:0 0 12px}.signalGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.signalCard{min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 11px}.signalCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.signalCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px}.signalCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:2px}.sourceRibbon{display:flex;gap:8px;flex-wrap:wrap}.sourceBadge{display:inline-flex;align-items:center;gap:6px;border:1px solid #d7dfeb;background:#f8fafc;border-radius:999px;padding:6px 8px;font-size:11px;font-weight:800;color:#2f3b4f}.sourceDot{width:8px;height:8px;border-radius:50%;background:#94a3b8}.sourceDot.active,.sourceDot.packaged{background:#16a34a}.sourceDot.dry_run{background:#d97706}.sourceDot.candidate{background:#2563eb}.sourceGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.sourceCard{min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:12px}.sourceCard h3{margin:0;font-size:15px;line-height:1.2}.sourceMeta{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.sourceStatus{border-radius:999px;padding:3px 7px;font-size:10px;font-weight:850;text-transform:uppercase;background:#eef6ff;color:#294f88}.sourceStatus.active,.sourceStatus.packaged{background:#eaf8ef;color:#137047}.sourceStatus.dry_run{background:#fff6df;color:#976100}.sourceStatus.candidate{background:#edf3ff;color:#2452a6}.sourceCard dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 10px;margin:9px 0 0;font-size:12px}.sourceCard dt{color:#667085;font-weight:800}.sourceCard dd{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis}.sourceCard p{font-size:12px;color:#566174;line-height:1.45;margin:9px 0 0}.sourceLink{font-size:11px;color:#1d4ed8;text-decoration:none;font-weight:800;word-break:break-word}.contextTableWrap{overflow:auto;border:1px solid #e1e7f0;border-radius:8px;background:#fff}.contextTable{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}.contextTable th,.contextTable td{border-bottom:1px solid #edf1f6;padding:7px 8px;text-align:right}.contextTable th:first-child,.contextTable td:first-child{text-align:left}.contextTable th{background:#f8fafc;color:#566174;text-transform:uppercase;font-size:10px}.settingsPanel{margin:0 0 12px}.settingsGrid{display:grid;grid-template-columns:minmax(180px,230px) auto minmax(220px,1fr);gap:10px;align-items:end}.settingsInput{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:7px;padding:8px 10px;font-size:12px;font-weight:760;min-height:34px}.settingsStatus{font-size:12px;color:#566174;line-height:1.45}.settingsStatus b{color:#111827}.disclosurePanel{padding:0}.disclosureSummary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;cursor:pointer}.disclosureSummary::-webkit-details-marker{display:none}.disclosureSummary:after{content:'+';display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;border:1px solid #cfd7e3;color:#294f88;font-weight:900;flex:0 0 auto}.disclosurePanel[open] .disclosureSummary:after{content:'-'}.disclosureSummary .caption{margin-bottom:3px}.disclosureBody{border-top:1px solid #edf1f6}.updatePanel{margin:0 0 12px}.updateHeader{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.updateHeader h3{margin:0;font-size:18px;line-height:1.15}.updateButtons{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.updateButtons .btn[disabled]{opacity:.55;cursor:not-allowed}.updateSteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.updateStep{border:1px solid #dce3ee;border-radius:8px;background:#f8fafc;padding:9px}.updateStep b{display:block;font-size:12px}.updateStep span{display:block;color:#667085;font-size:11px;line-height:1.35;margin-top:3px}.updateLog{margin:10px 0 0;max-height:210px;overflow:auto;background:#101828;color:#e5edf8;border-radius:8px;padding:10px;font-size:11px;line-height:1.45;white-space:pre-wrap}.updateStatus.running{background:#fff6df;color:#976100}.updateStatus.succeeded{background:#eaf8ef;color:#137047}.updateStatus.failed,.updateStatus.unavailable{background:#fee4e2;color:#981b1b}.outageForm{margin:0 0 12px}.outageGrid{display:grid;grid-template-columns:minmax(130px,180px) minmax(240px,1.3fr) minmax(240px,1fr) repeat(3,minmax(130px,170px));gap:10px;align-items:end}.outageGrid label{display:grid;gap:5px}.outageGrid label.wide{grid-column:1/-1}.outageActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.outageTable{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}.outageTable th,.outageTable td{border-bottom:1px solid #edf1f6;padding:8px 9px;text-align:left;vertical-align:top}.outageTable th{background:#f8fafc;color:#566174;text-transform:uppercase;font-size:10px}.outageTable td.num{text-align:right}.outageNote{white-space:normal;min-width:210px;color:#566174}.typePill{display:inline-flex;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:850;text-transform:uppercase;background:#edf3ff;color:#244a87}.typePill.planned{background:#eaf8ef;color:#137047}.typePill.unplanned{background:#fee4e2;color:#981b1b}.typePill.other{background:#fff6df;color:#976100}.maintenanceRow td:not(:first-child){color:#b45309}.forecastCell{background:#fffdf4}.editableCell{cursor:text;box-shadow:inset 0 0 0 1px rgba(37,99,235,.18)}.manualCell{background:#dcfce7!important;color:#14532d!important;font-weight:900}.cellEditor{width:100%;border:1px solid #16a34a;border-radius:5px;background:#f0fdf4;color:#14532d;text-align:right;font:inherit;font-weight:850;padding:4px 6px}.adjustableTag{font-size:9px;color:#1d6b45;font-style:normal;font-weight:900;text-transform:uppercase;margin-left:5px}.adjustableRow td{font-weight:900}.operatingRow td{font-weight:840}.emptyRow td{text-align:center;color:#667085;padding:18px}.chartScenarioWorkbench{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:26px;background:rgba(15,23,42,.42)}.scenarioModalPanel{width:min(1180px,calc(100vw - 36px));max-height:min(88vh,920px);overflow:auto;background:#fff;border:1px solid #d7dee8;border-radius:14px;box-shadow:0 24px 64px rgba(15,23,42,.28);padding:18px 18px 16px}.scenarioModalHeader{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.scenarioModalHeader h3{margin:0;font-size:22px;line-height:1.1}.scenarioModalHeader p{margin:5px 0 0;color:#667085;font-size:12px;line-height:1.45;max-width:760px}.scenarioWorkbenchGrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:14px;align-items:start}.scenarioSummaryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 12px}.scenarioSummaryCard{background:#f8fafc;border:1px solid #d7dee8;border-radius:8px;padding:11px 12px}.scenarioSummaryCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.scenarioSummaryCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px}.scenarioSummaryCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:3px}.scenarioSummaryCard.positive b{color:#14764d}.scenarioSummaryCard.negative b{color:#b42318}.scenarioDraftGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.scenarioDraftGrid label{display:grid;gap:5px}.scenarioDraftGrid label.wide{grid-column:1/-1}.scenarioReadOnly{display:flex;align-items:center;min-height:34px;padding:8px 10px;border:1px solid #d7dee8;border-radius:7px;background:#f8fafc;color:#1f2937;font-size:12px;font-weight:760}.scenarioRangeRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.scenarioRangeRow output{font-size:12px;font-weight:850;color:#1f2937;white-space:nowrap}.scenarioHint{font-size:12px;color:#566174;line-height:1.45;margin-top:10px}.scenarioActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.scenarioStatus{font-size:12px;color:#566174;line-height:1.45;min-height:18px}.scenarioList{display:grid;gap:8px}.scenarioListEmpty{border:1px dashed #cfd7e3;border-radius:8px;padding:16px;color:#667085;font-size:12px;text-align:center;background:#f8fafc}.scenarioRow{border:1px solid #dce3ee;border-radius:8px;padding:10px 11px;background:#fff}.scenarioRowTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.scenarioRowTop strong{display:block;font-size:13px;line-height:1.25}.scenarioRowTop span{display:block;color:#667085;font-size:11px;margin-top:2px}.scenarioRowMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.scenarioMetaPill{display:inline-flex;align-items:center;border-radius:999px;background:#f8fafc;border:1px solid #dce3ee;padding:4px 8px;font-size:10px;font-weight:820;color:#344054}.scenarioRowActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.scenarioCheck{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:760;color:#1f2937}.scenarioCheck input{margin:0}.scenarioDraftPill{display:inline-flex;align-items:center;border-radius:999px;background:#fff6df;color:#976100;padding:4px 8px;font-size:10px;font-weight:850}.scenarioScopeNote{font-size:11px;color:#667085;line-height:1.4;margin-top:8px}
 	    .outageForm .select,.outageForm .settingsInput,#capacityAdjustmentPanel .select,#capacityAdjustmentPanel .settingsInput{font-weight:620}
-	    .balanceMatrix th,.balanceMatrix td{border-bottom:.85px solid #aeb8c6;border-right:1px solid #8f9aaa;text-align:center}.balanceMatrix th:first-child,.balanceMatrix td:first-child{text-align:left}.balanceMatrix th[data-period].periodActual{background:#c7d9f6;color:#102a53}.balanceMatrix th[data-period].periodActual .periodHead b,.balanceMatrix th[data-period].periodActual .periodHead span{color:#102a53}.balanceMatrix th[data-period].periodForecast{background:#fff0a8;color:#5d4200}.balanceMatrix th[data-period].periodForecast .periodHead b,.balanceMatrix th[data-period].periodForecast .periodHead span{color:#5d4200}.balanceMatrix td{font-variant-numeric:tabular-nums}.cellEditor{text-align:center}.adjustmentRow td{background:#d9f2cf!important;color:#113216!important;font-style:normal;border-top:1px solid #8ebd83;border-bottom:1px solid #8ebd83;font-weight:820}.adjustmentRow td:first-child{background:#c7e9b8!important;color:#113216!important}.adjustmentRow td.activeValue{color:#000!important}.anchorSubtotalRow td{background:#111827!important;color:#fff;border-top:3px solid #000;border-bottom:5px solid #000;border-color:#111827;font-weight:940}.anchorSubtotalRow td:first-child{background:#0b1220!important;color:#fff}.guideRow td{background:#fffaf2!important;color:#c76a13!important;font-style:normal;font-weight:760;border-top:1px solid #f4d3ad;border-bottom:1px solid #f7dfbf}.guideRow td:first-child{background:#fff4e6!important;color:#a8560f!important;border-left:8px solid #f4b46b}.importSourceRow td{background:#fff9d8!important;color:#1f2937;font-weight:880;border-top:1px solid #d9c476;border-bottom:1px solid #d9c476}.importSourceRow td:first-child{background:linear-gradient(90deg,#fff0aa,#fffbe8 76%)!important;border-left:8px solid var(--group);color:#141b26}.importTotalRow td{background:#f1f2f5!important;color:#111827;font-weight:940;border-top:2px solid #2f3540;border-bottom:4px solid #2f3540}.importTotalRow td:first-child{background:linear-gradient(90deg,#d9dde5,#f7f8fb 78%)!important;border-left:8px solid var(--group);color:#111827}.demandZoneRow td{background:#eef4ff;border-color:#bccbe3}.demandZoneRow td:first-child{background:linear-gradient(90deg,#d8e4fb,#f7faff 76%)!important;border-left:8px solid #2958a6;color:#163058}.demandSectionBand td{background:#204b8f!important;color:#fff;border-top:4px solid #d9e6fb;border-bottom:3px solid #17396f;border-color:#204b8f}.demandSubtotalBand td{background:#3a67af!important;color:#fff;border-top:2px solid #274b83;border-bottom:3px solid #274b83;border-color:#3a67af}.dividerRow td{background:#fff!important;border:0!important;height:14px;padding:0}.balanceMatrix .maintenanceRow td{background:#fff7ef!important;color:#a45f2d!important;font-style:italic;font-weight:780;border-top:1px solid #efd1b9;border-bottom:1px solid #efd1b9}.balanceMatrix .maintenanceRow td:first-child{background:linear-gradient(90deg,#fff0df,#fffaf5 76%)!important;border-left:8px solid #b77441;color:#9b5424!important}.balanceMatrix .operatingRow td{background:#d9d9d4!important;color:#111827;font-weight:920;border-top:2px solid #9aa0aa;border-bottom:2px solid #7b8390}.balanceMatrix .operatingRow td:first-child{background:linear-gradient(90deg,#d6d6d1,#f1f1ef 76%)!important;border-left:8px solid var(--group);color:#111827}.balanceMatrix.monthlyBalanceMatrix .importSourceRow td,.balanceMatrix.monthlyBalanceMatrix .guideRow td,.balanceMatrix.monthlyBalanceMatrix .maintenanceRow td{padding-top:9px;padding-bottom:9px}.outageForm.invalid{border-color:#d92d20;box-shadow:0 0 0 2px rgba(217,45,32,.14)}.validationError{border-color:#d92d20!important;background:#fff1f1!important;color:#7a0f11!important;box-shadow:0 0 0 1px rgba(217,45,32,.12) inset}.outageCollisionSummary{display:grid;gap:8px;margin-top:12px;padding:12px;border:1px solid #f0c7c5;border-radius:10px;background:#fff5f5}.outageCollisionSummary strong{font-size:13px;color:#7a0f11}.outageCollisionGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.outageCollisionGrid span{display:block;font-size:10px;font-weight:850;text-transform:uppercase;color:#7a0f11}.outageCollisionGrid b{display:block;font-size:13px;color:#111827;margin-top:2px}.scenarioFieldInline{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.scenarioFieldInline .btn{min-height:34px;padding:6px 10px}.outageTable tr.invalidOutage td{background:#fff1f1;color:#7a0f11;border-color:#f0c7c5}.outageTable tr.invalidOutage td.num{font-weight:900}
-	    .balanceMatrix td:not(:first-child){text-align:right}.balanceMatrix th:not(:first-child),.balanceMatrix th[data-period]{text-align:center}.balanceMatrix .cellEditor{text-align:right}.balanceMatrix.monthlyBalanceMatrix th,.balanceMatrix.monthlyBalanceMatrix td{padding-top:12px;padding-bottom:12px;line-height:1.35}.balanceMatrix.monthlyBalanceMatrix .rowLabel{line-height:1.4}.balanceMatrix.monthlyBalanceMatrix .regionLine:not(.sectionRow):not(.dividerRow) td{border-bottom-width:2px}.balanceMatrix.monthlyBalanceMatrix .sectionRow td{border-top-width:8px;height:44px}.balanceMatrix.monthlyBalanceMatrix .groupRow td{border-top-width:12px;border-bottom-width:5px}.balanceMatrix.monthlyBalanceMatrix .groupInner{min-height:48px;padding-top:10px;padding-bottom:10px}.balanceMatrix.monthlyBalanceMatrix .dividerRow td{height:22px}.balanceMatrix.monthlyBalanceMatrix .cellEditor{padding-top:6px;padding-bottom:6px}.balanceMatrix.monthlyBalanceMatrix .adjustmentRow td{border-bottom:14px solid #fff!important}.balanceMatrix.monthlyBalanceMatrix .adjustmentRow td.lockedOverrideCell{background:#e6e9ee!important;color:#667085!important;font-weight:760!important;font-style:normal;box-shadow:none;cursor:default}
-		    @media(max-width:1220px){.contextPulse{grid-template-columns:1fr}.sourceGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.marketMonitor{grid-template-columns:repeat(2,minmax(0,1fr))}.updateSteps{grid-template-columns:repeat(2,minmax(0,1fr))}.outageGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.scenarioWorkbenchGrid,.scenarioSummaryGrid{grid-template-columns:1fr}.scenarioImpactGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.workbookHeaderActions{justify-content:flex-start}.groupInner{grid-template-columns:auto minmax(0,1fr) auto}.groupMeta{display:none}.groupCode{display:inline;font-size:13px}.groupName{font-size:13px}.cardTools{display:grid;grid-template-columns:1fr;gap:6px}.toolGroup{min-width:0}.chartTitle{min-height:auto}.chartSummary{grid-template-columns:1fr 1fr}.seasonChart{height:270px}.signalGrid,.sourceGrid,.scenarioDraftGrid{grid-template-columns:1fr 1fr}.settingsGrid,.outageGrid{grid-template-columns:1fr}.sourceRibbon{gap:6px}.chartScenarioWorkbench{padding:14px}.scenarioModalPanel{width:min(100vw - 16px,1180px);padding:15px 14px}.scenarioModalHeader{flex-direction:column}.scenarioRangeRow{grid-template-columns:1fr}.scenarioSummaryGrid{grid-template-columns:1fr}}@media(max-width:520px){.marketMonitor{grid-template-columns:1fr}.viewPresetActions,.updateSteps{grid-template-columns:1fr}.scenarioDraftGrid,.signalGrid,.sourceGrid,.scenarioImpactGrid{grid-template-columns:1fr}}@media(max-width:460px){.chartSummary,.signalGrid,.sourceGrid{grid-template-columns:1fr}.groupCode{display:none}.groupInner{gap:7px;padding:6px 8px}.headerBtn{font-size:10px}}
+    .balanceMatrix th,.balanceMatrix td{border-bottom:.85px solid #aeb8c6;border-right:1px solid #8f9aaa;text-align:center}.balanceMatrix th:first-child,.balanceMatrix td:first-child{text-align:left}.balanceMatrix th[data-period].periodActual{background:#c7d9f6;color:#102a53}.balanceMatrix th[data-period].periodActual .periodHead b,.balanceMatrix th[data-period].periodActual .periodHead span{color:#102a53}.balanceMatrix th[data-period].periodForecast{background:#fff0a8;color:#5d4200}.balanceMatrix th[data-period].periodForecast .periodHead b,.balanceMatrix th[data-period].periodForecast .periodHead span{color:#5d4200}.balanceMatrix td{font-variant-numeric:tabular-nums}.cellEditor{text-align:center}.adjustmentRow td{background:#d9f2cf!important;color:#113216!important;font-style:normal;border-top:1px solid #8ebd83;border-bottom:1px solid #8ebd83;font-weight:820}.adjustmentRow td:first-child{background:#c7e9b8!important;color:#113216!important}.adjustmentRow td.activeValue{color:#000!important}.anchorSubtotalRow td{background:#111827!important;color:#fff;border-top:3px solid #000;border-bottom:5px solid #000;border-color:#111827;font-weight:940}.anchorSubtotalRow td:first-child{background:#0b1220!important;color:#fff}.receiptSubtotalRow td{background:#40546a!important;color:#fff;border-top:2px solid #2d3d50;border-bottom:3px solid #2d3d50;border-color:#40546a;font-weight:920}.receiptSubtotalRow td:first-child{background:#33465a!important;color:#fff;border-left:8px solid var(--group)}.guideRow td{background:#fffaf2!important;color:#c76a13!important;font-style:normal;font-weight:760;border-top:1px solid #f4d3ad;border-bottom:1px solid #f7dfbf}.guideRow td:first-child{background:#fff4e6!important;color:#a8560f!important;border-left:8px solid #f4b46b}.importSourceRow td{background:#fff9d8!important;color:#1f2937;font-weight:900;border-top:1px solid #d9c476;border-bottom:1px solid #d9c476}.importSourceRow td:first-child{background:linear-gradient(90deg,#fff0aa,#fffbe8 76%)!important;border-left:8px solid var(--group);color:#141b26}.importOverrideRow td{background:#dff3d7!important;color:#123818!important;border-top:1px solid #9cc891!important;border-bottom:1px solid #9cc891!important;font-weight:820}.importOverrideRow td:first-child{background:linear-gradient(90deg,#c8eebb,#f5fff0 76%)!important;border-left:8px solid var(--group);color:#123818!important}.importTotalRow td{background:#111827!important;color:#fff!important;font-weight:940;border-top:3px solid #101828;border-bottom:5px solid #101828}.importTotalRow td:first-child{background:#111827!important;border-left:8px solid #0b1220;color:#fff!important}.demandZoneRow td{background:#eef4ff;border-color:#bccbe3}.demandZoneRow td:first-child{background:linear-gradient(90deg,#d8e4fb,#f7faff 76%)!important;border-left:8px solid #2958a6;color:#163058}.demandSectionBand td{background:#204b8f!important;color:#fff;border-top:4px solid #d9e6fb;border-bottom:3px solid #17396f;border-color:#204b8f}.demandSubtotalBand td{background:#3a67af!important;color:#fff;border-top:2px solid #274b83;border-bottom:3px solid #274b83;border-color:#3a67af}.dividerRow td{background:#fff!important;border:0!important;height:14px;padding:0}.balanceMatrix .maintenanceRow td{background:#fffaf2!important;color:#b45309!important;font-style:italic;font-weight:760;border-top:1px solid #f4d3ad;border-bottom:1px solid #f7dfbf}.balanceMatrix .maintenanceRow td:first-child{background:linear-gradient(90deg,#fff4e6,#fffdf7 76%)!important;border-left:8px solid #f4b46b;color:#b45309!important}.balanceMatrix .operatingRow td{background:#d9d9d4!important;color:#111827;font-weight:920;border-top:2px solid #9aa0aa;border-bottom:2px solid #7b8390}.balanceMatrix .operatingRow td:first-child{background:linear-gradient(90deg,#d6d6d1,#f1f1ef 76%)!important;border-left:8px solid var(--group);color:#111827}.balanceMatrix.monthlyBalanceMatrix .importSourceRow td,.balanceMatrix.monthlyBalanceMatrix .importOverrideRow td,.balanceMatrix.monthlyBalanceMatrix .guideRow td,.balanceMatrix.monthlyBalanceMatrix .maintenanceRow td{padding-top:9px;padding-bottom:9px}.balanceMatrix.monthlyBalanceMatrix .importOverrideRow td{border-bottom-width:1px!important}.outageForm.invalid{border-color:#d92d20;box-shadow:0 0 0 2px rgba(217,45,32,.14)}.validationError{border-color:#d92d20!important;background:#fff1f1!important;color:#7a0f11!important;box-shadow:0 0 0 1px rgba(217,45,32,.12) inset}.outageCollisionSummary{display:grid;gap:8px;margin-top:12px;padding:12px;border:1px solid #f0c7c5;border-radius:10px;background:#fff5f5}.outageCollisionSummary strong{font-size:13px;color:#7a0f11}.outageCollisionGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.outageCollisionGrid span{display:block;font-size:10px;font-weight:850;text-transform:uppercase;color:#7a0f11}.outageCollisionGrid b{display:block;font-size:13px;color:#111827;margin-top:2px}.scenarioFieldInline{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}.scenarioFieldInline .btn{min-height:34px;padding:6px 10px}.outageTable tr.invalidOutage td{background:#fff1f1;color:#7a0f11;border-color:#f0c7c5}.outageTable tr.invalidOutage td.num{font-weight:900}
+	    .balanceMatrix td:not(:first-child){text-align:right}.balanceMatrix th:not(:first-child),.balanceMatrix th[data-period]{text-align:center}.balanceMatrix .cellEditor{text-align:right}.balanceMatrix.monthlyBalanceMatrix th,.balanceMatrix.monthlyBalanceMatrix td{padding-top:12px;padding-bottom:12px;line-height:1.35}.balanceMatrix.monthlyBalanceMatrix .rowLabel{line-height:1.4}.balanceMatrix.monthlyBalanceMatrix .regionLine:not(.sectionRow):not(.dividerRow) td{border-bottom-width:2px}.balanceMatrix.monthlyBalanceMatrix .sectionRow td{border-top-width:8px;height:44px}.balanceMatrix.monthlyBalanceMatrix .groupRow td{border-top-width:12px;border-bottom-width:5px}.balanceMatrix.monthlyBalanceMatrix .groupInner{min-height:48px;padding-top:10px;padding-bottom:10px}.balanceMatrix.monthlyBalanceMatrix .dividerRow td{height:22px}.balanceMatrix.monthlyBalanceMatrix .cellEditor{padding-top:6px;padding-bottom:6px}.balanceMatrix.monthlyBalanceMatrix .adjustmentRow td{border-bottom:14px solid #fff!important}.balanceMatrix.monthlyBalanceMatrix .adjustmentRow.importOverrideRow td,.balanceMatrix.monthlyBalanceMatrix .adjustmentRow.exportDestinationOverrideRow td{border-bottom:1px solid #9cc891!important}.balanceMatrix.monthlyBalanceMatrix .adjustmentRow td.lockedOverrideCell{background:#e6e9ee!important;color:#667085!important;font-weight:760!important;font-style:normal;box-shadow:none;cursor:default}
+    .adjustmentRow td{background:#eef1f5!important;color:#667085!important;font-style:normal;border-top:1px solid #d8dee8!important;border-bottom:1px solid #d8dee8!important;font-weight:760}
+    .balanceMatrix.monthlyBalanceMatrix .adjustmentRow td{background:#eef1f5!important;color:#667085!important;border-top:1px solid #d8dee8!important}
+    .adjustmentRow td:first-child{background:linear-gradient(90deg,#e6e9ee,#f8fafc 76%)!important;color:#667085!important;border-left:8px solid #98a2b3}
+    .adjustmentRow td.activeValue{color:#344054!important;font-weight:850}
+    .importOverrideRow td,.exportDestinationOverrideRow td{background:#eef1f5!important;color:#667085!important;border-top:1px solid #d8dee8!important;border-bottom:1px solid #d8dee8!important;font-weight:760}
+    .importOverrideRow td:first-child,.exportDestinationOverrideRow td:first-child{background:linear-gradient(90deg,#e6e9ee,#f8fafc 76%)!important;border-left:8px solid #98a2b3;color:#667085!important}
+    .balanceMatrix.monthlyBalanceMatrix .adjustmentRow.importOverrideRow td,.balanceMatrix.monthlyBalanceMatrix .adjustmentRow.exportDestinationOverrideRow td{border-bottom:1px solid #d8dee8!important}
+    .balanceMatrix td.forecastCell.editableCell{background:#d9f2cf!important;color:#113216!important;border-top:1px solid #8ebd83!important;border-bottom:1px solid #8ebd83!important;box-shadow:inset 0 0 0 1px rgba(22,163,74,.26)}
+    .balanceMatrix td.forecastCell.editableCell.activeValue{color:#113216!important;font-weight:900}
+    .balanceMatrix td.forecastCell.editableCell.manualCell{background:#dcfce7!important;color:#14532d!important;font-weight:900}
+    .focusStack{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:center}.focusStack .select,.focusStack .settingsInput,.focusStack .btn{width:100%;min-width:0}.periodActionGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.balanceWatchlist{margin:0 0 12px}.insightHeader{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}.insightHeader h3{margin:0;font-size:16px;line-height:1.15}.insightHeader p{margin:4px 0 0;color:#667085;font-size:12px;line-height:1.4}.insightGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.insightCard{min-width:0;border:1px solid #d7dee8;border-radius:8px;background:#fff;padding:10px 11px}.insightCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.insightCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px}.insightCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.insightCard.positive b{color:#14764d}.insightCard.negative b{color:#b42318}.insightAction{margin-top:8px;border:1px solid #d7dee8;background:#f8fafc;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:850;color:#294f88}.filterActivePill{background:#eef6ff;color:#294f88}.emptyFilteredRow td{background:#f8fafc!important;color:#667085!important;font-style:italic;text-align:center!important}
+		    @media(max-width:1220px){.contextPulse{grid-template-columns:1fr}.sourceGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.marketMonitor,.insightGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.updateSteps{grid-template-columns:repeat(2,minmax(0,1fr))}.outageGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.scenarioWorkbenchGrid,.scenarioSummaryGrid{grid-template-columns:1fr}.scenarioImpactGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.workbookHeaderActions{justify-content:flex-start}.groupInner{grid-template-columns:auto minmax(0,1fr) auto}.groupMeta{display:none}.groupCode{display:inline;font-size:13px}.groupName{font-size:13px}.cardTools{display:grid;grid-template-columns:1fr;gap:6px}.toolGroup{min-width:0}.chartTitle{min-height:auto}.chartSummary{grid-template-columns:1fr 1fr}.seasonChart{height:270px}.signalGrid,.sourceGrid,.scenarioDraftGrid{grid-template-columns:1fr 1fr}.settingsGrid,.outageGrid,.focusStack{grid-template-columns:1fr}.sourceRibbon{gap:6px}.chartScenarioWorkbench{padding:14px}.scenarioModalPanel{width:min(100vw - 16px,1180px);padding:15px 14px}.scenarioModalHeader{flex-direction:column}.scenarioRangeRow{grid-template-columns:1fr}.scenarioSummaryGrid{grid-template-columns:1fr}}@media(max-width:520px){.marketMonitor,.insightGrid{grid-template-columns:1fr}.viewPresetActions,.updateSteps,.periodActionGrid{grid-template-columns:1fr}.scenarioDraftGrid,.signalGrid,.sourceGrid,.scenarioImpactGrid{grid-template-columns:1fr}}@media(max-width:460px){.chartSummary,.signalGrid,.sourceGrid{grid-template-columns:1fr}.groupCode{display:none}.groupInner{gap:7px;padding:6px 8px}.headerBtn{font-size:10px}}
   </style>
 </head>
 <body>
@@ -3019,10 +3319,12 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     </header>
     <section class="options" id="balanceOptions">
       <div class="panel pad"><div class="caption">Balance options</div><div class="chiprow"><span class="chip">Actual headers: blue</span><span class="chip">Forecast headers: yellow</span><span class="chip">Forecast starts ${addMonths(bundle.freshness.latestMonthly, 1)}</span><span class="chip">Last pull ${new Date(bundle.generatedAt).toLocaleString()}</span></div></div>
-      <div class="panel pad"><div class="caption">Refresh / saved views</div><div class="quickActionGrid"><button class="btn primary full" id="refreshBtn" type="button">Refresh dashboard</button><button class="btn primary full" id="saveViewBtn" type="button">Save view</button></div><div class="viewPresetGrid"><select id="savedViewSelect" class="select" aria-label="Saved views"></select><div class="viewPresetActions"><button class="btn" id="loadViewBtn" type="button">Load</button><button class="btn" id="deleteViewBtn" type="button">Delete</button><button class="btn" id="resetViewBtn" type="button">Reset</button></div></div><p class="small">Saved views store this workbook layout and table state.</p></div>
+      <div class="panel pad"><div class="caption">Refresh / saved views</div><div class="quickActionGrid"><button class="btn primary full" id="refreshBtn" type="button">Refresh dashboard</button><button class="btn primary full" id="saveViewBtn" type="button">Save view</button></div><div class="viewPresetGrid"><select id="savedViewSelect" class="select" aria-label="Saved views"></select><div class="viewPresetActions"><button class="btn" id="loadViewBtn" type="button">Load</button><button class="btn" id="deleteViewBtn" type="button">Delete</button><button class="btn" id="resetViewBtn" type="button">Reset</button></div></div><div class="caption" style="margin-top:14px">Experimental reconcile</div><div class="periodActionGrid"><button class="btn" id="reconcileWeeklyToMonthlyBtn" type="button">Weekly to monthly</button><button class="btn" id="reconcileMonthlyToWeeklyBtn" type="button">Monthly to weekly</button></div><button class="btn full" id="clearExperimentalBalanceSyncBtn" type="button" style="margin-top:8px">Clear experimental</button><p class="small">Writes tagged forecast overrides for eligible months only. Existing non-experimental overrides stay untouched and are skipped.</p></div>
     </section>
     <section class="controlbar balanceControlbar" id="balanceControls">
       <div class="panel pad"><div class="caption">View</div><div class="seg"><button class="toggle active" data-frequency="monthly" type="button">Monthly</button><button class="toggle" data-frequency="weekly" type="button">Weekly</button></div></div>
+      <div class="panel pad"><div class="caption">Period focus</div><select id="periodWindowSelect" class="select" aria-label="Period window"><option value="smart">Smart window</option><option value="latest">Latest actual</option><option value="forecast">Forecast runway</option><option value="full">Full history</option></select><div class="periodActionGrid"><button class="btn" id="jumpLatestActualBtn" type="button">Latest actual</button><button class="btn" id="jumpFirstForecastBtn" type="button">First forecast</button></div></div>
+      <div class="panel pad"><div class="caption">Row focus</div><div class="focusStack"><input id="balanceSearchInput" class="settingsInput" type="search" maxlength="80" placeholder="Search rows or PADDs" aria-label="Search balance rows"><select id="balanceFocusSelect" class="select" aria-label="Balance row focus"><option value="all">All rows</option><option value="manual">Manual overrides</option><option value="risk">Risk rows</option><option value="cover">Stock cover</option><option value="moves">Build/draw moves</option></select><button class="btn" id="clearBalanceFocusBtn" type="button">Clear</button></div></div>
       <div class="panel pad"><div class="caption">Table layout</div><div class="layoutControls"><label class="rangeField"><span>Names width</span><output id="labelWidthValue"></output><input id="labelWidthSlider" type="range" min="300" max="560" step="10"></label><label class="rangeField"><span>Name size</span><output id="labelSizeValue"></output><input id="labelSizeSlider" type="range" min="9" max="14" step="1"></label></div></div>
     </section>
     <section class="options" id="chartOptions" hidden>
@@ -3035,7 +3337,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       <select id="metricSelect" class="select" aria-label="Metric" hidden></select>
       <div class="panel pad"><div class="caption">Chart logic</div><div class="small">Seasonal cards show prior year, current year, and the 2019 plus 2022-2025 range for the selected region and metric.</div></div>
     </section>
-    <section id="balanceSheet" class="sheet"><div class="sheetHead"><div><h2 id="balanceTitle">Monthly Balance</h2><p id="balanceSubtitle"></p></div><div class="workbookHeaderActions"><button class="headerBtn" id="expandGroupsBtn" type="button">Expand all</button><button class="headerBtn" id="collapseGroupsBtn" type="button">Collapse all</button><span class="pill">collapsible PADD groups</span></div></div><section class="marketMonitor" id="balanceMonitor" aria-label="Balance diagnostics"></section><div class="tablewrap" id="balanceTableWrap" tabindex="0" aria-label="Scrollable balance table"><table class="balanceMatrix" id="balanceTable"></table></div></section>
+    <section id="balanceSheet" class="sheet"><div class="sheetHead"><div><h2 id="balanceTitle">Monthly Balance</h2><p id="balanceSubtitle"></p></div><div class="workbookHeaderActions"><button class="headerBtn" id="expandGroupsBtn" type="button">Expand all</button><button class="headerBtn" id="collapseGroupsBtn" type="button">Collapse all</button><span class="pill">collapsible PADD groups</span></div></div><section class="marketMonitor" id="balanceMonitor" aria-label="Balance diagnostics"></section><section class="balanceWatchlist panel pad" id="balanceWatchlist" aria-label="Balance watchlist"></section><div class="tablewrap" id="balanceTableWrap" tabindex="0" aria-label="Scrollable balance table"><table class="balanceMatrix" id="balanceTable"></table></div></section>
     <section id="chartsSheet" class="sheet" hidden><div class="sheetHead"><div><h2 id="chartsTitle">Monthly | U.S. Charts</h2><p>Cards match the reference layout: region-prefixed titles, shaded five-year range, dashed average, prior-year line, current-year actual/forecast path, hover values, zoom table, export, copy, and saved-forecast overlays.</p></div><span class="pill" id="chartCount">7 charts</span></div><div class="chartGrid" id="chartGrid"></div><section class="chartScenarioWorkbench" id="chartScenarioWorkbench" hidden></section></section>
     <section id="crudeRunsSheet" class="sheet" hidden><div class="sheetHead crudeViewportLock"><div><h2 id="crudeRunsTitle">Monthly | Crude Runs Forecast</h2><p>Forecast operable capacity carries forward from monthly EIA actuals, idle capacity is manual, and operating capacity equals operable less idle. Forecast crude runs equal operating capacity less planned Atmos offline and unplanned Atmos offline, with a 3-day linear post-outage ramp-down applied automatically.</p></div><span class="pill" id="crudeRunsCount">0 columns</span></div><div class="controlbar crudeStickyControls crudeViewportLock" id="crudeRunsControls"><div class="panel pad"><div class="caption">View</div><div class="seg"><button class="toggle active" data-frequency="monthly" type="button">Monthly</button><button class="toggle" data-frequency="weekly" type="button">Weekly</button></div></div><div class="panel pad"><div class="caption">Crude region</div><select id="crudeRegionSelect" class="select" aria-label="Crude runs region"></select></div><div class="panel pad"><div class="caption">Forecast end</div><div class="small" id="crudeLatestLine"></div></div><div class="panel pad"><div class="caption">Outage schedule</div><button class="btn primary full" id="openOutagesFromCrudeBtn" type="button">Add outage</button></div></div><div class="tablewrap" id="crudeRunsTableWrap" tabindex="0" aria-label="Full crude runs table"><table class="balanceMatrix" id="crudeRunsTable"></table></div><div class="crudeActiveRegionHeader" id="crudeActiveRegionHeader"></div><div class="chartGrid" id="crudeRunsChartGrid"></div></section>
     <section id="outagesSheet" class="sheet" hidden><div class="sheetHead"><div><h2>Outages</h2><p>Saved outage entries are shared by Diesel and Jet crude runs. Select a real refinery and unit, then enter the offline capacity, dates, type, and note. Unplanned outages default to a one-week horizon from today, a 3-day linear ramp-down is added after each outage end date, and duplicate refinery/day entries are blocked into edit mode.</p></div><span class="pill" id="outageCount">0 entries</span></div><section class="outageForm panel pad" id="outageFormPanel"><div class="caption">Known outage entry</div><div class="outageGrid"><label><span class="small">Region</span><select id="outageRegion" class="select" aria-label="Outage region"></select></label><label><span class="small">Refinery</span><select id="outageRefinery" class="select" aria-label="Outage refinery"></select></label><label><span class="small">Unit</span><select id="outageUnit" class="select" aria-label="Outage unit"></select></label><label><span class="small">Capacity offline</span><input class="settingsInput" id="outageCapacity" type="number" min="0" step="0.1" placeholder="kbd"></label><label><span class="small">Start date</span><input class="settingsInput" id="outageStart" type="date"></label><label><span class="small">End date</span><input class="settingsInput" id="outageEnd" type="date"></label><label><span class="small">Type</span><select id="outageType" class="select" aria-label="Outage type"><option value="Planned">Planned</option><option value="Unplanned">Unplanned</option><option value="Other">Other</option></select></label><label class="wide"><span class="small">Note</span><input class="settingsInput" id="outageNote" type="text" placeholder="Optional note"></label></div><div class="outageActions"><button class="btn primary" id="addOutageBtn" type="button">Add outage</button><button class="btn" id="clearOutageFormBtn" type="button">Clear</button><span class="settingsStatus" id="outageFormStatus"></span></div></section><section class="panel pad"><div class="caption">Saved outages</div><div class="contextTableWrap"><table class="outageTable" id="outageTable"></table></div></section></section>
@@ -3054,13 +3356,13 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     const HISTORY_LINE_PALETTE = ['#16835f','#d9468b','#f08c00','#0f9488','#64748b','#a16207'];
     const NEXT_YEAR_FORECAST_COLOR = '#0f9488';
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const METRICS = [{key:'balanceKbd',label:'Build/(draw)',unit:'kbd',digits:0},{key:'demandKbd',label:'Demand',unit:'kbd',digits:0},{key:'productionKbd',label:'Production',unit:'kbd',digits:0},{key:'importsKbd',label:'Imports',unit:'kbd',digits:0},{key:'exportsKbd',label:'Exports',unit:'kbd',digits:0},{key:'netReceiptsKbd',label:'Net receipts',unit:'kbd',digits:0},{key:'stockChangeKbd',label:'Stock change',unit:'kbd',digits:0},{key:'stocksKb',label:'Stocks',unit:'kb',digits:0}];
+    const METRICS = [{key:'balanceKbd',label:'Build/(draw)',unit:'kbd',digits:0},{key:'demandKbd',label:'Demand',unit:'kbd',digits:0},{key:'productionKbd',label:'Production',unit:'kbd',digits:0},{key:'importsKbd',label:'Imports',unit:'kbd',digits:0},{key:'exportsKbd',label:'Exports',unit:'kbd',digits:0},{key:'netReceiptsKbd',label:'Net receipts',unit:'kbd',digits:0},{key:'stockChangeKbd',label:'Stock change',unit:'kbd',digits:0},{key:'stocksKb',label:'Stocks',unit:'kb',digits:0},{key:'daysForwardCover',label:'Days of Forward Cover',unit:'days',digits:1}];
     const CRUDE_METRICS = D.crudeRuns.metrics || [{key:'crudeRunsKbd',label:'Crude runs',unit:'kbd',digits:0},{key:'operableCapacityKbd',label:'Operable capacity',unit:'kbd',digits:0},{key:'idleCapacityKbd',label:'Idle capacity',unit:'kbd',digits:0},{key:'operatingCapacityKbd',label:'Operating capacity',unit:'kbd',digits:0},{key:'utilizationPct',label:'Operable utilization',unit:'%',digits:1},{key:'operatingUtilizationPct',label:'Operating utilization',unit:'%',digits:1},{key:'exPlannedUtilizationPct',label:'Operating (ex-planned) utilization',unit:'%',digits:1}];
-    const CHART_METRICS = ['balanceKbd','demandKbd','productionKbd','importsKbd','exportsKbd','netReceiptsKbd','stocksKb','exPlannedUtilizationPct'];
+    const CHART_METRICS = ['balanceKbd','demandKbd','productionKbd','importsKbd','exportsKbd','netReceiptsKbd','stocksKb','daysForwardCover','exPlannedUtilizationPct'];
     const CHART_SCENARIO_METRICS = [{key:'demand',label:'Demand',lineId:'demand',valueType:'pct'},{key:'yield',label:'Yield',lineId:'yieldAdjustmentPct',valueType:'pct'},{key:'imports',label:'Imports',lineId:'imports',valueType:'kbd_delta'},{key:'exports',label:'Exports',lineId:'exports',valueType:'kbd_delta'},{key:'receipts',label:'Receipts',lineId:'receipts',valueType:'pct'},{key:'exPlannedUtilization',label:'Operating Utilization (Ex-Planned)',lineId:'exPlannedUtilizationAdjustmentPct',valueType:'pct'}];
     const CHART_SCENARIO_LIMIT = 10;
     const CHART_SCENARIO_OVERLAY_PALETTE = ['#0f9488','#e11d48','#1d4ed8','#d97706','#7c3aed','#0891b2','#15803d','#b91c1c','#4f46e5','#a16207'];
-    const REGION_META = {padd1ab:['P1-A/B','Northeast'],padd1c:['P1-C','Lower Atlantic'],padd2:['P2','Midwest'],padd3:['P3','Gulf Coast'],padd4:['P4','Rocky Mountain'],padd5:['P5','West Coast'],us:['U.S.',''],p123:['','PADDs 1, 2, 3'],p13:['','PADDs 1,3']};
+    const REGION_META = {padd1:['P1','East Coast'],padd1ab:['P1-A/B','Northeast'],padd1c:['P1-C','Lower Atlantic'],padd2:['P2','Midwest'],padd3:['P3','Gulf Coast'],padd4:['P4','Rocky Mountain'],padd5:['P5','West Coast'],us:['U.S.',''],p123:['','PADDs 1, 2, 3'],p13:['','PADDs 1,3']};
     const CHART_ALL_REGION_KEY = 'all';
     const OUTAGE_CAPACITY_DIGITS = 1;
     const fmt = (n, d=0) => Number(n || 0).toLocaleString(navigator.language || 'en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
@@ -3086,6 +3388,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     const TABLE_LAYOUT_DEFAULTS = {labelWidth:360,labelSize:11};
     const TABLE_LAYOUT_LIMITS = {labelWidth:[300,560],labelSize:[9,14]};
     const LAYOUT_STORAGE_KEY = STORAGE_KEY + ':table-layout';
+    const BALANCE_PERIOD_WINDOWS = new Set(['smart','latest','forecast','full']);
+    const BALANCE_FOCUS_MODES = new Set(['all','manual','risk','cover','moves']);
     const lazyChunkPromises = {};
     const loadedLazyChunks = new Set();
     function applyWeeklyChunk(payload){
@@ -3180,6 +3484,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     let pendingEditableFocus = null;
     let tableScrollSignatures = {};
     let forceCrudeRunsPeriodScroll = false;
+    let pendingBalanceScrollPeriod = '';
+    let forceBalancePeriodScroll = false;
     let controlsOptionsRendered = false;
     let savedViewsSignature = '';
     let historyChipsSignature = '';
@@ -3202,8 +3508,10 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     let adjustedWeeklyRowsCache = {key:'',rows:null};
     const periodBucketsCache = new Map();
     const rowsByRegionCache = new Map();
+    const rowsByRegionIndexCache = new Map();
     const crudeRowsByRegionCache = new Map();
     const crudePeriodBucketsCache = new Map();
+    const crudeInfoByPeriodCache = new Map();
     const crudeAllPeriodsCache = new Map();
     const crudeDisplayPeriodsCache = new Map();
     const latestMonthlyCrudeBasisCache = new Map();
@@ -3231,30 +3539,30 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     const crudeScheduleEntriesCache = new Map();
     const balanceRegionRowsHtmlCache = new Map();
     const crudeRegionRowsHtmlCache = new Map();
+    const balanceLinesCache = new Map();
     function stableSettingsRows(rows){ try { return JSON.stringify(rows || []); } catch { return String(Date.now()); } }
     function scenarioTimestamp(value){ const time = new Date(String(value || '')).getTime(); return Number.isFinite(time) ? time : 0; }
     function round1(value){ return Math.round(Number(value || 0) * 10) / 10; }
     function roundScenarioKbd(value){ return Math.max(0, Math.round(Number(value || 0) / 5) * 5); }
     function chartScenarioMetricByKey(key){ return CHART_SCENARIO_METRICS.find(metric => metric.key === key) || CHART_SCENARIO_METRICS[0]; }
-    function chartScenarioRegionOptions(){ return D.regionalBalance.regions.filter(region => ['padd1ab','padd1c','padd2','padd3','padd4','padd5'].includes(region.key)); }
+    function chartScenarioRegionOptions(){ return D.regionalBalance.regions.filter(region => !['us','p123','p13'].includes(region.key)); }
     function chartScenarioUsesRawVolume(metricKey){ return ['imports','exports'].includes(String(metricKey || '')); }
     function chartScenarioUsesNetUtilization(metricKey){ return metricKey === 'exPlannedUtilization'; }
     function chartScenarioRange(metricKey){ if (chartScenarioUsesRawVolume(metricKey)) return {min:-100,max:100,step:1}; if (chartScenarioUsesNetUtilization(metricKey)) return {min:-20,max:20,step:.25}; return {min:-10,max:10,step:.25}; }
     function clampScenarioDelta(value, metricKey='demand'){ const range = chartScenarioRange(metricKey); const numeric = Number(value || 0); const rounded = chartScenarioUsesRawVolume(metricKey) ? Math.round(numeric) : round2(numeric); return Math.max(range.min, Math.min(range.max, rounded)); }
     function chartScenarioAdjustedValue(metricKey, baseValue, delta){ const base = Number(baseValue || 0); const change = Number(delta || 0); if (chartScenarioUsesRawVolume(metricKey)) return Math.max(0, round2(base + change)); return Math.max(0, round2(base * (1 + change / 100))); }
     function defaultScenarioMonth(){ return (workbookSettings?.forecastEnd || D.forecast?.weeklyThrough || '2026-12-31').slice(0,7); }
-    function defaultChartScenarioDraft(overrides={}){ const chartRegion = chartScenarioRegionOptions().some(region => region.key === state?.chartRegion) ? state.chartRegion : ''; const regionKey = chartRegion || (chartScenarioRegionOptions().some(region => region.key === state?.region) ? state.region : 'padd1ab'); const startMonth = workbookSettings ? firstForecastMonth() : defaultScenarioMonth(); const endMonth = workbookSettings?.forecastEnd?.slice(0,7) || defaultScenarioMonth(); return {...{id:'draft',name:'',regionKey,metricKey:'imports',startPeriod:startMonth,endPeriod:endMonth < startMonth ? startMonth : endMonth,deltaPct:0,previewEnabled:false,updatedAt:new Date().toISOString()}, ...overrides}; }
+    function defaultChartScenarioDraft(overrides={}){ const options = chartScenarioRegionOptions(); const chartRegion = options.some(region => region.key === state?.chartRegion) ? state.chartRegion : ''; const regionKey = chartRegion || (options.some(region => region.key === state?.region) ? state.region : options[0]?.key || 'padd1'); const startMonth = workbookSettings ? firstForecastMonth() : defaultScenarioMonth(); const endMonth = workbookSettings?.forecastEnd?.slice(0,7) || defaultScenarioMonth(); return {...{id:'draft',name:'',regionKey,metricKey:'imports',startPeriod:startMonth,endPeriod:endMonth < startMonth ? startMonth : endMonth,deltaPct:0,previewEnabled:false,updatedAt:new Date().toISOString()}, ...overrides}; }
     function normalizeScenarioMonth(value, fallback=defaultScenarioMonth()){ return /^\\d{4}-\\d{2}$/.test(String(value || '')) ? String(value).slice(0,7) : fallback; }
     function normalizeChartScenario(row, options={}){ if (!row || typeof row !== 'object') return null; const metricKey = String(row.metricKey || row.metric || ''); const scenario = {id:String(row.id || ('scenario-' + Date.now() + '-' + Math.random().toString(16).slice(2))),name:String(row.name || '').trim().slice(0,48) || 'Forecast',regionKey:String(row.regionKey || ''),metricKey,startPeriod:normalizeScenarioMonth(row.startPeriod || row.startMonth),endPeriod:normalizeScenarioMonth(row.endPeriod || row.endMonth),deltaPct:clampScenarioDelta(row.deltaPct, metricKey),enabled:row.enabled !== false,previewEnabled:Boolean(row.previewEnabled),updatedAt:row.updatedAt || new Date().toISOString()}; if (!chartScenarioRegionOptions().some(region => region.key === scenario.regionKey)) return null; if (!CHART_SCENARIO_METRICS.some(metric => metric.key === scenario.metricKey)) return null; if (scenario.endPeriod < scenario.startPeriod) { const swap = scenario.startPeriod; scenario.startPeriod = scenario.endPeriod; scenario.endPeriod = swap; } if (options.previewOnly) scenario.enabled = true; return scenario; }
     function normalizeChartScenarioList(rows){ return (Array.isArray(rows) ? rows : []).map(row => normalizeChartScenario(row)).filter(Boolean).sort((a,b)=>scenarioTimestamp(a.updatedAt) - scenarioTimestamp(b.updatedAt) || a.name.localeCompare(b.name)).slice(-CHART_SCENARIO_LIMIT); }
     function readChartScenarios(){ try { return normalizeChartScenarioList(JSON.parse(localStorage.getItem(CHART_SCENARIO_STORAGE_KEY) || '[]')); } catch { return []; } }
-    function saveChartScenariosLocal(){ chartScenarios = normalizeChartScenarioList(chartScenarios); localStorage.setItem(CHART_SCENARIO_STORAGE_KEY, JSON.stringify(chartScenarios)); invalidateCalculationCaches(); }
     function readChartScenarioDraft(){ try { return normalizeChartScenario(JSON.parse(localStorage.getItem(CHART_SCENARIO_DRAFT_STORAGE_KEY) || 'null'), {previewOnly:true}) || defaultChartScenarioDraft(); } catch { return defaultChartScenarioDraft(); } }
-    function saveChartScenarioDraftLocal(){ chartScenarioDraft = normalizeChartScenario(chartScenarioDraft, {previewOnly:true}) || defaultChartScenarioDraft(); localStorage.setItem(CHART_SCENARIO_DRAFT_STORAGE_KEY, JSON.stringify(chartScenarioDraft)); invalidateCalculationCaches(); }
     let chartScenarios = readChartScenarios();
     let chartScenarioDraft = readChartScenarioDraft();
     let chartScenarioModalOpen = false;
     let chartScenarioSuspendDepth = 0;
+    let chartScenarioCacheModeMemo = '';
     let chartScenarioDerivedAdjustmentsCache = {key:'',rows:null};
     let chartScenarioDerivedCapacityAdjustmentsCache = {key:'',rows:null};
     let balanceChartHydrationToken = 0;
@@ -3267,20 +3575,22 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     const chartTableHtmlCache = new Map();
     function activeChartScenarios(){ const draft = chartScenarioDraft?.previewEnabled ? [normalizeChartScenario(chartScenarioDraft, {previewOnly:true})].filter(Boolean) : []; return draft.sort((a,b)=>scenarioTimestamp(a.updatedAt) - scenarioTimestamp(b.updatedAt) || a.name.localeCompare(b.name)); }
     function enabledChartScenarioOverlays(){ return chartScenarios.filter(scenario => scenario.enabled).sort((a,b)=>scenarioTimestamp(a.updatedAt) - scenarioTimestamp(b.updatedAt) || a.name.localeCompare(b.name)); }
-    function chartScenarioCacheMode(){ return chartScenarioSuspendDepth > 0 ? 'scenarios:suppressed' : 'scenarios:' + stableSettingsRows(activeChartScenarios()); }
     function chartScenarioCalculationSignature(rows=activeChartScenarios()){ return stableSettingsRows((rows || []).map(scenario => ({regionKey:scenario.regionKey,metricKey:scenario.metricKey,startPeriod:scenario.startPeriod,endPeriod:scenario.endPeriod,deltaPct:Number(scenario.deltaPct || 0),previewEnabled:Boolean(scenario.previewEnabled)}))); }
     function chartScenarioOverlaySignature(rows=enabledChartScenarioOverlays()){ return stableSettingsRows((rows || []).map(scenario => ({id:scenario.id,name:scenario.name,regionKey:scenario.regionKey,metricKey:scenario.metricKey,startPeriod:scenario.startPeriod,endPeriod:scenario.endPeriod,deltaPct:Number(scenario.deltaPct || 0),enabled:Boolean(scenario.enabled)}))); }
-    function chartScenarioCacheMode(){ return chartScenarioSuspendDepth > 0 ? 'scenarios:suppressed' : 'scenarios:' + chartScenarioCalculationSignature(); }
+    function updateChartScenarioCacheModeMemo(){ chartScenarioCacheModeMemo = 'scenarios:' + chartScenarioCalculationSignature(); return chartScenarioCacheModeMemo; }
+    function chartScenarioCacheMode(){ return chartScenarioSuspendDepth > 0 ? 'scenarios:suppressed' : (chartScenarioCacheModeMemo || updateChartScenarioCacheModeMemo()); }
     function saveChartScenariosLocal(){ chartScenarios = normalizeChartScenarioList(chartScenarios); localStorage.setItem(CHART_SCENARIO_STORAGE_KEY, JSON.stringify(chartScenarios)); chartScenarioOverlaySeriesCache.clear(); }
-    function saveChartScenarioDraftLocal(){ const before = chartScenarioCalculationSignature(); chartScenarioDraft = normalizeChartScenario(chartScenarioDraft, {previewOnly:true}) || defaultChartScenarioDraft(); localStorage.setItem(CHART_SCENARIO_DRAFT_STORAGE_KEY, JSON.stringify(chartScenarioDraft)); if (before !== chartScenarioCalculationSignature()) invalidateCalculationCaches(); }
+    function saveChartScenarioDraftLocal(){ const before = chartScenarioCalculationSignature(); chartScenarioDraft = normalizeChartScenario(chartScenarioDraft, {previewOnly:true}) || defaultChartScenarioDraft(); localStorage.setItem(CHART_SCENARIO_DRAFT_STORAGE_KEY, JSON.stringify(chartScenarioDraft)); const after = chartScenarioCalculationSignature(); chartScenarioCacheModeMemo = 'scenarios:' + after; if (before !== after) invalidateCalculationCaches(); }
+    updateChartScenarioCacheModeMemo();
     function withChartScenariosSuppressed(fn){ chartScenarioSuspendDepth += 1; try { return fn(); } finally { chartScenarioSuspendDepth = Math.max(0, chartScenarioSuspendDepth - 1); } }
     function calcCacheKey(...parts){ return [calculationRevision, workbookSettings?.forecastEnd || '', chartScenarioCacheMode(), ...parts].join('|'); }
-    function invalidateCalculationCaches(){ calculationRevision += 1; monthlyRawBucketsCache = null; weeklyRawBucketsCache = null; adjustedMonthlyActualRowsCache = null; adjustedWeeklyActualRowsCache = null; adjustedMonthlyBucketsCache = {key:'',buckets:null}; adjustedMonthlyRowsCache = {key:'',rows:null}; adjustedWeeklyRowsCache = {key:'',rows:null}; chartScenarioDerivedAdjustmentsCache = {key:'',rows:null}; chartScenarioDerivedCapacityAdjustmentsCache = {key:'',rows:null}; chartScenarioOverlaySeriesCache.clear(); chartScenarioRowsByPeriodCache.clear(); chartSeriesCache.clear(); chartTableHtmlCache.clear(); chartYearContextCache.clear(); periodBucketsCache.clear(); rowsByRegionCache.clear(); crudeRowsByRegionCache.clear(); crudePeriodBucketsCache.clear(); crudeAllPeriodsCache.clear(); crudeDisplayPeriodsCache.clear(); latestMonthlyCrudeBasisCache.clear(); historicalCrudeGapCache.clear(); latestCapacityAdjustmentCache.clear(); latestRegionalCapacityAdjustmentCache.clear(); capacityAdjustmentIndexCache = {key:'',index:null}; regionalCapacityRowValueCache.clear(); refineryCapacityForRegionCache.clear(); balanceAdjustmentValueCache.clear(); balanceAdjustmentIndexCache = {key:'',index:null}; balancePointTotalsCache.clear(); balanceLineValueCache.clear(); balancePeriodEntriesCache = {key:'',entries:null}; movementSummaryCache.clear(); movementFlowValueCache.clear(); movementRowMapCache.clear(); outageTotalsCache.clear(); outageDailyVectorCache = {key:'',days:null}; weeklyGuideMonthlyIndexCache = {key:'',index:null}; weeklyGuideVectorCache = {key:'',vectors:null}; weeklyGuideSeriesCache = {key:'',index:null}; actualCrudeSchedulePointCache.clear(); crudeSchedulePointCache.clear(); crudeScheduleEntriesCache.clear(); balanceRegionRowsHtmlCache.clear(); crudeRegionRowsHtmlCache.clear(); }
+    function invalidateCalculationCaches(){ calculationRevision += 1; monthlyRawBucketsCache = null; weeklyRawBucketsCache = null; adjustedMonthlyActualRowsCache = null; adjustedWeeklyActualRowsCache = null; adjustedMonthlyBucketsCache = {key:'',buckets:null}; adjustedMonthlyRowsCache = {key:'',rows:null}; adjustedWeeklyRowsCache = {key:'',rows:null}; chartScenarioDerivedAdjustmentsCache = {key:'',rows:null}; chartScenarioDerivedCapacityAdjustmentsCache = {key:'',rows:null}; chartScenarioOverlaySeriesCache.clear(); chartScenarioRowsByPeriodCache.clear(); chartSeriesCache.clear(); chartTableHtmlCache.clear(); chartYearContextCache.clear(); periodBucketsCache.clear(); rowsByRegionCache.clear(); rowsByRegionIndexCache.clear(); crudeRowsByRegionCache.clear(); crudePeriodBucketsCache.clear(); crudeInfoByPeriodCache.clear(); crudeAllPeriodsCache.clear(); crudeDisplayPeriodsCache.clear(); latestMonthlyCrudeBasisCache.clear(); historicalCrudeGapCache.clear(); latestCapacityAdjustmentCache.clear(); latestRegionalCapacityAdjustmentCache.clear(); capacityAdjustmentIndexCache = {key:'',index:null}; regionalCapacityRowValueCache.clear(); refineryCapacityForRegionCache.clear(); balanceAdjustmentValueCache.clear(); balanceAdjustmentIndexCache = {key:'',index:null}; balancePointTotalsCache.clear(); balanceLineValueCache.clear(); balancePeriodEntriesCache = {key:'',entries:null}; movementSummaryCache.clear(); movementFlowValueCache.clear(); movementRowMapCache.clear(); outageTotalsCache.clear(); outageDailyVectorCache = {key:'',days:null}; weeklyGuideMonthlyIndexCache = {key:'',index:null}; weeklyGuideVectorCache = {key:'',vectors:null}; weeklyGuideSeriesCache = {key:'',index:null}; actualCrudeSchedulePointCache.clear(); crudeSchedulePointCache.clear(); crudeScheduleEntriesCache.clear(); balanceRegionRowsHtmlCache.clear(); crudeRegionRowsHtmlCache.clear(); balanceLinesCache.clear(); }
     const UPDATE_GROUPS = {weekly:{label:'Weekly',steps:['WPSR/latest weekly pull','Weekly export files','Clean public EIA outputs','Weekly freshness check','Rebuild balances','Dashboard freshness check']},monthly:{label:'Monthly',steps:['Monthly EIA API pull','Monthly export files','Bulk series inventory','PADD 1 split','Clean outputs','Monthly freshness check','Rebuild balances','Dashboard freshness check']},other:{label:'Other',steps:['Parallel context refreshes','JODI context','Kpler package and PADD 1 split','EIA PADD capacity refresh','Refinery unit capacity refresh','Power DFO daily and hourly','Validation checks','Data health check','Rebuild balances','Dashboard freshness check']},all:{label:'Complete',steps:['Weekly and monthly pulls','Weekly/monthly exports','Bulk series inventory','PADD 1 and clean outputs','Weekly/monthly freshness checks','Parallel context refreshes','JODI/Kpler context','EIA PADD capacity and refinery unit capacity','Power DFO refreshes','Validate and data health','Rebuild balances','Dashboard freshness check']}};
     const SETTINGS_STORAGE_KEY = STORAGE_KEY + ':workbook-settings';
     const SHARED_CRUDE_STORAGE_KEY = 'regional-balance-shared-crude:v1';
     const OUTAGE_STORAGE_KEY = SHARED_CRUDE_STORAGE_KEY + ':crude-outages';
     const CAPACITY_ADJ_STORAGE_KEY = SHARED_CRUDE_STORAGE_KEY + ':refinery-capacity-adjustments';
+    const EXPERIMENTAL_BALANCE_SYNC_NOTE_PREFIX = 'Experimental monthly-weekly sync:';
     const LEGACY_OUTAGE_STORAGE_KEYS = ['diesel:regional-balance-v2:crude-outages','jet:regional-balance-v2:crude-outages'];
     const LEGACY_CAPACITY_ADJ_STORAGE_KEYS = ['diesel:regional-balance-v2:refinery-capacity-adjustments','jet:regional-balance-v2:refinery-capacity-adjustments'];
     const OUTAGE_TYPES = ['Planned','Unplanned','Other'];
@@ -3331,7 +3641,9 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function saveCapacityAdjustmentsLocal(priorStable){ const before = priorStable ?? stableSettingsRows(workbookSettings.refineryCapacityAdjustments); workbookSettings.refineryCapacityAdjustments = normalizeCapacityAdjustmentList(workbookSettings.refineryCapacityAdjustments); localStorage.setItem(CAPACITY_ADJ_STORAGE_KEY, JSON.stringify(workbookSettings.refineryCapacityAdjustments)); const changed = before !== stableSettingsRows(workbookSettings.refineryCapacityAdjustments); if (changed) invalidateCalculationCaches(); saveWorkbookSettingsLocal(); return changed; }
     function settingsPayload(){ return {forecastEnd:workbookSettings.forecastEnd,product:D.product.key,adjustments:workbookSettings.adjustments,crudeOutages:workbookSettings.crudeOutages,refineryCapacityAdjustments:workbookSettings.refineryCapacityAdjustments}; }
     async function saveOutagesToServer(){ try { const response = await fetch(updateBaseUrl() + '/api/settings', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(settingsPayload())}); if (!response.ok) throw new Error('save '+response.status); const payload = await response.json(); if (Array.isArray(payload.settings?.crudeOutages)) { outageEntries = normalizeOutageList(payload.settings.crudeOutages); saveOutagesLocal(); } if (Array.isArray(payload.settings?.refineryCapacityAdjustments)) { workbookSettings.refineryCapacityAdjustments = normalizeCapacityAdjustmentList(payload.settings.refineryCapacityAdjustments); saveCapacityAdjustmentsLocal(); } showToast('Outage schedule saved'); } catch { showToast('Outage schedule saved in this browser; local runner offline'); } }
-    function forecastEndForFrequency(){ return state.frequency === 'weekly' ? workbookSettings.forecastEnd : workbookSettings.forecastEnd.slice(0,7); }
+    function minForecastEnd(a,b){ const left = String(a || ''); const right = String(b || ''); if (!left) return right; if (!right) return left; return left < right ? left : right; }
+    function embeddedForecastEndForFrequency(frequency=state.frequency){ return frequency === 'weekly' ? (D.forecast.weeklyThrough || workbookSettings.forecastEnd) : (D.forecast.monthlyThrough || workbookSettings.forecastEnd.slice(0,7)); }
+    function forecastEndForFrequency(frequency=state.frequency){ const settingEnd = frequency === 'weekly' ? workbookSettings.forecastEnd : workbookSettings.forecastEnd.slice(0,7); return minForecastEnd(settingEnd, embeddedForecastEndForFrequency(frequency)); }
     function renderSettingsPanel(){ const input = document.getElementById('forecastEndInput'); const status = document.getElementById('forecastEndStatus'); if (!input || !status) return; input.value = workbookSettings.forecastEnd; const adjustmentCount = Array.isArray(workbookSettings.adjustments) ? workbookSettings.adjustments.length : 0; const outageCount = Array.isArray(workbookSettings.crudeOutages) ? workbookSettings.crudeOutages.length : 0; const capacityAdjustmentCount = Array.isArray(workbookSettings.refineryCapacityAdjustments) ? workbookSettings.refineryCapacityAdjustments.length : 0; status.innerHTML = '<b>Current:</b> '+esc(workbookSettings.forecastEnd)+' | embedded through '+esc(D.forecast.weeklyThrough)+' | '+fmt(adjustmentCount)+' saved balance adjustments | '+fmt(outageCount)+' crude outages | '+fmt(capacityAdjustmentCount)+' capacity adjustments | '+fmt(refineryUnits().length)+' refinery unit rows'; }
     function applyWorkbookSettingsSnapshot(nextSettings, options={}){ if (!nextSettings || typeof nextSettings !== 'object') return false; const normalized = {forecastEnd:normalizeForecastEnd(nextSettings.forecastEnd),adjustments:normalizeBalanceAdjustmentList(nextSettings.adjustments),crudeOutages:normalizeOutageList(nextSettings.crudeOutages),refineryCapacityAdjustments:normalizeCapacityAdjustmentList(nextSettings.refineryCapacityAdjustments)}; const changed = workbookSettings.forecastEnd !== normalized.forecastEnd || stableSettingsRows(workbookSettings.adjustments) !== stableSettingsRows(normalized.adjustments) || stableSettingsRows(workbookSettings.crudeOutages) !== stableSettingsRows(normalized.crudeOutages) || stableSettingsRows(workbookSettings.refineryCapacityAdjustments) !== stableSettingsRows(normalized.refineryCapacityAdjustments); workbookSettings.forecastEnd = normalized.forecastEnd; workbookSettings.adjustments = normalized.adjustments; workbookSettings.crudeOutages = normalized.crudeOutages; workbookSettings.refineryCapacityAdjustments = normalized.refineryCapacityAdjustments; outageEntries = normalized.crudeOutages; if (changed) { invalidateCalculationCaches(); tableScrollSignatures = {}; } renderSettingsPanel(); if (!changed && state.sheet === 'outages') renderOutagesSheet(); if (!changed && state.sheet === 'reference') renderCapacityAdjustmentPanel(); if (changed) queueRender(Number(options.renderDelay || 0)); return changed; }
     let settingsRefreshPromise = null;
@@ -3360,7 +3672,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function clampLayoutValue(key, value){ const limits = TABLE_LAYOUT_LIMITS[key] || [0,999]; const fallback = TABLE_LAYOUT_DEFAULTS[key]; const n = Number(value); if (!Number.isFinite(n)) return fallback; return Math.min(limits[1], Math.max(limits[0], Math.round(n))); }
     function storedTableLayout(){ try { return JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY) || '{}') || {}; } catch { return {}; } }
     function saveTableLayout(){ localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify({labelWidth:state.labelWidth,labelSize:state.labelSize,savedAt:new Date().toISOString()})); }
-    function chartYearContext(frequency=state.frequency){ const rows = rawRowsForFrequency(frequency); const key = calculationRevision + '|' + frequency + '|' + rows.length; if (chartYearContextCache.has(key)) return chartYearContextCache.get(key); const yearsSet = new Set(); const actualYearsSet = new Set(); const forecastYearsSet = new Set(); rows.forEach(row => { const year = yearOf(row.period); if (!year) return; yearsSet.add(year); if (row.status === 'actual') actualYearsSet.add(year); else if (row.status === 'forecast') forecastYearsSet.add(year); }); const years = Array.from(yearsSet).sort((a,b)=>a-b); const actualYears = Array.from(actualYearsSet).sort((a,b)=>a-b); const currentYear = actualYears.at(-1) || years.at(-1) || new Date().getFullYear(); const priorYear = years.includes(currentYear - 1) ? currentYear - 1 : null; const nextYearForecast = Array.from(forecastYearsSet).sort((a,b)=>a-b).find(year => year > currentYear) || null; const context = {years, actualYears, currentYear, priorYear, nextYearForecast}; chartYearContextCache.set(key, context); return context; }
+    function chartYearContext(frequency=state.frequency){ const rows = rawRowsForFrequency(frequency); const key = calculationRevision + '|' + frequency + '|' + rows.length; if (chartYearContextCache.has(key)) return chartYearContextCache.get(key); const yearsSet = new Set(); const actualYearsSet = new Set(); const forecastYearsSet = new Set(); rows.forEach(row => { const year = chartPeriodYear(row.period, frequency); if (!year) return; yearsSet.add(year); if (row.status === 'actual') actualYearsSet.add(year); else if (row.status === 'forecast') forecastYearsSet.add(year); }); const years = Array.from(yearsSet).sort((a,b)=>a-b); const actualYears = Array.from(actualYearsSet).sort((a,b)=>a-b); const currentYear = actualYears.at(-1) || years.at(-1) || new Date().getFullYear(); const priorYear = years.includes(currentYear - 1) ? currentYear - 1 : null; const nextYearForecast = Array.from(forecastYearsSet).sort((a,b)=>a-b).find(year => year > currentYear) || null; const context = {years, actualYears, currentYear, priorYear, nextYearForecast}; chartYearContextCache.set(key, context); return context; }
     function availableBandYears(frequency='monthly'){ const context = chartYearContext(frequency); return context.years.filter(year => year < context.currentYear).sort((a,b)=>b-a); }
     function availableHistoryYears(frequency='monthly'){ const {currentYear} = chartYearContext(frequency); return availableBandYears(frequency).filter(year => year <= currentYear - 2).sort((a,b)=>b-a); }
     function historyLineDefs(frequency=state.frequency){ const {currentYear} = chartYearContext(frequency); return availableHistoryYears(frequency).map((year, index) => ({year,offset:currentYear - year,color:HISTORY_LINE_PALETTE[index % HISTORY_LINE_PALETTE.length]})); }
@@ -3377,16 +3689,20 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function validChartRegionKey(key){ return key === CHART_ALL_REGION_KEY || D.regionalBalance.regions.some(region => region.key === key); }
     function chartRegionDisplayLabel(key){ return key === CHART_ALL_REGION_KEY ? 'All regions' : balanceRegionDisplayLabel(key); }
     function activeCrudeRegionKey(value=state?.crudeRegion){ return validCrudeRegion(value) ? value : ''; }
-    function defaultState(){ const frequency = 'monthly'; const layout = storedTableLayout(); return {frequency, region:'us', chartRegion:'us', metric:'balanceKbd', crudeRegion:'', sheet:'balance', showLegends:true, showForecast:true, showRegionTitles:true,showFourWeekAverage:false,showPriorYear:true,showCurrentYear:true,showNextYearForecast:true,bandYears:defaultBandYears(frequency),historyYears:defaultHistoryYears(),labelWidth:clampLayoutValue('labelWidth', layout.labelWidth),labelSize:clampLayoutValue('labelSize', layout.labelSize)}; }
-    function readState(){ const params = new URLSearchParams(location.search); const base = defaultState(); const frequency = params.get('f') === 'weekly' ? 'weekly' : 'monthly'; const weeklyPending = frequency === 'weekly' && !hasWeeklyData(); const region = D.regionalBalance.regions.some(r => r.key === params.get('r')) ? params.get('r') : base.region; const chartRegion = validChartRegionKey(params.get('chr')) ? params.get('chr') : (validChartRegionKey(region) ? region : base.chartRegion); const metric = METRICS.some(m => m.key === params.get('m')) ? params.get('m') : base.metric; const crudeRegion = D.crudeRuns.regions.some(r => r.key === params.get('cr')) ? params.get('cr') : base.crudeRegion; const requestedSheet = params.get('sheet'); const sheet = requestedSheet === 'charts' || requestedSheet === 'reference' || requestedSheet === 'sources' || requestedSheet === 'crude' || requestedSheet === 'outages' ? (requestedSheet === 'sources' ? 'reference' : requestedSheet) : 'balance'; const historyParam = params.get('y'); const bandParam = params.get('band'); const requestedHistory = historyParam ? historyParam.split(',') : base.historyYears; const requestedBand = bandParam && bandParam !== 'none' ? bandParam.split(',') : base.bandYears; const historyYears = historyParam === 'none' ? [] : (weeklyPending && historyParam ? parseYearList(requestedHistory) : normalizeHistoryYears(requestedHistory, frequency, false)); const bandYears = weeklyPending && bandParam && bandParam !== 'none' ? parseYearList(requestedBand) : normalizeBandYears(requestedBand, frequency, true); const labelWidth = clampLayoutValue('labelWidth', params.get('lw') || base.labelWidth); const labelSize = clampLayoutValue('labelSize', params.get('ls') || base.labelSize); return {...base, frequency, region, chartRegion, metric, crudeRegion, sheet, historyYears, bandYears, showPriorYear:params.get('ly') !== '0', showCurrentYear:params.get('cy') !== '0', showNextYearForecast:params.get('ny') !== '0', showFourWeekAverage:params.get('ma4') === '1', labelWidth, labelSize}; }
-    function writeStateUrl(){ const params = new URLSearchParams(location.search); const bandYears = effectiveBandYears(state.frequency); state.bandYears = bandYears; params.set('f', state.frequency); params.set('y', state.historyYears?.length ? state.historyYears.join(',') : 'none'); params.set('band', bandYears.length ? bandYears.join(',') : 'none'); params.set('ly', state.showPriorYear ? '1' : '0'); params.set('cy', state.showCurrentYear ? '1' : '0'); params.set('ny', state.showNextYearForecast ? '1' : '0'); params.set('ma4', state.showFourWeekAverage ? '1' : '0'); params.set('r', state.region); params.set('chr', state.chartRegion); params.set('m', state.metric); const crudeRegion = activeCrudeRegionKey(); if (crudeRegion) params.set('cr', crudeRegion); else params.delete('cr'); params.delete('cm'); params.set('sheet', state.sheet); params.set('lw', String(state.labelWidth)); params.set('ls', String(state.labelSize)); history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash); }
+    function defaultState(){ const frequency = 'monthly'; const layout = storedTableLayout(); return {frequency, region:'us', chartRegion:'us', metric:'balanceKbd', crudeRegion:'', sheet:'balance', showLegends:true, showForecast:true, showRegionTitles:true,showFourWeekAverage:false,showPriorYear:true,showCurrentYear:true,showNextYearForecast:true,bandYears:defaultBandYears(frequency),historyYears:defaultHistoryYears(),labelWidth:clampLayoutValue('labelWidth', layout.labelWidth),labelSize:clampLayoutValue('labelSize', layout.labelSize),periodWindow:'smart',balanceSearch:'',balanceFocus:'all'}; }
+    function readState(){ const params = new URLSearchParams(location.search); const base = defaultState(); const frequency = params.get('f') === 'weekly' ? 'weekly' : 'monthly'; const weeklyPending = frequency === 'weekly' && !hasWeeklyData(); const region = D.regionalBalance.regions.some(r => r.key === params.get('r')) ? params.get('r') : base.region; const chartRegion = validChartRegionKey(params.get('chr')) ? params.get('chr') : (validChartRegionKey(region) ? region : base.chartRegion); const metric = METRICS.some(m => m.key === params.get('m')) ? params.get('m') : base.metric; const crudeRegion = D.crudeRuns.regions.some(r => r.key === params.get('cr')) ? params.get('cr') : base.crudeRegion; const requestedSheet = params.get('sheet'); const sheet = requestedSheet === 'charts' || requestedSheet === 'reference' || requestedSheet === 'sources' || requestedSheet === 'crude' || requestedSheet === 'outages' ? (requestedSheet === 'sources' ? 'reference' : requestedSheet) : 'balance'; const historyParam = params.get('y'); const bandParam = params.get('band'); const requestedHistory = historyParam ? historyParam.split(',') : base.historyYears; const requestedBand = bandParam && bandParam !== 'none' ? bandParam.split(',') : base.bandYears; const historyYears = historyParam === 'none' ? [] : (weeklyPending && historyParam ? parseYearList(requestedHistory) : normalizeHistoryYears(requestedHistory, frequency, false)); const bandYears = weeklyPending && bandParam && bandParam !== 'none' ? parseYearList(requestedBand) : normalizeBandYears(requestedBand, frequency, true); const labelWidth = clampLayoutValue('labelWidth', params.get('lw') || base.labelWidth); const labelSize = clampLayoutValue('labelSize', params.get('ls') || base.labelSize); const periodWindow = BALANCE_PERIOD_WINDOWS.has(params.get('pw')) ? params.get('pw') : base.periodWindow; const balanceFocus = BALANCE_FOCUS_MODES.has(params.get('bf')) ? params.get('bf') : base.balanceFocus; const balanceSearch = String(params.get('q') || '').slice(0,80); return {...base, frequency, region, chartRegion, metric, crudeRegion, sheet, historyYears, bandYears, showPriorYear:params.get('ly') !== '0', showCurrentYear:params.get('cy') !== '0', showNextYearForecast:params.get('ny') !== '0', showFourWeekAverage:params.get('ma4') === '1', labelWidth, labelSize, periodWindow, balanceSearch, balanceFocus}; }
+    function writeStateUrl(){ const params = new URLSearchParams(location.search); const bandYears = effectiveBandYears(state.frequency); state.bandYears = bandYears; params.set('f', state.frequency); params.set('y', state.historyYears?.length ? state.historyYears.join(',') : 'none'); params.set('band', bandYears.length ? bandYears.join(',') : 'none'); params.set('ly', state.showPriorYear ? '1' : '0'); params.set('cy', state.showCurrentYear ? '1' : '0'); params.set('ny', state.showNextYearForecast ? '1' : '0'); params.set('ma4', state.showFourWeekAverage ? '1' : '0'); params.set('r', state.region); params.set('chr', state.chartRegion); params.set('m', state.metric); if (state.periodWindow && state.periodWindow !== 'smart') params.set('pw', state.periodWindow); else params.delete('pw'); if (state.balanceFocus && state.balanceFocus !== 'all') params.set('bf', state.balanceFocus); else params.delete('bf'); if (String(state.balanceSearch || '').trim()) params.set('q', String(state.balanceSearch || '').trim()); else params.delete('q'); const crudeRegion = activeCrudeRegionKey(); if (crudeRegion) params.set('cr', crudeRegion); else params.delete('cr'); params.delete('cm'); params.set('sheet', state.sheet); params.set('lw', String(state.labelWidth)); params.set('ls', String(state.labelSize)); history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash); }
     function periodBuckets(frequency=state.frequency){ const key = calcCacheKey('periodBuckets', frequency); if (periodBucketsCache.has(key)) return periodBucketsCache.get(key); const periods = new Map(); rowsForFrequency(frequency).forEach(row => { const bucket = periods.get(row.period) || {}; bucket[row.regionKey] = row; periods.set(row.period, bucket); }); const entries = Array.from(periods.entries()).sort((a,b)=>a[0].localeCompare(b[0])); periodBucketsCache.set(key, entries); return entries; }
     function periodEntriesForBalance(){ const key = calcCacheKey('periodEntriesForBalance', state.frequency, forecastEndForFrequency()); if (balancePeriodEntriesCache.key === key && balancePeriodEntriesCache.entries) return balancePeriodEntriesCache.entries; const entries = periodBuckets().filter(([period,bucket]) => { const hasForecast = Object.values(bucket).some(row => row && row.status === 'forecast'); if (!hasForecast) return true; return period <= forecastEndForFrequency(); }); balancePeriodEntriesCache = {key,entries}; return entries; }
-    function rowsForRegion(regionKey, frequency){ const key = calcCacheKey('rowsForRegion', frequency, regionKey); if (rowsByRegionCache.has(key)) return rowsByRegionCache.get(key); const rows = rowsForFrequency(frequency).filter(row => row.regionKey === regionKey); rowsByRegionCache.set(key, rows); return rows; }
+    function rowsByRegionIndex(frequency){ const key = calcCacheKey('rowsByRegionIndex', frequency); if (rowsByRegionIndexCache.has(key)) return rowsByRegionIndexCache.get(key); const index = new Map(); rowsForFrequency(frequency).forEach(row => { if (!row?.regionKey) return; const rows = index.get(row.regionKey) || []; rows.push(row); index.set(row.regionKey, rows); }); rowsByRegionIndexCache.set(key, index); return index; }
+    function rowsForRegion(regionKey, frequency){ const key = calcCacheKey('rowsForRegion', frequency, regionKey); if (rowsByRegionCache.has(key)) return rowsByRegionCache.get(key); const rows = rowsByRegionIndex(frequency).get(regionKey) || []; rowsByRegionCache.set(key, rows); return rows; }
     function crudeRowsForFrequency(frequency=state.frequency){ return frequency === 'weekly' ? (Array.isArray(D.crudeRuns?.weekly) ? D.crudeRuns.weekly : []) : (Array.isArray(D.crudeRuns?.monthly) ? D.crudeRuns.monthly : []); }
     function crudeRowsForRegion(regionKey, frequency=state.frequency){ const key = calcCacheKey('crudeRowsForRegion', frequency, regionKey); if (crudeRowsByRegionCache.has(key)) return crudeRowsByRegionCache.get(key); const rows = crudeRowsForFrequency(frequency).filter(row => row.regionKey === regionKey); crudeRowsByRegionCache.set(key, rows); return rows; }
-    const BASE_BALANCE_REGION_KEYS = ['padd1ab','padd1c','padd2','padd3','padd4','padd5'];
-    const BALANCE_AGGREGATES = {us:['padd1ab','padd1c','padd2','padd3','padd4','padd5'],p123:['padd1ab','padd1c','padd2','padd3'],p13:['padd1ab','padd1c','padd3']};
+    const EXPORT_DESTINATION_FIELDS = ['exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd'];
+    const EXPORT_DESTINATION_LINE_BY_FIELD = {exportsLatinAmericaKbd:'exportsLatinAmerica',exportsEuropeKbd:'exportsEurope',exportsAfricaKbd:'exportsAfrica',exportsOtherKbd:'exportsOther'};
+    const HAS_SINGLE_PADD1_BALANCE = D.regionalBalance.regions.some(region => region.key === 'padd1');
+    const BALANCE_AGGREGATES = HAS_SINGLE_PADD1_BALANCE ? {us:['padd1','padd2','padd3','padd4','padd5'],p123:['padd1','padd2','padd3'],p13:['padd1','padd3']} : {us:['padd1ab','padd1c','padd2','padd3','padd4','padd5'],p123:['padd1ab','padd1c','padd2','padd3'],p13:['padd1ab','padd1c','padd3']};
+    const BASE_BALANCE_REGION_KEYS = D.regionalBalance.regions.map(region => region.key).filter(key => !BALANCE_AGGREGATES[key]);
     const BALANCE_AGGREGATE_REGION_KEYS = Object.keys(BALANCE_AGGREGATES);
     function isBaseBalanceRegion(regionKey){ return BASE_BALANCE_REGION_KEYS.includes(regionKey); }
     function isAggregateBalanceRegion(regionKey){ return BALANCE_AGGREGATE_REGION_KEYS.includes(regionKey); }
@@ -3419,11 +3735,14 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function adjustedMonthlyBuckets(){ const key = calcCacheKey('adjustedMonthlyBuckets'); if (adjustedMonthlyBucketsCache.key === key && adjustedMonthlyBucketsCache.buckets) return adjustedMonthlyBucketsCache.buckets; const buckets = bucketRows(adjustedMonthlyBalanceRows()); adjustedMonthlyBucketsCache = {key,buckets}; return buckets; }
     function balanceRegionMemberKeys(regionKey){ if (BASE_BALANCE_REGION_KEYS.includes(regionKey)) return [regionKey]; return BALANCE_AGGREGATES[regionKey] || []; }
     function movementRowsForRegion(regionKey, direction){ const scope = movementFlowScope(regionKey); return direction === 'in' ? scope.inFlows : scope.outFlows; }
-    function receiptLineId(flowId){ return 'receipt:' + flowId; }
-    function shipmentLineId(flowId){ return 'shipment:' + flowId; }
-    function isReceiptFlowLine(lineId){ return String(lineId || '').startsWith('receipt:'); }
-    function isShipmentFlowLine(lineId){ return String(lineId || '').startsWith('shipment:'); }
-    function lineFlowId(lineId){ return String(lineId || '').replace(/^(receipt|shipment):/, ''); }
+	    function receiptLineId(flowId){ return 'receipt:' + flowId; }
+	    function receiptSourceLineId(sourceKey){ return 'receiptSource:' + sourceKey; }
+	    function shipmentLineId(flowId){ return 'shipment:' + flowId; }
+	    function isReceiptFlowLine(lineId){ return String(lineId || '').startsWith('receipt:'); }
+	    function isReceiptSourceLine(lineId){ return String(lineId || '').startsWith('receiptSource:'); }
+	    function isShipmentFlowLine(lineId){ return String(lineId || '').startsWith('shipment:'); }
+	    function receiptSourceLineRegion(lineId){ return String(lineId || '').replace(/^receiptSource:/, ''); }
+	    function lineFlowId(lineId){ return String(lineId || '').replace(/^(receipt|shipment):/, ''); }
     function flowById(flowId){ return MOVEMENT_FLOW_BY_ID.get(flowId) || null; }
     function movementRowsByPeriod(frequency, flowId){ const key = frequency + '|' + flowId; if (movementRowMapCache.has(key)) return movementRowMapCache.get(key); const flow = flowById(flowId); const map = new Map((Array.isArray(flow?.[frequency]) ? flow[frequency] : []).map(row => [row.period, row])); movementRowMapCache.set(key, map); return map; }
     function movementRow(frequency, period, flowId){ return movementRowsByPeriod(frequency, flowId).get(period) || null; }
@@ -3433,11 +3752,11 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function receiptAdjustmentLineId(flowId){ return 'receiptAdjustment:' + flowId; }
     function isReceiptAdjustmentLine(lineId){ return String(lineId || '').startsWith('receiptAdjustment:'); }
     function receiptAdjustmentFlowId(lineId){ return String(lineId || '').replace(/^receiptAdjustment:/, ''); }
-    function adjustmentTargetLineId(lineId){ const raw = String(lineId || '').trim(); if (isReceiptAdjustmentLine(raw)) return receiptLineId(receiptAdjustmentFlowId(raw)); if (raw === 'demandAdjustment') return 'demand'; if (raw === 'importsAdjustment') return 'imports'; if (raw === 'exportsAdjustment') return 'exports'; return raw; }
+    function adjustmentTargetLineId(lineId){ const raw = String(lineId || '').trim(); if (isReceiptAdjustmentLine(raw)) return receiptLineId(receiptAdjustmentFlowId(raw)); if (raw === 'demandAdjustment') return 'demand'; if (raw === 'importsAdjustment') return 'imports'; if (raw === 'canadaImportsAdjustment') return 'canadaImports'; if (raw === 'nonCanadaImportsAdjustment') return 'nonCanadaImports'; if (raw === 'exportsAdjustment') return 'exports'; if (raw === 'exportsLatinAmericaAdjustment') return 'exportsLatinAmerica'; if (raw === 'exportsEuropeAdjustment') return 'exportsEurope'; if (raw === 'exportsAfricaAdjustment') return 'exportsAfrica'; if (raw === 'exportsOtherAdjustment') return 'exportsOther'; return raw; }
     function adjustmentDisplayTargetLineId(lineId){ const target = adjustmentTargetLineId(lineId); return target === 'yieldAdjustmentPct' ? 'yieldPct' : target; }
-    const BALANCE_ADJUSTMENT_ALIASES = {production:['production','productionKbd'],productionKbd:['productionKbd','production'],demand:['demand','demandKbd','productSupplied','demandAdjustment'],demandAdjustment:['demandAdjustment','demand','demandKbd','productSupplied'],productSupplied:['productSupplied','demand','demandKbd','demandAdjustment'],imports:['imports','importsKbd','importsAdjustment'],importsAdjustment:['importsAdjustment','imports','importsKbd'],exports:['exports','exportsKbd','exportsAdjustment'],exportsAdjustment:['exportsAdjustment','exports','exportsKbd'],netReceiptsKbd:['netReceiptsKbd','netReceipts'],stocks:['stocks','stocksKb'],stocksKb:['stocksKb','stocks'],yieldPct:['yieldPct','yield','yieldPercent','yieldAdjustmentPct'],yield:['yield','yieldPct','yieldPercent','yieldAdjustmentPct'],yieldAdjustmentPct:['yieldAdjustmentPct','yieldPct','yield','yieldPercent']};
-    const BALANCE_LINE_CANONICAL = {productionKbd:'production',demandKbd:'demand',productSupplied:'demand',demandAdjustment:'demand',importsKbd:'imports',importsAdjustment:'imports',exportsKbd:'exports',exportsAdjustment:'exports',netReceipts:'netReceiptsKbd',stocksKb:'stocks',yield:'yieldPct',yieldPercent:'yieldPct',yieldAdjustmentPct:'yieldPct'};
-    const ADJUSTABLE_BALANCE_LINES = new Set(['yieldAdjustmentPct','demandAdjustment','importsAdjustment','exportsAdjustment']);
+    const BALANCE_ADJUSTMENT_ALIASES = {production:['production','productionKbd'],productionKbd:['productionKbd','production'],demand:['demand','demandKbd','productSupplied','demandAdjustment'],demandAdjustment:['demandAdjustment','demand','demandKbd','productSupplied'],productSupplied:['productSupplied','demand','demandKbd','demandAdjustment'],imports:['imports','importsKbd','importsAdjustment'],importsAdjustment:['importsAdjustment','imports','importsKbd'],canadaImports:['canadaImports','canadaImportsKbd','canadaImportsAdjustment'],canadaImportsKbd:['canadaImportsKbd','canadaImports','canadaImportsAdjustment'],canadaImportsAdjustment:['canadaImportsAdjustment','canadaImports','canadaImportsKbd'],nonCanadaImports:['nonCanadaImports','nonCanadaImportsKbd','nonCanadaImportsAdjustment'],nonCanadaImportsKbd:['nonCanadaImportsKbd','nonCanadaImports','nonCanadaImportsAdjustment'],nonCanadaImportsAdjustment:['nonCanadaImportsAdjustment','nonCanadaImports','nonCanadaImportsKbd'],exports:['exports','exportsKbd','exportsAdjustment'],exportsAdjustment:['exportsAdjustment','exports','exportsKbd'],exportsLatinAmerica:['exportsLatinAmerica','exportsLatinAmericaKbd','exportsLatinAmericaAdjustment'],exportsLatinAmericaKbd:['exportsLatinAmericaKbd','exportsLatinAmerica','exportsLatinAmericaAdjustment'],exportsLatinAmericaAdjustment:['exportsLatinAmericaAdjustment','exportsLatinAmerica','exportsLatinAmericaKbd'],exportsEurope:['exportsEurope','exportsEuropeKbd','exportsEuropeAdjustment'],exportsEuropeKbd:['exportsEuropeKbd','exportsEurope','exportsEuropeAdjustment'],exportsEuropeAdjustment:['exportsEuropeAdjustment','exportsEurope','exportsEuropeKbd'],exportsAfrica:['exportsAfrica','exportsAfricaKbd','exportsAfricaAdjustment'],exportsAfricaKbd:['exportsAfricaKbd','exportsAfrica','exportsAfricaAdjustment'],exportsAfricaAdjustment:['exportsAfricaAdjustment','exportsAfrica','exportsAfricaKbd'],exportsOther:['exportsOther','exportsOtherKbd','exportsOtherAdjustment'],exportsOtherKbd:['exportsOtherKbd','exportsOther','exportsOtherAdjustment'],exportsOtherAdjustment:['exportsOtherAdjustment','exportsOther','exportsOtherKbd'],netReceiptsKbd:['netReceiptsKbd','netReceipts'],stocks:['stocks','stocksKb'],stocksKb:['stocksKb','stocks'],yieldPct:['yieldPct','yield','yieldPercent','yieldAdjustmentPct'],yield:['yield','yieldPct','yieldPercent','yieldAdjustmentPct'],yieldAdjustmentPct:['yieldAdjustmentPct','yieldPct','yield','yieldPercent']};
+    const BALANCE_LINE_CANONICAL = {productionKbd:'production',demandKbd:'demand',productSupplied:'demand',demandAdjustment:'demand',importsKbd:'imports',importsAdjustment:'imports',canadaImportsKbd:'canadaImports',canadaImportsAdjustment:'canadaImports',nonCanadaImportsKbd:'nonCanadaImports',nonCanadaImportsAdjustment:'nonCanadaImports',exportsKbd:'exports',exportsAdjustment:'exports',exportsLatinAmericaKbd:'exportsLatinAmerica',exportsLatinAmericaAdjustment:'exportsLatinAmerica',exportsEuropeKbd:'exportsEurope',exportsEuropeAdjustment:'exportsEurope',exportsAfricaKbd:'exportsAfrica',exportsAfricaAdjustment:'exportsAfrica',exportsOtherKbd:'exportsOther',exportsOtherAdjustment:'exportsOther',netReceipts:'netReceiptsKbd',stocksKb:'stocks',yield:'yieldPct',yieldPercent:'yieldPct',yieldAdjustmentPct:'yieldPct'};
+    const ADJUSTABLE_BALANCE_LINES = new Set(['yieldAdjustmentPct','demandAdjustment','importsAdjustment','canadaImportsAdjustment','nonCanadaImportsAdjustment','exportsAdjustment','exportsLatinAmericaAdjustment','exportsEuropeAdjustment','exportsAfricaAdjustment','exportsOtherAdjustment']);
     function normalizeBalanceLineId(lineId){ const target = adjustmentTargetLineId(lineId); return BALANCE_LINE_CANONICAL[target] || target; }
     function normalizeBalanceAdjustment(row){ if (!row || typeof row !== 'object') return null; const frequency = row.frequency === 'weekly' ? 'weekly' : 'monthly'; const period = String(row.period || '').trim(); const regionKey = String(row.regionKey || '').trim(); const lineId = normalizeBalanceLineId(row.lineId); const valueKbd = Number(row.valueKbd ?? row.value ?? row.percent ?? 0); if (!period || !BASE_BALANCE_REGION_KEYS.includes(regionKey) || !lineId || !Number.isFinite(valueKbd) || valueKbd < 0) return null; return {frequency,period,regionKey,lineId,valueKbd:round3(valueKbd),note:String(row.note || '').trim(),updatedAt:row.updatedAt || new Date().toISOString()}; }
     function normalizeBalanceAdjustmentList(rows){ return (Array.isArray(rows) ? rows : []).map(normalizeBalanceAdjustment).filter(Boolean).sort((a,b)=>a.frequency.localeCompare(b.frequency) || a.period.localeCompare(b.period) || a.regionKey.localeCompare(b.regionKey) || a.lineId.localeCompare(b.lineId)); }
@@ -3466,28 +3785,303 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function balanceAdjustmentIndex(){ const rows = effectiveBalanceAdjustments(); const signature = stableSettingsRows(rows); if (balanceAdjustmentIndexCache.key === signature && balanceAdjustmentIndexCache.index) return balanceAdjustmentIndexCache.index; const index = new Map(); rows.forEach(adj => { if (!adj) return; const key = balanceAdjustmentIndexKey(adj.frequency, adj.period, adj.regionKey, adj.lineId); const current = index.get(key); if (!current || String(adj.updatedAt || '').localeCompare(String(current.updatedAt || '')) >= 0) index.set(key, adj); }); balanceAdjustmentIndexCache = {key:signature,index}; return index; }
     function balanceAdjustmentValue(frequency, period, regionKey, lineId){ const aliases = balanceAdjustmentAliases(lineId); const key = calcCacheKey('balanceAdjustmentValue', frequency, period, regionKey, aliases.join(',')); if (balanceAdjustmentValueCache.has(key)) return balanceAdjustmentValueCache.get(key); const index = balanceAdjustmentIndex(); let adjustment = null; aliases.forEach(alias => { const candidate = index.get(balanceAdjustmentIndexKey(frequency, period, regionKey, alias)); if (candidate && (!adjustment || String(candidate.updatedAt || '').localeCompare(String(adjustment.updatedAt || '')) >= 0)) adjustment = candidate; }); const value = adjustment ? Number(adjustment.valueKbd) : null; balanceAdjustmentValueCache.set(key, Number.isFinite(value) ? value : null); return Number.isFinite(value) ? value : null; }
     function applyBalanceAdjustment(value, frequency, period, regionKey, lineId){ const override = balanceAdjustmentValue(frequency, period, regionKey, lineId); return override === null ? value : override; }
+    function isExperimentalBalanceSyncNote(note){ return String(note || '').startsWith(EXPERIMENTAL_BALANCE_SYNC_NOTE_PREFIX); }
+    function experimentalBalanceSyncNote(scope, period=''){ return EXPERIMENTAL_BALANCE_SYNC_NOTE_PREFIX + ' ' + String(scope || '').trim() + (period ? ' ' + String(period) : ''); }
+    function workbookBalanceAdjustmentRow(frequency, period, regionKey, lineId){
+      const aliases = balanceAdjustmentAliases(lineId);
+      let latest = null;
+      (Array.isArray(workbookSettings?.adjustments) ? workbookSettings.adjustments : []).forEach(adj => {
+        if (!adj || adj.frequency !== frequency || adj.period !== period || adj.regionKey !== regionKey) return;
+        if (!aliases.includes(normalizeBalanceLineId(adj.lineId))) return;
+        if (!latest || String(adj.updatedAt || '').localeCompare(String(latest.updatedAt || '')) >= 0) latest = adj;
+      });
+      return latest;
+    }
+    function saveExperimentalBalanceAdjustments(nextAdjustments, predicate, successMessage, emptyMessage){
+      const rows = Array.isArray(nextAdjustments) ? nextAdjustments.filter(Boolean) : [];
+      const beforeRows = stableSettingsRows(workbookSettings.adjustments);
+      workbookSettings.adjustments = normalizeBalanceAdjustmentList([...(workbookSettings.adjustments || []).filter(adj => !predicate(adj)), ...rows]);
+      const changed = saveBalanceAdjustmentsLocal(beforeRows);
+      if (changed) {
+        tableScrollSignatures = {};
+        scheduleAdjustmentRender(false);
+        queueBalanceAdjustmentsToServer();
+      }
+      showToast(changed ? successMessage : emptyMessage);
+      return changed;
+    }
+    async function applyExperimentalWeeklyToMonthlyReconcile(){
+      try {
+        await ensureWeeklyData();
+      } catch {
+        showToast('Unable to load weekly workbook data');
+        return false;
+      }
+      const timestamp = new Date().toISOString();
+      const nextAdjustments = [];
+      const replaceKeys = new Set();
+      let applied = 0;
+      let skippedLocked = 0;
+      let skippedNegative = 0;
+      let alreadyAligned = 0;
+      withChartScenariosSuppressed(() => {
+        BASE_BALANCE_REGION_KEYS.forEach(regionKey => {
+          rowsForRegion(regionKey, 'monthly').forEach(monthlyPoint => {
+            if (!monthlyPoint?.period || monthlyPoint.status !== 'forecast') return;
+            const weeklyRows = rowsForRegion(regionKey, 'weekly').filter(row => row?.period && weeklyForecastMonth(row.period) === monthlyPoint.period);
+            const actualRows = weeklyRows.filter(row => row.status === 'actual');
+            const forecastRows = weeklyRows.filter(row => row.status === 'forecast');
+            if (!actualRows.length || !forecastRows.length) return;
+            const adjustableRows = forecastRows.filter(row => {
+              const existing = workbookBalanceAdjustmentRow('weekly', row.period, regionKey, 'demand');
+              return !existing || isExperimentalBalanceSyncNote(existing.note);
+            });
+            if (!adjustableRows.length) {
+              skippedLocked += 1;
+              return;
+            }
+            const targetTotalKb = Number(totals(monthlyPoint).total || 0);
+            const actualTotalKb = actualRows.reduce((sum, row) => sum + Number(totals(row).total || 0), 0);
+            const forecastTotalKb = forecastRows.reduce((sum, row) => sum + Number(totals(row).total || 0), 0);
+            const deltaTotalKb = round3(targetTotalKb - actualTotalKb - forecastTotalKb);
+            if (Math.abs(deltaTotalKb) < 0.001) {
+              alreadyAligned += 1;
+              return;
+            }
+            const adjustableDays = adjustableRows.reduce((sum, row) => sum + periodDays(row.period), 0);
+            if (!adjustableDays) {
+              skippedLocked += 1;
+              return;
+            }
+            const balanceDeltaKbd = deltaTotalKb / adjustableDays;
+            const monthAdjustments = [];
+            let invalid = false;
+            adjustableRows.forEach(row => {
+              const nextDemand = round3(Number(row.demandKbd || 0) - balanceDeltaKbd);
+              if (!Number.isFinite(nextDemand) || nextDemand < 0) {
+                invalid = true;
+                return;
+              }
+              const adjustment = normalizeBalanceAdjustment({frequency:'weekly',period:row.period,regionKey,lineId:'demand',valueKbd:nextDemand,note:experimentalBalanceSyncNote('weekly-demand', monthlyPoint.period),updatedAt:timestamp});
+              if (!adjustment) {
+                invalid = true;
+                return;
+              }
+              monthAdjustments.push(adjustment);
+            });
+            if (invalid || !monthAdjustments.length) {
+              skippedNegative += 1;
+              return;
+            }
+            applied += 1;
+            monthAdjustments.forEach(adjustment => {
+              replaceKeys.add(balanceAdjustmentIndexKey(adjustment.frequency, adjustment.period, adjustment.regionKey, adjustment.lineId));
+              nextAdjustments.push(adjustment);
+            });
+          });
+        });
+      });
+      if (!applied) {
+        const message = skippedNegative ? 'Weekly reconcile skipped: demand would go negative' : skippedLocked ? 'Weekly reconcile skipped: affected weeks already have manual demand overrides' : alreadyAligned ? 'Weekly forecast already matches monthly target' : 'No mixed weekly months to reconcile';
+        showToast(message);
+        return false;
+      }
+      const summary = 'Applied weekly demand reconcile to ' + applied + ' region-month' + (applied === 1 ? '' : 's') + (skippedLocked ? ' | locked ' + skippedLocked : '') + (skippedNegative ? ' | invalid ' + skippedNegative : '');
+      return saveExperimentalBalanceAdjustments(nextAdjustments, adj => replaceKeys.has(balanceAdjustmentIndexKey(adj.frequency, adj.period, adj.regionKey, adj.lineId)), summary, 'Weekly reconcile already applied');
+    }
+    async function applyExperimentalMonthlyToWeeklyReconcile(){
+      try {
+        await ensureWeeklyData();
+      } catch {
+        showToast('Unable to load weekly workbook data');
+        return false;
+      }
+      const timestamp = new Date().toISOString();
+      const nextAdjustments = [];
+      const replaceKeys = new Set();
+      let applied = 0;
+      let skippedLocked = 0;
+      let skippedNegative = 0;
+      let alreadyAligned = 0;
+      const pushTargetAdjustment = (rows, regionKey, periodMonth, lineId, valueKbd, currentValue) => {
+        if (!Number.isFinite(valueKbd) || valueKbd < 0) return false;
+        const existing = workbookBalanceAdjustmentRow('monthly', periodMonth, regionKey, lineId);
+        if (existing && !isExperimentalBalanceSyncNote(existing.note)) return null;
+        const roundedValue = lineId === 'yieldAdjustmentPct' ? round3(Math.max(0, Math.min(100, valueKbd))) : round3(valueKbd);
+        const roundedCurrent = round3(Number(currentValue || 0));
+        if ((!existing || isExperimentalBalanceSyncNote(existing.note)) && roundedValue === roundedCurrent && !existing) return true;
+        const adjustment = normalizeBalanceAdjustment({frequency:'monthly',period:periodMonth,regionKey,lineId,valueKbd:roundedValue,note:experimentalBalanceSyncNote('monthly-average', periodMonth),updatedAt:timestamp});
+        if (!adjustment) return false;
+        rows.push(adjustment);
+        replaceKeys.add(balanceAdjustmentIndexKey(adjustment.frequency, adjustment.period, adjustment.regionKey, adjustment.lineId));
+        return true;
+      };
+      withChartScenariosSuppressed(() => {
+        BASE_BALANCE_REGION_KEYS.forEach(regionKey => {
+          const monthlyRows = rowsForRegion(regionKey, 'monthly');
+          const weeklyRows = rowsForRegion(regionKey, 'weekly');
+          const periodMonths = Array.from(new Set(weeklyRows.filter(row => row?.period && row.status === 'actual').map(row => weeklyForecastMonth(row.period))));
+          periodMonths.forEach(periodMonth => {
+            const completedWeeks = weeklyRows.filter(row => row?.period && weeklyForecastMonth(row.period) === periodMonth);
+            if (!completedWeeks.length || completedWeeks.some(row => row.status !== 'actual')) return;
+            const monthlyPoint = monthlyRows.find(row => row?.period === periodMonth);
+            if (!monthlyPoint || monthlyPoint.status !== 'forecast') return;
+            const productionAvg = average(completedWeeks.map(row => Number(row.productionKbd || 0)));
+            const importsAvg = average(completedWeeks.map(row => Number(row.importsKbd || 0)));
+            const exportsAvg = forceZeroExports(regionKey) ? 0 : (average(completedWeeks.map(row => Number(row.exportsKbd || 0))) || 0);
+            const balanceAvg = average(completedWeeks.map(row => Number(row.balanceKbd || 0)));
+            const yieldAvg = average(completedWeeks.map(row => Number(row.yieldPct || 0)));
+            if (![productionAvg, importsAvg, exportsAvg, balanceAvg].every(Number.isFinite)) return;
+            const monthlyCrudeRunsKbd = Number(monthlyPoint.crudeRunsKbd || 0);
+            const yieldTarget = monthlyCrudeRunsKbd > 0 ? Number(productionAvg) / monthlyCrudeRunsKbd * 100 : Number(yieldAvg || 0);
+            const demandTarget = Number(productionAvg) + Number(importsAvg) + Number(monthlyPoint.netReceiptsKbd || 0) - Number(exportsAvg) - Number(balanceAvg);
+            if (!Number.isFinite(demandTarget) || demandTarget < 0) {
+              skippedNegative += 1;
+              return;
+            }
+            const monthAdjustments = [];
+            let locked = false;
+            let invalid = false;
+            const productionResult = pushTargetAdjustment(monthAdjustments, regionKey, periodMonth, 'production', Number(productionAvg), monthlyPoint.productionKbd);
+            if (productionResult === null) locked = true;
+            if (productionResult === false) invalid = true;
+            const yieldResult = pushTargetAdjustment(monthAdjustments, regionKey, periodMonth, 'yieldAdjustmentPct', yieldTarget, monthlyPoint.yieldPct);
+            if (yieldResult === null) locked = true;
+            if (yieldResult === false) invalid = true;
+            if (regionKey === 'padd1ab') {
+              const importParts = adjustedImportComponents(monthlyPoint, Number(importsAvg));
+              const canadaResult = pushTargetAdjustment(monthAdjustments, regionKey, periodMonth, 'canadaImportsAdjustment', Number(importParts.canadaImportsKbd || 0), monthlyPoint.canadaImportsKbd);
+              const nonCanadaResult = pushTargetAdjustment(monthAdjustments, regionKey, periodMonth, 'nonCanadaImportsAdjustment', Number(importParts.nonCanadaImportsKbd || 0), monthlyPoint.nonCanadaImportsKbd);
+              if (canadaResult === null || nonCanadaResult === null) locked = true;
+              if (canadaResult === false || nonCanadaResult === false) invalid = true;
+            } else {
+              const importsResult = pushTargetAdjustment(monthAdjustments, regionKey, periodMonth, 'imports', Number(importsAvg), monthlyPoint.importsKbd);
+              if (importsResult === null) locked = true;
+              if (importsResult === false) invalid = true;
+            }
+            if (regionKey === 'padd3') {
+              const exportTargets = adjustedExportDestinationValues(monthlyPoint, Number(exportsAvg));
+              const destinationPairs = [['exportsLatinAmericaAdjustment', monthlyPoint.exportsLatinAmericaKbd, exportTargets.exportsLatinAmericaKbd],['exportsEuropeAdjustment', monthlyPoint.exportsEuropeKbd, exportTargets.exportsEuropeKbd],['exportsAfricaAdjustment', monthlyPoint.exportsAfricaKbd, exportTargets.exportsAfricaKbd],['exportsOtherAdjustment', monthlyPoint.exportsOtherKbd, exportTargets.exportsOtherKbd]];
+              destinationPairs.forEach(([lineId, currentValue, nextValue]) => {
+                const result = pushTargetAdjustment(monthAdjustments, regionKey, periodMonth, lineId, Number(nextValue || 0), currentValue);
+                if (result === null) locked = true;
+                if (result === false) invalid = true;
+              });
+            } else if (!forceZeroExports(regionKey)) {
+              const exportsResult = pushTargetAdjustment(monthAdjustments, regionKey, periodMonth, 'exports', Number(exportsAvg), monthlyPoint.exportsKbd);
+              if (exportsResult === null) locked = true;
+              if (exportsResult === false) invalid = true;
+            }
+            const demandResult = pushTargetAdjustment(monthAdjustments, regionKey, periodMonth, 'demand', demandTarget, monthlyPoint.demandKbd);
+            if (demandResult === null) locked = true;
+            if (demandResult === false) invalid = true;
+            if (invalid) {
+              skippedNegative += 1;
+              return;
+            }
+            if (locked) {
+              skippedLocked += 1;
+              return;
+            }
+            if (!monthAdjustments.length) {
+              alreadyAligned += 1;
+              return;
+            }
+            applied += 1;
+            monthAdjustments.forEach(adjustment => nextAdjustments.push(adjustment));
+          });
+        });
+      });
+      if (!applied) {
+        const message = skippedNegative ? 'Monthly backfill skipped: demand would go negative' : skippedLocked ? 'Monthly backfill skipped: affected months already have manual overrides' : alreadyAligned ? 'Monthly view already matches completed weekly data' : 'No completed weekly months to backfill';
+        showToast(message);
+        return false;
+      }
+      const summary = 'Applied monthly backfill to ' + applied + ' region-month' + (applied === 1 ? '' : 's') + (skippedLocked ? ' | locked ' + skippedLocked : '') + (skippedNegative ? ' | invalid ' + skippedNegative : '');
+      return saveExperimentalBalanceAdjustments(nextAdjustments, adj => replaceKeys.has(balanceAdjustmentIndexKey(adj.frequency, adj.period, adj.regionKey, adj.lineId)), summary, 'Monthly backfill already applied');
+    }
+    function clearExperimentalBalanceSyncAdjustments(){
+      const current = Array.isArray(workbookSettings?.adjustments) ? workbookSettings.adjustments : [];
+      const count = current.filter(adj => isExperimentalBalanceSyncNote(adj?.note)).length;
+      if (!count) {
+        showToast('No experimental adjustments to clear');
+        return false;
+      }
+      return saveExperimentalBalanceAdjustments([], adj => isExperimentalBalanceSyncNote(adj?.note), 'Cleared ' + count + ' experimental adjustment' + (count === 1 ? '' : 's'), 'No experimental adjustments to clear');
+    }
     function crudeRegionForBalanceRegion(regionKey){ return regionKey === 'padd1ab' || regionKey === 'padd1c' ? 'padd1' : regionKey; }
     function outageRegionForBalanceRegion(regionKey){ const crudeRegion = crudeRegionForBalanceRegion(regionKey); return validBaseCrudeRegion(crudeRegion) ? crudeRegion : 'padd1'; }
     function padd1SplitShare(regionKey, rawBucket){ if (regionKey !== 'padd1ab' && regionKey !== 'padd1c') return 1; const point = rawBucket?.[regionKey] || {}; const ab = Number(rawBucket?.padd1ab?.productionKbd || 0); const c = Number(rawBucket?.padd1c?.productionKbd || 0); const total = ab + c; if (total > 0) return Math.max(0, Math.min(1, Number(point.productionKbd || 0) / total)); const demandTotal = Number(rawBucket?.padd1ab?.demandKbd || 0) + Number(rawBucket?.padd1c?.demandKbd || 0); if (demandTotal > 0) return Math.max(0, Math.min(1, Number(point.demandKbd || 0) / demandTotal)); return regionKey === 'padd1ab' ? 1 : 0; }
     function adjustedImportComponents(point, importsKbd){ const total = Math.max(0, Number(importsKbd || 0)); const sourceCanada = Math.max(0, Number(point?.canadaImportsKbd || 0)); const sourceNonCanada = Math.max(0, Number(point?.nonCanadaImportsKbd ?? Math.max(0, Number(point?.importsKbd || 0) - sourceCanada))); const sourceTotal = sourceCanada + sourceNonCanada; const canadaImportsKbd = sourceTotal > 0 ? round2(Math.min(total, total * sourceCanada / sourceTotal)) : 0; return {canadaImportsKbd,nonCanadaImportsKbd:round2(Math.max(0, total - canadaImportsKbd))}; }
+    function adjustedImportValues(point, importsKbd, frequency, period, regionKey, isActual){ const base = adjustedImportComponents(point, importsKbd); if (isActual || frequency === 'weekly' || regionKey !== 'padd1ab') return {importsKbd:round2(importsKbd),...base}; let canadaImportsKbd = base.canadaImportsKbd; let nonCanadaImportsKbd = base.nonCanadaImportsKbd; const canadaOverride = balanceAdjustmentValue(frequency, period, regionKey, 'canadaImports'); const nonCanadaOverride = balanceAdjustmentValue(frequency, period, regionKey, 'nonCanadaImports'); if (canadaOverride !== null) canadaImportsKbd = round2(canadaOverride); if (nonCanadaOverride !== null) nonCanadaImportsKbd = round2(nonCanadaOverride); return {importsKbd:round2(canadaImportsKbd + nonCanadaImportsKbd),canadaImportsKbd,nonCanadaImportsKbd}; }
+    function adjustedExportDestinationValues(point, exportsKbd){ const total = Math.max(0, Number(exportsKbd || 0)); const base = EXPORT_DESTINATION_FIELDS.map(key => Math.max(0, Number(point?.[key] || 0))); const baseTotal = base.reduce((sum, value) => sum + value, 0); const values = {}; if (baseTotal <= 0) { EXPORT_DESTINATION_FIELDS.forEach((key, index) => { values[key] = index === EXPORT_DESTINATION_FIELDS.length - 1 ? round2(total) : 0; }); return values; } EXPORT_DESTINATION_FIELDS.forEach((key, index) => { values[key] = round2(total * base[index] / baseTotal); }); const drift = round2(total - EXPORT_DESTINATION_FIELDS.reduce((sum, key) => sum + Number(values[key] || 0), 0)); values.exportsOtherKbd = round2(Math.max(0, Number(values.exportsOtherKbd || 0) + drift)); return values; }
+    function exportDestinationTotal(values){ return round2(EXPORT_DESTINATION_FIELDS.reduce((sum, key) => sum + Number(values?.[key] || 0), 0)); }
+    function adjustedPadd3ExportDestinationValues(point, frequency, period, isActual){ const values = {}; EXPORT_DESTINATION_FIELDS.forEach(key => { values[key] = round2(Math.max(0, Number(point?.[key] || 0))); }); if (!isActual) EXPORT_DESTINATION_FIELDS.forEach(key => { const override = balanceAdjustmentValue(frequency, period, 'padd3', EXPORT_DESTINATION_LINE_BY_FIELD[key]); if (override !== null) values[key] = round2(override); }); return values; }
     function allocatedCrudeDetail(regionKey, period, rawBucket, crudeBucket, isActual, frequency='monthly', splitBucket=rawBucket){ const crudeRegion = crudeRegionForBalanceRegion(regionKey); const crudePoint = crudeSchedulePoint(crudeRegion, period, crudeBucket || {}, isActual, frequency); const share = crudeRegion === 'padd1' ? padd1SplitShare(regionKey, splitBucket || rawBucket) : 1; const scale = key => round2(Number(crudePoint[key] || 0) * share); const operableCapacityKbd = scale('operableCapacityKbd'); const operatingCapacityKbd = scale('operatingCapacityKbd'); const plannedMaintenanceKbd = scale('plannedMaintenanceKbd'); const unplannedMaintenanceKbd = scale('unplannedMaintenanceKbd'); const crudeRunsKbd = scale('crudeRunsKbd'); const exPlannedCapacity = Math.max(0, operableCapacityKbd - plannedMaintenanceKbd); return {operableCapacityKbd,operatingCapacityKbd,plannedMaintenanceKbd,unplannedMaintenanceKbd,crudeRunsKbd,operatingUtilizationPct:round2(safePct(crudeRunsKbd, operatingCapacityKbd)),exPlannedUtilizationPct:round2(safePct(crudeRunsKbd, exPlannedCapacity))}; }
     function seasonalYieldPct(regionKey, period, rawBuckets, crudeInfoByPeriod){ const month = String(monthOf(period)).padStart(2,'0'); const years = Array.isArray(D.forecast?.seasonYears) && D.forecast.seasonYears.length ? D.forecast.seasonYears : [2023,2024,2025]; const yields = years.map(year => { const seasonPeriod = year + '-' + month; const rawBucket = rawBuckets.get(seasonPeriod); const rawPoint = rawBucket?.[regionKey]; if (!rawPoint) return null; const crudeInfo = crudeInfoByPeriod.get(seasonPeriod) || {bucket:{},isActual:true}; const detail = allocatedCrudeDetail(regionKey, seasonPeriod, rawBucket, crudeInfo.bucket, true); return detail.crudeRunsKbd > 0 ? Number(rawPoint.productionKbd || 0) / detail.crudeRunsKbd * 100 : null; }).filter(value => Number.isFinite(value)); return round2(average(yields) || 0); }
-    function adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorPoint){ const isActual = rawPoint.status === 'actual'; const detail = allocatedCrudeDetail(rawPoint.regionKey, rawPoint.period, rawBucket, crudeInfo?.bucket || {}, isActual); let yieldPct = isActual ? round2(detail.crudeRunsKbd > 0 ? Number(rawPoint.productionKbd || 0) / detail.crudeRunsKbd * 100 : 0) : seasonalYieldPct(rawPoint.regionKey, rawPoint.period, rawBuckets, crudeInfoByPeriod); const yieldAdjustmentPct = isActual ? null : balanceAdjustmentValue('monthly', rawPoint.period, rawPoint.regionKey, 'yieldAdjustmentPct'); if (yieldAdjustmentPct !== null) yieldPct = round2(yieldAdjustmentPct); let productionKbd = isActual ? Number(rawPoint.productionKbd || 0) : round2(detail.crudeRunsKbd * yieldPct / 100); if (!isActual) productionKbd = round2(applyBalanceAdjustment(productionKbd, 'monthly', rawPoint.period, rawPoint.regionKey, 'production')); const demandKbd = isActual ? Number(rawPoint.demandKbd || 0) : round2(applyBalanceAdjustment(Number(rawPoint.demandKbd || 0), 'monthly', rawPoint.period, rawPoint.regionKey, 'demand')); const importsKbd = isActual ? Number(rawPoint.importsKbd || 0) : round2(applyBalanceAdjustment(Number(rawPoint.importsKbd || 0), 'monthly', rawPoint.period, rawPoint.regionKey, 'imports')); const importComponents = adjustedImportComponents(rawPoint, importsKbd); const exportsKbd = isActual ? Number(rawPoint.exportsKbd || 0) : round2(applyBalanceAdjustment(Number(rawPoint.exportsKbd || 0), 'monthly', rawPoint.period, rawPoint.regionKey, 'exports')); const movement = movementSummaryForRegion('monthly', rawPoint.period, rawPoint.regionKey); const receiptsKbd = movement.hasFlows ? movement.receiptsKbd : null; const shipmentsKbd = movement.hasFlows ? movement.shipmentsKbd : null; const netReceiptsKbd = movement.hasFlows ? movement.netReceiptsKbd : Number(rawPoint.netReceiptsKbd || 0); const balanceKbd = round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd); const stocksKb = isActual ? Number(rawPoint.stocksKb || 0) : round2(Number(priorPoint?.stocksKb || rawPoint.stocksKb || 0) + balanceKbd * periodDays(rawPoint.period)); return {...rawPoint,...detail,yieldPct,yieldAdjustmentPct,demandKbd,productionKbd,importsKbd,...importComponents,exportsKbd,netReceiptsKbd,receiptsKbd,shipmentsKbd,stockChangeKbd:isActual ? Number(rawPoint.stockChangeKbd || 0) : balanceKbd,balanceKbd,stocksKb}; }
-    function aggregateAdjustedMonthlyPoint(period, regionKey, parts, frequency='monthly'){ const status = parts.some(point => point.status === 'forecast') ? 'forecast' : 'actual'; const sum = key => parts.reduce((total, point) => total + Number(point[key] || 0), 0); const productionKbd = sum('productionKbd'); const importsKbd = sum('importsKbd'); const canadaImportsKbd = sum('canadaImportsKbd'); const nonCanadaImportsKbd = sum('nonCanadaImportsKbd'); const movement = movementSummaryForRegion(frequency, period, regionKey); const receiptsKbd = movement.hasFlows ? movement.receiptsKbd : sum('receiptsKbd'); const shipmentsKbd = movement.hasFlows ? movement.shipmentsKbd : sum('shipmentsKbd'); const netReceiptsKbd = movement.hasFlows ? movement.netReceiptsKbd : sum('netReceiptsKbd'); const exportsKbd = sum('exportsKbd'); const demandKbd = sum('demandKbd'); const operableCapacityKbd = sum('operableCapacityKbd'); const operatingCapacityKbd = sum('operatingCapacityKbd'); const plannedMaintenanceKbd = sum('plannedMaintenanceKbd'); const crudeRunsKbd = sum('crudeRunsKbd'); const exPlannedCapacity = Math.max(0, operableCapacityKbd - plannedMaintenanceKbd); return {period,status,regionKey,regionName:balanceRegionDisplayLabel(regionKey),demandKbd:round2(demandKbd),productionKbd:round2(productionKbd),importsKbd:round2(importsKbd),canadaImportsKbd:round2(canadaImportsKbd),nonCanadaImportsKbd:round2(nonCanadaImportsKbd),exportsKbd:round2(exportsKbd),netReceiptsKbd:round2(netReceiptsKbd),receiptsKbd:round2(receiptsKbd),shipmentsKbd:round2(shipmentsKbd),stockChangeKbd:round2(sum('stockChangeKbd')),stocksKb:round2(sum('stocksKb')),balanceKbd:round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd),operableCapacityKbd:round2(operableCapacityKbd),operatingCapacityKbd:round2(operatingCapacityKbd),plannedMaintenanceKbd:round2(plannedMaintenanceKbd),unplannedMaintenanceKbd:round2(sum('unplannedMaintenanceKbd')),crudeRunsKbd:round2(crudeRunsKbd),operatingUtilizationPct:round2(safePct(crudeRunsKbd, operatingCapacityKbd)),exPlannedUtilizationPct:round2(safePct(crudeRunsKbd, exPlannedCapacity)),yieldPct:round2(safePct(productionKbd, crudeRunsKbd)),yieldAdjustmentPct:null}; }
-    function adjustedMonthlyActualBaseline(){ if (adjustedMonthlyActualRowsCache) return adjustedMonthlyActualRowsCache; const rawBuckets = monthlyRawBuckets(); const crudeInfoByPeriod = new Map(crudeAllPeriods('monthly').map(([period,bucket,isActual]) => [period,{bucket,isActual}])); const priorByRegion = new Map(); const out = []; Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:true}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'monthly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); adjustedMonthlyActualRowsCache = {rows:out,buckets:bucketRows(out),priorByRegion:new Map(priorByRegion)}; return adjustedMonthlyActualRowsCache; }
-    function adjustedMonthlyBalanceRows(){ const key = calcCacheKey('adjustedMonthlyBalanceRows'); if (adjustedMonthlyRowsCache.key === key && adjustedMonthlyRowsCache.rows) return adjustedMonthlyRowsCache.rows; const actualBaseline = adjustedMonthlyActualBaseline(); const rawBuckets = monthlyRawBuckets(); const crudeInfoByPeriod = new Map(crudeAllPeriods('monthly').map(([period,bucket,isActual]) => [period,{bucket,isActual}])); const priorByRegion = new Map(actualBaseline.priorByRegion); const out = actualBaseline.rows.slice(); Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (!Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:false}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'monthly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); adjustedMonthlyRowsCache = {key,rows:out}; return out; }
+    function forceZeroExports(regionKey){ return D.product?.key === 'diesel' && regionKey === 'padd1c'; }
+    function adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorPoint){ const isActual = rawPoint.status === 'actual'; const detail = allocatedCrudeDetail(rawPoint.regionKey, rawPoint.period, rawBucket, crudeInfo?.bucket || {}, isActual); let yieldPct = isActual ? round2(detail.crudeRunsKbd > 0 ? Number(rawPoint.productionKbd || 0) / detail.crudeRunsKbd * 100 : 0) : seasonalYieldPct(rawPoint.regionKey, rawPoint.period, rawBuckets, crudeInfoByPeriod); const yieldAdjustmentPct = isActual ? null : balanceAdjustmentValue('monthly', rawPoint.period, rawPoint.regionKey, 'yieldAdjustmentPct'); if (yieldAdjustmentPct !== null) yieldPct = round2(yieldAdjustmentPct); let productionKbd = isActual ? Number(rawPoint.productionKbd || 0) : round2(detail.crudeRunsKbd * yieldPct / 100); if (!isActual) productionKbd = round2(applyBalanceAdjustment(productionKbd, 'monthly', rawPoint.period, rawPoint.regionKey, 'production')); const demandKbd = isActual ? Number(rawPoint.demandKbd || 0) : round2(applyBalanceAdjustment(Number(rawPoint.demandKbd || 0), 'monthly', rawPoint.period, rawPoint.regionKey, 'demand')); let importsKbd = Number(rawPoint.importsKbd || 0); if (!isActual && rawPoint.regionKey !== 'padd1ab') importsKbd = round2(applyBalanceAdjustment(importsKbd, 'monthly', rawPoint.period, rawPoint.regionKey, 'imports')); const importValues = adjustedImportValues(rawPoint, importsKbd, 'monthly', rawPoint.period, rawPoint.regionKey, isActual); importsKbd = importValues.importsKbd; let exportsKbd = forceZeroExports(rawPoint.regionKey) ? 0 : isActual ? Number(rawPoint.exportsKbd || 0) : round2(applyBalanceAdjustment(Number(rawPoint.exportsKbd || 0), 'monthly', rawPoint.period, rawPoint.regionKey, 'exports')); let exportDestinationValues = adjustedExportDestinationValues(rawPoint, exportsKbd); if (forceZeroExports(rawPoint.regionKey)) exportDestinationValues = adjustedExportDestinationValues(rawPoint, 0); if (rawPoint.regionKey === 'padd3') { exportDestinationValues = isActual ? adjustedExportDestinationValues(rawPoint, exportsKbd) : adjustedPadd3ExportDestinationValues(rawPoint, 'monthly', rawPoint.period, isActual); if (!isActual) exportsKbd = exportDestinationTotal(exportDestinationValues); } const movement = movementSummaryForRegion('monthly', rawPoint.period, rawPoint.regionKey); const receiptsKbd = movement.hasFlows ? movement.receiptsKbd : null; const shipmentsKbd = movement.hasFlows ? movement.shipmentsKbd : null; const netReceiptsKbd = movement.hasFlows ? movement.netReceiptsKbd : Number(rawPoint.netReceiptsKbd || 0); const balanceKbd = round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd); const stocksKb = isActual ? Number(rawPoint.stocksKb || 0) : round2(Number(priorPoint?.stocksKb || rawPoint.stocksKb || 0) + balanceKbd * periodDays(rawPoint.period)); return {...rawPoint,...detail,yieldPct,yieldAdjustmentPct,demandKbd,productionKbd,...importValues,exportsKbd,...exportDestinationValues,netReceiptsKbd,receiptsKbd,shipmentsKbd,stockChangeKbd:isActual ? Number(rawPoint.stockChangeKbd || 0) : balanceKbd,balanceKbd,stocksKb}; }
+    function aggregateAdjustedMonthlyPoint(period, regionKey, parts, frequency='monthly'){ const status = parts.some(point => point.status === 'forecast') ? 'forecast' : 'actual'; const sum = key => parts.reduce((total, point) => total + Number(point[key] || 0), 0); const productionKbd = sum('productionKbd'); const importsKbd = sum('importsKbd'); const canadaImportsKbd = sum('canadaImportsKbd'); const nonCanadaImportsKbd = sum('nonCanadaImportsKbd'); const movement = movementSummaryForRegion(frequency, period, regionKey); const receiptsKbd = movement.hasFlows ? movement.receiptsKbd : sum('receiptsKbd'); const shipmentsKbd = movement.hasFlows ? movement.shipmentsKbd : sum('shipmentsKbd'); const netReceiptsKbd = movement.hasFlows ? movement.netReceiptsKbd : sum('netReceiptsKbd'); const exportsKbd = sum('exportsKbd'); const exportsLatinAmericaKbd = sum('exportsLatinAmericaKbd'); const exportsEuropeKbd = sum('exportsEuropeKbd'); const exportsAfricaKbd = sum('exportsAfricaKbd'); const exportsOtherKbd = sum('exportsOtherKbd'); const demandKbd = sum('demandKbd'); const operableCapacityKbd = sum('operableCapacityKbd'); const operatingCapacityKbd = sum('operatingCapacityKbd'); const plannedMaintenanceKbd = sum('plannedMaintenanceKbd'); const crudeRunsKbd = sum('crudeRunsKbd'); const exPlannedCapacity = Math.max(0, operableCapacityKbd - plannedMaintenanceKbd); return {period,status,regionKey,regionName:balanceRegionDisplayLabel(regionKey),demandKbd:round2(demandKbd),productionKbd:round2(productionKbd),importsKbd:round2(importsKbd),canadaImportsKbd:round2(canadaImportsKbd),nonCanadaImportsKbd:round2(nonCanadaImportsKbd),exportsKbd:round2(exportsKbd),exportsLatinAmericaKbd:round2(exportsLatinAmericaKbd),exportsEuropeKbd:round2(exportsEuropeKbd),exportsAfricaKbd:round2(exportsAfricaKbd),exportsOtherKbd:round2(exportsOtherKbd),netReceiptsKbd:round2(netReceiptsKbd),receiptsKbd:round2(receiptsKbd),shipmentsKbd:round2(shipmentsKbd),stockChangeKbd:round2(sum('stockChangeKbd')),stocksKb:round2(sum('stocksKb')),balanceKbd:round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd),operableCapacityKbd:round2(operableCapacityKbd),operatingCapacityKbd:round2(operatingCapacityKbd),plannedMaintenanceKbd:round2(plannedMaintenanceKbd),unplannedMaintenanceKbd:round2(sum('unplannedMaintenanceKbd')),crudeRunsKbd:round2(crudeRunsKbd),operatingUtilizationPct:round2(safePct(crudeRunsKbd, operatingCapacityKbd)),exPlannedUtilizationPct:round2(safePct(crudeRunsKbd, exPlannedCapacity)),yieldPct:round2(safePct(productionKbd, crudeRunsKbd)),yieldAdjustmentPct:null}; }
+    function daysForwardCoverLookahead(frequency){ return frequency === 'weekly' ? 8 : 2; }
+    function applyDaysForwardCover(rows, frequency){ const lookahead = daysForwardCoverLookahead(frequency); const byRegion = new Map(); rows.forEach(row => { if (!row?.regionKey || !row.period) return; const list = byRegion.get(row.regionKey) || []; list.push(row); byRegion.set(row.regionKey, list); }); byRegion.forEach(list => { list.sort((a,b)=>String(a.period).localeCompare(String(b.period))); const demand = list.map(point => Number(point?.demandKbd)); let sum = 0; let valid = 0; for (let index = 0; index < list.length; index += 1) { if (index === 0) { for (let offset = 1; offset <= lookahead && offset < list.length; offset += 1) { const value = demand[offset]; if (Number.isFinite(value)) { sum += value; valid += 1; } } } else { const leaving = demand[index]; if (Number.isFinite(leaving)) { sum -= leaving; valid -= 1; } const entering = demand[index + lookahead]; if (Number.isFinite(entering)) { sum += entering; valid += 1; } } const avgDemand = valid === lookahead ? sum / lookahead : null; list[index].daysForwardCover = Number.isFinite(avgDemand) && avgDemand > 0 ? round2(Number(list[index].stocksKb || 0) / avgDemand) : NaN; } }); return rows; }
+    function crudeInfoIndex(frequency){ const key = calcCacheKey('crudeInfoByPeriod', frequency); if (crudeInfoByPeriodCache.has(key)) return crudeInfoByPeriodCache.get(key); const index = new Map(crudeAllPeriods(frequency).map(([period,bucket,isActual]) => [period,{bucket,isActual}])); crudeInfoByPeriodCache.set(key, index); return index; }
+    function adjustedMonthlyActualBaseline(){ if (adjustedMonthlyActualRowsCache) return adjustedMonthlyActualRowsCache; const rawBuckets = monthlyRawBuckets(); const crudeInfoByPeriod = crudeInfoIndex('monthly'); const priorByRegion = new Map(); const out = []; Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:true}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'monthly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); adjustedMonthlyActualRowsCache = {rows:out,buckets:bucketRows(out),priorByRegion:new Map(priorByRegion)}; return adjustedMonthlyActualRowsCache; }
+    function adjustedMonthlyBalanceRows(){ const key = calcCacheKey('adjustedMonthlyBalanceRows'); if (adjustedMonthlyRowsCache.key === key && adjustedMonthlyRowsCache.rows) return adjustedMonthlyRowsCache.rows; const actualBaseline = adjustedMonthlyActualBaseline(); const rawBuckets = monthlyRawBuckets(); const crudeInfoByPeriod = crudeInfoIndex('monthly'); const priorByRegion = new Map(actualBaseline.priorByRegion); const out = actualBaseline.rows.slice(); Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (!Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:false}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'monthly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); applyDaysForwardCover(out, 'monthly'); adjustedMonthlyRowsCache = {key,rows:out}; return out; }
     function weeklyForecastMonth(period){ return periodMonthValue(period); }
-    function adjustedBaseWeeklyPoint(rawPoint, rawBucket, monthlyBucket, crudeInfo, priorPoint){ const isActual = rawPoint.status === 'actual'; const monthlyPoint = monthlyBucket?.[rawPoint.regionKey] || rawPoint; const detail = allocatedCrudeDetail(rawPoint.regionKey, rawPoint.period, rawBucket, crudeInfo?.bucket || {}, isActual, 'weekly', monthlyBucket || rawBucket); if (!isActual) { ['operableCapacityKbd','operatingCapacityKbd','plannedMaintenanceKbd','unplannedMaintenanceKbd','crudeRunsKbd'].forEach(lineId => { detail[lineId] = round2(applyBalanceAdjustment(detail[lineId], 'weekly', rawPoint.period, rawPoint.regionKey, lineId)); }); const exPlannedCapacity = Math.max(0, Number(detail.operableCapacityKbd || 0) - Number(detail.plannedMaintenanceKbd || 0)); detail.operatingUtilizationPct = round2(safePct(detail.crudeRunsKbd, detail.operatingCapacityKbd)); detail.exPlannedUtilizationPct = round2(safePct(detail.crudeRunsKbd, exPlannedCapacity)); } let yieldPct = isActual ? round2(safePct(Number(rawPoint.productionKbd || 0), detail.crudeRunsKbd)) : Number(monthlyPoint.yieldPct || 0); const yieldAdjustmentPct = isActual ? null : balanceAdjustmentValue('weekly', rawPoint.period, rawPoint.regionKey, 'yieldAdjustmentPct'); if (yieldAdjustmentPct !== null) yieldPct = round2(yieldAdjustmentPct); let productionKbd = isActual ? Number(rawPoint.productionKbd || 0) : round2(detail.crudeRunsKbd * yieldPct / 100); if (!isActual) productionKbd = round2(applyBalanceAdjustment(productionKbd, 'weekly', rawPoint.period, rawPoint.regionKey, 'production')); const demandKbd = isActual ? Number(rawPoint.demandKbd || 0) : round2(applyBalanceAdjustment(Number(monthlyPoint.demandKbd ?? rawPoint.demandKbd ?? 0), 'weekly', rawPoint.period, rawPoint.regionKey, 'demand')); const importsKbd = isActual ? Number(rawPoint.importsKbd || 0) : round2(applyBalanceAdjustment(Number(monthlyPoint.importsKbd ?? rawPoint.importsKbd ?? 0), 'weekly', rawPoint.period, rawPoint.regionKey, 'imports')); const importComponents = adjustedImportComponents(monthlyPoint || rawPoint, importsKbd); const exportsKbd = isActual ? Number(rawPoint.exportsKbd || 0) : round2(applyBalanceAdjustment(Number(monthlyPoint.exportsKbd ?? rawPoint.exportsKbd ?? 0), 'weekly', rawPoint.period, rawPoint.regionKey, 'exports')); const movement = movementSummaryForRegion('weekly', rawPoint.period, rawPoint.regionKey); const receiptsKbd = movement.hasFlows ? movement.receiptsKbd : null; const shipmentsKbd = movement.hasFlows ? movement.shipmentsKbd : null; const netReceiptsKbd = movement.hasFlows ? movement.netReceiptsKbd : Number(monthlyPoint.netReceiptsKbd ?? rawPoint.netReceiptsKbd ?? 0); const balanceKbd = round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd); const stocksKb = isActual ? Number(rawPoint.stocksKb || 0) : round2(Number(priorPoint?.stocksKb || rawPoint.stocksKb || monthlyPoint.stocksKb || 0) + balanceKbd * periodDays(rawPoint.period)); return {...rawPoint,...detail,yieldPct,yieldAdjustmentPct,demandKbd,productionKbd,importsKbd,...importComponents,exportsKbd,netReceiptsKbd,receiptsKbd,shipmentsKbd,stockChangeKbd:isActual ? Number(rawPoint.stockChangeKbd || 0) : balanceKbd,balanceKbd,stocksKb}; }
-    function adjustedWeeklyActualBaseline(){ if (adjustedWeeklyActualRowsCache) return adjustedWeeklyActualRowsCache; const rawBuckets = weeklyRawBuckets(); const monthlyBuckets = adjustedMonthlyActualBaseline().buckets; const crudeInfoByPeriod = new Map(crudeAllPeriods('weekly').map(([period,bucket,isActual]) => [period,{bucket,isActual}])); const priorByRegion = new Map(); const out = []; Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const monthlyBucket = monthlyBuckets.get(weeklyForecastMonth(period)) || {}; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:true}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseWeeklyPoint(rawPoint, rawBucket, monthlyBucket, crudeInfo, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'weekly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); adjustedWeeklyActualRowsCache = {rows:out,buckets:bucketRows(out),priorByRegion:new Map(priorByRegion)}; return adjustedWeeklyActualRowsCache; }
-    function adjustedWeeklyBalanceRows(){ const key = calcCacheKey('adjustedWeeklyBalanceRows'); if (adjustedWeeklyRowsCache.key === key && adjustedWeeklyRowsCache.rows) return adjustedWeeklyRowsCache.rows; const actualBaseline = adjustedWeeklyActualBaseline(); const rawBuckets = weeklyRawBuckets(); const monthlyBuckets = adjustedMonthlyBuckets(); const crudeInfoByPeriod = new Map(crudeAllPeriods('weekly').map(([period,bucket,isActual]) => [period,{bucket,isActual}])); const priorByRegion = new Map(actualBaseline.priorByRegion); const out = actualBaseline.rows.slice(); Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (!Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const monthlyBucket = monthlyBuckets.get(weeklyForecastMonth(period)) || {}; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:false}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseWeeklyPoint(rawPoint, rawBucket, monthlyBucket, crudeInfo, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'weekly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); adjustedWeeklyRowsCache = {key,rows:out}; return out; }
+    function adjustedBaseWeeklyPoint(rawPoint, rawBucket, monthlyBucket, crudeInfo, priorPoint){
+      const isActual = rawPoint.status === 'actual';
+      const monthlyActualPoint = monthlyBucket?.[rawPoint.regionKey] || null;
+      const monthlyPoint = monthlyActualPoint || rawPoint;
+      const detail = allocatedCrudeDetail(rawPoint.regionKey, rawPoint.period, rawBucket, crudeInfo?.bucket || {}, isActual, 'weekly', monthlyBucket || rawBucket);
+      if (!isActual) {
+        ['operableCapacityKbd','operatingCapacityKbd','plannedMaintenanceKbd','unplannedMaintenanceKbd','crudeRunsKbd'].forEach(lineId => {
+          detail[lineId] = round2(applyBalanceAdjustment(detail[lineId], 'weekly', rawPoint.period, rawPoint.regionKey, lineId));
+        });
+        const exPlannedCapacity = Math.max(0, Number(detail.operableCapacityKbd || 0) - Number(detail.plannedMaintenanceKbd || 0));
+        detail.operatingUtilizationPct = round2(safePct(detail.crudeRunsKbd, detail.operatingCapacityKbd));
+        detail.exPlannedUtilizationPct = round2(safePct(detail.crudeRunsKbd, exPlannedCapacity));
+      }
+      let yieldPct = isActual ? round2(safePct(Number(rawPoint.productionKbd || 0), detail.crudeRunsKbd)) : Number(monthlyPoint.yieldPct || 0);
+      const yieldAdjustmentPct = isActual ? null : balanceAdjustmentValue('weekly', rawPoint.period, rawPoint.regionKey, 'yieldAdjustmentPct');
+      if (yieldAdjustmentPct !== null) yieldPct = round2(yieldAdjustmentPct);
+      let productionKbd = isActual ? Number(rawPoint.productionKbd || 0) : round2(detail.crudeRunsKbd * yieldPct / 100);
+      if (!isActual) productionKbd = round2(applyBalanceAdjustment(productionKbd, 'weekly', rawPoint.period, rawPoint.regionKey, 'production'));
+      let demandKbd = isActual ? Number(rawPoint.demandKbd || 0) : round2(applyBalanceAdjustment(Number(monthlyPoint.demandKbd ?? rawPoint.demandKbd ?? 0), 'weekly', rawPoint.period, rawPoint.regionKey, 'demand'));
+      let importsKbd = Number(monthlyPoint.importsKbd ?? rawPoint.importsKbd ?? 0);
+      if (isActual) importsKbd = Number(rawPoint.importsKbd || 0);
+      else importsKbd = round2(applyBalanceAdjustment(Number(rawPoint.importsKbd ?? monthlyPoint.importsKbd ?? 0), 'weekly', rawPoint.period, rawPoint.regionKey, 'imports'));
+      const importValues = adjustedImportValues(monthlyPoint || rawPoint, importsKbd, 'weekly', rawPoint.period, rawPoint.regionKey, isActual);
+      importsKbd = importValues.importsKbd;
+      let exportsKbd = forceZeroExports(rawPoint.regionKey) ? 0 : isActual ? Number(rawPoint.exportsKbd || 0) : round2(applyBalanceAdjustment(Number(rawPoint.exportsKbd ?? monthlyPoint.exportsKbd ?? 0), 'weekly', rawPoint.period, rawPoint.regionKey, 'exports'));
+      let exportDestinationValues = adjustedExportDestinationValues(rawPoint || monthlyPoint, exportsKbd);
+      if (forceZeroExports(rawPoint.regionKey)) exportDestinationValues = adjustedExportDestinationValues(rawPoint || monthlyPoint, 0);
+      const movement = movementSummaryForRegion('weekly', rawPoint.period, rawPoint.regionKey);
+      const receiptsKbd = movement.hasFlows ? movement.receiptsKbd : null;
+      const shipmentsKbd = movement.hasFlows ? movement.shipmentsKbd : null;
+      const netReceiptsKbd = movement.hasFlows ? movement.netReceiptsKbd : Number(monthlyPoint.netReceiptsKbd ?? rawPoint.netReceiptsKbd ?? 0);
+      if (isActual && monthlyActualPoint?.status !== 'actual') demandKbd = round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - Number(rawPoint.stockChangeKbd || 0));
+      const balanceKbd = round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd);
+      const stocksKb = isActual ? Number(rawPoint.stocksKb || 0) : round2(Number(priorPoint?.stocksKb || rawPoint.stocksKb || monthlyPoint.stocksKb || 0) + balanceKbd * periodDays(rawPoint.period));
+      return {...rawPoint,...detail,yieldPct,yieldAdjustmentPct,demandKbd,productionKbd,...importValues,exportsKbd,...exportDestinationValues,netReceiptsKbd,receiptsKbd,shipmentsKbd,stockChangeKbd:isActual ? Number(rawPoint.stockChangeKbd || 0) : balanceKbd,balanceKbd,stocksKb};
+    }
+    function adjustedWeeklyActualBaseline(){ if (adjustedWeeklyActualRowsCache) return adjustedWeeklyActualRowsCache; const rawBuckets = weeklyRawBuckets(); const monthlyBuckets = adjustedMonthlyActualBaseline().buckets; const crudeInfoByPeriod = crudeInfoIndex('weekly'); const priorByRegion = new Map(); const out = []; Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const monthlyBucket = monthlyBuckets.get(weeklyForecastMonth(period)) || {}; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:true}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseWeeklyPoint(rawPoint, rawBucket, monthlyBucket, crudeInfo, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'weekly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); adjustedWeeklyActualRowsCache = {rows:out,buckets:bucketRows(out),priorByRegion:new Map(priorByRegion)}; return adjustedWeeklyActualRowsCache; }
+    function adjustedWeeklyBalanceRows(){ const key = calcCacheKey('adjustedWeeklyBalanceRows'); if (adjustedWeeklyRowsCache.key === key && adjustedWeeklyRowsCache.rows) return adjustedWeeklyRowsCache.rows; const actualBaseline = adjustedWeeklyActualBaseline(); const rawBuckets = weeklyRawBuckets(); const monthlyBuckets = adjustedMonthlyBuckets(); const crudeInfoByPeriod = crudeInfoIndex('weekly'); const priorByRegion = new Map(actualBaseline.priorByRegion); const out = actualBaseline.rows.slice(); Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (!Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const monthlyBucket = monthlyBuckets.get(weeklyForecastMonth(period)) || {}; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:false}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseWeeklyPoint(rawPoint, rawBucket, monthlyBucket, crudeInfo, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'weekly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); applyDaysForwardCover(out, 'weekly'); adjustedWeeklyRowsCache = {key,rows:out}; return out; }
     function showToast(message){ const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove('show'), 1800); }
-    function productionBalanceLines(regionKey){ const lines = [{id:'operatingCapacityKbd',label:'Operating Capacity',kind:'item muted'},{id:'plannedMaintenanceKbd',label:'Planned Atmos Offline',kind:'item muted maintenance'},{id:'unplannedMaintenanceKbd',label:'Unplanned Atmos Offline',kind:'item muted maintenance'},{id:'crudeRunsKbd',label:'Crude Runs',kind:'item muted'},weeklyGuideLine('crudeRunsKbd'),{id:'operatingUtilizationPct',label:'Operating Utilization',kind:'item muted percent'},{id:'exPlannedUtilizationPct',label:'Operating (ex-planned) Utilization',kind:'highlight percent'},{id:'yieldPct',label:'Yield',kind:'highlight percent'},weeklyGuideLine('yieldPct')]; if (isBaseBalanceRegion(regionKey)) lines.push({id:'yieldAdjustmentPct',label:'Yield Adjustment',kind:'item muted adjustment percent'}); lines.push({id:'production',label:'Production',kind:'subtotal'}); if (state.frequency === 'monthly') lines.push(weeklyGuideLine('production')); return lines; }
-    function movementLineLabel(flow, direction){ return (direction === 'in' ? 'from ' + balanceRegionDisplayLabel(flow.fromRegionKey) : 'to ' + balanceRegionDisplayLabel(flow.toRegionKey)) + ' - ' + flow.modeLabel; }
-    function receiptLines(regionKey){ return movementRowsForRegion(regionKey, 'in').map(flow => ({id:receiptLineId(flow.id),label:movementLineLabel(flow, 'in'),kind:'item muted movement'})); }
-    function receiptDisplayLines(regionKey){ const flows = movementRowsForRegion(regionKey, 'in'); return isBaseBalanceRegion(regionKey) ? flows.flatMap(flow => [{id:receiptLineId(flow.id),label:movementLineLabel(flow, 'in'),kind:'item muted movement'},{id:receiptAdjustmentLineId(flow.id),label:movementLineLabel(flow, 'in') + ' Adjustment',kind:'item muted movement adjustment'}]) : flows.map(flow => ({id:receiptLineId(flow.id),label:movementLineLabel(flow, 'in'),kind:'item muted movement'})); }
-    function shipmentLines(regionKey){ return movementRowsForRegion(regionKey, 'out').map(flow => ({id:shipmentLineId(flow.id),label:movementLineLabel(flow, 'out'),kind:'item muted movement mirrored'})); }
-    function importBreakoutLines(regionKey){ return regionKey === 'padd1ab' ? [{id:'canadaImports',label:'Canada Imports (EIA)',kind:'item importSource anchor'},{id:'nonCanadaImports',label:'Non-Canada Imports (EIA)',kind:'item importSource anchor'}] : []; }
-    function balanceLines(regionKey){ const baseRegion = isBaseBalanceRegion(regionKey); const receipts = receiptLines(regionKey); const receiptRows = receiptDisplayLines(regionKey); const p3Receipts = receipts.filter(line => flowById(lineFlowId(line.id))?.fromRegionKey === 'padd3'); const shipments = shipmentLines(regionKey); const importLines = importBreakoutLines(regionKey); return [{id:'supplySection',label:'Supply',kind:'section'},...productionBalanceLines(regionKey),...importLines,{id:'imports',label:'Total Imports',kind:importLines.length ? 'subtotal anchor importTotal' : 'anchor'},...(baseRegion ? [{id:'importsAdjustment',label:'Imports Adjustment',kind:'item muted adjustment'}] : []),{id:'receiptsIn',label:'Total Receipts',kind:receipts.length ? 'subtotal anchor' : 'item muted'},...(p3Receipts.length ? [{id:'receiptsP3',label:'Total P3 Receipts',kind:'subtotal anchor'}] : []),...receiptRows,{id:'totalSupply',label:'Total supply',kind:'subtotal'},{id:'supplyDemandDivider',label:'',kind:'divider'},{id:'demandSection',label:'Demand',kind:'section'},{id:'demand',label:'Product supplied',kind:'item'},...(baseRegion ? [{id:'demandAdjustment',label:'Product Supplied Adjustment',kind:'item muted adjustment'}] : []),{id:'exports',label:'Exports',kind:'item'},...(baseRegion ? [{id:'exportsAdjustment',label:'Exports Adjustment',kind:'item muted adjustment'}] : []),{id:'receiptsOut',label:'Shipments to other PADDs',kind:shipments.length ? 'subtotal' : 'item muted'},...shipments,{id:'totalDemand',label:'Total demand',kind:'subtotal'},{id:'buildDaily',label:'Build/(draw) per day',kind:'highlight draw'},weeklyGuideLine('buildTotal'),{id:'buildTotal',label:'Total period build/(draw)',kind:'highlight draw'},{id:'stocks',label:'Ending stocks',kind:'stock'}]; }
+    function hideProductionBalanceLines(regionKey){ return D.product?.key === 'diesel' && regionKey === 'padd1c'; }
+    function productionBalanceLines(regionKey){ if (hideProductionBalanceLines(regionKey)) return []; const lines = [{id:'operatingCapacityKbd',label:'Operating Capacity',kind:'item muted'},{id:'plannedMaintenanceKbd',label:'Planned Atmos Offline',kind:'item muted maintenance'},{id:'unplannedMaintenanceKbd',label:'Unplanned Atmos Offline',kind:'item muted maintenance'},{id:'crudeRunsKbd',label:'Crude Runs',kind:'item muted'},weeklyGuideLine('crudeRunsKbd'),{id:'operatingUtilizationPct',label:'Operating Utilization',kind:'item muted percent'},{id:'exPlannedUtilizationPct',label:'Operating (ex-planned) Utilization',kind:'highlight percent'},{id:'yieldPct',label:'Yield',kind:'highlight percent'},weeklyGuideLine('yieldPct')]; if (isBaseBalanceRegion(regionKey)) lines.push({id:'yieldAdjustmentPct',label:'Yield Adjustment',kind:'item muted adjustment percent'}); lines.push({id:'production',label:'Production',kind:'subtotal'}); if (state.frequency === 'monthly') lines.push(weeklyGuideLine('production')); return lines; }
+	    function movementLineLabel(flow, direction){ return (direction === 'in' ? 'from ' + balanceRegionDisplayLabel(flow.fromRegionKey) : 'to ' + balanceRegionDisplayLabel(flow.toRegionKey)) + ' - ' + flow.modeLabel; }
+	    function receiptSourceGroupKey(regionKey){ return regionKey === 'padd1ab' || regionKey === 'padd1c' ? 'padd1' : regionKey; }
+	    function receiptSourceGroupLabel(sourceKey){ const labels = {padd1:'P1 Receipts',padd2:'P2 Receipts',padd3:'P3 Receipts'}; return labels[sourceKey] || balanceRegionDisplayLabel(sourceKey) + ' Receipts'; }
+	    function aggregateReceiptSourceLines(regionKey){ if (!isAggregateBalanceRegion(regionKey)) return []; const sourceKeys = ['padd1','padd2','padd3']; const flows = movementRowsForRegion(regionKey, 'in'); return sourceKeys.filter(sourceKey => flows.some(flow => receiptSourceGroupKey(flow.fromRegionKey) === sourceKey)).map(sourceKey => ({id:receiptSourceLineId(sourceKey),label:receiptSourceGroupLabel(sourceKey),kind:'item muted movement'})); }
+	    function receiptLines(regionKey){ if (isAggregateBalanceRegion(regionKey)) return aggregateReceiptSourceLines(regionKey); return movementRowsForRegion(regionKey, 'in').map(flow => ({id:receiptLineId(flow.id),label:movementLineLabel(flow, 'in'),kind:'item muted movement'})); }
+	    function receiptDisplayLines(regionKey){ if (isAggregateBalanceRegion(regionKey)) return aggregateReceiptSourceLines(regionKey); const flows = movementRowsForRegion(regionKey, 'in'); return isBaseBalanceRegion(regionKey) ? flows.flatMap(flow => [{id:receiptLineId(flow.id),label:movementLineLabel(flow, 'in'),kind:'item muted movement'},{id:receiptAdjustmentLineId(flow.id),label:movementLineLabel(flow, 'in') + ' Adjustment',kind:'item muted movement adjustment'}]) : flows.map(flow => ({id:receiptLineId(flow.id),label:movementLineLabel(flow, 'in'),kind:'item muted movement'})); }
+	    function p3ReceiptSubtotalFlows(regionKey){ if (isAggregateBalanceRegion(regionKey)) return []; const flows = movementRowsForRegion(regionKey, 'in').filter(flow => flow.fromRegionKey === 'padd3'); const modes = new Set(flows.map(flow => flow.modeKey)); return modes.has('pipeline') && modes.has('tankerBarge') ? flows : []; }
+    function hasShipmentFlows(regionKey){ return movementRowsForRegion(regionKey, 'out').length > 0; }
+    function shipmentLines(_regionKey){ return []; }
+    function importBreakoutLines(regionKey){ return state.frequency === 'monthly' && regionKey === 'padd1ab' ? [{id:'canadaImports',label:'Canada Imports (EIA)',kind:'item importSource'},{id:'canadaImportsAdjustment',label:'Canada Imports Override',kind:'item muted adjustment importOverride'},{id:'nonCanadaImports',label:'Non-Canada Imports (EIA)',kind:'item importSource'},{id:'nonCanadaImportsAdjustment',label:'Non-Canada Imports Override',kind:'item muted adjustment importOverride'}] : []; }
+    function exportBreakoutLines(regionKey){ return state.frequency === 'monthly' && regionKey === 'padd3' ? [{id:'exportsLatinAmerica',label:'Exports to Latin America',kind:'item muted exportDestination'},{id:'exportsLatinAmericaAdjustment',label:'Exports to Latin America Override',kind:'item muted adjustment exportDestinationOverride'},{id:'exportsEurope',label:'Exports to Europe',kind:'item muted exportDestination'},{id:'exportsEuropeAdjustment',label:'Exports to Europe Override',kind:'item muted adjustment exportDestinationOverride'},{id:'exportsAfrica',label:'Exports to Africa',kind:'item muted exportDestination'},{id:'exportsAfricaAdjustment',label:'Exports to Africa Override',kind:'item muted adjustment exportDestinationOverride'},{id:'exportsOther',label:'Exports to Other',kind:'item muted exportDestination'},{id:'exportsOtherAdjustment',label:'Exports to Other Override',kind:'item muted adjustment exportDestinationOverride'}] : []; }
+    function isExportDestinationLine(lineId){ return ['exportsLatinAmerica','exportsEurope','exportsAfrica','exportsOther'].includes(lineId); }
+	    function balanceLines(regionKey){ const cacheKey = state.frequency + '|' + regionKey; if (balanceLinesCache.has(cacheKey)) return balanceLinesCache.get(cacheKey); const baseRegion = isBaseBalanceRegion(regionKey); const receipts = receiptLines(regionKey); const receiptRows = receiptDisplayLines(regionKey); const p3Receipts = p3ReceiptSubtotalFlows(regionKey); const hasShipments = hasShipmentFlows(regionKey); const shipments = shipmentLines(regionKey); const importLines = importBreakoutLines(regionKey); const exportLines = exportBreakoutLines(regionKey); const importsTotalLine = {id:'imports',label:importLines.length ? 'Total Imports' : state.frequency === 'weekly' ? 'Imports' : 'Total Imports',kind:importLines.length ? 'subtotal anchor importTotal' : 'anchor'}; const exportsTotalLine = {id:'exports',label:exportLines.length || regionKey === 'padd3' ? 'Total Exports' : 'Exports',kind:exportLines.length ? 'subtotal anchor exportTotal' : 'item'}; const lines = [{id:'supplySection',label:'Supply',kind:'section'},...productionBalanceLines(regionKey),...importLines,importsTotalLine,...(baseRegion && !importLines.length ? [{id:'importsAdjustment',label:'Imports Adjustment',kind:'item muted adjustment'}] : []),...receiptRows,...(p3Receipts.length ? [{id:'receiptsP3',label:'Total P3 Receipts',kind:'subtotal receiptSubtotal'}] : []),{id:'receiptsIn',label:'Total Receipts',kind:receipts.length ? 'subtotal anchor' : 'item muted'},{id:'totalSupply',label:'Total supply',kind:'subtotal'},{id:'supplyDemandDivider',label:'',kind:'divider'},{id:'demandSection',label:'Demand',kind:'section'},{id:'demand',label:'Product supplied',kind:'item'},...(baseRegion ? [{id:'demandAdjustment',label:'Product Supplied Adjustment',kind:'item muted adjustment'}] : []),...exportLines,exportsTotalLine,...(baseRegion && !exportLines.length && !forceZeroExports(regionKey) ? [{id:'exportsAdjustment',label:'Exports Adjustment',kind:'item muted adjustment'}] : []),{id:'receiptsOut',label:'Shipments to other PADDs',kind:hasShipments ? 'subtotal' : 'item muted'},...shipments,{id:'totalDemand',label:'Total demand',kind:'subtotal'},{id:'buildDaily',label:'Build/(draw) per day',kind:'highlight draw'},...(state.frequency === 'monthly' ? [weeklyGuideLine('buildTotal')] : []),{id:'buildTotal',label:'Total period build/(draw)',kind:'highlight draw'},{id:'stocks',label:'Ending stocks',kind:'stock'},{id:'daysForwardCover',label:'Days of Forward Cover',kind:'item muted cover'}]; balanceLinesCache.set(cacheKey, lines); return lines; }
     function pointReceiptTotal(point){ return point.receiptsKbd !== null && point.receiptsKbd !== undefined && Number.isFinite(Number(point.receiptsKbd)) ? Number(point.receiptsKbd || 0) : Math.max(Number(point.netReceiptsKbd || 0), 0); }
     function pointShipmentTotal(point){ return point.shipmentsKbd !== null && point.shipmentsKbd !== undefined && Number.isFinite(Number(point.shipmentsKbd)) ? Number(point.shipmentsKbd || 0) : Math.max(-Number(point.netReceiptsKbd || 0), 0); }
     function totals(point){
@@ -3499,7 +4093,11 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       const net = Number(point.netReceiptsKbd || 0);
       const supply = Number(point.productionKbd || 0) + Number(point.importsKbd || 0) + receipts;
       const demand = Number(point.demandKbd || 0) + Number(point.exportsKbd || 0) + shipments;
-      const totalsValue = {net,receipts,shipments,supply,demand,daily:supply - demand,total:(supply - demand) * periodDays(point.period || '')};
+      const daily = supply - demand;
+      const total = state.frequency === 'weekly' && point.status === 'actual'
+        ? Number(point.stockChangeKbd || 0) * periodDays(point.period || '')
+        : daily * periodDays(point.period || '');
+      const totalsValue = {net,receipts,shipments,supply,demand,daily,total};
       balancePointTotalsCache.set(key, totalsValue);
       return totalsValue;
     }
@@ -3521,33 +4119,40 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       else if (lineId === 'yieldPct') value = point.yieldPct;
       else if (lineId === 'canadaImports') value = point.canadaImportsKbd || 0;
       else if (lineId === 'nonCanadaImports') value = point.nonCanadaImportsKbd ?? Math.max(0, Number(point.importsKbd || 0) - Number(point.canadaImportsKbd || 0));
-      else if (lineId === 'imports') value = regionKey === 'padd1ab' ? Number(point.canadaImportsKbd || 0) + Number(point.nonCanadaImportsKbd || 0) : point.importsKbd;
+      else if (lineId === 'imports') value = state.frequency === 'monthly' && regionKey === 'padd1ab' ? Number(point.canadaImportsKbd || 0) + Number(point.nonCanadaImportsKbd || 0) : point.importsKbd;
       else if (lineId === 'receiptsIn') value = t.receipts;
-      else if (lineId === 'receiptsP3') value = movementRowsForRegion(regionKey, 'in').filter(flow => flow.fromRegionKey === 'padd3').reduce((sum, flow) => sum + Number(movementFlowValue(state.frequency, point.period, flow.id) || 0), 0);
-      else if (isReceiptFlowLine(lineId) || isShipmentFlowLine(lineId)) value = movementFlowValue(state.frequency, point.period, lineFlowId(lineId));
+	      else if (lineId === 'receiptsP3') value = movementRowsForRegion(regionKey, 'in').filter(flow => flow.fromRegionKey === 'padd3').reduce((sum, flow) => sum + Number(movementFlowValue(state.frequency, point.period, flow.id) || 0), 0);
+	      else if (isReceiptSourceLine(lineId)) value = movementRowsForRegion(regionKey, 'in').filter(flow => receiptSourceGroupKey(flow.fromRegionKey) === receiptSourceLineRegion(lineId)).reduce((sum, flow) => sum + Number(movementFlowValue(state.frequency, point.period, flow.id) || 0), 0);
+	      else if (isReceiptFlowLine(lineId) || isShipmentFlowLine(lineId)) value = movementFlowValue(state.frequency, point.period, lineFlowId(lineId));
       else if (lineId === 'totalSupply') value = t.supply;
       else if (lineId === 'demand') value = point.demandKbd;
-      else if (lineId === 'exports') value = point.exportsKbd;
+      else if (lineId === 'exports') value = state.frequency === 'monthly' && regionKey === 'padd3' ? exportDestinationTotal(point) : point.exportsKbd;
+      else if (lineId === 'exportsLatinAmerica') value = point.exportsLatinAmericaKbd || 0;
+      else if (lineId === 'exportsEurope') value = point.exportsEuropeKbd || 0;
+      else if (lineId === 'exportsAfrica') value = point.exportsAfricaKbd || 0;
+      else if (lineId === 'exportsOther') value = point.exportsOtherKbd || 0;
       else if (lineId === 'receiptsOut') value = t.shipments;
       else if (lineId === 'totalDemand') value = t.demand;
       else if (lineId === 'buildDaily') value = t.daily;
       else if (lineId === 'buildTotal') value = t.total;
       else if (lineId === 'stocks') value = point.stocksKb;
+      else if (lineId === 'daysForwardCover') value = point.daysForwardCover;
       balanceLineValueCache.set(key, value);
       return value;
     }
-    function balanceLineDigits(lineId){ const target = isWeeklyGuideLine(lineId) ? weeklyGuideTargetLineId(lineId) : lineId; return target === 'operatingUtilizationPct' || target === 'exPlannedUtilizationPct' || target === 'yieldPct' || target === 'yieldAdjustmentPct' ? 1 : 0; }
-    function balanceValueHtml(lineId, value){ if (value === null || value === undefined) return ''; return fmt(value, balanceLineDigits(lineId)) + (balanceLineDigits(lineId) ? '%' : ''); }
+    function isPercentBalanceLine(lineId){ const target = isWeeklyGuideLine(lineId) ? weeklyGuideTargetLineId(lineId) : lineId; return target === 'operatingUtilizationPct' || target === 'exPlannedUtilizationPct' || target === 'yieldPct' || target === 'yieldAdjustmentPct'; }
+    function balanceLineDigits(lineId){ const target = isWeeklyGuideLine(lineId) ? weeklyGuideTargetLineId(lineId) : lineId; return isPercentBalanceLine(lineId) || target === 'daysForwardCover' ? 1 : 0; }
+    function balanceValueHtml(lineId, value){ const numeric = Number(value); if (value === null || value === undefined || !Number.isFinite(numeric)) return ''; return fmt(numeric, balanceLineDigits(lineId)) + (isPercentBalanceLine(lineId) ? '%' : ''); }
     function isBalanceLineAdjustable(lineId){ return ADJUSTABLE_BALANCE_LINES.has(lineId) || isReceiptAdjustmentLine(lineId); }
     function isBalanceLineAdjustableForRegion(regionKey, lineId){ return isBaseBalanceRegion(regionKey) && !isAggregateBalanceRegion(regionKey) && isBalanceLineAdjustable(lineId); }
     function isBalanceAdjustmentLine(lineId){ return isBalanceLineAdjustable(lineId); }
-    function isDemandZoneLine(lineId){ return ['demandSection','demand','demandAdjustment','exports','exportsAdjustment','receiptsOut','totalDemand'].includes(lineId) || isShipmentFlowLine(lineId); }
+    function isDemandZoneLine(lineId){ return ['demandSection','demand','demandAdjustment','exports','exportsAdjustment','receiptsOut','totalDemand'].includes(lineId) || isShipmentFlowLine(lineId) || isExportDestinationLine(lineId); }
     function balanceLineDisplayLabel(line){ return isBalanceAdjustmentLine(line.id) ? 'Override' : line.label; }
     function balanceLineLabelHtml(line){ return esc(balanceLineDisplayLabel(line)); }
     function isBalanceForecastAdjustableCell(regionKey, lineId, point){ return point && point.status === 'forecast' && isBalanceLineAdjustableForRegion(regionKey, lineId); }
     function balanceManualAdjustmentValue(frequency, period, regionKey, lineId){ if (isBalanceLineAdjustable(lineId)) return balanceAdjustmentValue(frequency, period, regionKey, adjustmentTargetLineId(lineId)); if (isShipmentFlowLine(lineId)) { const flow = flowById(lineFlowId(lineId)); return flow ? balanceAdjustmentValue(frequency, period, flow.toRegionKey, receiptLineId(flow.id)) : null; } return null; }
     function balanceCellHtml(regionKey, line, period, point, value){ const editable = isBalanceForecastAdjustableCell(regionKey, line.id, point); const adjustmentLine = isBalanceAdjustmentLine(line.id); const lockedOverride = Boolean(point && state.frequency === 'monthly' && adjustmentLine && point.status !== 'forecast'); const manual = point?.status === 'forecast' && balanceManualAdjustmentValue(state.frequency, period, regionKey, line.id) !== null; const classes = []; if (point?.status === 'forecast') classes.push('forecastCell'); if (editable) classes.push('editableCell'); if (manual) classes.push('manualCell'); if (lockedOverride) classes.push('lockedOverrideCell'); if (adjustmentLine && !lockedOverride && value !== null && value !== undefined && value !== '') classes.push('activeValue'); const heat = heatCellParts(regionKey, line, period, point, value); if (heat.classes.length) classes.push(...heat.classes); const attrs = (classes.length ? ' class="'+classes.join(' ')+'"' : '') + heatAttrs(heat); const editAttrs = editable ? ' data-balance-adjust-region="'+esc(regionKey)+'" data-balance-adjust-line="'+esc(line.id)+'" data-balance-adjust-period="'+esc(period)+'" data-balance-adjust-status="forecast" title="Click to enter a manual PADD-level forecast value. Blank clears this period override."' : ''; return '<td'+attrs+editAttrs+'>'+balanceValueHtml(line.id, value)+'</td>'; }
-    function rowClassForLine(line, values){ const parts = []; if (line.kind === 'section') parts.push('sectionRow'); if (line.kind.includes('subtotal')) parts.push('subtotalRow'); if (line.kind === 'divider') parts.push('dividerRow'); if (line.kind.includes('highlight')) parts.push('highlightRow'); if (line.kind.includes('muted')) parts.push('mutedRow'); if (line.kind.includes('adjustment')) parts.push('adjustmentRow'); if (line.kind === 'stock') parts.push('stockRow'); if (line.kind.includes('anchor')) parts.push('anchorSubtotalRow'); if (line.kind.includes('guide')) parts.push('guideRow'); if (line.kind.includes('importSource')) parts.push('importSourceRow'); if (line.kind.includes('importTotal')) parts.push('importTotalRow'); if (isDemandZoneLine(line.id)) parts.push(line.kind === 'section' ? 'demandSectionBand' : line.kind.includes('subtotal') ? 'demandSubtotalBand' : 'demandZoneRow'); if (line.kind.includes('draw')) parts.push('drawRow', values.some(v => v < 0) ? 'negative' : 'positive'); return parts.join(' '); }
+    function rowClassForLine(line, values){ const parts = []; if (line.kind === 'section') parts.push('sectionRow'); if (line.kind.includes('subtotal')) parts.push('subtotalRow'); if (line.kind === 'divider') parts.push('dividerRow'); if (line.kind.includes('highlight')) parts.push('highlightRow'); if (line.kind.includes('muted')) parts.push('mutedRow'); if (line.kind.includes('adjustment')) parts.push('adjustmentRow'); if (line.kind === 'stock') parts.push('stockRow'); if (line.kind.includes('anchor')) parts.push('anchorSubtotalRow'); if (line.kind.includes('receiptSubtotal')) parts.push('receiptSubtotalRow'); if (line.kind.includes('guide')) parts.push('guideRow'); if (line.kind.includes('maintenance')) parts.push('maintenanceRow'); if (line.kind.includes('importSource')) parts.push('importSourceRow'); if (line.kind.includes('importOverride')) parts.push('importOverrideRow'); if (line.kind.includes('importTotal')) parts.push('importTotalRow'); if (line.kind.includes('exportDestinationOverride')) parts.push('exportDestinationOverrideRow'); if (isDemandZoneLine(line.id)) parts.push(line.kind === 'section' ? 'demandSectionBand' : line.kind.includes('subtotal') ? 'demandSubtotalBand' : 'demandZoneRow'); if (line.kind.includes('draw')) parts.push('drawRow', values.some(v => v < 0) ? 'negative' : 'positive'); return parts.join(' '); }
     function applyTableLayout(){ const signature = state.labelWidth + '|' + state.labelSize; if (lastAppliedLayoutSignature === signature) return; lastAppliedLayoutSignature = signature; document.documentElement.style.setProperty('--label-col-width', state.labelWidth + 'px'); document.documentElement.style.setProperty('--row-label-size', state.labelSize + 'px'); const widthSlider = document.getElementById('labelWidthSlider'); const sizeSlider = document.getElementById('labelSizeSlider'); const widthValue = document.getElementById('labelWidthValue'); const sizeValue = document.getElementById('labelSizeValue'); if (widthSlider) widthSlider.value = String(state.labelWidth); if (sizeSlider) sizeSlider.value = String(state.labelSize); if (widthValue) widthValue.textContent = state.labelWidth + 'px'; if (sizeValue) sizeValue.textContent = state.labelSize + 'px'; }
     function updateTableLayout(key, value){ const next = clampLayoutValue(key, value); if (state[key] === next) return; state[key] = next; saveTableLayout(); applyTableLayout(); writeStateUrl(); }
     function renderControls(){
@@ -3578,6 +4183,13 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       document.getElementById('balanceControls').hidden = state.sheet !== 'balance';
       document.getElementById('chartOptions').hidden = state.sheet !== 'charts';
       document.getElementById('chartControls').hidden = state.sheet !== 'charts';
+      const periodWindowSelect = document.getElementById('periodWindowSelect');
+      const balanceFocusSelect = document.getElementById('balanceFocusSelect');
+      const balanceSearchInput = document.getElementById('balanceSearchInput');
+      if (periodWindowSelect) periodWindowSelect.value = BALANCE_PERIOD_WINDOWS.has(state.periodWindow) ? state.periodWindow : 'smart';
+      if (balanceFocusSelect) balanceFocusSelect.value = BALANCE_FOCUS_MODES.has(state.balanceFocus) ? state.balanceFocus : 'all';
+      if (balanceSearchInput && document.activeElement !== balanceSearchInput) balanceSearchInput.value = String(state.balanceSearch || '');
+      document.getElementById('clearBalanceFocusBtn')?.classList.toggle('filterActivePill', Boolean(balanceFilterActive()));
       document.getElementById('showLegends').checked = state.showLegends;
       document.getElementById('showForecast').checked = state.showForecast;
       document.getElementById('showRegionTitles').checked = state.showRegionTitles;
@@ -3688,7 +4300,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function toggleChartScenario(id, enabled){ chartScenarios = chartScenarios.map(scenario => scenario.id === id ? {...scenario, enabled:Boolean(enabled), updatedAt:new Date().toISOString()} : scenario); saveChartScenariosLocal(); renderChartScenarioWorkbench(); queueRender(); }
     function deleteChartScenario(id){ const before = chartScenarios.length; chartScenarios = chartScenarios.filter(scenario => scenario.id !== id); if (before === chartScenarios.length) return; saveChartScenariosLocal(); renderChartScenarioWorkbench(); queueRender(); showToast('Saved forecast deleted'); }
     function loadChartScenarioIntoDraft(id){ const scenario = chartScenarios.find(row => row.id === id); if (!scenario) return; chartScenarioDraft = {...scenario,id:'draft',previewEnabled:false,updatedAt:new Date().toISOString()}; saveChartScenarioDraftLocal(); chartScenarioModalOpen = true; renderChartScenarioWorkbench(); showToast('Saved forecast loaded into the workbench'); }
-    async function applyViewState(next){ const clean = defaultState(); Object.assign(clean, next || {}); delete clean.crudeMetric; clean.frequency = clean.frequency === 'weekly' ? 'weekly' : 'monthly'; if (!D.regionalBalance.regions.some(region => region.key === clean.region)) clean.region = 'us'; if (!validChartRegionKey(clean.chartRegion)) clean.chartRegion = clean.region; if (!METRICS.some(metric => metric.key === clean.metric)) clean.metric = 'balanceKbd'; if (!validCrudeRegion(clean.crudeRegion)) clean.crudeRegion = ''; if (clean.sheet === 'sources') clean.sheet = 'reference'; if (!['balance','charts','crude','outages','reference'].includes(clean.sheet)) clean.sheet = 'balance'; clean.showPriorYear = clean.showPriorYear !== false; clean.showCurrentYear = clean.showCurrentYear !== false; clean.showNextYearForecast = clean.showNextYearForecast !== false; clean.showFourWeekAverage = Boolean(clean.showFourWeekAverage); clean.labelWidth = clampLayoutValue('labelWidth', clean.labelWidth); clean.labelSize = clampLayoutValue('labelSize', clean.labelSize); try { await ensureDataForState(clean); } catch { showToast('Unable to load saved view data'); return false; } clean.bandYears = normalizeBandYears(clean.bandYears, clean.frequency, true); clean.historyYears = normalizeHistoryYears(clean.historyYears, clean.frequency, clean.historyYears == null); state = clean; saveTableLayout(); tableScrollSignatures = {}; queueRender(); return true; }
+    async function applyViewState(next){ const clean = defaultState(); Object.assign(clean, next || {}); delete clean.crudeMetric; clean.frequency = clean.frequency === 'weekly' ? 'weekly' : 'monthly'; if (!D.regionalBalance.regions.some(region => region.key === clean.region)) clean.region = 'us'; if (!validChartRegionKey(clean.chartRegion)) clean.chartRegion = clean.region; if (!METRICS.some(metric => metric.key === clean.metric)) clean.metric = 'balanceKbd'; if (!validCrudeRegion(clean.crudeRegion)) clean.crudeRegion = ''; if (clean.sheet === 'sources') clean.sheet = 'reference'; if (!['balance','charts','crude','outages','reference'].includes(clean.sheet)) clean.sheet = 'balance'; clean.showPriorYear = clean.showPriorYear !== false; clean.showCurrentYear = clean.showCurrentYear !== false; clean.showNextYearForecast = clean.showNextYearForecast !== false; clean.showFourWeekAverage = Boolean(clean.showFourWeekAverage); clean.labelWidth = clampLayoutValue('labelWidth', clean.labelWidth); clean.labelSize = clampLayoutValue('labelSize', clean.labelSize); if (!BALANCE_PERIOD_WINDOWS.has(clean.periodWindow)) clean.periodWindow = 'smart'; if (!BALANCE_FOCUS_MODES.has(clean.balanceFocus)) clean.balanceFocus = 'all'; clean.balanceSearch = String(clean.balanceSearch || '').slice(0,80); try { await ensureDataForState(clean); } catch { showToast('Unable to load saved view data'); return false; } clean.bandYears = normalizeBandYears(clean.bandYears, clean.frequency, true); clean.historyYears = normalizeHistoryYears(clean.historyYears, clean.frequency, clean.historyYears == null); state = clean; saveTableLayout(); tableScrollSignatures = {}; queueRender(); return true; }
     function heatCellParts(regionKey, line, period, point, value){
       const numeric = Number(value);
       if (!point || !Number.isFinite(numeric)) return {classes:[],style:''};
@@ -3701,7 +4313,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     }
     function heatAttrs(parts){ return parts?.style ? ' style="'+esc(parts.style)+'"' : ''; }
     function balanceFocusRegionKey(){ return D.regionalBalance.regions.some(region => region.key === state.region) ? state.region : 'us'; }
-    function stockCoverDays(point){ const demand = totals(point).demand; return demand > 0 ? Number(point.stocksKb || 0) / demand : null; }
+    function stockCoverDays(point){ const cover = Number(point?.daysForwardCover); return Number.isFinite(cover) ? cover : null; }
     function balanceMonitorEntry(periods){ const firstForecast = firstForecastPeriod(periods); if (firstForecast) return periods.find(([period]) => period === firstForecast) || periods.at(-1) || null; return periods.at(-1) || null; }
     function balanceBandStats(regionKey, metricKey, period){
       const bandYears = effectiveBandYears(state.frequency);
@@ -3740,7 +4352,62 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       ].join('');
     }
     function firstForecastPeriod(periods){ const found = periods.find(([,bucket]) => Object.values(bucket).some(row => row && row.status === 'forecast')); return found ? found[0] : null; }
-    function initialBalancePeriod(periods){ if (!periods.length) return ''; const firstForecast = firstForecastPeriod(periods); if (firstForecast) { const index = periods.findIndex(([period]) => period === firstForecast); return periods[Math.max(0, index - 3)][0]; } return periods[Math.max(0, periods.length - 6)][0]; }
+    function latestActualPeriod(periods){ const found = periods.slice().reverse().find(([,bucket]) => Object.values(bucket).some(row => row && row.status === 'actual')); return found ? found[0] : periods.at(-1)?.[0] || ''; }
+    function initialBalancePeriod(periods){ if (!periods.length) return ''; if (state.periodWindow === 'latest') return latestActualPeriod(periods) || periods.at(-1)[0]; const firstForecast = firstForecastPeriod(periods); if (firstForecast) { const index = periods.findIndex(([period]) => period === firstForecast); return periods[Math.max(0, index - 3)][0]; } return periods[Math.max(0, periods.length - 6)][0]; }
+    function periodWindowSlice(allPeriods, anchorIndex, beforeCount, afterCount){ if (!allPeriods.length || anchorIndex < 0) return allPeriods; const start = Math.max(0, anchorIndex - beforeCount); const end = Math.min(allPeriods.length, anchorIndex + afterCount + 1); return allPeriods.slice(start, end); }
+    function balanceDisplayPeriodEntries(allPeriods=periodEntriesForBalance()){
+      const mode = BALANCE_PERIOD_WINDOWS.has(state.periodWindow) ? state.periodWindow : 'smart';
+      if (mode === 'full' || !allPeriods.length) return allPeriods;
+      const firstForecast = firstForecastPeriod(allPeriods);
+      const forecastIndex = firstForecast ? allPeriods.findIndex(([period]) => period === firstForecast) : allPeriods.length;
+      if (mode === 'forecast') return periodWindowSlice(allPeriods, forecastIndex >= 0 ? forecastIndex : allPeriods.length - 1, state.frequency === 'weekly' ? 8 : 3, state.frequency === 'weekly' ? 30 : 18);
+      const latestActual = latestActualPeriod(allPeriods);
+      const latestIndex = latestActual ? allPeriods.findIndex(([period]) => period === latestActual) : allPeriods.length - 1;
+      if (mode === 'latest') return periodWindowSlice(allPeriods, latestIndex, state.frequency === 'weekly' ? 52 : 18, 0);
+      if (state.frequency !== 'weekly') return allPeriods;
+      const visibleActualWeeks = 104;
+      const start = Math.max(0, forecastIndex - visibleActualWeeks);
+      return allPeriods.slice(start);
+    }
+    function balanceDisplayPeriodNote(allPeriods, displayPeriods){
+      const filterParts = [];
+      if (String(state.balanceSearch || '').trim()) filterParts.push('search "' + String(state.balanceSearch || '').trim() + '"');
+      if (state.balanceFocus && state.balanceFocus !== 'all') filterParts.push({manual:'manual overrides',risk:'risk rows',cover:'stock cover',moves:'build/draw moves'}[state.balanceFocus] || state.balanceFocus);
+      const filterNote = filterParts.length ? ' Row focus active: ' + filterParts.join(' + ') + '.' : '';
+      if (!allPeriods.length || allPeriods.length === displayPeriods.length) return filterNote;
+      const first = displayPeriods[0]?.[0] || '';
+      const last = displayPeriods.at(-1)?.[0] || '';
+      const modeLabel = {smart:'smart window',latest:'latest actual window',forecast:'forecast runway',full:'full history'}[state.periodWindow] || 'smart window';
+      return ' Showing ' + fmt(displayPeriods.length) + ' of ' + fmt(allPeriods.length) + ' columns on-screen (' + first + ' through ' + last + ', ' + modeLabel + '); exports keep full history.' + filterNote;
+    }
+    function watchlistActionButton(label, regionKey, period, focus=''){ return '<button class="insightAction" data-watch-region="'+esc(regionKey || '')+'" data-watch-period="'+esc(period || '')+'" data-watch-focus="'+esc(focus || '')+'" type="button">'+esc(label)+'</button>'; }
+    function insightCardHtml(label, value, note, tone='', actionHtml=''){ return '<article class="insightCard '+esc(tone)+'"><span>'+esc(label)+'</span><b>'+esc(value)+'</b><i>'+esc(note)+'</i>'+actionHtml+'</article>'; }
+    function manualAdjustmentCountForWindow(periods){ const periodSet = new Set(periods.map(([period]) => period)); return (workbookSettings?.adjustments || []).filter(adj => adj && adj.frequency === state.frequency && periodSet.has(adj.period)).length; }
+    function renderBalanceWatchlist(periods){
+      const host = document.getElementById('balanceWatchlist');
+      if (!host) return;
+      const entry = balanceMonitorEntry(periods);
+      if (!entry) { host.innerHTML = ''; return; }
+      const [period,bucket] = entry;
+      const baseRows = BASE_BALANCE_REGION_KEYS.map(key => bucket[key]).filter(Boolean);
+      const coverRows = baseRows.map(row => ({key:row.regionKey,cover:stockCoverDays(row)})).filter(row => Number.isFinite(row.cover)).sort((a,b)=>a.cover-b.cover);
+      const drawRows = baseRows.map(row => ({key:row.regionKey,daily:totals(row).daily,total:totals(row).total})).sort((a,b)=>a.daily-b.daily);
+      const buildRows = drawRows.slice().sort((a,b)=>b.daily-a.daily);
+      const tightest = coverRows[0] || null;
+      const largestDraw = drawRows[0] || null;
+      const largestBuild = buildRows[0] || null;
+      const manualCount = manualAdjustmentCountForWindow(periods);
+      const tightTone = tightest && tightest.cover < 20 ? 'negative' : tightest && tightest.cover < 30 ? '' : 'positive';
+      const drawTone = largestDraw && largestDraw.daily < -50 ? 'negative' : '';
+      const buildTone = largestBuild && largestBuild.daily > 50 ? 'positive' : '';
+      const manualTone = manualCount ? '' : 'positive';
+      host.innerHTML = '<div class="insightHeader"><div><h3>Analyst watchlist</h3><p>Auto-ranked exceptions for the current focus period and visible period window.</p></div><span class="pill">'+esc(periodHeaderLabel(period))+'</span></div><div class="insightGrid">'
+        + insightCardHtml('Tightest cover', tightest ? fmt(tightest.cover,1) + ' days' : 'n/a', tightest ? balanceRegionDisplayLabel(tightest.key) : 'no cover data', tightTone, tightest ? watchlistActionButton('Open region', tightest.key, period, 'cover') : '')
+        + insightCardHtml('Largest draw', largestDraw ? fmt(largestDraw.daily) + ' kbd' : 'n/a', largestDraw ? balanceRegionDisplayLabel(largestDraw.key) + ' | ' + fmt(largestDraw.total) + ' kb period' : 'no draw data', drawTone, largestDraw ? watchlistActionButton('Open region', largestDraw.key, period, 'moves') : '')
+        + insightCardHtml('Largest build', largestBuild ? (largestBuild.daily >= 0 ? '+' : '') + fmt(largestBuild.daily) + ' kbd' : 'n/a', largestBuild ? balanceRegionDisplayLabel(largestBuild.key) + ' | ' + (largestBuild.total >= 0 ? '+' : '') + fmt(largestBuild.total) + ' kb period' : 'no build data', buildTone, largestBuild ? watchlistActionButton('Open region', largestBuild.key, period, 'moves') : '')
+        + insightCardHtml('Manual overrides', fmt(manualCount), manualCount ? 'in current visible window' : 'no visible manual overrides', manualTone, watchlistActionButton(manualCount ? 'Show overrides' : 'Show all rows', state.region, period, manualCount ? 'manual' : 'all'))
+        + '</div>';
+    }
     function syncGroupStickyOffset(tableId){ requestAnimationFrame(() => { const table = document.getElementById(tableId); const wrap = table?.closest('.tablewrap'); const head = table?.querySelector('thead'); if (!table || !wrap || !head) return; const controls = tableId === 'crudeRunsTable' ? document.getElementById('crudeRunsControls') : null; const controlsSticky = controls && !controls.hidden && getComputedStyle(controls).position === 'sticky'; const controlOffset = controlsSticky ? Math.ceil(controls.getBoundingClientRect().height) : 0; const headOffset = Math.ceil(head.getBoundingClientRect().height); wrap.style.setProperty('--table-head-sticky-top', controlOffset + 'px'); wrap.style.setProperty('--group-sticky-top', (controlOffset + headOffset) + 'px'); }); }
     function scrollTableActiveSheet(tableId){ if (tableId === 'balanceTable') return 'balance'; if (tableId === 'crudeRunsTable') return 'crude'; return ''; }
     function scrollTableStillActive(table, wrap, tableId, signature){ const activeSheet = scrollTableActiveSheet(tableId); return Boolean(table && wrap && (!activeSheet || state.sheet === activeSheet) && table.isConnected && wrap.getClientRects().length && table.dataset.renderSignature === signature); }
@@ -3764,7 +4431,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       document.querySelectorAll('.topbar,.chartGrid,.crudeViewportLock').forEach(el => { el.style.transform = x ? 'translateX('+x+'px)' : ''; });
     }
     function balancePeriodStatusSignature(periods){ return periods.map(([period,bucket]) => period + ':' + (Object.values(bucket).some(row => row?.status === 'forecast') ? 'f' : 'a')).join(','); }
-    function balanceTableRenderSignature(periods){ return calcCacheKey('balanceTableRender', state.frequency, balancePeriodStatusSignature(periods)); }
+    function balanceTableRenderSignature(periods){ return calcCacheKey('balanceTableRender', state.frequency, balancePeriodStatusSignature(periods), state.periodWindow || 'smart', balanceFilterSignature()); }
     function scheduleWeeklyGuideDataRefresh(){
       if (state.frequency !== 'monthly' || hasWeeklyGuideMonthlyData() || hasWeeklyData() || weeklyGuideLoadQueued) return;
       weeklyGuideLoadQueued = true;
@@ -3772,10 +4439,54 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       if (typeof requestIdleCallback === 'function') requestIdleCallback(load, {timeout:2500});
       else setTimeout(load, 900);
     }
+    function balanceSearchText(){ return String(state.balanceSearch || '').trim().toLowerCase(); }
+    function balanceFilterActive(){ return Boolean(balanceSearchText() || (state.balanceFocus && state.balanceFocus !== 'all')); }
+    function balanceFilterSignature(){ return [balanceSearchText(), state.balanceFocus || 'all'].join('|'); }
+    function balanceLineSearchText(regionKey, line){ return [balanceRegionDisplayLabel(regionKey), line.id, line.label, balanceLineDisplayLabel(line)].join(' ').toLowerCase(); }
+    function balanceLineValuesForPeriods(regionKey, line, periods){ return periods.map(([,bucket]) => bucket[regionKey] ? valueForLine(bucket[regionKey], line.id) : null); }
+    function balanceLineHasManual(regionKey, line, periods){ return periods.some(([period,bucket]) => bucket[regionKey]?.status === 'forecast' && balanceManualAdjustmentValue(state.frequency, period, regionKey, line.id) !== null); }
+    function balanceLineHasLowCover(line, values){ return line.id === 'daysForwardCover' && values.some(value => Number.isFinite(Number(value)) && Number(value) < 30); }
+    function balanceLineHasMove(line, values, periods){
+      if (line.id !== 'buildDaily' && line.id !== 'buildTotal') return false;
+      return values.some((value, idx) => {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) return false;
+        const perDay = line.id === 'buildTotal' ? numeric / Math.max(1, periodDays(periods[idx]?.[0] || '')) : numeric;
+        return Math.abs(perDay) >= 50;
+      });
+    }
+    function balanceLineHasRisk(regionKey, line, periods, values){
+      if (balanceLineHasManual(regionKey, line, periods) || balanceLineHasLowCover(line, values) || balanceLineHasMove(line, values, periods)) return true;
+      if (line.id === 'exPlannedUtilizationPct') return values.some(value => Number.isFinite(Number(value)) && Number(value) < 80);
+      return false;
+    }
+    function balanceLineMatchesFocus(regionKey, line, periods, values){
+      const focus = BALANCE_FOCUS_MODES.has(state.balanceFocus) ? state.balanceFocus : 'all';
+      if (focus === 'all') return true;
+      if (focus === 'manual') return balanceLineHasManual(regionKey, line, periods);
+      if (focus === 'risk') return balanceLineHasRisk(regionKey, line, periods, values);
+      if (focus === 'cover') return line.id === 'daysForwardCover' || balanceLineHasLowCover(line, values);
+      if (focus === 'moves') return line.id === 'buildDaily' || line.id === 'buildTotal';
+      return true;
+    }
+    function balanceLineMatchesFilter(regionKey, line, periods){
+      if (!balanceFilterActive()) return true;
+      if (line.kind === 'section' || line.kind === 'divider') return false;
+      const values = balanceLineValuesForPeriods(regionKey, line, periods);
+      const search = balanceSearchText();
+      if (search && !balanceLineSearchText(regionKey, line).includes(search)) return false;
+      return balanceLineMatchesFocus(regionKey, line, periods, values);
+    }
+    function visibleBalanceLines(regionKey, periods){ return balanceLines(regionKey).filter(line => balanceLineMatchesFilter(regionKey, line, periods)); }
     function balanceRegionRowsHtml(region, periods){
-      const cacheKey = calcCacheKey('balanceRegionRowsHtml', state.frequency, region.key, balancePeriodStatusSignature(periods));
+      const cacheKey = calcCacheKey('balanceRegionRowsHtml', state.frequency, region.key, balancePeriodStatusSignature(periods), balanceFilterSignature());
       if (balanceRegionRowsHtmlCache.has(cacheKey)) return balanceRegionRowsHtmlCache.get(cacheKey);
-      const lines = balanceLines(region.key);
+      const lines = visibleBalanceLines(region.key, periods);
+      if (!lines.length && balanceFilterActive()) {
+        const empty = '<tr class="regionLine region-'+region.key+' emptyFilteredRow"><td class="rowLabel">No matching rows</td>'+periods.map(() => '<td></td>').join('')+'</tr>';
+        balanceRegionRowsHtmlCache.set(cacheKey, empty);
+        return empty;
+      }
       const html = lines.map(line => {
         const values = periods.map(([,bucket]) => bucket[region.key] ? valueForLine(bucket[region.key], line.id) : null);
         const numericValues = values.filter(value => typeof value === 'number');
@@ -3791,7 +4502,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       const regionClass = 'region-' + CSS.escape(regionKey);
       table.querySelectorAll('tr.regionLine.' + regionClass).forEach(row => row.remove());
     }
-    function ensureBalanceRegionRows(table, regionKey, periods=periodEntriesForBalance()){
+    function ensureBalanceRegionRows(table, regionKey, periods=balanceDisplayPeriodEntries()){
       const region = D.regionalBalance.regions.find(row => row.key === regionKey);
       if (!region) return;
       const regionClass = 'region-' + CSS.escape(regionKey);
@@ -3803,20 +4514,21 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function saveCollapsedBalanceGroups(){
       localStorage.setItem(BALANCE_COLLAPSED_STORAGE_KEY, JSON.stringify(Array.from(collapsedGroups)));
     }
-    function syncBalanceGroupVisibility(){
+    function updateBalanceGroupVisibility(table, regionKey, periods=balanceDisplayPeriodEntries()){
+      if (!table) return;
+      const collapsed = collapsedGroups.has(regionKey) && !balanceFilterActive();
+      if (collapsed) removeBalanceRegionRows(table, regionKey);
+      else ensureBalanceRegionRows(table, regionKey, periods);
+      const button = table.querySelector('[data-toggle-group="'+CSS.escape(regionKey)+'"]');
+      if (button) {
+        button.textContent = collapsed ? '+' : '-';
+        button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      }
+    }
+    function syncBalanceGroupVisibility(periods=balanceDisplayPeriodEntries()){
       const table = document.getElementById('balanceTable');
       if (!table) return;
-      D.regionalBalance.regions.forEach(region => {
-        const collapsed = collapsedGroups.has(region.key);
-        const regionClass = 'region-' + CSS.escape(region.key);
-        if (collapsed) removeBalanceRegionRows(table, region.key);
-        else ensureBalanceRegionRows(table, region.key);
-        const button = table.querySelector('[data-toggle-group="'+CSS.escape(region.key)+'"]');
-        if (button) {
-          button.textContent = collapsed ? '+' : '-';
-          button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-        }
-      });
+      D.regionalBalance.regions.forEach(region => updateBalanceGroupVisibility(table, region.key, periods));
     }
     function setAllBalanceGroupsCollapsed(collapsed){
       collapsedGroups = collapsed ? new Set(D.regionalBalance.regions.map(region => region.key)) : new Set();
@@ -3829,24 +4541,26 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function toggleBalanceGroup(key){
       if (!D.regionalBalance.regions.some(region => region.key === key)) return;
       collapsedGroups.has(key) ? collapsedGroups.delete(key) : collapsedGroups.add(key);
-      syncBalanceGroupVisibility();
+      updateBalanceGroupVisibility(document.getElementById('balanceTable'), key);
       saveCollapsedBalanceGroups();
     }
 	    function renderBalanceTable(){
-	      const periods = periodEntriesForBalance();
+	      const allPeriods = periodEntriesForBalance();
+	      const periods = balanceDisplayPeriodEntries(allPeriods);
 	      const table = document.getElementById('balanceTable');
 	      table.classList.toggle('monthlyBalanceMatrix', state.frequency === 'monthly');
       scheduleWeeklyGuideDataRefresh();
-	      const signature = balanceTableRenderSignature(periods);
+      const signature = balanceTableRenderSignature(periods);
       let tableRebuilt = false;
-      renderBalanceMonitor(periods);
+      renderBalanceMonitor(allPeriods);
+      renderBalanceWatchlist(periods);
       document.getElementById('balanceTitle').textContent = (state.frequency === 'weekly' ? 'Weekly' : 'Monthly') + ' Balance Statement';
-      document.getElementById('balanceSubtitle').textContent = state.frequency === 'monthly' ? 'Monthly production is calculated from crude runs, operating capacity, known Atmos offline, and a 3-year seasonal yield. Total supply = production + imports + receipts in.' : 'Forward weekly production inherits the monthly forecast yield and crude-run story first, then applies weekly outage timing and weekly adjustments. Total supply = production + imports + receipts in.';
+      document.getElementById('balanceSubtitle').textContent = (state.frequency === 'monthly' ? 'Monthly production is calculated from crude runs, operating capacity, known Atmos offline, and a 3-year seasonal yield. Total supply = production + imports + receipts in.' : 'Forward weekly production inherits the monthly forecast yield and crude-run story first, then applies weekly outage timing and weekly adjustments. Total supply = production + imports + receipts in.') + balanceDisplayPeriodNote(allPeriods, periods);
       if (table.dataset.renderSignature !== signature || !table.tBodies.length) {
         const header = '<thead><tr><th>PADD / balance item</th>'+periods.map(([period,bucket]) => { const status = Object.values(bucket).map(row => row.status).find(Boolean) || 'actual'; const label = periodHeaderLabel(period); const statusClass = status === 'forecast' ? 'periodForecast' : 'periodActual'; return '<th class="'+statusClass+'" data-period="'+esc(period)+'"><span class="periodHead"><b>'+esc(label)+'</b><span>'+esc(status)+'</span></span></th>'; }).join('')+'</tr></thead>';
         const body = D.regionalBalance.regions.map(region => {
           const meta = REGION_META[region.key] || [region.label, region.label];
-          const collapsed = collapsedGroups.has(region.key);
+          const collapsed = collapsedGroups.has(region.key) && !balanceFilterActive();
           const groupPeriodCell = periods.length ? '<td class="groupPeriodCell" colspan="'+periods.length+'" aria-hidden="true"></td>' : '';
           const outageRegion = outageRegionForBalanceRegion(region.key);
           const group = '<tr class="groupRow region-'+esc(region.key)+'"><td class="groupLockCell"><div class="groupInner"><button class="groupBtn" data-toggle-group="'+esc(region.key)+'" type="button" aria-expanded="'+(collapsed?'false':'true')+'">'+(collapsed?'+':'-')+'</button><div><span class="groupCode">'+esc(meta[0])+'</span> <span class="groupName">'+esc(meta[1])+'</span></div><div class="groupActions"><button class="groupChartBtn" data-open-region="'+esc(region.key)+'" type="button">Charts</button><button class="groupChartBtn" data-open-balance-outages="'+esc(outageRegion)+'" type="button">Outages</button></div></div></td>'+groupPeriodCell+'</tr>';
@@ -3856,14 +4570,24 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
         table.dataset.renderSignature = signature;
         tableRebuilt = true;
       }
-      syncBalanceGroupVisibility();
+      syncBalanceGroupVisibility(periods);
       if (tableRebuilt) syncGroupStickyOffset('balanceTable');
-      if (tableRebuilt || tableScrollSignatures.balanceTable !== signature) scrollTableToPeriod('balanceTable', initialBalancePeriod(periods), signature);
+      const targetPeriod = pendingBalanceScrollPeriod || initialBalancePeriod(periods);
+      const forceScroll = forceBalancePeriodScroll;
+      pendingBalanceScrollPeriod = '';
+      forceBalancePeriodScroll = false;
+      if (tableRebuilt || tableScrollSignatures.balanceTable !== signature || forceScroll) scrollTableToPeriod('balanceTable', targetPeriod, signature, forceScroll);
     }
-    function weekSlot(period){ const date = new Date(period + 'T00:00:00Z'); const start = new Date(Date.UTC(date.getUTCFullYear(),0,1)); return Math.min(53, Math.floor((date.getTime() - start.getTime()) / 604800000) + 1); }
+    function isoWeekInfo(period){ const date = new Date(String(period || '').slice(0,10) + 'T00:00:00Z'); if (!Number.isFinite(date.getTime())) return {year:yearOf(String(period || '')),week:1}; const day = date.getUTCDay() || 7; const thursday = new Date(date); thursday.setUTCDate(date.getUTCDate() + 4 - day); const isoYear = thursday.getUTCFullYear(); const yearStart = new Date(Date.UTC(isoYear,0,1)); const week = Math.ceil((((thursday.getTime() - yearStart.getTime()) / 86400000) + 1) / 7); return {year:isoYear,week:Math.min(53, Math.max(1, week))}; }
+    function weekSlot(period){ return isoWeekInfo(period).week; }
+    function chartPeriodYear(period, frequency=state.frequency){ return frequency === 'weekly' ? isoWeekInfo(period).year : yearOf(period); }
     function slotOf(period, frequency){ return frequency === 'weekly' ? weekSlot(period) : monthOf(period); }
-    function weeklyMonthLabelSlots(){ return MONTHS.map((_, month) => Math.min(53, Math.max(1, Math.round((Date.UTC(2026, month, 15) - Date.UTC(2026, 0, 1)) / 604800000) + 1))); }
-    function slotLabel(slot, frequency){ if (frequency === 'monthly') return MONTHS[slot - 1] || ''; const date = new Date(Date.UTC(2026,0,1 + (slot - 1) * 7)); return MONTHS[date.getUTCMonth()]; }
+    function shortDateLabel(period){ const date = new Date(String(period || '').slice(0,10) + 'T00:00:00Z'); return Number.isFinite(date.getTime()) ? MONTHS[date.getUTCMonth()] + ' ' + String(date.getUTCDate()).padStart(2,'0') + ", '" + String(date.getUTCFullYear()).slice(2) : String(period || ''); }
+    function isoWeekEndPeriod(year, week){ const jan4 = new Date(Date.UTC(year, 0, 4)); const day = jan4.getUTCDay() || 7; jan4.setUTCDate(jan4.getUTCDate() - day + 1 + (Math.max(1, week) - 1) * 7 + 4); return jan4.toISOString().slice(0,10); }
+    function weeklySlotDateLabel(slot, year=chartYearContext('weekly').currentYear || 2026){ return shortDateLabel(isoWeekEndPeriod(year, slot)); }
+    function weeklyAxisLabelEntries(_year=chartYearContext('weekly').currentYear || 2026, slots=53){ return MONTHS.map((label, index) => ({slot:1 + index * (slots - 1) / Math.max(MONTHS.length - 1, 1),label})); }
+    function slotLabel(slot, frequency){ return frequency === 'monthly' ? (MONTHS[slot - 1] || '') : 'ISO W' + String(slot).padStart(2,'0'); }
+    function chartPeriodLabel(period, frequency=state.frequency){ if (!period) return ''; return frequency === 'weekly' ? shortDateLabel(period) : periodHeaderLabel(period, 'monthly'); }
     function finiteNumberOrNull(value){ const n = Number(value); return Number.isFinite(n) ? n : null; }
     function sortedChartRows(rows){ return (Array.isArray(rows) ? rows : []).filter(row => row && row.period).slice().sort((a,b)=>String(a.period).localeCompare(String(b.period))); }
     function alignChartVectors(bundle){ const size = Math.min(bundle.periods.length, bundle.statuses.length, bundle.years.length, bundle.slots.length, bundle.values.length, bundle.valid.length); if (size === bundle.length) return bundle; return {...bundle,length:size,periods:bundle.periods.slice(0,size),statuses:bundle.statuses.slice(0,size),years:bundle.years.subarray(0,size),slots:bundle.slots.subarray(0,size),values:bundle.values.subarray(0,size),valid:bundle.valid.subarray(0,size)}; }
@@ -3882,7 +4606,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
         const value = finiteNumberOrNull(row[metricKey]);
         periods[index] = period;
         statuses[index] = row.status === 'forecast' ? 'forecast' : 'actual';
-        years[index] = yearOf(period);
+        years[index] = chartPeriodYear(period, frequency);
         slots[index] = slotOf(period, frequency);
         if (value !== null) {
           values[index] = value;
@@ -3959,7 +4683,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
         if (statusMode === 'actual' && status !== 'actual') continue;
         if (statusMode === 'forecast' && status !== 'forecast') continue;
         if (statusMode === 'visible' && !state.showForecast && status === 'forecast') continue;
-        points.push({slot:bundle.slots[index],value:bundle.values[index]});
+        points.push({slot:bundle.slots[index],value:bundle.values[index],period:bundle.periods[index],status});
       }
       points.sort((a,b)=>a.slot-b.slot);
       derived.yearPoints.set(cacheKey, points);
@@ -3972,7 +4696,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       for (let index = 0; index < bundle.length; index += 1) {
         if (!bundle.valid[index]) continue;
         if (!predicate(index, bundle)) continue;
-        points.push({slot:bundle.slots[index],value:bundle.values[index]});
+        points.push({slot:bundle.slots[index],value:bundle.values[index],period:bundle.periods[index],status:bundle.statuses[index]});
       }
       return points.sort((a,b)=>a.slot-b.slot);
     }
@@ -4077,7 +4801,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       if (!year) return points;
       for (let index = 0; index < baseBundle.length; index += 1) {
         if (!valid[index] || baseBundle.years[index] !== year || baseBundle.statuses[index] !== 'forecast') continue;
-        points.push({slot:baseBundle.slots[index],value:values[index]});
+        points.push({slot:baseBundle.slots[index],value:values[index],period:baseBundle.periods[index],status:baseBundle.statuses[index]});
       }
       points.sort((a,b)=>a.slot-b.slot);
       return points;
@@ -4199,75 +4923,121 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       const bandPoints = band.filter(point => Number.isFinite(point.min) && Number.isFinite(point.max));
       const bandPath = bandPoints.length ? bandPoints.map((point, idx) => (idx ? 'L' : 'M') + x(point.slot).toFixed(1) + ' ' + y(point.visibleMax).toFixed(1)).join(' ') + ' ' + bandPoints.slice().reverse().map(point => 'L' + x(point.slot).toFixed(1) + ' ' + y(point.visibleMin).toFixed(1)).join(' ') + ' Z' : '';
       const grid = scale.ticks.map(value => { const gy = y(value); return '<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+gy.toFixed(1)+'" y2="'+gy.toFixed(1)+'" stroke="#cbd3df"/><text x="'+(pad.l-8)+'" y="'+(gy+4).toFixed(1)+'" font-size="10" text-anchor="end" fill="#4b5566">'+fmt(value)+'</text>'; }).join('');
-      const labelSlots = frequency === 'weekly' ? weeklyMonthLabelSlots() : slotList;
-      const labels = labelSlots.map(slot => '<text x="'+x(slot).toFixed(1)+'" y="'+(h-10)+'" font-size="10" text-anchor="middle" fill="#303a49">'+slotLabel(slot, frequency)+'</text>').join('');
-      const avgLine = curve(band.filter(point => Number.isFinite(point.avg)).map(point => ({slot:point.slot,value:point.avg})));
+      const metric = svg.classList.contains('crudeSeasonChart') ? crudeMetricByKey(metricKey) : metricByKey(metricKey);
+      const labelEntries = frequency === 'weekly' ? weeklyAxisLabelEntries(currentYear || new Date().getFullYear(), slots) : slotList.map(slot => ({slot,label:slotLabel(slot, frequency)}));
+      const labels = labelEntries.map(row => '<text x="'+x(row.slot).toFixed(1)+'" y="'+(h-10)+'" font-size="10" text-anchor="middle" fill="#303a49">'+esc(row.label)+'</text>').join('');
+      const avgPoints = band.filter(point => Number.isFinite(point.avg)).map(point => ({slot:point.slot,value:point.avg}));
+      const avgLine = curve(avgPoints);
       const historyPaths = activeHistory.map(def => { const points = byYear(def.year); return points.length ? '<path d="'+curve(points)+'" fill="none" stroke="'+def.color+'" stroke-width="2.1"/>' : ''; }).join('');
       const priorPath = state.showPriorYear && priorYear ? curve(byYear(priorYear)) : '';
       const actualPath = curve(currentActual);
       const forecastPath = curve(forecastBridge);
       const overlayPaths = overlays.map(series => (series.currentBridge.length ? '<path d="'+curve(series.currentBridge)+'" fill="none" stroke="'+series.color+'" stroke-width="2.15" stroke-dasharray="3 6"/>' : '') + (series.nextForecast.length ? '<path d="'+curve(series.nextForecast)+'" fill="none" stroke="'+series.color+'" stroke-width="2.15" stroke-dasharray="3 6"/>' : '')).join('');
       const actualMarkers = currentActual.map(point => '<circle cx="'+x(point.slot).toFixed(1)+'" cy="'+y(point.value).toFixed(1)+'" r="4.2" fill="#fff" stroke="#b42318" stroke-width="2"/>').join('');
-	      svg.innerHTML = '<line x1="'+pad.l+'" x2="'+pad.l+'" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/><line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+(h-pad.b)+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/>' + grid + (bandPath ? '<path class="seasonBand" data-band-years="'+esc(activeBandYears.join(','))+'" d="'+bandPath+'" fill="var(--band)" opacity=".66" stroke="#8a909b" stroke-width=".8"/>' : '') + labels + (avgLine && activeBandYears.length ? '<path d="'+avgLine+'" fill="none" stroke="#4b5563" stroke-width="1.45" stroke-dasharray="6 7"/>' : '') + historyPaths + (priorPath ? '<path d="'+priorPath+'" fill="none" stroke="#315b99" stroke-width="2.25"/>' : '') + (actualPath ? '<path d="'+actualPath+'" fill="none" stroke="#b42318" stroke-width="2.35"/>' : '') + actualMarkers + (forecastPath ? '<path d="'+forecastPath+'" fill="none" stroke="#b42318" stroke-width="2.35" stroke-dasharray="6 7"/>' : '') + (nextYearPath ? '<path d="'+nextYearPath+'" fill="none" stroke="'+NEXT_YEAR_FORECAST_COLOR+'" stroke-width="2.25" stroke-dasharray="4 6"/>' : '') + overlayPaths + '<g class="hoverMarker" visibility="hidden"><line class="hoverLine" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#111827" stroke-width="1" opacity=".5"/><circle class="hoverPrior" r="4" fill="#315b99" stroke="#fff" stroke-width="1.5"/><circle class="hoverCurrent" r="4" fill="#b42318" stroke="#fff" stroke-width="1.5"/><circle class="hoverNext" r="4" fill="'+NEXT_YEAR_FORECAST_COLOR+'" stroke="#fff" stroke-width="1.5"/><circle class="hoverAvg" r="3" fill="#111827" stroke="#fff" stroke-width="1.5"/></g>';
-	      const marker = svg.querySelector('.hoverMarker');
-	      const hoverLine = marker?.querySelector('.hoverLine');
-	      const hoverPrior = marker?.querySelector('.hoverPrior');
-	      const hoverCurrent = marker?.querySelector('.hoverCurrent');
-	      const hoverNext = marker?.querySelector('.hoverNext');
-	      const hoverAvg = marker?.querySelector('.hoverAvg');
-	      const card = svg.closest('.chartCard');
-	      const tip = card?.querySelector('.chartTooltip');
-	      const metric = svg.classList.contains('crudeSeasonChart') ? crudeMetricByKey(metricKey) : metricByKey(metricKey);
-	      let lastHoverSlot = 0;
-	      let lastTipHeight = 124;
-	      svg.onmousemove = event => {
-	        if (!marker || !hoverLine || !hoverPrior || !hoverCurrent || !hoverNext || !hoverAvg || !card || !tip) return;
-	        const rect = svg.getBoundingClientRect();
-	        const sx = (event.clientX - rect.left) * (w / rect.width);
-	        const slot = Math.min(slots, Math.max(1, Math.round(1 + ((sx - pad.l) / (w - pad.l - pad.r)) * (slots - 1))));
-	        const gx = x(slot);
-	        marker.setAttribute('visibility','visible');
-	        if (slot !== lastHoverSlot) {
-	          hoverLine.setAttribute('x1',gx);
-	          hoverLine.setAttribute('x2',gx);
-	          const setCircle = (circle, value) => { if (Number.isFinite(value)) { circle.style.display = ''; circle.setAttribute('cx',gx); circle.setAttribute('cy',y(value)); } else circle.style.display = 'none'; };
-	          const prior = state.showPriorYear && priorYear ? values.get(priorYear+':'+slot) : null;
-	          const current = state.showCurrentYear && currentYear ? values.get(currentYear+':'+slot) : null;
-	          const nextForecast = state.showNextYearForecast && nextYearForecast && state.showForecast ? values.get(nextYearForecast+':'+slot) : null;
-	          const avg = activeBandYears.length ? band[slot-1]?.avg : null;
-	          setCircle(hoverPrior, prior);
-	          setCircle(hoverCurrent, current);
-	          setCircle(hoverNext, nextForecast);
-	          setCircle(hoverAvg, avg);
-	          const b = band[slot-1] || {};
-	          const historyRows = activeHistory.map(def => '<div><span style="color:'+def.color+'">'+def.year+'</span><strong>'+fmtMaybe(values.get(def.year+':'+slot), metric.digits)+'</strong></div>').join('');
-	          const priorRow = state.showPriorYear && priorYear ? '<div><span>'+priorYear+'</span><strong>'+fmtMaybe(prior, metric.digits)+'</strong></div>' : '';
-	          const currentRow = state.showCurrentYear && currentYear ? '<div><span>'+currentYear+'</span><strong>'+fmtMaybe(current, metric.digits)+'</strong></div>' : '';
-	          const nextRow = state.showNextYearForecast && nextYearForecast && state.showForecast ? '<div><span>'+nextYearForecast+' fcst</span><strong>'+fmtMaybe(nextForecast, metric.digits)+'</strong></div>' : '';
-	          const bandRow = activeBandYears.length ? '<div><span>Band</span><strong>'+(Number.isFinite(b.min) ? fmt(b.min, metric.digits) : '')+(Number.isFinite(b.min) && Number.isFinite(b.max) ? ' - ' : '')+(Number.isFinite(b.max) ? fmt(b.max, metric.digits) : '')+'</strong></div><div><span>Avg</span><strong>'+fmtMaybe(avg, metric.digits)+'</strong></div>' : '';
-	          tip.innerHTML = '<b>'+esc(slotLabel(slot, frequency))+' '+esc(metric.label)+(seriesBundle.rolling ? ' 4-week avg' : '')+'</b>' + currentRow + priorRow + nextRow + historyRows + bandRow;
-	          lastTipHeight = 88 + ([currentRow, priorRow, nextRow].filter(Boolean).length + activeHistory.length + (activeBandYears.length ? 2 : 0)) * 18;
-	          lastHoverSlot = slot;
-	        }
-	        const cardRect = card.getBoundingClientRect();
-	        const tipWidth = Math.min(240, Math.max(170, cardRect.width - 20));
-	        const maxLeft = Math.max(10, cardRect.width - tipWidth - 10);
-	        const maxTop = Math.max(36, cardRect.height - lastTipHeight);
-	        tip.style.display = 'block';
-	        tip.style.left = Math.max(10, Math.min(maxLeft, event.clientX - cardRect.left + 12)) + 'px';
-	        tip.style.top = Math.max(36, Math.min(maxTop, event.clientY - cardRect.top + 12)) + 'px';
-	      };
-	      svg.onmouseleave = () => { if (marker) marker.setAttribute('visibility','hidden'); if (tip) tip.style.display = 'none'; };
+      const hoverTargets = [];
+      const formatMetricValue = value => {
+        const rendered = fmt(value, metric.digits);
+        if (!metric.unit) return rendered;
+        return metric.unit === '%' ? rendered + '%' : rendered + ' ' + metric.unit;
+      };
+      const hoverLabel = label => seriesBundle.rolling && !String(label).includes('avg') ? label + ' 4-week avg' : label;
+      const addHoverTargets = (label, color, points) => {
+        (points || []).forEach((point, index) => {
+          if (!Number.isFinite(point?.value) || !Number.isFinite(point?.slot)) return;
+          hoverTargets.push({
+            key: label + '|' + (point.period || '') + '|' + point.slot + '|' + index,
+            label:hoverLabel(label),
+            color,
+            value:point.value,
+            slot:point.slot,
+            period:point.period || '',
+            pointX:x(point.slot),
+            pointY:y(point.value)
+          });
+        });
+      };
+      activeHistory.forEach(def => addHoverTargets(String(def.year), def.color, byYear(def.year)));
+      if (state.showPriorYear && priorYear) addHoverTargets(String(priorYear), '#315b99', byYear(priorYear));
+      if (state.showCurrentYear && currentYear) {
+        addHoverTargets(String(currentYear) + ' actual', '#b42318', currentActual);
+        if (state.showForecast) addHoverTargets(String(currentYear) + ' forecast', '#b42318', currentForecast);
+      }
+      if (state.showNextYearForecast && nextYearForecast && state.showForecast) addHoverTargets(String(nextYearForecast) + ' forecast', NEXT_YEAR_FORECAST_COLOR, chartBundleYearPoints(seriesBundle, nextYearForecast, 'forecast'));
+      if (activeBandYears.length) addHoverTargets(compactYearList(activeBandYears) + ' avg', '#4b5563', avgPoints);
+      overlays.forEach(series => {
+        addHoverTargets(series.name, series.color, series.currentBridge.filter(point => point.status === 'forecast'));
+        addHoverTargets(series.name + (nextYearForecast ? ' ' + nextYearForecast + ' forecast' : ' forecast'), series.color, series.nextForecast);
+      });
+      svg.innerHTML = '<line x1="'+pad.l+'" x2="'+pad.l+'" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/><line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+(h-pad.b)+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/>' + grid + (bandPath ? '<path class="seasonBand" data-band-years="'+esc(activeBandYears.join(','))+'" d="'+bandPath+'" fill="var(--band)" opacity=".66" stroke="#8a909b" stroke-width=".8"/>' : '') + labels + (avgLine && activeBandYears.length ? '<path d="'+avgLine+'" fill="none" stroke="#4b5563" stroke-width="1.45" stroke-dasharray="6 7"/>' : '') + historyPaths + (priorPath ? '<path d="'+priorPath+'" fill="none" stroke="#315b99" stroke-width="2.25"/>' : '') + (actualPath ? '<path d="'+actualPath+'" fill="none" stroke="#b42318" stroke-width="2.35"/>' : '') + actualMarkers + (forecastPath ? '<path d="'+forecastPath+'" fill="none" stroke="#b42318" stroke-width="2.35" stroke-dasharray="6 7"/>' : '') + (nextYearPath ? '<path d="'+nextYearPath+'" fill="none" stroke="'+NEXT_YEAR_FORECAST_COLOR+'" stroke-width="2.25" stroke-dasharray="4 6"/>' : '') + overlayPaths + '<g class="hoverMarker" visibility="hidden"><line class="hoverLine" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#111827" stroke-width="1" opacity=".35"/><circle class="hoverPoint" r="4.7" fill="#fff" stroke="#111827" stroke-width="2.2"/></g>';
+      const marker = svg.querySelector('.hoverMarker');
+      const hoverLine = marker?.querySelector('.hoverLine');
+      const hoverPoint = marker?.querySelector('.hoverPoint');
+      const card = svg.closest('.chartCard');
+      const tip = card?.querySelector('.chartTooltip');
+      let lastHoverKey = '';
+      let lastTipHeight = 70;
+      const hideHover = () => {
+        if (marker) marker.setAttribute('visibility','hidden');
+        if (tip) tip.style.display = 'none';
+        lastHoverKey = '';
+      };
+      const nearestHoverTarget = (sx, sy) => {
+        let best = null;
+        let bestDistance = Infinity;
+        hoverTargets.forEach(target => {
+          const dx = target.pointX - sx;
+          const dy = target.pointY - sy;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < bestDistance) {
+            bestDistance = distance;
+            best = target;
+          }
+        });
+        return best && bestDistance <= 34 ? best : null;
+      };
+      svg.onmousemove = event => {
+        if (!marker || !hoverLine || !hoverPoint || !card || !tip) return;
+        const rect = svg.getBoundingClientRect();
+        const sx = (event.clientX - rect.left) * (w / rect.width);
+        const sy = (event.clientY - rect.top) * (h / rect.height);
+        if (sx < pad.l - 14 || sx > w - pad.r + 14 || sy < pad.t - 20 || sy > h - pad.b + 20) {
+          hideHover();
+          return;
+        }
+        const target = nearestHoverTarget(sx, sy);
+        if (!target) {
+          hideHover();
+          return;
+        }
+        marker.setAttribute('visibility','visible');
+        hoverLine.setAttribute('x1',target.pointX.toFixed(1));
+        hoverLine.setAttribute('x2',target.pointX.toFixed(1));
+        hoverPoint.setAttribute('cx',target.pointX.toFixed(1));
+        hoverPoint.setAttribute('cy',target.pointY.toFixed(1));
+        hoverPoint.setAttribute('stroke',target.color);
+        if (target.key !== lastHoverKey) {
+          const periodLabel = target.period ? chartPeriodLabel(target.period, frequency) : (frequency === 'weekly' ? weeklySlotDateLabel(target.slot, currentYear || new Date().getFullYear()) : slotLabel(target.slot, frequency));
+          tip.innerHTML = '<b>'+esc(periodLabel)+' '+esc(metric.label)+'</b><div><span><i style="background:'+esc(target.color)+'"></i>'+esc(target.label)+'</span><strong>'+esc(formatMetricValue(target.value))+'</strong></div>';
+          lastTipHeight = 60;
+          lastHoverKey = target.key;
+        }
+        const cardRect = card.getBoundingClientRect();
+        const tipWidth = Math.min(240, Math.max(170, cardRect.width - 20));
+        const maxLeft = Math.max(10, cardRect.width - tipWidth - 10);
+        const maxTop = Math.max(36, cardRect.height - lastTipHeight);
+        tip.style.display = 'block';
+        tip.style.left = Math.max(10, Math.min(maxLeft, event.clientX - cardRect.left + 12)) + 'px';
+        tip.style.top = Math.max(36, Math.min(maxTop, event.clientY - cardRect.top + 12)) + 'px';
+      };
+      svg.onmouseleave = hideHover;
     }
     function orderedChartMetrics(){ return CHART_METRICS; }
     function displayChartRegions(){ return state.chartRegion === CHART_ALL_REGION_KEY ? D.regionalBalance.regions.map(region => region.key) : [state.chartRegion]; }
     function chartRegionHeadingHtml(regionKey, chartCount){ const meta = REGION_META[regionKey] || null; const label = meta?.[0] && meta?.[1] ? meta[0] + ' | ' + meta[1] : balanceRegionDisplayLabel(regionKey).trim(); return '<div class="chartRegionHeading region-'+esc(regionKey)+'"><div><span>Chart region</span><strong>'+esc(label)+'</strong></div><i>'+fmt(chartCount)+' charts</i></div>'; }
     function chartShellRenderSignature(){ const zooms = Array.from(zoomedCharts).filter(key => !String(key).startsWith('crude:')).sort().join(','); return calcCacheKey('balanceChartShell', state.frequency, state.chartRegion, state.showRegionTitles ? 'titles' : 'no-titles', zooms); }
-    function chartRenderSignature(grid){ const zooms = Array.from(zoomedCharts).filter(key => !String(key).startsWith('crude:')).sort().join(','); return calcCacheKey('balanceCharts', state.frequency, state.chartRegion, state.showForecast ? 'forecast' : 'actual-only', state.showFourWeekAverage ? 'ma4' : 'raw', state.showLegends ? 'legends' : 'no-legends', state.showRegionTitles ? 'titles' : 'no-titles', state.showPriorYear ? 'prior' : 'no-prior', state.showCurrentYear ? 'current' : 'no-current', state.showNextYearForecast ? 'next' : 'no-next', JSON.stringify(effectiveBandYears(state.frequency)), JSON.stringify(state.historyYears || []), zooms, Math.round(grid?.clientWidth || window.innerWidth || 0)); }
     function chartRenderSignature(grid){ const zooms = Array.from(zoomedCharts).filter(key => !String(key).startsWith('crude:')).sort().join(','); return calcCacheKey('balanceCharts', state.frequency, state.chartRegion, state.showForecast ? 'forecast' : 'actual-only', state.showFourWeekAverage ? 'ma4' : 'raw', state.showLegends ? 'legends' : 'no-legends', state.showRegionTitles ? 'titles' : 'no-titles', state.showPriorYear ? 'prior' : 'no-prior', state.showCurrentYear ? 'current' : 'no-current', state.showNextYearForecast ? 'next' : 'no-next', JSON.stringify(effectiveBandYears(state.frequency)), JSON.stringify(state.historyYears || []), chartScenarioOverlaySignature(), zooms, Math.round(grid?.clientWidth || window.innerWidth || 0)); }
     function markBalanceChartCardsForHydration(grid){ grid?.querySelectorAll('.chartCard').forEach(card => { card.dataset.chartReady = '0'; card.setAttribute('aria-busy', 'true'); }); }
     function cancelBalanceChartHydration(){ balanceChartHydrationToken += 1; if (balanceChartHydrationObserver) { balanceChartHydrationObserver.disconnect(); balanceChartHydrationObserver = null; } }
-    function balanceChartShellHtml(regionKey, metricKey, options={}){ const metric = metricByKey(metricKey); const regionLabel = chartRegionLabel(regionKey); const zoomKey = options.allMode ? regionKey + ':' + metricKey : metricKey; const zoomed = zoomedCharts.has(zoomKey); const scenarioMetric = chartScenarioMetricFromChartMetric(metricKey); const canLaunchScenario = Boolean(options.regionHasScenarioTarget && scenarioMetric); const cardClass = ['chartCard', zoomed ? 'zoomed' : '', canLaunchScenario ? 'scenarioAdjustable' : ''].filter(Boolean).join(' '); const title = (state.showRegionTitles || options.allMode ? regionLabel + ' | ' : '') + metric.label; const sliderLabel = canLaunchScenario ? 'Open ' + regionLabel + ' ' + metric.label + ' slider' : ''; return '<article class="'+esc(cardClass)+'" data-chart-metric="'+esc(metricKey)+'" data-chart-region="'+esc(regionKey)+'" data-chart-ready="0" aria-busy="true"><div class="cardTools"><div class="toolGroup"><button class="toolBtn" data-zoom="'+esc(zoomKey)+'" type="button">'+(zoomed?'Close zoom':'Zoom')+'</button><button class="toolBtn" data-export-chart="'+esc(metricKey)+'" data-export-region="'+esc(regionKey)+'" type="button">Export XLSX</button></div><div class="toolGroup"><button class="toolBtn" data-copy-chart="'+esc(metricKey)+'" data-copy-region="'+esc(regionKey)+'" type="button">Copy</button><button class="toolBtn" data-save-chart="'+esc(metricKey)+'" data-save-region="'+esc(regionKey)+'" type="button">Save</button></div></div><h3 class="chartTitle">'+esc(title)+'</h3><svg class="seasonChart" role="img" aria-label="'+esc(title)+' chart"></svg><div class="chartLegendHost"><div class="legend" '+(state.showLegends?'':'hidden')+'><span>Rendering…</span></div></div><div class="miniWrap"><div class="chartNotice">Rendering chart details…</div></div><div class="chartTooltip"></div>'+(canLaunchScenario ? '<button class="chartScenarioLaunch" data-open-chart-scenario="'+esc(metricKey)+'" data-scenario-region="'+esc(regionKey)+'" type="button" aria-label="'+esc(sliderLabel)+'" title="'+esc(sliderLabel)+'"></button>' : '')+'</article>'; }
     function balanceChartShellHtml(regionKey, metricKey, options={}){ const metric = metricByKey(metricKey); const regionLabel = chartRegionLabel(regionKey); const zoomKey = options.allMode ? regionKey + ':' + metricKey : metricKey; const zoomed = zoomedCharts.has(zoomKey); const scenarioMetric = chartScenarioMetricFromChartMetric(metricKey); const canLaunchScenario = Boolean(options.regionHasScenarioTarget && scenarioMetric); const cardClass = ['chartCard', zoomed ? 'zoomed' : '', canLaunchScenario ? 'scenarioAdjustable' : ''].filter(Boolean).join(' '); const title = (state.showRegionTitles || options.allMode ? regionLabel + ' | ' : '') + metric.label; const sliderLabel = canLaunchScenario ? 'Open ' + regionLabel + ' ' + metric.label + ' forecast workbench' : ''; const forecastButton = canLaunchScenario ? '<button class="toolBtn scenarioTool" data-open-chart-scenario="'+esc(metricKey)+'" data-scenario-region="'+esc(regionKey)+'" type="button" aria-label="'+esc(sliderLabel)+'" title="'+esc(sliderLabel)+'">Forecast</button>' : ''; return '<article class="'+esc(cardClass)+'" data-chart-metric="'+esc(metricKey)+'" data-chart-region="'+esc(regionKey)+'" data-chart-ready="0" aria-busy="true"><div class="cardTools"><div class="toolGroup"><button class="toolBtn" data-zoom="'+esc(zoomKey)+'" type="button">'+(zoomed?'Close zoom':'Zoom')+'</button><button class="toolBtn" data-export-chart="'+esc(metricKey)+'" data-export-region="'+esc(regionKey)+'" type="button">Export XLSX</button>'+forecastButton+'</div><div class="toolGroup"><button class="toolBtn" data-copy-chart="'+esc(metricKey)+'" data-copy-region="'+esc(regionKey)+'" type="button">Copy</button><button class="toolBtn" data-save-chart="'+esc(metricKey)+'" data-save-region="'+esc(regionKey)+'" type="button">Save</button></div></div><h3 class="chartTitle">'+esc(title)+'</h3><svg class="seasonChart" role="img" aria-label="'+esc(title)+' chart"></svg><div class="chartLegendHost"><div class="legend" '+(state.showLegends?'':'hidden')+'><span>Rendering…</span></div></div><div class="miniWrap"><div class="chartNotice">Rendering chart details…</div></div><div class="chartTooltip"></div></article>'; }
     function chartLegendHtml(rows, regionKey, metricKey){ const {currentYear, priorYear, nextYearForecast} = chartYearContext(state.frequency); const historyLegend = historyLineDefs(state.frequency).filter(def => (state.historyYears || []).includes(def.year)).map(def => '<span><i class="swatch" style="background:'+def.color+'"></i>'+def.year+'</span>').join(''); const priorLegend = state.showPriorYear && priorYear ? '<span><i class="swatch" style="background:#315b99"></i>'+priorYear+'</span>' : ''; const currentLegend = state.showCurrentYear && currentYear ? '<span><i class="swatch" style="background:#b42318"></i>'+currentYear+'</span>' : ''; const nextLegend = state.showNextYearForecast && nextYearForecast && state.showForecast ? '<span><i class="swatch dashed" style="color:'+NEXT_YEAR_FORECAST_COLOR+'"></i>'+nextYearForecast+' fcst</span>' : ''; const rollingLegend = state.showFourWeekAverage && state.frequency === 'weekly' ? '<span><i class="swatch dashed" style="color:#111827"></i>4-week avg</span>' : ''; const bandYears = effectiveBandYears(state.frequency); const bandLabel = compactYearList(bandYears); const bandLegend = bandYears.length ? '<span><i class="swatch band"></i>'+esc(bandLabel)+' Range</span><span><i class="swatch dashed" style="color:#4b5563"></i>'+esc(bandLabel)+' Avg</span>' : ''; const overlayLegend = chartScenarioOverlaySeries(regionKey, metricKey, state.frequency).map(series => '<span><i class="swatch dashed" style="color:'+series.color+'"></i>'+esc(series.name)+'</span>').join(''); return '<div class="legend" '+(state.showLegends?'':'hidden')+'>'+priorLegend+currentLegend+nextLegend+rollingLegend+historyLegend+bandLegend+overlayLegend+'</div>'; }
     function hydrateBalanceChartCard(card, rowsByRegion=null){ if (!card || card.dataset.chartReady === '1') return; const regionKey = card.dataset.chartRegion || state.chartRegion; const metricKey = card.dataset.chartMetric || ''; const rows = rowsByRegion?.get?.(regionKey) || rowsForRegion(regionKey, state.frequency); const chartOptions = {regionKey,cacheScope:'balance:' + regionKey + ':' + metricKey}; const legendHost = card.querySelector('.chartLegendHost'); if (legendHost) legendHost.outerHTML = chartLegendHtml(rows, regionKey, metricKey); const miniWrap = card.querySelector('.miniWrap'); if (miniWrap) miniWrap.innerHTML = card.classList.contains('zoomed') ? chartTableHtml(rows, metricKey, chartOptions) : '<div class="chartNotice">Zoom to show chart details.</div>'; const svg = liveChartSvg(card); if (svg) drawSeasonChart(svg, rows, metricKey, state.frequency, regionKey); card.dataset.chartReady = '1'; card.setAttribute('aria-busy', 'false'); }
@@ -4313,9 +5083,9 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
         deferred.forEach(card => balanceChartHydrationObserver.observe(card));
       } else hydrateChartBatch(deferred, token, valid, hydrate, () => updateHydrationSignatureWhenDone(grid, signature), 3);
     }
-    function renderCharts(){ const metrics = orderedChartMetrics(); const chartRegions = displayChartRegions(); const allMode = state.chartRegion === CHART_ALL_REGION_KEY; const grid = document.getElementById('chartGrid'); const shellSignature = chartShellRenderSignature(); const signature = chartRenderSignature(grid); const rowsByRegion = new Map(chartRegions.map(regionKey => [regionKey, rowsForRegion(regionKey, state.frequency)])); renderChartScenarioWorkbench(); document.getElementById('chartsTitle').textContent = (state.frequency === 'weekly' ? 'Weekly' : 'Monthly') + ' | ' + chartRegionDisplayLabel(state.chartRegion) + ' Charts'; document.getElementById('chartCount').textContent = (metrics.length * chartRegions.length) + ' charts'; if (grid.dataset.renderSignature === shellSignature && grid.children.length) { if (grid.dataset.hydratedSignature !== signature) { cancelBalanceChartHydration(); markBalanceChartCardsForHydration(grid); scheduleBalanceChartHydration(grid, signature, rowsByRegion); } syncChartViewport(); return; } cancelBalanceChartHydration(); grid.innerHTML = chartRegions.flatMap(regionKey => { const regionHasScenarioTarget = chartScenarioRegionOptions().some(region => region.key === regionKey); const cards = metrics.map(metricKey => balanceChartShellHtml(regionKey, metricKey, {allMode, regionHasScenarioTarget})); return [chartRegionHeadingHtml(regionKey, metrics.length), ...cards]; }).join(''); grid.dataset.renderSignature = shellSignature; grid.dataset.hydratedSignature = ''; scheduleBalanceChartHydration(grid, signature, rowsByRegion); syncChartViewport(); }
+    function renderCharts(){ const metrics = orderedChartMetrics(); const chartRegions = displayChartRegions(); const allMode = state.chartRegion === CHART_ALL_REGION_KEY; const grid = document.getElementById('chartGrid'); const shellSignature = chartShellRenderSignature(); const signature = chartRenderSignature(grid); const rowsByRegionForCharts = () => new Map(chartRegions.map(regionKey => [regionKey, rowsForRegion(regionKey, state.frequency)])); renderChartScenarioWorkbench(); document.getElementById('chartsTitle').textContent = (state.frequency === 'weekly' ? 'Weekly' : 'Monthly') + ' | ' + chartRegionDisplayLabel(state.chartRegion) + ' Charts'; document.getElementById('chartCount').textContent = (metrics.length * chartRegions.length) + ' charts'; if (grid.dataset.renderSignature === shellSignature && grid.children.length) { if (grid.dataset.hydratedSignature !== signature) { cancelBalanceChartHydration(); markBalanceChartCardsForHydration(grid); scheduleBalanceChartHydration(grid, signature, rowsByRegionForCharts()); } syncChartViewport(); return; } cancelBalanceChartHydration(); grid.innerHTML = chartRegions.flatMap(regionKey => { const regionHasScenarioTarget = chartScenarioRegionOptions().some(region => region.key === regionKey); const cards = metrics.map(metricKey => balanceChartShellHtml(regionKey, metricKey, {allMode, regionHasScenarioTarget})); return [chartRegionHeadingHtml(regionKey, metrics.length), ...cards]; }).join(''); grid.dataset.renderSignature = shellSignature; grid.dataset.hydratedSignature = ''; scheduleBalanceChartHydration(grid, signature, rowsByRegionForCharts()); syncChartViewport(); }
     function crudePeriodBuckets(frequency=state.frequency){ const key = frequency; if (crudePeriodBucketsCache.has(key)) return crudePeriodBucketsCache.get(key); const periods = new Map(); crudeRowsForFrequency(frequency).forEach(row => { const bucket = periods.get(row.period) || {}; bucket[row.regionKey] = row; periods.set(row.period, bucket); }); const entries = Array.from(periods.entries()).sort((a,b)=>a[0].localeCompare(b[0])); crudePeriodBucketsCache.set(key, entries); return entries; }
-    function crudeAllPeriods(frequency=state.frequency){ const key = calcCacheKey('crudeAllPeriods', frequency); if (crudeAllPeriodsCache.has(key)) return crudeAllPeriodsCache.get(key); const buckets = new Map(crudePeriodBuckets(frequency)); const actualPeriods = Array.from(buckets.keys()).sort(); const latest = actualPeriods.at(-1); const end = frequency === 'weekly' ? workbookSettings.forecastEnd : workbookSettings.forecastEnd.slice(0,7); const future = []; if (latest) { let next = frequency === 'weekly' ? addDaysText(latest, 7) : addMonthsText(latest, 1); for (let guard = 0; next <= end && guard < 520; guard++) { if (!buckets.has(next)) future.push(next); next = frequency === 'weekly' ? addDaysText(next, 7) : addMonthsText(next, 1); } } const entries = [...actualPeriods.map(period => [period, buckets.get(period) || {}, true]), ...future.map(period => [period, {}, false])]; crudeAllPeriodsCache.set(key, entries); return entries; }
+	    function crudeAllPeriods(frequency=state.frequency){ const key = calcCacheKey('crudeAllPeriods', frequency, forecastEndForFrequency(frequency)); if (crudeAllPeriodsCache.has(key)) return crudeAllPeriodsCache.get(key); const buckets = new Map(crudePeriodBuckets(frequency)); const actualPeriods = Array.from(buckets.keys()).sort(); const latest = actualPeriods.at(-1); const end = forecastEndForFrequency(frequency); const future = []; if (latest) { let next = frequency === 'weekly' ? addDaysText(latest, 7) : addMonthsText(latest, 1); for (let guard = 0; next <= end && guard < 520; guard++) { if (!buckets.has(next)) future.push(next); next = frequency === 'weekly' ? addDaysText(next, 7) : addMonthsText(next, 1); } } const entries = [...actualPeriods.map(period => [period, buckets.get(period) || {}, true]), ...future.map(period => [period, {}, false])]; crudeAllPeriodsCache.set(key, entries); return entries; }
     function firstForecastMonth(){ return (crudeAllPeriods('monthly').find(([, , isActual]) => !isActual)?.[0] || workbookSettings.forecastEnd.slice(0,7)).slice(0,7); }
     function isForecastMonth(periodMonth){ return periodMonthValue(periodMonth) >= firstForecastMonth(); }
     function crudeDisplayPeriods(frequency=state.frequency){ const key = calcCacheKey('crudeDisplayPeriods', frequency); if (crudeDisplayPeriodsCache.has(key)) return crudeDisplayPeriodsCache.get(key); const entries = crudeAllPeriods(frequency); crudeDisplayPeriodsCache.set(key, entries); return entries; }
@@ -4331,6 +5101,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function isFourWeekWeeklyGuideLine(lineId){ const target = weeklyGuideTargetLineId(lineId); return target === 'crudeRunsKbd' || target === 'yieldPct'; }
     function weeklyGuideLabel(lineId){ if (lineId === 'production') return 'EIA weekly production avg'; if (lineId === 'crudeRunsKbd') return state.frequency === 'weekly' ? 'EIA weekly crude runs 4-week avg' : 'EIA weekly crude runs avg'; if (lineId === 'yieldPct') return state.frequency === 'weekly' ? 'EIA weekly yield 4-week avg' : 'EIA weekly yield avg'; if (lineId === 'buildTotal') return 'Implied weekly total build/(draw)'; return 'EIA weekly guide'; }
     function weeklyGuideMetric(lineId){ const target = weeklyGuideTargetLineId(lineId); if (target === 'production') return 'productionKbd'; if (target === 'crudeRunsKbd') return 'crudeRunsKbd'; if (target === 'yieldPct') return 'yieldPct'; if (target === 'buildTotal') return 'balanceKbd'; return ''; }
+    function weeklyGuideMetricValue(row, metric){ if (metric === 'balanceKbd') return Number(row.stockChangeKbd || 0); return Number(row[metric] || 0); }
     function weeklyGuideMonthlyIndex(){
       const rows = Array.isArray(D.regionalBalance?.weeklyGuideMonthly) ? D.regionalBalance.weeklyGuideMonthly : [];
       const key = rows.length + '|' + (rows.at(-1)?.period || '') + '|' + (rows.at(-1)?.regionKey || '');
@@ -4379,7 +5150,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
         const end = dateOrdinal(row.period);
         if (end === null) return;
         metrics.forEach(metric => {
-          const value = Number(row[metric] || 0);
+          const value = weeklyGuideMetricValue(row, metric);
           if (!Number.isFinite(value)) return;
           const vector = ensureVector(row.regionKey, metric);
           for (let day = end - 6; day <= end; day += 1) {
@@ -4404,7 +5175,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       rows.forEach(row => {
         if (!row?.period || row.status !== 'actual' || !row.regionKey) return;
         metrics.forEach(metric => {
-          const value = Number(row[metric]);
+          const value = weeklyGuideMetricValue(row, metric);
           if (!Number.isFinite(value)) return;
           const key = row.regionKey + '|' + metric;
           const series = index.get(key) || [];
@@ -4558,7 +5329,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       const html = lines.map(line => {
         const values = entries.map(entry => crudeLineValue(entry.point, line.id));
         const numericValues = values.filter(value => typeof value === 'number');
-        const cls = 'regionLine region-'+region.key+' '+rowClassForLine(line, numericValues)+(line.kind.includes('maintenance') ? ' maintenanceRow' : '')+(line.id === 'operatingCapacityKbd' ? ' operatingRow' : '');
+        const cls = 'regionLine region-'+region.key+' '+rowClassForLine(line, numericValues)+(line.id === 'operatingCapacityKbd' ? ' operatingRow' : '');
         if (line.kind === 'section') return '<tr class="'+cls+'"><td class="rowLabel">'+esc(line.label)+'</td>'+periods.map(() => '<td></td>').join('')+'</tr>';
         return '<tr class="'+cls+'"><td class="rowLabel">'+crudeLineLabelHtml(line)+'</td>'+entries.map((entry, idx) => crudeCellHtml(region.key, line.id, entry, values[idx])).join('')+'</tr>';
       }).join('');
@@ -4773,7 +5544,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function deleteCapacityAdjustment(id){ const beforeRows = stableSettingsRows(workbookSettings.refineryCapacityAdjustments); workbookSettings.refineryCapacityAdjustments = normalizeCapacityAdjustmentList((workbookSettings.refineryCapacityAdjustments || []).filter(adj => adj.id !== id)); saveCapacityAdjustmentsLocal(beforeRows); renderCapacityAdjustmentPanel(); tableScrollSignatures = {}; queueRender(); saveCapacityAdjustmentsToServer(); }
     function clearCapacityAdjustmentForm(){ ['capacityAdjValue','capacityAdjNote'].forEach(id => { const input = document.getElementById(id); if (input) input.value = ''; }); updateCapacityAdjustmentDefault(true); }
     function currentCrudeRowsForExport(){ const periods = crudeDisplayPeriods(); const rows = []; D.crudeRuns.regions.forEach(region => { const lines = crudeLines(region.key).filter(line => line.kind !== 'section'); const entries = crudeScheduleEntriesForRegion(region.key, state.frequency, periods); lines.forEach(line => { const out = {frequency:state.frequency, region:crudeRegionDisplayLabel(region.key), line:crudeLineDisplayLabel(line)}; entries.forEach(entry => { out[entry.period] = round2(crudeLineValue(entry.point, line.id)); }); rows.push(out); }); }); return rows; }
-    function currentBalanceRowsForExport(){ const periods = periodEntriesForBalance(); const rows = []; D.regionalBalance.regions.forEach(region => { const lines = balanceLines(region.key).filter(line => line.kind !== 'section' && line.kind !== 'divider'); lines.forEach(line => { const out = {frequency:state.frequency, region:balanceRegionDisplayLabel(region.key), line:balanceLineDisplayLabel(line)}; periods.forEach(([period,bucket]) => { const value = bucket[region.key] ? valueForLine(bucket[region.key], line.id) : null; out[period] = value === null || value === undefined ? '' : round2(value); }); rows.push(out); }); }); return rows; }
+    function currentBalanceRowsForExport(){ const periods = periodEntriesForBalance(); const rows = []; D.regionalBalance.regions.forEach(region => { const lines = balanceLines(region.key).filter(line => line.kind !== 'section' && line.kind !== 'divider'); lines.forEach(line => { const out = {frequency:state.frequency, region:balanceRegionDisplayLabel(region.key), line:balanceLineDisplayLabel(line)}; periods.forEach(([period,bucket]) => { const value = bucket[region.key] ? valueForLine(bucket[region.key], line.id) : null; const numeric = Number(value); out[period] = value === null || value === undefined || !Number.isFinite(numeric) ? '' : round2(numeric); }); rows.push(out); }); }); return rows; }
     function toCsv(rows){ const cols = Object.keys(rows[0] || {}); const clean = v => /[",\\n\\r]/.test(String(v ?? '')) ? '"' + String(v ?? '').replaceAll('"','""') + '"' : String(v ?? ''); return [cols.join(','),...rows.map(r=>cols.map(c=>clean(r[c])).join(','))].join('\\n') + '\\n'; }
     function toExcelTable(rows){ const cols = Object.keys(rows[0] || {}); const cell = value => '<td>'+esc(value ?? '')+'</td>'; return '<html><head><meta charset="utf-8"></head><body><table><thead><tr>'+cols.map(col => '<th>'+esc(col)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row => '<tr>'+cols.map(col => cell(row[col])).join('')+'</tr>').join('')+'</tbody></table></body></html>'; }
     function downloadBlob(filename, type, content){ const blob = content instanceof Blob ? content : new Blob([content],{type}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(url), 250); }
@@ -4818,7 +5589,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     }
     async function copyChartPng(card, metricKey, regionKey){ const blob = await chartSvgPngBlob(liveChartSvg(card)); if (navigator.clipboard?.write && window.ClipboardItem) { await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); showToast('Chart PNG copied'); return; } downloadBlob(chartPngFilename('copy', metricKey, regionKey), 'image/png', blob); showToast('Image clipboard unavailable; PNG downloaded'); }
     async function saveChartPng(card, metricKey, regionKey){ const blob = await chartSvgPngBlob(liveChartSvg(card)); downloadBlob(chartPngFilename('chart', metricKey, regionKey), 'image/png', blob); showToast('Chart PNG saved'); }
-    function chartRows(metricKey, regionKey=state.chartRegion === CHART_ALL_REGION_KEY ? preferredChartScenarioRegion() : state.chartRegion){ return rowsForRegion(regionKey, state.frequency).map(row => ({frequency:state.frequency, region:balanceRegionDisplayLabel(regionKey), metric:metricByKey(metricKey).label, period:row.period, status:row.status, value:round2(row[metricKey] || 0)})); }
+    function chartRows(metricKey, regionKey=state.chartRegion === CHART_ALL_REGION_KEY ? preferredChartScenarioRegion() : state.chartRegion){ return rowsForRegion(regionKey, state.frequency).map(row => { const value = Number(row[metricKey]); return {frequency:state.frequency, region:balanceRegionDisplayLabel(regionKey), metric:metricByKey(metricKey).label, period:row.period, status:row.status, value:Number.isFinite(value) ? round2(value) : NaN}; }); }
     function crudeChartRows(metricKey){ const regionKey = activeCrudeRegionKey(); return regionKey ? crudeForecastRowsForRegion(regionKey).map(row => ({frequency:state.frequency, region:crudeRegionDisplayLabel(regionKey), metric:crudeMetricByKey(metricKey).label, period:row.period, status:row.status, value:round2(row[metricKey] || 0)})) : []; }
     function statusLabel(status){ return String(status || 'missing').replace('_',' '); }
     function sourceStatusDot(status){ return '<span class="sourceDot '+esc(status)+'"></span>'; }
@@ -4836,10 +5607,32 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function clearInactiveSheetDom(){
       if (lastInactiveSheetDomClear === state.sheet) return;
       lastInactiveSheetDomClear = state.sheet;
+      if (state.sheet !== 'balance') {
+        const balanceTable = document.getElementById('balanceTable');
+        if (balanceTable) {
+          balanceTable.innerHTML = '';
+          delete balanceTable.dataset.renderSignature;
+        }
+        const balanceMonitor = document.getElementById('balanceMonitor');
+        if (balanceMonitor) balanceMonitor.innerHTML = '';
+        const balanceWatchlist = document.getElementById('balanceWatchlist');
+        if (balanceWatchlist) balanceWatchlist.innerHTML = '';
+      }
       if (state.sheet !== 'charts') { cancelBalanceChartHydration(); chartScenarioModalOpen = false; document.getElementById('chartGrid').innerHTML = ''; document.getElementById('chartScenarioWorkbench').innerHTML = ''; document.getElementById('chartScenarioWorkbench').hidden = true; }
       if (state.sheet !== 'crude') {
         cancelCrudeChartHydration();
         hideCrudeActiveHeader();
+        const crudeTable = document.getElementById('crudeRunsTable');
+        if (crudeTable) {
+          crudeTable.innerHTML = '';
+          delete crudeTable.dataset.renderSignature;
+        }
+        const crudeGrid = document.getElementById('crudeRunsChartGrid');
+        if (crudeGrid) {
+          crudeGrid.innerHTML = '';
+          delete crudeGrid.dataset.renderSignature;
+          delete crudeGrid.dataset.hydratedSignature;
+        }
       }
       if (state.sheet !== 'outages') {
         closeOutageCollisionModal();
@@ -4874,8 +5667,12 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       }
     }
     function queueRender(delay=0){ if (delay > 0) { clearTimeout(deferredRenderTimer); deferredRenderTimer = setTimeout(() => { deferredRenderTimer = 0; queueRender(); }, delay); return; } if (deferredRenderTimer) { clearTimeout(deferredRenderTimer); deferredRenderTimer = 0; } if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
-    function normalizeRenderableState(){ state.bandYears = effectiveBandYears(state.frequency); state.historyYears = normalizeHistoryYears(state.historyYears, state.frequency, false); }
+    function normalizeRenderableState(){ state.bandYears = effectiveBandYears(state.frequency); state.historyYears = normalizeHistoryYears(state.historyYears, state.frequency, false); if (!BALANCE_PERIOD_WINDOWS.has(state.periodWindow)) state.periodWindow = 'smart'; if (!BALANCE_FOCUS_MODES.has(state.balanceFocus)) state.balanceFocus = 'all'; state.balanceSearch = String(state.balanceSearch || '').slice(0,80); }
     function render(){ normalizeRenderableState(); renderControls(); clearInactiveSheetDom(); renderActiveSheet(); syncChartViewport(true); restorePendingEditableFocus(); writeStateUrl(); }
+    function queueBalanceTableRefresh(delay=0){ tableScrollSignatures.balanceTable = ''; queueRender(delay); }
+    function setBalancePeriodWindow(mode, period=''){ state.periodWindow = BALANCE_PERIOD_WINDOWS.has(mode) ? mode : 'smart'; pendingBalanceScrollPeriod = period || ''; forceBalancePeriodScroll = Boolean(period); queueBalanceTableRefresh(); }
+    function clearBalanceFocus(){ state.balanceSearch = ''; state.balanceFocus = 'all'; queueBalanceTableRefresh(); }
+    function openBalanceWatchRegion(regionKey, period, focus){ if (BALANCE_FOCUS_MODES.has(focus)) state.balanceFocus = focus; if (focus === 'all') state.balanceFocus = 'all'; if (D.regionalBalance.regions.some(region => region.key === regionKey)) { state.region = regionKey; collapsedGroups.delete(regionKey); saveCollapsedBalanceGroups(); } pendingBalanceScrollPeriod = period || ''; forceBalancePeriodScroll = Boolean(period); queueBalanceTableRefresh(); }
     document.getElementById('regionSelect').addEventListener('change', e => {
       if (state.sheet === 'charts') {
         const nextRegion = validChartRegionKey(e.target.value) ? e.target.value : state.chartRegion;
@@ -4923,15 +5720,25 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     document.getElementById('historyChips').addEventListener('change', e => { const lineInput = e.target.closest('[data-line-toggle]'); if (lineInput) { const key = lineInput.dataset.lineToggle; if (key === 'prior') state.showPriorYear = lineInput.checked; else if (key === 'current') state.showCurrentYear = lineInput.checked; else if (key === 'next') state.showNextYearForecast = lineInput.checked; historyChipsSignature = ''; queueRender(); return; } const input = e.target.closest('[data-history-year]'); if (!input) return; const year = Number(input.dataset.historyYear); const next = new Set(state.historyYears || []); if (input.checked) next.add(year); else next.delete(year); state.historyYears = Array.from(next).sort((a,b)=>b-a); historyChipsSignature = ''; queueRender(); });
     document.getElementById('labelWidthSlider').addEventListener('input', e => updateTableLayout('labelWidth', e.target.value));
     document.getElementById('labelSizeSlider').addEventListener('input', e => updateTableLayout('labelSize', e.target.value));
+    document.getElementById('periodWindowSelect').addEventListener('change', e => setBalancePeriodWindow(e.target.value));
+    document.getElementById('jumpLatestActualBtn').addEventListener('click', () => setBalancePeriodWindow('latest', latestActualPeriod(periodEntriesForBalance())));
+    document.getElementById('jumpFirstForecastBtn').addEventListener('click', () => setBalancePeriodWindow('forecast', firstForecastPeriod(periodEntriesForBalance()) || periodEntriesForBalance().at(-1)?.[0] || ''));
+    document.getElementById('balanceSearchInput').addEventListener('input', e => { state.balanceSearch = String(e.target.value || '').slice(0,80); queueBalanceTableRefresh(80); });
+    document.getElementById('balanceFocusSelect').addEventListener('change', e => { state.balanceFocus = BALANCE_FOCUS_MODES.has(e.target.value) ? e.target.value : 'all'; queueBalanceTableRefresh(); });
+    document.getElementById('clearBalanceFocusBtn').addEventListener('click', clearBalanceFocus);
     document.getElementById('newTabBtn').addEventListener('click', () => { writeStateUrl(); window.open(location.href, '_blank', 'noopener'); });
     document.getElementById('downloadBtn').addEventListener('click', () => state.sheet === 'crude' ? downloadBlob(D.product.key + '_' + state.frequency + '_crude_forecast.csv','text/csv',toCsv(currentCrudeRowsForExport())) : state.sheet === 'outages' ? downloadBlob(D.product.key + '_crude_outages.csv','text/csv',toCsv(currentOutageRowsForExport())) : downloadBlob(D.product.key + '_' + state.frequency + '_balance_statement.csv','text/csv',toCsv(currentBalanceRowsForExport())));
     document.getElementById('jsonBtn').addEventListener('click', () => downloadBlob(D.product.key + '_regional_balance_view.json','application/json',JSON.stringify({product:D.product,generatedAt:D.generatedAt,state,workbookSettings:{...workbookSettings,crudeOutages:outageEntries},chartScenarios,chartScenarioDraft,regionalBalance:D.regionalBalance,crudeRuns:D.crudeRuns,refineryCapacity:D.refineryCapacity,sourceHub:D.sourceHub}, null, 2)));
     document.getElementById('htmlBtn').addEventListener('click', () => downloadBlob(D.product.key + '_regional_balance_app.html','text/html','<!doctype html>\\n' + document.documentElement.outerHTML));
     document.getElementById('refreshBtn').addEventListener('click', () => { queueRender(); showToast('Dashboard refreshed'); });
+    document.getElementById('reconcileWeeklyToMonthlyBtn').addEventListener('click', applyExperimentalWeeklyToMonthlyReconcile);
+    document.getElementById('reconcileMonthlyToWeeklyBtn').addEventListener('click', applyExperimentalMonthlyToWeeklyReconcile);
+    document.getElementById('clearExperimentalBalanceSyncBtn').addEventListener('click', clearExperimentalBalanceSyncAdjustments);
     document.getElementById('saveViewBtn').addEventListener('click', () => { normalizeRenderableState(); const rows = savedViews(); const stamp = new Date().toLocaleString(); const viewLabel = state.sheet === 'charts' ? chartRegionDisplayLabel(state.chartRegion) : balanceRegionDisplayLabel(state.region); rows.push({name:state.frequency+' '+viewLabel+' '+metricByKey(state.metric).label+' | '+stamp,savedAt:new Date().toISOString(),state:{...state}}); localStorage.setItem(STORAGE_KEY, JSON.stringify(rows.slice(-30))); renderSavedViews(); showToast('View saved'); });
     document.getElementById('loadViewBtn').addEventListener('click', async () => { const views = savedViews(); const view = views[Number(document.getElementById('savedViewSelect').value)]; if (!view) return; if (await applyViewState(view.state)) showToast('View loaded'); });
     document.getElementById('deleteViewBtn').addEventListener('click', () => { const select = document.getElementById('savedViewSelect'); const index = Number(select.value); const views = savedViews().filter((_, idx) => idx !== index); localStorage.setItem(STORAGE_KEY, JSON.stringify(views)); renderSavedViews(); showToast('View deleted'); });
     document.getElementById('resetViewBtn').addEventListener('click', () => { localStorage.removeItem(LAYOUT_STORAGE_KEY); state = defaultState(); collapsedGroups = new Set(balanceGroupKeys()); expandedCrudeGroups.clear(); zoomedCharts.clear(); tableScrollSignatures = {}; saveCollapsedBalanceGroups(); saveExpandedCrudeGroups(); queueRender(); showToast('View reset'); });
+    document.getElementById('balanceWatchlist').addEventListener('click', e => { const button = e.target.closest('[data-watch-region]'); if (!button) return; openBalanceWatchRegion(button.dataset.watchRegion, button.dataset.watchPeriod, button.dataset.watchFocus); });
     document.getElementById('balanceTable').addEventListener('click', async e => { if (e.target.classList?.contains('cellEditor')) return; const editCell = e.target.closest('[data-balance-adjust-line]'); const toggle = e.target.closest('[data-toggle-group]'); const open = e.target.closest('[data-open-region]'); const outage = e.target.closest('[data-open-balance-outages]'); if (editCell) { startBalanceCellEdit(editCell); return; } if (toggle) { toggleBalanceGroup(toggle.dataset.toggleGroup); return; } if (open) openChartTab(open.dataset.openRegion); if (outage) { try { await ensureReferenceData(); } catch { showToast('Unable to load outage workbook data'); return; } state.crudeRegion = validBaseCrudeRegion(outage.dataset.openBalanceOutages) ? outage.dataset.openBalanceOutages : 'padd1'; state.sheet = 'outages'; queueRender(); refreshWorkbookSettings(); } });
     document.getElementById('crudeRunsTable').addEventListener('click', async e => { if (e.target.classList?.contains('cellEditor')) return; const editCell = e.target.closest('[data-crude-adjust-line]'); const toggle = e.target.closest('[data-toggle-crude-region]'); const open = e.target.closest('[data-open-crude-outages]'); if (editCell) { startCrudeCellEdit(editCell); return; } if (toggle) { toggleCrudeGroup(toggle.dataset.toggleCrudeRegion); return; } if (open) { try { await ensureReferenceData(); } catch { showToast('Unable to load outage workbook data'); return; } state.crudeRegion = validBaseCrudeRegion(open.dataset.openCrudeOutages) ? open.dataset.openCrudeOutages : 'padd1'; state.sheet = 'outages'; queueRender(); } });
     document.getElementById('crudeActiveRegionHeader').addEventListener('click', async e => { const toggle = e.target.closest('[data-toggle-crude-region]'); const open = e.target.closest('[data-open-crude-outages]'); if (toggle) { toggleCrudeGroup(toggle.dataset.toggleCrudeRegion); return; } if (open) { try { await ensureReferenceData(); } catch { showToast('Unable to load outage workbook data'); return; } state.crudeRegion = validBaseCrudeRegion(open.dataset.openCrudeOutages) ? open.dataset.openCrudeOutages : 'padd1'; state.sheet = 'outages'; queueRender(); } });
@@ -4945,7 +5752,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     document.getElementById('chartGrid').addEventListener('click', async e => { const zoomMetric = e.target.dataset.zoom; const exportMetric = e.target.dataset.exportChart; const exportRegion = e.target.dataset.exportRegion; const copyMetric = e.target.dataset.copyChart; const copyRegion = e.target.dataset.copyRegion; const saveMetric = e.target.dataset.saveChart; const saveRegion = e.target.dataset.saveRegion; const scenarioMetric = e.target.dataset.openChartScenario; const scenarioRegion = e.target.dataset.scenarioRegion; const card = e.target.closest('.chartCard'); if (zoomMetric) { if (!toggleBalanceChartZoom(card, zoomMetric)) queueRender(); return; } if (scenarioMetric) { openChartScenarioModal(scenarioMetric, {regionKey:scenarioRegion}); return; } if (exportMetric) downloadBlob(D.product.key + '_' + state.frequency + '_' + (exportRegion || state.chartRegion) + '_' + exportMetric + '.xls','application/vnd.ms-excel',toExcelTable(chartRows(exportMetric, exportRegion || preferredChartScenarioRegion()))); if ((copyMetric || saveMetric) && card?.dataset?.chartReady !== '1') hydrateBalanceChartCard(card); if (copyMetric) { try { await copyChartPng(card, copyMetric, copyRegion || preferredChartScenarioRegion()); } catch { showToast('Chart PNG copy failed'); } } if (saveMetric) { try { await saveChartPng(card, saveMetric, saveRegion || state.chartRegion); } catch { showToast('Chart PNG save failed'); } } });
     document.getElementById('crudeRunsChartGrid').addEventListener('click', async e => { const zoomMetric = e.target.dataset.crudeZoom; const exportMetric = e.target.dataset.crudeExportChart; const copyMetric = e.target.dataset.crudeCopyChart; const saveMetric = e.target.dataset.crudeSaveChart; const card = e.target.closest('.chartCard'); if (zoomMetric) { if (!toggleCrudeChartZoom(card, zoomMetric)) queueRender(); return; } if (exportMetric) downloadBlob(D.product.key + '_' + state.frequency + '_' + state.crudeRegion + '_' + exportMetric + '.xls','application/vnd.ms-excel',toExcelTable(crudeChartRows(exportMetric))); if ((copyMetric || saveMetric) && card?.dataset?.chartReady !== '1') hydrateCrudeChartCard(card, crudeForecastRowsForRegion(activeCrudeRegionKey()), activeCrudeRegionKey()); if (copyMetric) { try { await copyChartPng(card, copyMetric, state.crudeRegion); } catch { showToast('Crude chart PNG copy failed'); } } if (saveMetric) { try { await saveChartPng(card, saveMetric, state.crudeRegion); } catch { showToast('Crude chart PNG save failed'); } } });
     document.getElementById('outageCollisionModal').addEventListener('click', e => { if (e.target === e.currentTarget) { closeOutageCollisionModal(); return; } const button = e.target.closest('button'); if (!button) return; if (button.id === 'loadCollisionOutageBtn') loadOutageIntoForm(outageCollisionEntry()); else if (button.id === 'closeOutageCollisionModalBtn' || button.id === 'dismissOutageCollisionBtn') closeOutageCollisionModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && chartScenarioModalOpen) closeChartScenarioModal(); else if (e.key === 'Escape' && !document.getElementById('outageCollisionModal')?.hidden) closeOutageCollisionModal(); });
+    document.addEventListener('keydown', e => { const tag = document.activeElement?.tagName || ''; const editing = ['INPUT','SELECT','TEXTAREA'].includes(tag); if (e.key === '/' && state.sheet === 'balance' && !editing) { e.preventDefault(); document.getElementById('balanceSearchInput')?.focus(); return; } if (e.key === 'Escape' && chartScenarioModalOpen) closeChartScenarioModal(); else if (e.key === 'Escape' && !document.getElementById('outageCollisionModal')?.hidden) closeOutageCollisionModal(); else if (e.key === 'Escape' && state.sheet === 'balance' && balanceFilterActive() && !editing) clearBalanceFocus(); });
     document.querySelectorAll('.tablewrap').forEach(wrap => { wrap.addEventListener('mousedown', () => wrap.focus({preventScroll:true})); wrap.addEventListener('keydown', e => { const stepX = e.shiftKey ? 360 : 96; const stepY = e.shiftKey ? 240 : 54; const pageWide = wrap.id === 'crudeRunsTableWrap'; const movePageX = delta => window.scrollBy({left:delta,top:0,behavior:'instant'}); if (e.key === 'ArrowRight') { pageWide ? movePageX(stepX) : wrap.scrollLeft += stepX; e.preventDefault(); } else if (e.key === 'ArrowLeft') { pageWide ? movePageX(-stepX) : wrap.scrollLeft -= stepX; e.preventDefault(); } else if (e.key === 'ArrowDown') { wrap.scrollTop += stepY; e.preventDefault(); } else if (e.key === 'ArrowUp') { wrap.scrollTop -= stepY; e.preventDefault(); } else if (e.key === 'Home' && e.ctrlKey) { pageWide ? window.scrollTo({left:0,top:window.scrollY,behavior:'instant'}) : wrap.scrollLeft = 0; e.preventDefault(); } else if (e.key === 'End' && e.ctrlKey) { pageWide ? window.scrollTo({left:document.documentElement.scrollWidth,top:window.scrollY,behavior:'instant'}) : wrap.scrollLeft = wrap.scrollWidth; e.preventDefault(); } }); });
     document.getElementById('crudeRunsTableWrap').addEventListener('scroll', () => { if (state.sheet === 'crude') scheduleCrudeActiveHeader(); }, {passive:true});
     addEventListener('storage', event => { if (!event) return; if ([SETTINGS_STORAGE_KEY, OUTAGE_STORAGE_KEY, CAPACITY_ADJ_STORAGE_KEY].includes(event.key)) { applyWorkbookSettingsSnapshot(readWorkbookSettings(), {renderDelay:260}); return; } if (event.key === STORAGE_KEY) { savedViewsSignature = ''; renderSavedViews(); return; } if ([CHART_SCENARIO_STORAGE_KEY, CHART_SCENARIO_DRAFT_STORAGE_KEY].includes(event.key)) { chartScenarios = readChartScenarios(); chartScenarioDraft = readChartScenarioDraft(); queueRender(120); } });
@@ -4990,9 +5797,10 @@ function buildProduct(
   productCrudeFingerprint: string,
 ): DashboardBundle {
   const { monthlyRows, weeklyRows } = inputRows;
-  const monthly = monthlyBalance(config, monthlyRows);
-  const actualWeekly = weeklyActual(config, weeklyRows);
-  const forecastWeekly = weeklyForecast(actualWeekly, monthly);
+	  const monthly = monthlyBalance(config, monthlyRows);
+	  const actualWeekly = weeklyActual(config, weeklyRows);
+	  const weeklyForecastThroughDate = weeklyForecastThrough(actualWeekly);
+	  const forecastWeekly = weeklyForecast(actualWeekly, monthly);
   const weekly = [...actualWeekly, ...forecastWeekly];
   const reconciliation = reconcile(monthly, weekly);
   const regionalMonthly = monthlyRegionalBalances(config, monthlyRows);
@@ -5028,12 +5836,12 @@ function buildProduct(
       fuelLabel: config.fuelLabel,
     },
     generatedAt: new Date().toISOString(),
-    forecast: {
-      method: `Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through ${DASHBOARD_SETTINGS.forecastEnd}.`,
-      monthlyThrough: MONTHLY_FORECAST_THROUGH,
-      weeklyThrough: WEEKLY_FORECAST_THROUGH,
-      seasonYears: SEASON_YEARS,
-    },
+	    forecast: {
+	      method: `Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for ${WEEKLY_FORECAST_WEEKS} weeks after the latest actual week.`,
+	      monthlyThrough: MONTHLY_FORECAST_THROUGH,
+	      weeklyThrough: weeklyForecastThroughDate,
+	      seasonYears: SEASON_YEARS,
+	    },
     freshness,
     checksums: Object.fromEntries(sourceFiles.map((file) => [file.role, file.checksum])),
     monthly,
@@ -5042,11 +5850,11 @@ function buildProduct(
     regionalBalance: {
       note:
         "Monthly regional balances use base PADD demand, production, imports, exports, receipts, shipments, stocks, and PADD 1 A/B versus 1-C split estimates. Weekly regional balances use base PADD weekly production, imports, and stocks where available, with monthly regional demand, exports, and inter-PADD movement details mapped onto each week. U.S. and aggregate regions are calculated from the base PADD rows.",
-      regions: REGION_DEFS.map((region) => ({ key: region.key, label: region.label })),
+      regions: regionalRegionDefs(config).map((region) => ({ key: region.key, label: region.label })),
       movementFlows: regionalMovementFlows,
       monthly: regionalMonthly,
       weekly: regionalWeekly,
-      weeklyGuideMonthly: buildWeeklyGuideMonthly(regionalWeekly, crudeRuns.weekly),
+      weeklyGuideMonthly: buildWeeklyGuideMonthly(config, regionalWeekly, crudeRuns.weekly),
     },
     crudeRuns,
     refineryCapacity,

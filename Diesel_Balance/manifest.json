@@ -1,9 +1,9 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-06-04T02:02:04.952Z",
+  "generatedAt": "2026-06-07T16:35:16.919Z",
   "folder": "Diesel_Balance",
-  "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through 2026-12-31.",
+  "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-03-15",
   "latestWeekly": "2026-05-22",
   "sourceFiles": [
@@ -12,14 +12,14 @@
       "path": "eia_monthly/diesel.csv",
       "rows": 123,
       "checksum": "0a16a3e68bacb5622c7e4d38e48e7b049f4f5df024f1b6c4faf284829f9af969",
-      "modifiedAt": "2026-05-31T13:54:45.624Z"
+      "modifiedAt": "2026-06-04T04:50:08.578Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/diesel.csv",
       "rows": 543,
-      "checksum": "270479355f34f9bca27d58771a74d0842dd3d55e1ecc431603b6002f28abf12d",
-      "modifiedAt": "2026-05-31T13:54:45.632Z"
+      "checksum": "6782f75ac3b08c9495f3bca1382ebde7f5d2ee530b58e3a5d2f7e4052f59cdec",
+      "modifiedAt": "2026-06-04T04:51:09.000Z"
     },
     {
       "role": "kpler_manifest",
@@ -43,7 +43,7 @@
   ],
   "checksums": {
     "eia_monthly": "0a16a3e68bacb5622c7e4d38e48e7b049f4f5df024f1b6c4faf284829f9af969",
-    "eia_weekly": "270479355f34f9bca27d58771a74d0842dd3d55e1ecc431603b6002f28abf12d",
+    "eia_weekly": "6782f75ac3b08c9495f3bca1382ebde7f5d2ee530b58e3a5d2f7e4052f59cdec",
     "kpler_manifest": "ea1b611065e410372610def7b7ec5c0744722ba8651a0847ec741bdaaa61990c",
     "padd_1": "8ccdb9eb4411d7b50f54d6b5e4a00aef18bdbd0de2e99174461178327e571357",
     "refinery_unit_capacity": "46bd4ad27709f4cfb40c81aeee64267585e0afe74ee917dd371eabc7ff157538"
