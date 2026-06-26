@@ -3063,6 +3063,20 @@ date,pull_set,family,geography,commodity,kpler_product,flow_direction,origin_cou
 2026-05-20,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,61.0,false,true,true,false,"",eia_fallback
 2026-05-21,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,61.0,false,true,true,false,"",eia_fallback
 2026-05-22,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,61.0,false,true,true,false,"",eia_fallback
+2026-05-30,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,120.0,false,true,true,false,"",eia_fallback
+2026-05-31,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,120.0,false,true,true,false,"",eia_fallback
+2026-06-01,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,120.0,false,true,true,false,"",eia_fallback
+2026-06-02,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,120.0,false,true,true,false,"",eia_fallback
+2026-06-03,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,120.0,false,true,true,false,"",eia_fallback
+2026-06-04,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,120.0,false,true,true,false,"",eia_fallback
+2026-06-05,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,120.0,false,true,true,false,"",eia_fallback
+2026-06-06,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,103.0,false,true,true,false,"",eia_fallback
+2026-06-07,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,103.0,false,true,true,false,"",eia_fallback
+2026-06-08,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,103.0,false,true,true,false,"",eia_fallback
+2026-06-09,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,103.0,false,true,true,false,"",eia_fallback
+2026-06-10,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,103.0,false,true,true,false,"",eia_fallback
+2026-06-11,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,103.0,false,true,true,false,"",eia_fallback
+2026-06-12,padd1_split_diesel_imports,padd1_split,us,diesel,Gasoil/Diesel,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,103.0,false,true,true,false,"",eia_fallback
 2018-01-01,padd1_split_diesel_exports,padd1_split,us,diesel,Gasoil/Diesel,export,United States,EIA fallback,"",EIA fallback,PADD 1A/B,"","","","",kbd,0.388,false,true,true,false,"",eia_fallback
 2018-01-02,padd1_split_diesel_exports,padd1_split,us,diesel,Gasoil/Diesel,export,United States,EIA fallback,"",EIA fallback,PADD 1A/B,"","","","",kbd,0.388,false,true,true,false,"",eia_fallback
 2018-01-03,padd1_split_diesel_exports,padd1_split,us,diesel,Gasoil/Diesel,export,United States,EIA fallback,"",EIA fallback,PADD 1A/B,"","","","",kbd,0.388,false,true,true,false,"",eia_fallback
@@ -9139,6 +9153,20 @@ date,pull_set,family,geography,commodity,kpler_product,flow_direction,origin_cou
 2026-05-20,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,17.0,false,true,true,false,"",eia_fallback
 2026-05-21,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,17.0,false,true,true,false,"",eia_fallback
 2026-05-22,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,17.0,false,true,true,false,"",eia_fallback
+2026-05-30,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,39.0,false,true,true,false,"",eia_fallback
+2026-05-31,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,39.0,false,true,true,false,"",eia_fallback
+2026-06-01,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,39.0,false,true,true,false,"",eia_fallback
+2026-06-02,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,39.0,false,true,true,false,"",eia_fallback
+2026-06-03,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,39.0,false,true,true,false,"",eia_fallback
+2026-06-04,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,39.0,false,true,true,false,"",eia_fallback
+2026-06-05,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,39.0,false,true,true,false,"",eia_fallback
+2026-06-06,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,13.0,false,true,true,false,"",eia_fallback
+2026-06-07,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,13.0,false,true,true,false,"",eia_fallback
+2026-06-08,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,13.0,false,true,true,false,"",eia_fallback
+2026-06-09,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,13.0,false,true,true,false,"",eia_fallback
+2026-06-10,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,13.0,false,true,true,false,"",eia_fallback
+2026-06-11,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,13.0,false,true,true,false,"",eia_fallback
+2026-06-12,padd1_split_jet_imports,padd1_split,us,jet,Kero/Jet,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,13.0,false,true,true,false,"",eia_fallback
 2018-01-01,padd1_split_jet_exports,padd1_split,us,jet,Kero/Jet,export,United States,EIA fallback,"",EIA fallback,PADD 1A/B,"","","","",kbd,20.646,false,true,true,false,"",eia_fallback
 2018-01-02,padd1_split_jet_exports,padd1_split,us,jet,Kero/Jet,export,United States,EIA fallback,"",EIA fallback,PADD 1A/B,"","","","",kbd,20.646,false,true,true,false,"",eia_fallback
 2018-01-03,padd1_split_jet_exports,padd1_split,us,jet,Kero/Jet,export,United States,EIA fallback,"",EIA fallback,PADD 1A/B,"","","","",kbd,20.646,false,true,true,false,"",eia_fallback
@@ -15215,3 +15243,17 @@ date,pull_set,family,geography,commodity,kpler_product,flow_direction,origin_cou
 2026-05-20,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,367.0,false,true,true,false,"",eia_fallback
 2026-05-21,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,367.0,false,true,true,false,"",eia_fallback
 2026-05-22,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,367.0,false,true,true,false,"",eia_fallback
+2026-05-30,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,485.0,false,true,true,false,"",eia_fallback
+2026-05-31,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,485.0,false,true,true,false,"",eia_fallback
+2026-06-01,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,485.0,false,true,true,false,"",eia_fallback
+2026-06-02,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,485.0,false,true,true,false,"",eia_fallback
+2026-06-03,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,485.0,false,true,true,false,"",eia_fallback
+2026-06-04,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,485.0,false,true,true,false,"",eia_fallback
+2026-06-05,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,485.0,false,true,true,false,"",eia_fallback
+2026-06-06,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,500.0,false,true,true,false,"",eia_fallback
+2026-06-07,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,500.0,false,true,true,false,"",eia_fallback
+2026-06-08,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,500.0,false,true,true,false,"",eia_fallback
+2026-06-09,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,500.0,false,true,true,false,"",eia_fallback
+2026-06-10,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,500.0,false,true,true,false,"",eia_fallback
+2026-06-11,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,500.0,false,true,true,false,"",eia_fallback
+2026-06-12,padd1_split_gasoline_imports,padd1_split,us,gasoline,Light Ends,import,EIA fallback,United States,EIA fallback,"","",PADD 1A/B,"","","",kbd,500.0,false,true,true,false,"",eia_fallback

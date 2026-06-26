@@ -41,12 +41,24 @@ type RuntimeBase = {
   };
   generatedAt?: string;
   freshness?: DashboardBundle["freshness"];
+  optimization?: {
+    runtimePlan?: {
+      baseRows?: number;
+      lazyRows?: number;
+      lazyRowSharePct?: number;
+    };
+    lazyChunks?: unknown[];
+    recommendations?: unknown[];
+  };
 };
 
 type RuntimeWeekly = {
   regionalBalance?: {
     weekly?: unknown[];
   };
+};
+
+type RuntimeCrudeWeekly = {
   crudeRuns?: {
     weekly?: unknown[];
   };
@@ -73,6 +85,7 @@ type ProductConfig = {
   indexPath: string;
   runtimeBasePath: string;
   runtimeWeeklyPath: string;
+  runtimeCrudeWeeklyPath: string;
   runtimeReferencePath: string;
 };
 
@@ -86,6 +99,7 @@ const PRODUCTS: ProductConfig[] = [
     indexPath: "Diesel_Balance/index.html",
     runtimeBasePath: "Diesel_Balance/data/diesel_balance_runtime_base.js",
     runtimeWeeklyPath: "Diesel_Balance/data/diesel_balance_runtime_weekly.js",
+    runtimeCrudeWeeklyPath: "Diesel_Balance/data/diesel_balance_runtime_crude_weekly.js",
     runtimeReferencePath: "Diesel_Balance/data/diesel_balance_runtime_reference.js",
   },
   {
@@ -97,6 +111,7 @@ const PRODUCTS: ProductConfig[] = [
     indexPath: "Jet_Balance/index.html",
     runtimeBasePath: "Jet_Balance/data/jet_balance_runtime_base.js",
     runtimeWeeklyPath: "Jet_Balance/data/jet_balance_runtime_weekly.js",
+    runtimeCrudeWeeklyPath: "Jet_Balance/data/jet_balance_runtime_crude_weekly.js",
     runtimeReferencePath: "Jet_Balance/data/jet_balance_runtime_reference.js",
   },
 ];
@@ -169,13 +184,14 @@ async function readAssignedJson<T>(path: string, marker: string): Promise<T> {
 }
 
 async function verifyProduct(config: ProductConfig): Promise<string> {
-  const [manifest, monthlyLatest, weeklyLatest, indexHtml, runtimeBase, runtimeWeekly, runtimeReference] = await Promise.all([
+  const [manifest, monthlyLatest, weeklyLatest, indexHtml, runtimeBase, runtimeWeekly, runtimeCrudeWeekly, runtimeReference] = await Promise.all([
     readJson<BalanceManifest>(config.manifestPath),
     latestCsvDate(config.monthlyCsv),
     latestCsvDate(config.weeklyCsv),
     readFile(config.indexPath, "utf8"),
     readAssignedJson<RuntimeBase>(config.runtimeBasePath, "window.BALANCE_DATA = "),
     readAssignedJson<RuntimeWeekly>(config.runtimeWeeklyPath, ".weekly = "),
+    readAssignedJson<RuntimeCrudeWeekly>(config.runtimeCrudeWeeklyPath, ".crudeWeekly = "),
     readAssignedJson<RuntimeReference>(config.runtimeReferencePath, ".reference = "),
   ]);
 
@@ -187,8 +203,12 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
   assertEqual(`${config.key} runtime base product`, runtimeBase.product?.key ?? "", config.key);
   assertEqual(`${config.key} runtime base monthly freshness`, runtimeBase.freshness?.latestMonthly ?? "", monthlyLatest);
   assertEqual(`${config.key} runtime base weekly freshness`, runtimeBase.freshness?.latestWeekly ?? "", weeklyLatest);
+  if ((runtimeBase.optimization?.runtimePlan?.baseRows ?? 0) <= 0) throw new Error(`${config.key} runtime optimization base rows are missing`);
+  if ((runtimeBase.optimization?.runtimePlan?.lazyRows ?? 0) <= 0) throw new Error(`${config.key} runtime optimization lazy rows are missing`);
+  if ((runtimeBase.optimization?.lazyChunks?.length ?? 0) < 3) throw new Error(`${config.key} runtime optimization lazy chunk diagnostics are incomplete`);
+  if ((runtimeBase.optimization?.recommendations?.length ?? 0) === 0) throw new Error(`${config.key} runtime optimization recommendations are missing`);
   if ((runtimeWeekly.regionalBalance?.weekly?.length ?? 0) === 0) throw new Error(`${config.key} runtime weekly regional rows are empty`);
-  if ((runtimeWeekly.crudeRuns?.weekly?.length ?? 0) === 0) throw new Error(`${config.key} runtime weekly crude rows are empty`);
+  if ((runtimeCrudeWeekly.crudeRuns?.weekly?.length ?? 0) === 0) throw new Error(`${config.key} runtime weekly crude rows are empty`);
   if ((runtimeReference.sourceFiles?.length ?? 0) === 0) throw new Error(`${config.key} runtime reference source files are empty`);
   if (!indexHtml.includes(`src="data/${config.key}_balance_runtime_base.js"`)) {
     throw new Error(`${config.key} index.html does not reference expected runtime base script`);

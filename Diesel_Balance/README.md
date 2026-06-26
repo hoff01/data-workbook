@@ -18,6 +18,7 @@ folder-local subdirectories:
 - `padd_1/`
 - `data/diesel_balance_runtime_base.js`
 - `data/diesel_balance_runtime_weekly.js`
+- `data/diesel_balance_runtime_crude_weekly.js`
 - `data/diesel_balance_runtime_reference.js`
 
 Set `BALANCE_WRITE_FULL_BUNDLE=1` before running the build to also emit the
@@ -42,12 +43,13 @@ Local app workflow:
 - Chart axes auto-fit to visible data without forcing zero, and y-axis ticks
   use clean whole-number increments.
 - Each chart card includes a compact latest/prior/band insight strip.
-- The Context Pulse adds external-source context from power-sector DFO burn,
-  weather/load inputs, and JODI international product demand/trade where those
-  files are packaged locally.
+- The Context Pulse adds external-source context from power-sector DFO burn and
+  weather/load inputs where those files are packaged locally.
 - The Reference tab inventories active, packaged, dry-run, and candidate
   sources with latest dates, row counts, official source URLs, and coverage
   notes.
+- The Reference tab also shows optimization diagnostics for runtime chunk
+  sizes, deferred row share, lazy-load guardrails, and follow-up trace actions.
 - The Reference tab can start background local refresh groups when served by
   the dashboard update runner: Weekly, Monthly, Other, or Complete.
 - The Market Monitor highlights the selected region's latest balance,

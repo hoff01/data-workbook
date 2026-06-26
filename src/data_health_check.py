@@ -264,39 +264,6 @@ def check_balances(checks: list[dict[str, Any]], report: dict[str, Any]) -> None
 
 
 def check_context_feeds(checks: list[dict[str, Any]], report: dict[str, Any], today: date) -> None:
-    jodi_path = Path("Jodi_Data/manifest.json")
-    if jodi_path.exists():
-        manifest = read_json(jodi_path)
-        outputs = manifest.get("outputs") or {}
-        latest_periods = [
-            str(output.get("max_period_month", ""))
-            for output in outputs.values()
-            if isinstance(output, dict) and output.get("max_period_month")
-        ]
-        row_counts = [int(output.get("rows") or 0) for output in outputs.values() if isinstance(output, dict)]
-        latest = max(latest_periods) if latest_periods else ""
-        monthly_latest = max(
-            (str(stats.get("max_date", "")) for stats in (report.get("eia_monthly") or {}).values()),
-            default="",
-        )
-        report["jodi"] = {
-            "path": str(jodi_path),
-            "generated_at": manifest.get("generated_at", ""),
-            "latest_period_month": latest,
-            "outputs": len(outputs),
-            "rows": sum(row_counts),
-        }
-        add_check(
-            checks,
-            "jodi_outputs",
-            "pass" if latest[:7] >= monthly_latest[:7] and sum(row_counts) > 0 else "warn",
-            latest_period_month=latest,
-            eia_monthly_latest=monthly_latest,
-            rows=sum(row_counts),
-        )
-    else:
-        add_check(checks, "jodi_outputs", "warn", path=str(jodi_path), error="missing manifest")
-
     power_path = Path("power_generation_dfo/manifest.json")
     if power_path.exists():
         manifest = read_json(power_path)

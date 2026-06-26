@@ -46,9 +46,10 @@ function isParallelPhase(phase: Phase): phase is ParallelPhase {
 
 const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
   weekly: [
-    npmStep("weekly EIA pull", "weekly"),
-    npmStep("weekly export files", "export:weekly"),
+    npmStep("weekly EIA pull", "weekly:raw"),
+    npmStep("weekly export files", "export:weekly:clean"),
     npmStep("clean public EIA outputs", "clean:eia"),
+    npmStep("Kpler PADD 1 EIA split", "kpler:padd1:eia"),
     npmStep("weekly freshness check", "verify:weekly"),
     npmStep("rebuild balance dashboards", "build:balances"),
     npmStep("dashboard freshness check", "verify:dashboard"),
@@ -65,7 +66,6 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
   ],
   other: [
     parallelPhase("independent context refreshes", [
-      branch("JODI context", [npmStep("JODI context refresh", "jodi")]),
       branch("Kpler package", [npmStep("Kpler flow package", "kpler"), npmStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")]),
       branch("capacity", [npmStep("capacity refresh", "capacity"), npmStep("refinery unit capacity refresh", "capacity:refineries")]),
       branch("power DFO", [npmStep("power DFO daily refresh", "power:dfo"), npmStep("power DFO hourly forecast", "power:dfo:hourly")]),
@@ -77,10 +77,10 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
   ],
   all: [
     parallelPhase("EIA source refreshes", [
-      branch("weekly EIA", [npmStep("weekly EIA pull", "weekly")]),
+      branch("weekly EIA", [npmStep("weekly EIA pull", "weekly:raw")]),
       branch("monthly EIA", [npmStep("monthly EIA pull", "monthly")]),
     ]),
-    npmStep("weekly/monthly export files", "export:headers"),
+    npmStep("weekly/monthly export files", "export:headers:clean"),
     npmStep("monthly bulk series inventory", "export:bulk-series"),
     npmStep("PADD 1 distillate split", "padd1"),
     npmStep("clean public EIA outputs", "clean:eia"),
@@ -89,7 +89,6 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
       branch("monthly freshness", [npmStep("monthly freshness check", "verify:monthly")]),
     ]),
     parallelPhase("independent context refreshes", [
-      branch("JODI context", [npmStep("JODI context refresh", "jodi")]),
       branch("Kpler package", [npmStep("Kpler flow package", "kpler"), npmStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")]),
       branch("capacity", [npmStep("capacity refresh", "capacity"), npmStep("refinery unit capacity refresh", "capacity:refineries")]),
       branch("power DFO", [npmStep("power DFO daily refresh", "power:dfo"), npmStep("power DFO hourly forecast", "power:dfo:hourly")]),

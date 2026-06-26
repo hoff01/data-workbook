@@ -8,6 +8,7 @@ from datetime import date, datetime, timedelta, timezone
 import json
 import re
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Any
@@ -58,6 +59,33 @@ def bool_label(value: bool) -> str:
     return str(value).lower()
 
 
+def atomic_temp_path(path: Path) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle = tempfile.NamedTemporaryFile(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+        delete=False,
+    )
+    try:
+        return Path(handle.name)
+    finally:
+        handle.close()
+
+
+def write_atomic(path: Path, writer: Any) -> None:
+    tmp_path = atomic_temp_path(path)
+    mode = path.stat().st_mode & 0o777 if path.exists() else 0o644
+    if mode & 0o444 != 0o444:
+        mode = 0o644
+    try:
+        writer(tmp_path)
+        tmp_path.chmod(mode)
+        tmp_path.replace(path)
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
 def build_padd1_specs() -> list[PullSpec]:
     config = runtime_config()
     specs: list[PullSpec] = []
@@ -91,15 +119,13 @@ def build_padd1_specs() -> list[PullSpec]:
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
-    tmp_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
-    tmp_path.replace(path)
+    write_atomic(path, lambda tmp_path: tmp_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8"))
 
 
 def write_raw(spec: PullSpec, content: bytes) -> dict[str, Any]:
     PADD1_RAW_DIR.mkdir(parents=True, exist_ok=True)
     path = PADD1_RAW_DIR / f"{spec.name}.csv"
-    path.write_bytes(content)
+    write_atomic(path, lambda tmp_path: tmp_path.write_bytes(content))
     return {
         "path": str(path),
         "rows": max(0, content.count(b"\n") - 1),
@@ -376,7 +402,7 @@ def build_share_outputs(long_rows: pl.DataFrame, assume_padd1ab: bool = False) -
 
     for name, frame in [("daily", daily), ("weekly", weekly), ("monthly", monthly)]:
         path = PADD1_SPLIT_DIR / f"padd1_import_export_shares_{name}.csv"
-        frame.write_csv(path)
+        write_polars_csv(path, frame)
         outputs[name] = str(path)
     return outputs
 
@@ -388,12 +414,17 @@ def read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
 
 
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
-    with tmp_path.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames, extrasaction="ignore")
-        writer.writeheader()
-        writer.writerows(rows)
-    tmp_path.replace(path)
+    def writer(tmp_path: Path) -> None:
+        with tmp_path.open("w", newline="", encoding="utf-8") as file:
+            csv_writer = csv.DictWriter(file, fieldnames=fieldnames, extrasaction="ignore")
+            csv_writer.writeheader()
+            csv_writer.writerows(rows)
+
+    write_atomic(path, writer)
+
+
+def write_polars_csv(path: Path, frame: pl.DataFrame) -> None:
+    write_atomic(path, lambda tmp_path: frame.write_csv(tmp_path))
 
 
 def as_float(value: Any) -> float:
@@ -553,7 +584,7 @@ def run(args: argparse.Namespace) -> int:
     mode = "existing_raw" if args.use_existing_raw else "live" if has_kpler_credentials() else "eia_fallback"
     long_rows, pull_status = pull_kpler_long(specs, use_existing_raw=args.use_existing_raw)
     normalized_path = PADD1_SPLIT_DIR / "padd1_import_export_normalized_long.csv"
-    long_rows.write_csv(normalized_path)
+    write_polars_csv(normalized_path, long_rows)
     share_outputs = build_share_outputs(long_rows, assume_padd1ab=mode == "eia_fallback")
     merge_results = merge_eia_outputs(share_outputs)
     write_json(

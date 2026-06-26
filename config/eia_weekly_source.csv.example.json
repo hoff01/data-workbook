@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "latest_source": "csv",
+  "instructions": [
+    "Drop this file over config/eia_weekly_source.json when EIA confirms the WPSR CSV feed is live.",
+    "Leave csv.url blank if EIA uses the expected production URL.",
+    "Set csv.url to the exact final URL if EIA publishes the CSV at a different location."
+  ],
+  "xls": {
+    "page_url": "https://www.eia.gov/petroleum/supply/weekly/",
+    "keep_latest_weeks": 2,
+    "tables": [
+      {
+        "id": "PSW01",
+        "url": "https://ir.eia.gov/wpsr/psw01.xls"
+      },
+      {
+        "id": "PSW02",
+        "url": "https://ir.eia.gov/wpsr/psw02.xls"
+      },
+      {
+        "id": "PSW03",
+        "url": "https://ir.eia.gov/wpsr/psw03.xls"
+      },
+      {
+        "id": "PSW04",
+        "url": "https://ir.eia.gov/wpsr/psw04.xls"
+      },
+      {
+        "id": "PSW05",
+        "url": "https://ir.eia.gov/wpsr/psw05.xls"
+      },
+      {
+        "id": "PSW05A",
+        "url": "https://ir.eia.gov/wpsr/psw05a.xls"
+      },
+      {
+        "id": "PSW06",
+        "url": "https://ir.eia.gov/wpsr/psw06.xls"
+      },
+      {
+        "id": "PSW07",
+        "url": "https://ir.eia.gov/wpsr/psw07.xls"
+      },
+      {
+        "id": "PSW08",
+        "url": "https://ir.eia.gov/wpsr/psw08.xls"
+      },
+      {
+        "id": "PSW09",
+        "url": "https://ir.eia.gov/wpsr/psw09.xls"
+      }
+    ]
+  },
+  "csv": {
+    "url": "",
+    "test_url": "https://irtest.eia.gov/wpsr/wpsr.csv",
+    "prod_url": "https://ir.eia.gov/wpsr/wpsr.csv",
+    "production_start": "2026-06-10"
+  }
+}

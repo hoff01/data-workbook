@@ -50,8 +50,7 @@ function requestParams(apiKey: string, endpoint: (typeof CHECK_ENDPOINTS)[number
 
 async function latestUpstreamMonth(): Promise<string> {
   const apiKey = resolveApiKey();
-  const periods: string[] = [];
-  for (const endpoint of CHECK_ENDPOINTS) {
+  const periods = await Promise.all(CHECK_ENDPOINTS.map(async (endpoint) => {
     const payload = await fetchJsonWithRetry<EiaPayload>(endpoint.url, requestParams(apiKey, endpoint));
     const latest = (payload.response?.data ?? [])
       .map((row) => String(row.period ?? ""))
@@ -59,8 +58,8 @@ async function latestUpstreamMonth(): Promise<string> {
       .sort()
       .at(-1);
     if (!latest) throw new Error(`${endpoint.label} returned no monthly periods`);
-    periods.push(latest);
-  }
+    return latest;
+  }));
   return periods.sort().at(-1) ?? "";
 }
 

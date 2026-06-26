@@ -1291,27 +1291,38 @@ def gasoline_mappings(series_rows: list[dict[str, str]]) -> list[dict[str, str]]
     return sort_weekly_mappings(mappings)
 
 
-def write_weekly_clean_csv(filename: str, mappings: list[dict[str, str]]) -> None:
+def read_weekly_value_data(source_columns: list[str]) -> dict[str, list[object]]:
     path = Path("eia_weekly")
-    source_columns = [row["source_column"] for row in mappings]
-    series_names = [row["series_name"] for row in mappings]
-    if len(series_names) != len(set(series_names)):
-        raise RuntimeError(f"{filename} would contain duplicate series_name columns")
-
-    columns = ["week_ending", *series_names]
     raw_columns = ["week_ending", "source_column", "period_type", "value"]
     table = pq.read_table(path / "raw", columns=raw_columns)
     mask = pc.and_(
         pc.is_in(table["source_column"], value_set=pa.array(source_columns, type=pa.string())),
         pc.equal(table["period_type"], "weekly"),
     )
-    filtered = table.filter(mask)
-    data = filtered.to_pydict()
+    return table.filter(mask).to_pydict()
+
+
+def write_weekly_clean_csv_from_values(filename: str, mappings: list[dict[str, str]], data: dict[str, list[object]]) -> None:
+    path = Path("eia_weekly")
+    source_columns = [row["source_column"] for row in mappings]
+    series_names = [row["series_name"] for row in mappings]
+    if len(source_columns) != len(set(source_columns)):
+        raise RuntimeError(f"{filename} would contain duplicate source columns")
+    if len(series_names) != len(set(series_names)):
+        raise RuntimeError(f"{filename} would contain duplicate series_name columns")
+
+    columns = ["week_ending", *series_names]
+    series_by_source_column = {
+        row["source_column"]: row["series_name"]
+        for row in mappings
+    }
     rows_by_week: dict[str, dict[str, str | float | None]] = {}
-    for index in range(filtered.num_rows):
+    for index in range(len(data.get("week_ending", []))):
         week_ending = data["week_ending"][index]
         source_column = data["source_column"][index]
-        series_name = mappings[source_columns.index(source_column)]["series_name"]
+        series_name = series_by_source_column.get(str(source_column))
+        if not series_name:
+            continue
         value = data["value"][index]
         row = rows_by_week.setdefault(week_ending, {"week_ending": week_ending})
         if series_name in row:
@@ -1327,20 +1338,33 @@ def write_weekly_clean_csv(filename: str, mappings: list[dict[str, str]]) -> Non
             writer.writerow(rows_by_week[week_ending])
 
 
+def write_weekly_clean_csv(filename: str, mappings: list[dict[str, str]]) -> None:
+    write_weekly_clean_csv_from_values(filename, mappings, read_weekly_value_data([row["source_column"] for row in mappings]))
+
+
 def write_weekly_clean_exports() -> None:
     series_rows = read_weekly_series_rows()
     diesel_rows = diesel_mappings(series_rows)
-    write_weekly_clean_csv(WEEKLY_DIESEL_OUTPUT, diesel_rows)
-    write_weekly_clean_csv(WEEKLY_JET_OUTPUT, jet_mappings(series_rows, diesel_rows))
-    write_weekly_clean_csv(WEEKLY_GASOLINE_OUTPUT, gasoline_mappings(series_rows))
+    jet_rows = jet_mappings(series_rows, diesel_rows)
+    gasoline_rows = gasoline_mappings(series_rows)
+    value_data = read_weekly_value_data(list(dict.fromkeys(
+        row["source_column"]
+        for mappings in [diesel_rows, jet_rows, gasoline_rows]
+        for row in mappings
+    )))
+    write_weekly_clean_csv_from_values(WEEKLY_DIESEL_OUTPUT, diesel_rows, value_data)
+    write_weekly_clean_csv_from_values(WEEKLY_JET_OUTPUT, jet_rows, value_data)
+    write_weekly_clean_csv_from_values(WEEKLY_GASOLINE_OUTPUT, gasoline_rows, value_data)
 
 
-def export_weekly() -> None:
+def export_weekly(*, include_raw_archive: bool = True) -> None:
     with suppress_native_stderr():
-        write_weekly_raw_excel_archive()
+        if include_raw_archive:
+            write_weekly_raw_excel_archive()
         write_weekly_series_csv()
         write_weekly_clean_exports()
-    print("wrote weekly raw.csv.tar.xz, series.csv inspection file, and weekly clean exports")
+    archive_label = "raw.csv.tar.xz, " if include_raw_archive else ""
+    print(f"wrote weekly {archive_label}series.csv inspection file, and weekly clean exports")
 
 
 def export_monthly() -> None:
@@ -1351,10 +1375,11 @@ def export_monthly() -> None:
     print("wrote monthly raw.csv, series.csv inspection file, and monthly clean exports")
 
 
-def export_all() -> None:
+def export_all(*, include_weekly_raw_archive: bool = True) -> None:
     with suppress_native_stderr():
         write_header_csv("eia_monthly")
-        write_weekly_raw_excel_archive()
+        if include_weekly_raw_archive:
+            write_weekly_raw_excel_archive()
         write_weekly_series_csv()
         write_monthly_series_csv()
         write_weekly_clean_exports()
@@ -1363,17 +1388,20 @@ def export_all() -> None:
 
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
+    include_weekly_raw_archive = "--skip-weekly-raw-archive" not in args
+    args = [arg for arg in args if arg != "--skip-weekly-raw-archive"]
     mode = args[0].lower() if args else "all"
     if mode in {"weekly", "--weekly"}:
-        export_weekly()
+        export_weekly(include_raw_archive=include_weekly_raw_archive)
         return 0
     if mode in {"monthly", "--monthly"}:
         export_monthly()
         return 0
     if mode not in {"all", "--all"}:
         raise RuntimeError(f"Unknown export mode {mode!r}; use weekly, monthly, or all")
-    export_all()
-    print("wrote monthly raw.csv, weekly raw.csv.tar.xz, series.csv inspection files, and weekly/monthly clean exports")
+    export_all(include_weekly_raw_archive=include_weekly_raw_archive)
+    archive_label = "weekly raw.csv.tar.xz, " if include_weekly_raw_archive else ""
+    print(f"wrote monthly raw.csv, {archive_label}series.csv inspection files, and weekly/monthly clean exports")
     return 0
 
 
