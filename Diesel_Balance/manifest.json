@@ -1,7 +1,7 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-06-26T04:50:46.738Z",
+  "generatedAt": "2026-06-26T05:09:51.552Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-03-15",
@@ -19,7 +19,7 @@
       "path": "eia_weekly/diesel.csv",
       "rows": 545,
       "checksum": "2baa5efa2d56e541ebc5ad36249688c5d28559de7e13b94121e7321e66106393",
-      "modifiedAt": "2026-06-26T04:50:45.496Z"
+      "modifiedAt": "2026-06-26T04:53:21.342Z"
     },
     {
       "role": "kpler_manifest",
@@ -49,7 +49,7 @@
     "refinery_unit_capacity": "46bd4ad27709f4cfb40c81aeee64267585e0afe74ee917dd371eabc7ff157538"
   },
   "optimization": {
-    "generatedAt": "2026-06-26T04:50:46.786Z",
+    "generatedAt": "2026-06-26T05:09:51.603Z",
     "runtimePlan": {
       "baseRows": 6747,
       "lazyRows": 42860,
