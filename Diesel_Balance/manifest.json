@@ -1,25 +1,25 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-06-25T06:33:51.854Z",
+  "generatedAt": "2026-06-26T04:50:46.738Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-03-15",
-  "latestWeekly": "2026-06-12",
+  "latestWeekly": "2026-06-19",
   "sourceFiles": [
     {
       "role": "eia_monthly",
       "path": "eia_monthly/diesel.csv",
       "rows": 123,
       "checksum": "0a16a3e68bacb5622c7e4d38e48e7b049f4f5df024f1b6c4faf284829f9af969",
-      "modifiedAt": "2026-06-24T02:07:31.541Z"
+      "modifiedAt": "2026-06-26T04:50:45.487Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/diesel.csv",
       "rows": 545,
-      "checksum": "c798a801ea2ce94721c00a2159e05aa9ad35fb9e40a2817a03ed157a13d9f5a1",
-      "modifiedAt": "2026-06-24T02:07:31.548Z"
+      "checksum": "2baa5efa2d56e541ebc5ad36249688c5d28559de7e13b94121e7321e66106393",
+      "modifiedAt": "2026-06-26T04:50:45.496Z"
     },
     {
       "role": "kpler_manifest",
@@ -43,19 +43,19 @@
   ],
   "checksums": {
     "eia_monthly": "0a16a3e68bacb5622c7e4d38e48e7b049f4f5df024f1b6c4faf284829f9af969",
-    "eia_weekly": "c798a801ea2ce94721c00a2159e05aa9ad35fb9e40a2817a03ed157a13d9f5a1",
+    "eia_weekly": "2baa5efa2d56e541ebc5ad36249688c5d28559de7e13b94121e7321e66106393",
     "kpler_manifest": "ea1b611065e410372610def7b7ec5c0744722ba8651a0847ec741bdaaa61990c",
     "padd_1": "8ccdb9eb4411d7b50f54d6b5e4a00aef18bdbd0de2e99174461178327e571357",
     "refinery_unit_capacity": "46bd4ad27709f4cfb40c81aeee64267585e0afe74ee917dd371eabc7ff157538"
   },
   "optimization": {
-    "generatedAt": "2026-06-25T06:33:51.926Z",
+    "generatedAt": "2026-06-26T04:50:46.786Z",
     "runtimePlan": {
       "baseRows": 6747,
       "lazyRows": 42860,
       "lazyRowSharePct": 86.4,
       "basePayloadKb": 996.4,
-      "weeklyPayloadKb": 2622.8,
+      "weeklyPayloadKb": 2622.9,
       "crudeWeeklyPayloadKb": 1116.4,
       "referencePayloadKb": 149.4
     },
@@ -78,7 +78,7 @@
         "name": "weekly",
         "path": "data/diesel_balance_runtime_weekly.js",
         "rows": 19845,
-        "estimatedKb": 2622.8,
+        "estimatedKb": 2622.9,
         "status": "optimized",
         "reason": "Weekly regional balances and movement flows stay out of the initial workbook payload."
       },

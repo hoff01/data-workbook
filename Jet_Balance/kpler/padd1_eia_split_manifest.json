@@ -17,7 +17,7 @@
     {
       "added_columns": 4,
       "date_column": "week_ending",
-      "latest": "2026-06-12",
+      "latest": "2026-06-19",
       "oldest": "2016-01-01",
       "path": "eia_weekly/diesel.csv",
       "rows": 545,
@@ -42,7 +42,7 @@
     {
       "added_columns": 4,
       "date_column": "week_ending",
-      "latest": "2026-06-12",
+      "latest": "2026-06-19",
       "oldest": "2016-01-01",
       "path": "eia_weekly/jet.csv",
       "rows": 545,
@@ -66,7 +66,7 @@
     {
       "added_columns": 8,
       "date_column": "week_ending",
-      "latest": "2026-06-12",
+      "latest": "2026-06-19",
       "oldest": "2016-01-01",
       "path": "eia_weekly/gasoline.csv",
       "rows": 545,
@@ -77,7 +77,7 @@
       ]
     }
   ],
-  "generated_at": "2026-06-24T02:07:31.597189+00:00",
+  "generated_at": "2026-06-26T04:50:45.546169+00:00",
   "mode": "eia_fallback",
   "normalized_long": {
     "path": "Kpler/output/padd1_split/padd1_import_export_normalized_long.csv",
@@ -126,7 +126,7 @@
   "pulls": [
     {
       "commodity": "diesel",
-      "end_date": "2026-08-07",
+      "end_date": "2026-08-09",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -152,7 +152,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-08-07",
+      "end_date": "2026-08-09",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -178,7 +178,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-07",
+      "end_date": "2026-08-09",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -204,7 +204,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-07",
+      "end_date": "2026-08-09",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -230,7 +230,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-08-07",
+      "end_date": "2026-08-09",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -256,7 +256,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-08-07",
+      "end_date": "2026-08-09",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -283,7 +283,7 @@
   ],
   "runtime_config": {
     "concurrency": 2,
-    "end_date": "2026-08-07",
+    "end_date": "2026-08-09",
     "granularity": "daily",
     "only_realized": false,
     "retry_backoff_seconds": 10.0,

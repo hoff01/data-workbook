@@ -1,25 +1,25 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-06-25T06:33:51.987Z",
+  "generatedAt": "2026-06-26T04:50:46.838Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-03-15",
-  "latestWeekly": "2026-06-12",
+  "latestWeekly": "2026-06-19",
   "sourceFiles": [
     {
       "role": "eia_monthly",
       "path": "eia_monthly/jet.csv",
       "rows": 123,
       "checksum": "28901da8adbccbc4cb94e26bc08ba33458e0a3b943b9fbf47e009582c057e31e",
-      "modifiedAt": "2026-06-24T02:07:31.556Z"
+      "modifiedAt": "2026-06-26T04:50:45.504Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/jet.csv",
       "rows": 545,
-      "checksum": "bb5831d979fd57b12f6daf06632540bc992bb0ae9aa6871108109b83391bd437",
-      "modifiedAt": "2026-06-24T02:07:31.563Z"
+      "checksum": "c47faf189d5213ab45e432574db79fb0fc4d78df2cdcfd4b42827f44808a7bc8",
+      "modifiedAt": "2026-06-26T04:50:45.512Z"
     },
     {
       "role": "kpler_manifest",
@@ -37,18 +37,18 @@
   ],
   "checksums": {
     "eia_monthly": "28901da8adbccbc4cb94e26bc08ba33458e0a3b943b9fbf47e009582c057e31e",
-    "eia_weekly": "bb5831d979fd57b12f6daf06632540bc992bb0ae9aa6871108109b83391bd437",
+    "eia_weekly": "c47faf189d5213ab45e432574db79fb0fc4d78df2cdcfd4b42827f44808a7bc8",
     "kpler_manifest": "ea1b611065e410372610def7b7ec5c0744722ba8651a0847ec741bdaaa61990c",
     "refinery_unit_capacity": "46bd4ad27709f4cfb40c81aeee64267585e0afe74ee917dd371eabc7ff157538"
   },
   "optimization": {
-    "generatedAt": "2026-06-25T06:33:52.021Z",
+    "generatedAt": "2026-06-26T04:50:46.870Z",
     "runtimePlan": {
       "baseRows": 6224,
       "lazyRows": 41158,
       "lazyRowSharePct": 86.9,
-      "basePayloadKb": 909,
-      "weeklyPayloadKb": 2324.4,
+      "basePayloadKb": 908.9,
+      "weeklyPayloadKb": 2324.3,
       "crudeWeeklyPayloadKb": 1116.4,
       "referencePayloadKb": 148.9
     },
@@ -71,7 +71,7 @@
         "name": "weekly",
         "path": "data/jet_balance_runtime_weekly.js",
         "rows": 18144,
-        "estimatedKb": 2324.4,
+        "estimatedKb": 2324.3,
         "status": "optimized",
         "reason": "Weekly regional balances and movement flows stay out of the initial workbook payload."
       },
@@ -123,7 +123,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 148.9 KB versus 909 KB estimated base payload."
+        "detail": "Reference payload is 148.9 KB versus 908.9 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",
