@@ -41,6 +41,9 @@ type RuntimeBase = {
   };
   generatedAt?: string;
   freshness?: DashboardBundle["freshness"];
+  regionalBalance?: {
+    movementFlows?: RegionalMovementFlow[];
+  };
   optimization?: {
     runtimePlan?: {
       baseRows?: number;
@@ -56,6 +59,12 @@ type RuntimeWeekly = {
   regionalBalance?: {
     weekly?: unknown[];
   };
+};
+
+type RegionalMovementFlow = {
+  id?: string;
+  fromRegionKey?: string;
+  toRegionKey?: string;
 };
 
 type RuntimeCrudeWeekly = {
@@ -153,6 +162,117 @@ function assertEqual(label: string, actual: string, expected: string): void {
   if (actual !== expected) throw new Error(`${label} mismatch: expected=${expected} actual=${actual}`);
 }
 
+function assertIncludes(label: string, text: string, expected: string): void {
+  if (!text.includes(expected)) throw new Error(`${label} missing expected text: ${expected}`);
+}
+
+function assertNotIncludes(label: string, text: string, unexpected: string): void {
+  if (text.includes(unexpected)) throw new Error(`${label} contains unexpected text: ${unexpected}`);
+}
+
+function verifyUsMovementCoverage(config: ProductConfig, runtimeBase: RuntimeBase): void {
+  const expectedRegions = config.key === "diesel"
+    ? ["padd1ab", "padd1c", "padd2", "padd3", "padd4", "padd5"]
+    : ["padd1", "padd2", "padd3", "padd4", "padd5"];
+  const expected = new Set(expectedRegions);
+  const flows = runtimeBase.regionalBalance?.movementFlows ?? [];
+  if (flows.length === 0) throw new Error(`${config.key} movement flow coverage is empty`);
+  const regions = new Set<string>();
+  flows.forEach((flow) => {
+    if (!flow.fromRegionKey || !flow.toRegionKey) throw new Error(`${config.key} movement flow has missing endpoint`);
+    if (!expected.has(flow.fromRegionKey) || !expected.has(flow.toRegionKey)) {
+      throw new Error(`${config.key} movement flow ${flow.id ?? "(unknown)"} is outside the Total U.S. PADD scope`);
+    }
+    regions.add(flow.fromRegionKey);
+    regions.add(flow.toRegionKey);
+  });
+  const missing = expectedRegions.filter((regionKey) => !regions.has(regionKey));
+  if (missing.length) throw new Error(`${config.key} movement flow coverage missing ${missing.join(", ")}`);
+}
+
+function verifyUsGrossMovementPresentation(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} Total U.S. gross movement suppression`, indexHtml, "function showGrossInterPaddRows(regionKey){ return regionKey !== 'us'; }");
+  assertIncludes(`${config.key} aggregate receipt source coverage`, indexHtml, "const sourceKeys = ['padd1','padd2','padd3','padd4','padd5']");
+  assertIncludes(`${config.key} U.S. gross movement total gating`, indexHtml, "...(showGrossMovements ? [{id:'receiptsIn'");
+  assertIncludes(`${config.key} U.S. shipment row gating`, indexHtml, "...(showGrossMovements ? [{id:'receiptsOut'");
+}
+
+function verifyBalanceSubtotalFormatting(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} Total Supply black subtotal class`, indexHtml, "totalSupplyRow");
+  assertIncludes(`${config.key} supply subtotal gray class`, indexHtml, "supplySubtotalBand");
+  assertIncludes(`${config.key} demand subtotal light-blue class`, indexHtml, "demandSubtotalBand");
+  assertIncludes(`${config.key} Total Demand dark-blue class`, indexHtml, "totalDemandRow");
+  assertIncludes(`${config.key} imports subtotal no longer black`, indexHtml, ".importTotalRow td{background:#dde2ea!important");
+  assertIncludes(`${config.key} highlighted rows keep PADD inset`, indexHtml, ".highlightRow td:first-child{background:#fff4a8!important;color:#1f2937!important;border-left:8px solid var(--group)}");
+  assertIncludes(`${config.key} balance crude runs row uses yield highlight`, indexHtml, "{id:'crudeRunsKbd',label:'Crude Runs',kind:'highlight'}");
+  assertIncludes(`${config.key} production row keeps subtotal and highlight`, indexHtml, "{id:'production',label:'Production',kind:'subtotal highlight'}");
+  assertIncludes(`${config.key} production row uses yellow highlight override`, indexHtml, ".productionHighlightRow td{background:#fff4a8!important;color:#1f2937!important;");
+  assertIncludes(`${config.key} production row applies yellow override class`, indexHtml, "if (line.id === 'production') parts.push('productionHighlightRow');");
+  assertIncludes(`${config.key} build draw rows use readable summary band`, indexHtml, ".balanceSummaryRow td{background:#e8eef6!important");
+  assertIncludes(`${config.key} build draw per-day row uses grey band`, indexHtml, ".buildDailyRow td{background:#dde2ea!important");
+  assertIncludes(`${config.key} build draw guide uses readable guide band`, indexHtml, ".balanceGuideRow td{background:#f5f8fc!important");
+  assertIncludes(`${config.key} build draw cells are sign colored`, indexHtml, ".drawRow td.positiveValue{color:#166534!important}");
+  assertIncludes(`${config.key} build draw guide cells are sign colored`, indexHtml, ".balanceGuideRow td.positiveValue{color:#166534!important}");
+  assertIncludes(`${config.key} ending stocks row uses grey band`, indexHtml, ".stockRow td{background:#dde2ea!important");
+  assertIncludes(`${config.key} cover row uses stock context band`, indexHtml, ".coverRow td{background:#f8fbff!important");
+  assertIncludes(`${config.key} build draw summary row class`, indexHtml, "{id:'buildDaily',label:'Build/(draw) per day',kind:'balanceSummary draw'}");
+  assertIncludes(`${config.key} build draw per-day row class`, indexHtml, "if (line.id === 'buildDaily') parts.push('buildDailyRow');");
+  assertIncludes(`${config.key} build draw guide row class`, indexHtml, "kind:lineId === 'buildTotal' ? 'guide balanceGuide' : 'guide'");
+}
+
+function verifyBalanceSupplySpacing(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} production/import spacer row`, indexHtml, "const productionImportSpacer = productionLines.length ? [{id:'productionImportSpacer',label:'',kind:'divider supplySpacer'}] : [];");
+  assertIncludes(`${config.key} spacer is between production and imports`, indexHtml, "...productionLines,...productionImportSpacer,...importLines,importsTotalLine");
+}
+
+function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} balance frequency switch clears stale viewport restore`, indexHtml, "if (state.sheet === 'balance') { clearPendingTableViewportRestore('balanceTable'); pendingBalanceScrollPeriod = ''; forceBalancePeriodScroll = true; }");
+  assertIncludes(`${config.key} balance force scroll bypasses viewport restore`, indexHtml, "else if (forceScroll) { clearPendingTableViewportRestore('balanceTable'); scrollTableToPeriod('balanceTable', targetPeriod, signature, true); }");
+  assertIncludes(`${config.key} balance table scroll gets delayed layout retries`, indexHtml, "const retryDelays = wrap.id === 'crudeRunsTableWrap' ? [120,360] : [40,120,360];");
+}
+
+function verifyYieldAdjustmentRowOrder(indexHtml: string, config: ProductConfig): void {
+  const yieldRow = "{id:'yieldPct',label:'Yield',kind:'highlight percent'}";
+  const adjustmentRow = "{id:'yieldAdjustmentPct',label:'Yield Adjustment',kind:'item muted adjustment percent'}";
+  const guideRow = "lines.push(weeklyGuideLine('yieldPct'));";
+  const yieldIndex = indexHtml.indexOf(yieldRow);
+  const adjustmentIndex = indexHtml.indexOf(adjustmentRow);
+  const guideIndex = indexHtml.indexOf(guideRow);
+  if (yieldIndex < 0 || adjustmentIndex < 0 || guideIndex < 0) {
+    throw new Error(`${config.key} yield adjustment order markers are missing`);
+  }
+  if (!(yieldIndex < adjustmentIndex && adjustmentIndex < guideIndex)) {
+    throw new Error(`${config.key} Yield Adjustment should render between Yield and EIA weekly yield guide`);
+  }
+}
+
+function verifyYieldWeeklyGuideStopsAtLatestActual(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(
+    `${config.key} weekly yield guide stops at latest actual week`,
+    indexHtml,
+    "if (target === 'yieldPct' && series.length && String(period || '') > String(series.at(-1)?.period || '')) return null;",
+  );
+}
+
+function verifyCrudeRunsDefaultActivation(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} crude default region constant`, indexHtml, "const DEFAULT_CRUDE_REGION_KEY = 'padd1';");
+  assertIncludes(`${config.key} crude expanded default storage reset`, indexHtml, "const CRUDE_EXPANDED_DEFAULT_KEY = STORAGE_KEY + ':crude-expanded-default-v2';");
+  assertIncludes(`${config.key} crude default expanded group`, indexHtml, "function defaultExpandedCrudeGroupKeys(){ const key = defaultCrudeRegionKey(); return key ? [key] : []; }");
+  assertIncludes(`${config.key} crude default active state`, indexHtml, "crudeRegion:defaultCrudeRegionKey()");
+  assertIncludes(`${config.key} crude render activates charts`, indexHtml, "function renderCrudeRunsSheet(){ ensureActiveCrudeRegionExpanded(); renderCrudeRunsTable(); renderCrudeCharts(); }");
+  assertIncludes(`${config.key} crude charts hydrate immediately`, indexHtml, "hydrateChartBatch(cards, token, valid, hydrate, () => {");
+  assertIncludes(`${config.key} crude reset restores PADD 1`, indexHtml, "expandedCrudeGroups = new Set(defaultExpandedCrudeGroupKeys())");
+}
+
+function verifyCrudeRunsSectionCleanup(indexHtml: string, config: ProductConfig): void {
+  assertNotIncludes(`${config.key} crude runs divider row removed`, indexHtml, "id:'runsSection'");
+}
+
+function verifyCrudeRunsRowFormatting(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} crude runs row uses operating capacity band`, indexHtml, "{id:'crudeRunsKbd',label:'Crude Runs',kind:'subtotal'}");
+  assertIncludes(`${config.key} crude runs row keeps operating row class`, indexHtml, "['operatingCapacityKbd','crudeRunsKbd'].includes(line.id) ? ' operatingRow' : ''");
+}
+
 function assignedJson<T>(text: string, marker: string): T {
   const markerIndex = text.indexOf(marker);
   if (markerIndex < 0) throw new Error(`runtime chunk missing marker ${marker}`);
@@ -210,9 +330,20 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
   if ((runtimeWeekly.regionalBalance?.weekly?.length ?? 0) === 0) throw new Error(`${config.key} runtime weekly regional rows are empty`);
   if ((runtimeCrudeWeekly.crudeRuns?.weekly?.length ?? 0) === 0) throw new Error(`${config.key} runtime weekly crude rows are empty`);
   if ((runtimeReference.sourceFiles?.length ?? 0) === 0) throw new Error(`${config.key} runtime reference source files are empty`);
-  if (!indexHtml.includes(`src="data/${config.key}_balance_runtime_base.js"`)) {
+  const runtimeScriptPattern = new RegExp(`src="data/${config.key}_balance_runtime_base\\.js(?:\\?v=[^"]+)?"`);
+  if (!runtimeScriptPattern.test(indexHtml)) {
     throw new Error(`${config.key} index.html does not reference expected runtime base script`);
   }
+  verifyUsGrossMovementPresentation(indexHtml, config);
+  verifyBalanceSubtotalFormatting(indexHtml, config);
+  verifyBalanceSupplySpacing(indexHtml, config);
+  verifyBalanceSmartWindowScroll(indexHtml, config);
+  verifyYieldAdjustmentRowOrder(indexHtml, config);
+  verifyYieldWeeklyGuideStopsAtLatestActual(indexHtml, config);
+  verifyCrudeRunsDefaultActivation(indexHtml, config);
+  verifyCrudeRunsSectionCleanup(indexHtml, config);
+  verifyCrudeRunsRowFormatting(indexHtml, config);
+  verifyUsMovementCoverage(config, runtimeBase);
 
   for (const file of runtimeReference.sourceFiles ?? []) {
     const actualChecksum = await packagedChecksum(config, file.path);

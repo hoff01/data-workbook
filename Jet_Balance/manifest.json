@@ -1,7 +1,7 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-06-26T05:24:28.394Z",
+  "generatedAt": "2026-06-30T03:44:42.441Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-03-15",
@@ -28,6 +28,34 @@
       "modifiedAt": "2026-05-31T13:54:45.001Z"
     },
     {
+      "role": "kpler_guide_monthly",
+      "path": "kpler/output/monthly/us_jet_monthly.csv",
+      "rows": 103,
+      "checksum": "afbe1f6e4d860eabf72a033345b02bda61c730e6fc38eb245f73d989683882ad",
+      "modifiedAt": "2026-05-31T13:54:44.907Z"
+    },
+    {
+      "role": "kpler_guide_weekly",
+      "path": "kpler/output/weekly/us_jet_weekly.csv",
+      "rows": 444,
+      "checksum": "fbe8b5235a975cc9c854bde5ab87889f68d25ff507eabb92a896da04f5ff389e",
+      "modifiedAt": "2026-05-31T13:54:44.907Z"
+    },
+    {
+      "role": "kpler_padd_movement_guide_monthly",
+      "path": "kpler/output/monthly/us_jet_padd_movements_monthly.csv",
+      "rows": 103,
+      "checksum": "097a8f6cbb1679b3b3d463ebcb7727763fa090443644abdd0547e2daf1384e56",
+      "modifiedAt": "2026-05-31T13:54:44.965Z"
+    },
+    {
+      "role": "kpler_padd_movement_guide_weekly",
+      "path": "kpler/output/weekly/us_jet_padd_movements_weekly.csv",
+      "rows": 444,
+      "checksum": "b7df0346bbba9d04999f8e154162fb2dbc546952a8d760f657f2f9fbda7728dd",
+      "modifiedAt": "2026-05-31T13:54:44.965Z"
+    },
+    {
       "role": "refinery_unit_capacity",
       "path": "data/refinery_unit_capacities_2025.csv",
       "rows": 311,
@@ -39,18 +67,22 @@
     "eia_monthly": "28901da8adbccbc4cb94e26bc08ba33458e0a3b943b9fbf47e009582c057e31e",
     "eia_weekly": "c47faf189d5213ab45e432574db79fb0fc4d78df2cdcfd4b42827f44808a7bc8",
     "kpler_manifest": "ea1b611065e410372610def7b7ec5c0744722ba8651a0847ec741bdaaa61990c",
+    "kpler_guide_monthly": "afbe1f6e4d860eabf72a033345b02bda61c730e6fc38eb245f73d989683882ad",
+    "kpler_guide_weekly": "fbe8b5235a975cc9c854bde5ab87889f68d25ff507eabb92a896da04f5ff389e",
+    "kpler_padd_movement_guide_monthly": "097a8f6cbb1679b3b3d463ebcb7727763fa090443644abdd0547e2daf1384e56",
+    "kpler_padd_movement_guide_weekly": "b7df0346bbba9d04999f8e154162fb2dbc546952a8d760f657f2f9fbda7728dd",
     "refinery_unit_capacity": "46bd4ad27709f4cfb40c81aeee64267585e0afe74ee917dd371eabc7ff157538"
   },
   "optimization": {
-    "generatedAt": "2026-06-26T05:24:28.431Z",
+    "generatedAt": "2026-06-30T03:44:42.515Z",
     "runtimePlan": {
       "baseRows": 6224,
-      "lazyRows": 41158,
+      "lazyRows": 41162,
       "lazyRowSharePct": 86.9,
-      "basePayloadKb": 908.9,
+      "basePayloadKb": 1074.7,
       "weeklyPayloadKb": 2324.3,
       "crudeWeeklyPayloadKb": 1116.4,
-      "referencePayloadKb": 148.9
+      "referencePayloadKb": 150.1
     },
     "rowCounts": {
       "monthlyRegional": 1056,
@@ -61,7 +93,7 @@
       "movementFlows": 24,
       "monthlyMovementFlowRows": 3168,
       "weeklyMovementFlowRows": 13608,
-      "sourceFiles": 4,
+      "sourceFiles": 8,
       "sourceHubSources": 7,
       "refineryCapacityRows": 311,
       "kplerRows": 18332
@@ -86,8 +118,8 @@
       {
         "name": "reference",
         "path": "data/jet_balance_runtime_reference.js",
-        "rows": 18654,
-        "estimatedKb": 148.9,
+        "rows": 18658,
+        "estimatedKb": 150.1,
         "status": "optimized",
         "reason": "Source inventory, refinery capacity, Kpler metadata, and checksums load only for Reference, Outages, or Crude runs."
       }
@@ -109,7 +141,7 @@
         "key": "reference-isolation",
         "label": "Reference isolation",
         "status": "optimized",
-        "detail": "148.9 KB of reference payload is isolated from initial load."
+        "detail": "150.1 KB of reference payload is isolated from initial load."
       }
     ],
     "recommendations": [
@@ -123,7 +155,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 148.9 KB versus 908.9 KB estimated base payload."
+        "detail": "Reference payload is 150.1 KB versus 1074.7 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",

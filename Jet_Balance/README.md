@@ -15,6 +15,8 @@ folder-local subdirectories:
 - `eia_monthly/`
 - `eia_weekly/`
 - `kpler/`
+- `kpler/output/monthly/`
+- `kpler/output/weekly/`
 - `padd_1/`
 - `data/jet_balance_runtime_base.js`
 - `data/jet_balance_runtime_weekly.js`

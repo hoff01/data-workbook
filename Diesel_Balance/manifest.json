@@ -1,7 +1,7 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-06-26T05:24:28.273Z",
+  "generatedAt": "2026-06-30T03:44:42.176Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-03-15",
@@ -28,6 +28,34 @@
       "modifiedAt": "2026-05-31T13:54:45.001Z"
     },
     {
+      "role": "kpler_guide_monthly",
+      "path": "kpler/output/monthly/us_diesel_monthly.csv",
+      "rows": 103,
+      "checksum": "4876b65d8d534fa5aac8c6f7a8cb669ae347895d3c8c21bf062e499b092227d8",
+      "modifiedAt": "2026-05-31T13:54:44.893Z"
+    },
+    {
+      "role": "kpler_guide_weekly",
+      "path": "kpler/output/weekly/us_diesel_weekly.csv",
+      "rows": 444,
+      "checksum": "7402f36d768a2a4fe422f58b9669c18ef289f6c9b2914b4775b55bff0243641a",
+      "modifiedAt": "2026-05-31T13:54:44.893Z"
+    },
+    {
+      "role": "kpler_padd_movement_guide_monthly",
+      "path": "kpler/output/monthly/us_diesel_padd_movements_monthly.csv",
+      "rows": 103,
+      "checksum": "1c06ed3333c2e42a78638fc8a98b194b0bffbe6ff713ede0472647d1d19f8d6b",
+      "modifiedAt": "2026-05-31T13:54:44.955Z"
+    },
+    {
+      "role": "kpler_padd_movement_guide_weekly",
+      "path": "kpler/output/weekly/us_diesel_padd_movements_weekly.csv",
+      "rows": 444,
+      "checksum": "ed66e1da503d63430c5960c5c5df961c5fe97fdc2928d948fe6299310758eea6",
+      "modifiedAt": "2026-05-31T13:54:44.955Z"
+    },
+    {
       "role": "padd_1",
       "path": "padd_1/padd_1_distillate_estimates.csv",
       "checksum": "8ccdb9eb4411d7b50f54d6b5e4a00aef18bdbd0de2e99174461178327e571357",
@@ -45,19 +73,23 @@
     "eia_monthly": "0a16a3e68bacb5622c7e4d38e48e7b049f4f5df024f1b6c4faf284829f9af969",
     "eia_weekly": "2baa5efa2d56e541ebc5ad36249688c5d28559de7e13b94121e7321e66106393",
     "kpler_manifest": "ea1b611065e410372610def7b7ec5c0744722ba8651a0847ec741bdaaa61990c",
+    "kpler_guide_monthly": "4876b65d8d534fa5aac8c6f7a8cb669ae347895d3c8c21bf062e499b092227d8",
+    "kpler_guide_weekly": "7402f36d768a2a4fe422f58b9669c18ef289f6c9b2914b4775b55bff0243641a",
+    "kpler_padd_movement_guide_monthly": "1c06ed3333c2e42a78638fc8a98b194b0bffbe6ff713ede0472647d1d19f8d6b",
+    "kpler_padd_movement_guide_weekly": "ed66e1da503d63430c5960c5c5df961c5fe97fdc2928d948fe6299310758eea6",
     "padd_1": "8ccdb9eb4411d7b50f54d6b5e4a00aef18bdbd0de2e99174461178327e571357",
     "refinery_unit_capacity": "46bd4ad27709f4cfb40c81aeee64267585e0afe74ee917dd371eabc7ff157538"
   },
   "optimization": {
-    "generatedAt": "2026-06-26T05:24:28.345Z",
+    "generatedAt": "2026-06-30T03:44:42.318Z",
     "runtimePlan": {
       "baseRows": 6747,
-      "lazyRows": 42860,
+      "lazyRows": 42864,
       "lazyRowSharePct": 86.4,
-      "basePayloadKb": 996.4,
+      "basePayloadKb": 1162.4,
       "weeklyPayloadKb": 2622.9,
       "crudeWeeklyPayloadKb": 1116.4,
-      "referencePayloadKb": 149.4
+      "referencePayloadKb": 150.6
     },
     "rowCounts": {
       "monthlyRegional": 1188,
@@ -68,7 +100,7 @@
       "movementFlows": 26,
       "monthlyMovementFlowRows": 3432,
       "weeklyMovementFlowRows": 14742,
-      "sourceFiles": 5,
+      "sourceFiles": 9,
       "sourceHubSources": 7,
       "refineryCapacityRows": 311,
       "kplerRows": 18332
@@ -93,8 +125,8 @@
       {
         "name": "reference",
         "path": "data/diesel_balance_runtime_reference.js",
-        "rows": 18655,
-        "estimatedKb": 149.4,
+        "rows": 18659,
+        "estimatedKb": 150.6,
         "status": "optimized",
         "reason": "Source inventory, refinery capacity, Kpler metadata, and checksums load only for Reference, Outages, or Crude runs."
       }
@@ -116,7 +148,7 @@
         "key": "reference-isolation",
         "label": "Reference isolation",
         "status": "optimized",
-        "detail": "149.4 KB of reference payload is isolated from initial load."
+        "detail": "150.6 KB of reference payload is isolated from initial load."
       }
     ],
     "recommendations": [
@@ -130,7 +162,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 149.4 KB versus 996.4 KB estimated base payload."
+        "detail": "Reference payload is 150.6 KB versus 1162.4 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",
