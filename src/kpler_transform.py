@@ -42,6 +42,11 @@ LONG_COLUMNS = [
 US_GROUPS = ["canada", "latin_america", "europe", "asia", "middle_east", "africa", "other"]
 EUROPE_REGIONS = ["nwe", "med", "other_europe"]
 DOMESTIC_ROUTES = ["padd3_to_padd1ab", "padd3_to_padd1c", "padd3_to_padd5"]
+PADD1_IMPORT_GUIDE_REGIONS = ["padd1ab", "padd1c"]
+PADD1_IMPORT_GUIDE_DESTINATIONS = {
+    "padd1ab": ["PADD1A", "PADDIA", "NEWENGLAND", "PADD1B", "PADDIB", "CENTRALATLANTIC"],
+    "padd1c": ["PADD1C", "PADDIC", "LOWERATLANTIC"],
+}
 
 
 def empty_long() -> pl.DataFrame:
@@ -58,6 +63,10 @@ def snake(value: str) -> str:
     text = value.strip().lower().replace("&", "and")
     text = re.sub(r"[^a-z0-9]+", "_", text)
     return text.strip("_")
+
+
+def compact_name(value: Any) -> str:
+    return re.sub(r"[^A-Z0-9]+", "", clean_name(value).upper())
 
 
 def split_header(value: str) -> list[str]:
@@ -282,6 +291,14 @@ def ensure_columns(frame: pl.DataFrame, columns: list[str]) -> pl.DataFrame:
     return out.select(columns)
 
 
+def add_missing_columns(frame: pl.DataFrame, columns: list[str]) -> pl.DataFrame:
+    out = frame
+    for column in columns:
+        if column not in out.columns:
+            out = out.with_columns(pl.lit(0.0 if column.endswith("_kbd") else "").alias(column))
+    return out
+
+
 def write_output_set(name: str, daily: pl.DataFrame) -> dict[str, Any]:
     daily_path = OUTPUT_DIR / "daily" / f"{name}_daily.csv"
     weekly_path = OUTPUT_DIR / "weekly" / f"{name}_weekly.csv"
@@ -397,9 +414,70 @@ def build_domestic_padd_outputs(long_rows: pl.DataFrame, start_date: date, end_d
     return outputs
 
 
+def country_total(rows: pl.DataFrame, country: str, alias: str) -> pl.DataFrame:
+    countries = [country]
+    if country == "United States":
+        countries.extend(["United States of America", "USA"])
+    subset = rows.filter(pl.col("origin_country").is_in(countries))
+    return subset.group_by("date").agg(pl.col("value_kbd").sum().alias(alias)) if subset.height else pl.DataFrame({"date": []}, schema={"date": pl.Utf8})
+
+
+def flow_total(rows: pl.DataFrame, alias: str) -> pl.DataFrame:
+    return rows.group_by("date").agg(pl.col("value_kbd").sum().alias(alias)) if rows.height else pl.DataFrame({"date": []}, schema={"date": pl.Utf8})
+
+
+def join_daily_frame(daily: pl.DataFrame, frame: pl.DataFrame) -> pl.DataFrame:
+    if daily.is_empty():
+        return frame
+    return daily.join(frame, on="date", how="outer", coalesce=True)
+
+
+def filter_padd1_import_destination(rows: pl.DataFrame, region: str) -> pl.DataFrame:
+    if rows.is_empty():
+        return rows
+    targets = PADD1_IMPORT_GUIDE_DESTINATIONS[region]
+    matches = [any(target in compact_name(value) for target in targets) for value in rows["destination_padd"].to_list()]
+    return rows.with_columns(pl.Series("_destination_match", matches)).filter(pl.col("_destination_match")).drop("_destination_match")
+
+
+def build_padd1_import_guide_outputs(long_rows: pl.DataFrame, start_date: date, end_date: date) -> dict[str, dict[str, Any]]:
+    outputs: dict[str, dict[str, Any]] = {}
+    schema = load_yaml(CONFIG_DIR / "output_schema.yml")["padd1_import_guide_columns"]
+    rows = long_rows.filter(pl.col("family") == "padd1_import_guides")
+    if rows.is_empty():
+        return outputs
+    commodities = sorted(rows.select("commodity").unique().to_series().to_list())
+    for commodity in commodities:
+        commodity_rows = rows.filter(pl.col("commodity") == commodity)
+        daily = pl.DataFrame({"date": []}, schema={"date": pl.Utf8})
+        for region in PADD1_IMPORT_GUIDE_REGIONS:
+            region_rows = filter_padd1_import_destination(commodity_rows.filter(pl.col("region_detail") == region), region)
+            total_col = f"{region}_imports_total_kbd"
+            canada_col = f"{region}_imports_canada_kbd"
+            non_canada_col = f"{region}_imports_non_canada_kbd"
+            intra_us_col = f"{region}_imports_intra_us_kbd"
+            daily = join_daily_frame(daily, flow_total(region_rows, total_col))
+            daily = join_daily_frame(daily, country_total(region_rows, "Canada", canada_col))
+            daily = join_daily_frame(daily, country_total(region_rows, "United States", intra_us_col))
+            daily = add_missing_columns(daily, ["date", total_col, canada_col, intra_us_col])
+            daily = daily.with_columns(
+                pl.when((pl.col(total_col) - pl.col(canada_col)) > 0)
+                .then(pl.col(total_col) - pl.col(canada_col))
+                .otherwise(0.0)
+                .alias(non_canada_col)
+            )
+        daily = complete_daily(daily, start_date, end_date, {"commodity": commodity})
+        outputs[f"us_{commodity}_padd1_import_guides"] = write_output_set(
+            f"us_{commodity}_padd1_import_guides",
+            ensure_columns(daily, schema),
+        )
+    return outputs
+
+
 def build_outputs(long_rows: pl.DataFrame, start_date: date, end_date: date) -> dict[str, dict[str, Any]]:
     outputs: dict[str, dict[str, Any]] = {}
     outputs.update(build_us_external_outputs(long_rows, start_date, end_date))
     outputs.update(build_europe_external_outputs(long_rows, start_date, end_date))
     outputs.update(build_domestic_padd_outputs(long_rows, start_date, end_date))
+    outputs.update(build_padd1_import_guide_outputs(long_rows, start_date, end_date))
     return outputs

@@ -39,3 +39,26 @@ domestic_padd:
     - origin padds
     - destination padds
     - products
+
+padd1_import_guides:
+  commodities:
+    - diesel
+  splits:
+    - origin countries
+    - origin trading regions
+    - origin padds
+    - destination padds
+    - products
+  regions:
+    padd1ab:
+      label: PADD 1A/B imports by origin country
+      to_zones:
+        - United States
+      with_intra_country: false
+      route_group: padd1ab_imports_by_origin
+    padd1c:
+      label: PADD 1C imports by origin country with intracountry
+      to_zones:
+        - United States
+      with_intra_country: true
+      route_group: padd1c_imports_by_origin

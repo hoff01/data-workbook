@@ -1,5 +1,4 @@
 period_month,padd1_distillate_product_supplied_kbd,northeast_share,southeast_share,estimated_padd_1ab_kbd,estimated_padd_1c_kbd,share_source
-2024-10-01,1239,0.488,0.512,604.59,634.41,forward_3yr_same_month_average_adjusted
 2024-11-01,1088,0.5247,0.4753,570.84,517.16,forward_3yr_same_month_average_adjusted
 2024-12-01,1270,0.5704,0.4296,724.46,545.54,forward_3yr_same_month_average_adjusted
 2025-01-01,1477,0.5862,0.4138,865.85,611.15,forward_3yr_same_month_average_adjusted
@@ -17,3 +16,4 @@ period_month,padd1_distillate_product_supplied_kbd,northeast_share,southeast_sha
 2026-01-01,1518,0.5862,0.4138,889.89,628.11,forward_3yr_same_month_average_adjusted
 2026-02-01,1715,0.5708,0.4292,979,736,forward_3yr_same_month_average_adjusted
 2026-03-01,1257,0.5272,0.4728,662.71,594.29,forward_3yr_same_month_average_adjusted
+2026-04-01,1231,0.5019,0.4981,617.88,613.12,forward_3yr_same_month_average_adjusted

@@ -1,4 +1,6 @@
-$env:KPLER_EMAIL = ""
+$env:KPLER_USERNAME = ""
+# $env:KPLER_EMAIL is also accepted if that is how your Kpler login is named.
+# $env:KPLER_EMAIL = ""
 $env:KPLER_PASSWORD = ""
 
 # Dynamic date controls.
@@ -12,3 +14,4 @@ $env:KPLER_CONCURRENCY = "2"
 $env:KPLER_RETRY_COUNT = "3"
 $env:KPLER_RETRY_BACKOFF_SECONDS = "10"
 $env:KPLER_VERIFY_TLS = "true"
+$env:KPLER_USER_AGENT = "US-Balances-Kpler-Pull/1.0"

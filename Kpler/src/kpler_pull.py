@@ -20,8 +20,26 @@ from kpler_transform import LONG_COLUMNS, build_outputs, kpler_content_to_long
 from kpler_validate import validate_outputs
 
 
-def list_param(values: list[str] | None) -> str | None:
-    return ",".join(values) if values else None
+SPLIT_PARAM_VALUES = {
+    "destination countries": "Destination Countries",
+    "destination padds": "Destination Padds",
+    "destination trading regions": "Destination Trading Regions",
+    "origin countries": "Origin Countries",
+    "origin padds": "Origin Padds",
+    "origin trading regions": "Origin Trading Regions",
+    "products": "Products",
+    "total": "Total",
+}
+
+
+def list_param(values: list[str] | None) -> list[str] | None:
+    return list(values) if values else None
+
+
+def split_param(values: list[str] | None) -> list[str] | None:
+    if not values:
+        return None
+    return [SPLIT_PARAM_VALUES.get(item.lower(), item) for item in values]
 
 
 def bool_param(value: bool | None) -> str | None:
@@ -269,7 +287,7 @@ def build_eia_fallback_long(specs: list[PullSpec], start_date: date, end_date: d
 def spec_to_kpler_params(spec: PullSpec, snapshot_date=None) -> dict[str, Any]:
     return {
         "flowDirection": spec.flow_direction,
-        "split": list_param([item.lower() for item in spec.split]),
+        "split": split_param(spec.split),
         "granularity": spec.granularity,
         "startDate": spec.start_date.isoformat(),
         "endDate": spec.end_date.isoformat(),

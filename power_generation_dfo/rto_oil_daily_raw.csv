@@ -5208,7 +5208,7 @@ OIL,2026-05-19,NE,New England,Central,Central,Petroleum,4232,megawatthours
 OIL,2026-05-20,MIDA,Mid-Atlantic,Central,Central,Petroleum,28539,megawatthours
 OIL,2026-05-20,NE,New England,Central,Central,Petroleum,1395,megawatthours
 OIL,2026-05-21,MIDA,Mid-Atlantic,Central,Central,Petroleum,16731,megawatthours
-OIL,2026-05-21,NE,New England,Central,Central,Petroleum,359,megawatthours
+OIL,2026-05-21,NE,New England,Central,Central,Petroleum,374,megawatthours
 OIL,2026-05-22,MIDA,Mid-Atlantic,Central,Central,Petroleum,11703,megawatthours
 OIL,2026-05-22,NE,New England,Central,Central,Petroleum,313,megawatthours
 OIL,2026-05-23,MIDA,Mid-Atlantic,Central,Central,Petroleum,8936,megawatthours
@@ -5216,8 +5216,67 @@ OIL,2026-05-23,NE,New England,Central,Central,Petroleum,2075,megawatthours
 OIL,2026-05-24,MIDA,Mid-Atlantic,Central,Central,Petroleum,13418,megawatthours
 OIL,2026-05-25,MIDA,Mid-Atlantic,Central,Central,Petroleum,13027,megawatthours
 OIL,2026-05-26,MIDA,Mid-Atlantic,Central,Central,Petroleum,14512,megawatthours
-OIL,2026-05-26,NE,New England,Central,Central,Petroleum,168,megawatthours
+OIL,2026-05-26,NE,New England,Central,Central,Petroleum,154,megawatthours
 OIL,2026-05-27,MIDA,Mid-Atlantic,Central,Central,Petroleum,20382,megawatthours
+OIL,2026-05-27,NE,New England,Central,Central,Petroleum,150,megawatthours
 OIL,2026-05-28,MIDA,Mid-Atlantic,Central,Central,Petroleum,12829,megawatthours
+OIL,2026-05-28,NE,New England,Central,Central,Petroleum,2476,megawatthours
 OIL,2026-05-29,MIDA,Mid-Atlantic,Central,Central,Petroleum,9162,megawatthours
-OIL,2026-05-30,MIDA,Mid-Atlantic,Central,Central,Petroleum,7716,megawatthours
+OIL,2026-05-30,MIDA,Mid-Atlantic,Central,Central,Petroleum,7564,megawatthours
+OIL,2026-05-31,MIDA,Mid-Atlantic,Central,Central,Petroleum,10305,megawatthours
+OIL,2026-06-01,MIDA,Mid-Atlantic,Central,Central,Petroleum,11211,megawatthours
+OIL,2026-06-02,MIDA,Mid-Atlantic,Central,Central,Petroleum,11211,megawatthours
+OIL,2026-06-03,MIDA,Mid-Atlantic,Central,Central,Petroleum,11211,megawatthours
+OIL,2026-06-03,NE,New England,Central,Central,Petroleum,213,megawatthours
+OIL,2026-06-04,MIDA,Mid-Atlantic,Central,Central,Petroleum,11211,megawatthours
+OIL,2026-06-04,NE,New England,Central,Central,Petroleum,975,megawatthours
+OIL,2026-06-05,MIDA,Mid-Atlantic,Central,Central,Petroleum,11211,megawatthours
+OIL,2026-06-05,NE,New England,Central,Central,Petroleum,987,megawatthours
+OIL,2026-06-06,MIDA,Mid-Atlantic,Central,Central,Petroleum,11211,megawatthours
+OIL,2026-06-07,MIDA,Mid-Atlantic,Central,Central,Petroleum,11211,megawatthours
+OIL,2026-06-08,MIDA,Mid-Atlantic,Central,Central,Petroleum,11215,megawatthours
+OIL,2026-06-08,NE,New England,Central,Central,Petroleum,175,megawatthours
+OIL,2026-06-09,MIDA,Mid-Atlantic,Central,Central,Petroleum,14724,megawatthours
+OIL,2026-06-09,NE,New England,Central,Central,Petroleum,931,megawatthours
+OIL,2026-06-10,MIDA,Mid-Atlantic,Central,Central,Petroleum,18204,megawatthours
+OIL,2026-06-10,NE,New England,Central,Central,Petroleum,372,megawatthours
+OIL,2026-06-11,MIDA,Mid-Atlantic,Central,Central,Petroleum,35455,megawatthours
+OIL,2026-06-11,NE,New England,Central,Central,Petroleum,7027,megawatthours
+OIL,2026-06-12,MIDA,Mid-Atlantic,Central,Central,Petroleum,42118,megawatthours
+OIL,2026-06-12,NE,New England,Central,Central,Petroleum,4100,megawatthours
+OIL,2026-06-13,MIDA,Mid-Atlantic,Central,Central,Petroleum,15693,megawatthours
+OIL,2026-06-13,NE,New England,Central,Central,Petroleum,886,megawatthours
+OIL,2026-06-14,MIDA,Mid-Atlantic,Central,Central,Petroleum,20467,megawatthours
+OIL,2026-06-14,NE,New England,Central,Central,Petroleum,866,megawatthours
+OIL,2026-06-15,MIDA,Mid-Atlantic,Central,Central,Petroleum,10895,megawatthours
+OIL,2026-06-15,NE,New England,Central,Central,Petroleum,643,megawatthours
+OIL,2026-06-16,MIDA,Mid-Atlantic,Central,Central,Petroleum,7224,megawatthours
+OIL,2026-06-16,NE,New England,Central,Central,Petroleum,594,megawatthours
+OIL,2026-06-17,MIDA,Mid-Atlantic,Central,Central,Petroleum,12789,megawatthours
+OIL,2026-06-17,NE,New England,Central,Central,Petroleum,231,megawatthours
+OIL,2026-06-18,MIDA,Mid-Atlantic,Central,Central,Petroleum,20263,megawatthours
+OIL,2026-06-18,NE,New England,Central,Central,Petroleum,180,megawatthours
+OIL,2026-06-19,MIDA,Mid-Atlantic,Central,Central,Petroleum,8445,megawatthours
+OIL,2026-06-19,NE,New England,Central,Central,Petroleum,153,megawatthours
+OIL,2026-06-20,MIDA,Mid-Atlantic,Central,Central,Petroleum,7893,megawatthours
+OIL,2026-06-21,MIDA,Mid-Atlantic,Central,Central,Petroleum,9768,megawatthours
+OIL,2026-06-22,MIDA,Mid-Atlantic,Central,Central,Petroleum,16829,megawatthours
+OIL,2026-06-23,MIDA,Mid-Atlantic,Central,Central,Petroleum,7482,megawatthours
+OIL,2026-06-23,NE,New England,Central,Central,Petroleum,266,megawatthours
+OIL,2026-06-24,MIDA,Mid-Atlantic,Central,Central,Petroleum,9348,megawatthours
+OIL,2026-06-24,NE,New England,Central,Central,Petroleum,23,megawatthours
+OIL,2026-06-25,MIDA,Mid-Atlantic,Central,Central,Petroleum,11460,megawatthours
+OIL,2026-06-25,NE,New England,Central,Central,Petroleum,943,megawatthours
+OIL,2026-06-26,MIDA,Mid-Atlantic,Central,Central,Petroleum,14536,megawatthours
+OIL,2026-06-27,MIDA,Mid-Atlantic,Central,Central,Petroleum,7329,megawatthours
+OIL,2026-06-28,MIDA,Mid-Atlantic,Central,Central,Petroleum,10736,megawatthours
+OIL,2026-06-29,MIDA,Mid-Atlantic,Central,Central,Petroleum,27569,megawatthours
+OIL,2026-06-29,NE,New England,Central,Central,Petroleum,497,megawatthours
+OIL,2026-06-30,MIDA,Mid-Atlantic,Central,Central,Petroleum,55450,megawatthours
+OIL,2026-06-30,NE,New England,Central,Central,Petroleum,1462,megawatthours
+OIL,2026-07-01,MIDA,Mid-Atlantic,Central,Central,Petroleum,53813,megawatthours
+OIL,2026-07-01,NE,New England,Central,Central,Petroleum,8325,megawatthours
+OIL,2026-07-02,MIDA,Mid-Atlantic,Central,Central,Petroleum,70386,megawatthours
+OIL,2026-07-02,NE,New England,Central,Central,Petroleum,18706,megawatthours
+OIL,2026-07-03,MIDA,Mid-Atlantic,Central,Central,Petroleum,71651,megawatthours
+OIL,2026-07-03,NE,New England,Central,Central,Petroleum,17847,megawatthours

@@ -1,4 +1,1443 @@
 fueltype,period,respondent,respondent-name,type-name,value,value-units
+OIL,2026-07-04T03,MIDA,Mid-Atlantic,Petroleum,3751,megawatthours
+OIL,2026-07-04T03,NE,New England,Petroleum,959,megawatthours
+OIL,2026-07-04T02,MIDA,Mid-Atlantic,Petroleum,4607,megawatthours
+OIL,2026-07-04T02,NE,New England,Petroleum,1284,megawatthours
+OIL,2026-07-04T01,MIDA,Mid-Atlantic,Petroleum,5356,megawatthours
+OIL,2026-07-04T01,NE,New England,Petroleum,1737,megawatthours
+OIL,2026-07-04T00,MIDA,Mid-Atlantic,Petroleum,6519,megawatthours
+OIL,2026-07-04T00,NE,New England,Petroleum,2013,megawatthours
+OIL,2026-07-03T23,MIDA,Mid-Atlantic,Petroleum,6243,megawatthours
+OIL,2026-07-03T23,NE,New England,Petroleum,1471,megawatthours
+OIL,2026-07-03T22,MIDA,Mid-Atlantic,Petroleum,5261,megawatthours
+OIL,2026-07-03T22,NE,New England,Petroleum,1126,megawatthours
+OIL,2026-07-03T21,MIDA,Mid-Atlantic,Petroleum,4514,megawatthours
+OIL,2026-07-03T21,NE,New England,Petroleum,1016,megawatthours
+OIL,2026-07-03T20,MIDA,Mid-Atlantic,Petroleum,4528,megawatthours
+OIL,2026-07-03T20,NE,New England,Petroleum,995,megawatthours
+OIL,2026-07-03T19,MIDA,Mid-Atlantic,Petroleum,4159,megawatthours
+OIL,2026-07-03T19,NE,New England,Petroleum,933,megawatthours
+OIL,2026-07-03T18,MIDA,Mid-Atlantic,Petroleum,3257,megawatthours
+OIL,2026-07-03T18,NE,New England,Petroleum,711,megawatthours
+OIL,2026-07-03T17,MIDA,Mid-Atlantic,Petroleum,2611,megawatthours
+OIL,2026-07-03T17,NE,New England,Petroleum,476,megawatthours
+OIL,2026-07-03T16,MIDA,Mid-Atlantic,Petroleum,2258,megawatthours
+OIL,2026-07-03T16,NE,New England,Petroleum,438,megawatthours
+OIL,2026-07-03T15,MIDA,Mid-Atlantic,Petroleum,1299,megawatthours
+OIL,2026-07-03T15,NE,New England,Petroleum,373,megawatthours
+OIL,2026-07-03T14,MIDA,Mid-Atlantic,Petroleum,1120,megawatthours
+OIL,2026-07-03T14,NE,New England,Petroleum,350,megawatthours
+OIL,2026-07-03T13,MIDA,Mid-Atlantic,Petroleum,1111,megawatthours
+OIL,2026-07-03T13,NE,New England,Petroleum,349,megawatthours
+OIL,2026-07-03T12,MIDA,Mid-Atlantic,Petroleum,1042,megawatthours
+OIL,2026-07-03T12,NE,New England,Petroleum,350,megawatthours
+OIL,2026-07-03T11,MIDA,Mid-Atlantic,Petroleum,1033,megawatthours
+OIL,2026-07-03T11,NE,New England,Petroleum,349,megawatthours
+OIL,2026-07-03T10,MIDA,Mid-Atlantic,Petroleum,1089,megawatthours
+OIL,2026-07-03T10,NE,New England,Petroleum,346,megawatthours
+OIL,2026-07-03T09,MIDA,Mid-Atlantic,Petroleum,1121,megawatthours
+OIL,2026-07-03T09,NE,New England,Petroleum,346,megawatthours
+OIL,2026-07-03T08,MIDA,Mid-Atlantic,Petroleum,1118,megawatthours
+OIL,2026-07-03T08,NE,New England,Petroleum,346,megawatthours
+OIL,2026-07-03T07,MIDA,Mid-Atlantic,Petroleum,1144,megawatthours
+OIL,2026-07-03T07,NE,New England,Petroleum,359,megawatthours
+OIL,2026-07-03T06,MIDA,Mid-Atlantic,Petroleum,1602,megawatthours
+OIL,2026-07-03T06,NE,New England,Petroleum,396,megawatthours
+OIL,2026-07-03T05,MIDA,Mid-Atlantic,Petroleum,2728,megawatthours
+OIL,2026-07-03T05,NE,New England,Petroleum,435,megawatthours
+OIL,2026-07-03T04,MIDA,Mid-Atlantic,Petroleum,2542,megawatthours
+OIL,2026-07-03T04,NE,New England,Petroleum,483,megawatthours
+OIL,2026-07-03T03,MIDA,Mid-Atlantic,Petroleum,3829,megawatthours
+OIL,2026-07-03T03,NE,New England,Petroleum,603,megawatthours
+OIL,2026-07-03T02,MIDA,Mid-Atlantic,Petroleum,4826,megawatthours
+OIL,2026-07-03T02,NE,New England,Petroleum,946,megawatthours
+OIL,2026-07-03T01,MIDA,Mid-Atlantic,Petroleum,6351,megawatthours
+OIL,2026-07-03T01,NE,New England,Petroleum,1359,megawatthours
+OIL,2026-07-03T00,MIDA,Mid-Atlantic,Petroleum,6425,megawatthours
+OIL,2026-07-03T00,NE,New England,Petroleum,2280,megawatthours
+OIL,2026-07-02T23,MIDA,Mid-Atlantic,Petroleum,6306,megawatthours
+OIL,2026-07-02T23,NE,New England,Petroleum,2436,megawatthours
+OIL,2026-07-02T22,MIDA,Mid-Atlantic,Petroleum,6194,megawatthours
+OIL,2026-07-02T22,NE,New England,Petroleum,1943,megawatthours
+OIL,2026-07-02T21,MIDA,Mid-Atlantic,Petroleum,5860,megawatthours
+OIL,2026-07-02T21,NE,New England,Petroleum,1179,megawatthours
+OIL,2026-07-02T20,MIDA,Mid-Atlantic,Petroleum,5109,megawatthours
+OIL,2026-07-02T20,NE,New England,Petroleum,865,megawatthours
+OIL,2026-07-02T19,MIDA,Mid-Atlantic,Petroleum,4538,megawatthours
+OIL,2026-07-02T19,NE,New England,Petroleum,734,megawatthours
+OIL,2026-07-02T18,MIDA,Mid-Atlantic,Petroleum,3968,megawatthours
+OIL,2026-07-02T18,NE,New England,Petroleum,631,megawatthours
+OIL,2026-07-02T17,MIDA,Mid-Atlantic,Petroleum,2778,megawatthours
+OIL,2026-07-02T17,NE,New England,Petroleum,548,megawatthours
+OIL,2026-07-02T16,MIDA,Mid-Atlantic,Petroleum,1574,megawatthours
+OIL,2026-07-02T16,NE,New England,Petroleum,462,megawatthours
+OIL,2026-07-02T15,MIDA,Mid-Atlantic,Petroleum,1149,megawatthours
+OIL,2026-07-02T15,NE,New England,Petroleum,463,megawatthours
+OIL,2026-07-02T14,MIDA,Mid-Atlantic,Petroleum,772,megawatthours
+OIL,2026-07-02T14,NE,New England,Petroleum,419,megawatthours
+OIL,2026-07-02T13,MIDA,Mid-Atlantic,Petroleum,677,megawatthours
+OIL,2026-07-02T13,NE,New England,Petroleum,415,megawatthours
+OIL,2026-07-02T12,MIDA,Mid-Atlantic,Petroleum,679,megawatthours
+OIL,2026-07-02T12,NE,New England,Petroleum,394,megawatthours
+OIL,2026-07-02T11,MIDA,Mid-Atlantic,Petroleum,639,megawatthours
+OIL,2026-07-02T11,NE,New England,Petroleum,363,megawatthours
+OIL,2026-07-02T10,MIDA,Mid-Atlantic,Petroleum,642,megawatthours
+OIL,2026-07-02T10,NE,New England,Petroleum,350,megawatthours
+OIL,2026-07-02T09,MIDA,Mid-Atlantic,Petroleum,643,megawatthours
+OIL,2026-07-02T09,NE,New England,Petroleum,351,megawatthours
+OIL,2026-07-02T08,MIDA,Mid-Atlantic,Petroleum,642,megawatthours
+OIL,2026-07-02T08,NE,New England,Petroleum,349,megawatthours
+OIL,2026-07-02T07,MIDA,Mid-Atlantic,Petroleum,665,megawatthours
+OIL,2026-07-02T07,NE,New England,Petroleum,349,megawatthours
+OIL,2026-07-02T06,MIDA,Mid-Atlantic,Petroleum,850,megawatthours
+OIL,2026-07-02T06,NE,New England,Petroleum,349,megawatthours
+OIL,2026-07-02T05,MIDA,Mid-Atlantic,Petroleum,1460,megawatthours
+OIL,2026-07-02T05,NE,New England,Petroleum,349,megawatthours
+OIL,2026-07-02T04,MIDA,Mid-Atlantic,Petroleum,2419,megawatthours
+OIL,2026-07-02T04,NE,New England,Petroleum,353,megawatthours
+OIL,2026-07-02T03,MIDA,Mid-Atlantic,Petroleum,3751,megawatthours
+OIL,2026-07-02T03,NE,New England,Petroleum,450,megawatthours
+OIL,2026-07-02T02,MIDA,Mid-Atlantic,Petroleum,5538,megawatthours
+OIL,2026-07-02T02,NE,New England,Petroleum,672,megawatthours
+OIL,2026-07-02T01,MIDA,Mid-Atlantic,Petroleum,5800,megawatthours
+OIL,2026-07-02T01,NE,New England,Petroleum,946,megawatthours
+OIL,2026-07-02T00,MIDA,Mid-Atlantic,Petroleum,5278,megawatthours
+OIL,2026-07-02T00,NE,New England,Petroleum,1230,megawatthours
+OIL,2026-07-01T23,MIDA,Mid-Atlantic,Petroleum,4517,megawatthours
+OIL,2026-07-01T23,NE,New England,Petroleum,1196,megawatthours
+OIL,2026-07-01T22,MIDA,Mid-Atlantic,Petroleum,3431,megawatthours
+OIL,2026-07-01T22,NE,New England,Petroleum,806,megawatthours
+OIL,2026-07-01T21,MIDA,Mid-Atlantic,Petroleum,3263,megawatthours
+OIL,2026-07-01T21,NE,New England,Petroleum,428,megawatthours
+OIL,2026-07-01T20,MIDA,Mid-Atlantic,Petroleum,2946,megawatthours
+OIL,2026-07-01T20,NE,New England,Petroleum,348,megawatthours
+OIL,2026-07-01T19,MIDA,Mid-Atlantic,Petroleum,2740,megawatthours
+OIL,2026-07-01T19,NE,New England,Petroleum,351,megawatthours
+OIL,2026-07-01T18,MIDA,Mid-Atlantic,Petroleum,2160,megawatthours
+OIL,2026-07-01T18,NE,New England,Petroleum,241,megawatthours
+OIL,2026-07-01T17,MIDA,Mid-Atlantic,Petroleum,1930,megawatthours
+OIL,2026-07-01T17,NE,New England,Petroleum,162,megawatthours
+OIL,2026-07-01T16,MIDA,Mid-Atlantic,Petroleum,1928,megawatthours
+OIL,2026-07-01T16,NE,New England,Petroleum,159,megawatthours
+OIL,2026-07-01T15,MIDA,Mid-Atlantic,Petroleum,1155,megawatthours
+OIL,2026-07-01T15,NE,New England,Petroleum,146,megawatthours
+OIL,2026-07-01T14,MIDA,Mid-Atlantic,Petroleum,742,megawatthours
+OIL,2026-07-01T14,NE,New England,Petroleum,140,megawatthours
+OIL,2026-07-01T13,MIDA,Mid-Atlantic,Petroleum,721,megawatthours
+OIL,2026-07-01T13,NE,New England,Petroleum,121,megawatthours
+OIL,2026-07-01T12,MIDA,Mid-Atlantic,Petroleum,554,megawatthours
+OIL,2026-07-01T12,NE,New England,Petroleum,103,megawatthours
+OIL,2026-07-01T11,MIDA,Mid-Atlantic,Petroleum,557,megawatthours
+OIL,2026-07-01T11,NE,New England,Petroleum,73,megawatthours
+OIL,2026-07-01T10,MIDA,Mid-Atlantic,Petroleum,559,megawatthours
+OIL,2026-07-01T10,NE,New England,Petroleum,39,megawatthours
+OIL,2026-07-01T09,MIDA,Mid-Atlantic,Petroleum,559,megawatthours
+OIL,2026-07-01T09,NE,New England,Petroleum,12,megawatthours
+OIL,2026-07-01T08,MIDA,Mid-Atlantic,Petroleum,557,megawatthours
+OIL,2026-07-01T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-07-01T07,MIDA,Mid-Atlantic,Petroleum,556,megawatthours
+OIL,2026-07-01T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-07-01T06,MIDA,Mid-Atlantic,Petroleum,692,megawatthours
+OIL,2026-07-01T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-07-01T05,MIDA,Mid-Atlantic,Petroleum,1082,megawatthours
+OIL,2026-07-01T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-07-01T04,MIDA,Mid-Atlantic,Petroleum,3768,megawatthours
+OIL,2026-07-01T04,NE,New England,Petroleum,39,megawatthours
+OIL,2026-07-01T03,MIDA,Mid-Atlantic,Petroleum,4411,megawatthours
+OIL,2026-07-01T03,NE,New England,Petroleum,39,megawatthours
+OIL,2026-07-01T02,MIDA,Mid-Atlantic,Petroleum,4998,megawatthours
+OIL,2026-07-01T02,NE,New England,Petroleum,39,megawatthours
+OIL,2026-07-01T01,MIDA,Mid-Atlantic,Petroleum,4520,megawatthours
+OIL,2026-07-01T01,NE,New England,Petroleum,203,megawatthours
+OIL,2026-07-01T00,MIDA,Mid-Atlantic,Petroleum,3697,megawatthours
+OIL,2026-07-01T00,NE,New England,Petroleum,231,megawatthours
+OIL,2026-06-30T23,MIDA,Mid-Atlantic,Petroleum,3387,megawatthours
+OIL,2026-06-30T23,NE,New England,Petroleum,231,megawatthours
+OIL,2026-06-30T22,MIDA,Mid-Atlantic,Petroleum,3002,megawatthours
+OIL,2026-06-30T22,NE,New England,Petroleum,234,megawatthours
+OIL,2026-06-30T21,MIDA,Mid-Atlantic,Petroleum,3252,megawatthours
+OIL,2026-06-30T21,NE,New England,Petroleum,215,megawatthours
+OIL,2026-06-30T20,MIDA,Mid-Atlantic,Petroleum,3401,megawatthours
+OIL,2026-06-30T20,NE,New England,Petroleum,98,megawatthours
+OIL,2026-06-30T19,MIDA,Mid-Atlantic,Petroleum,3337,megawatthours
+OIL,2026-06-30T19,NE,New England,Petroleum,31,megawatthours
+OIL,2026-06-30T18,MIDA,Mid-Atlantic,Petroleum,3184,megawatthours
+OIL,2026-06-30T18,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-30T17,MIDA,Mid-Atlantic,Petroleum,3059,megawatthours
+OIL,2026-06-30T17,NE,New England,Petroleum,20,megawatthours
+OIL,2026-06-30T16,MIDA,Mid-Atlantic,Petroleum,3060,megawatthours
+OIL,2026-06-30T16,NE,New England,Petroleum,19,megawatthours
+OIL,2026-06-30T15,MIDA,Mid-Atlantic,Petroleum,2225,megawatthours
+OIL,2026-06-30T15,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-30T14,MIDA,Mid-Atlantic,Petroleum,1277,megawatthours
+OIL,2026-06-30T14,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-30T13,MIDA,Mid-Atlantic,Petroleum,863,megawatthours
+OIL,2026-06-30T13,NE,New England,Petroleum,7,megawatthours
+OIL,2026-06-30T12,MIDA,Mid-Atlantic,Petroleum,443,megawatthours
+OIL,2026-06-30T12,NE,New England,Petroleum,7,megawatthours
+OIL,2026-06-30T11,MIDA,Mid-Atlantic,Petroleum,408,megawatthours
+OIL,2026-06-30T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-30T10,MIDA,Mid-Atlantic,Petroleum,409,megawatthours
+OIL,2026-06-30T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-30T09,MIDA,Mid-Atlantic,Petroleum,409,megawatthours
+OIL,2026-06-30T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-30T08,MIDA,Mid-Atlantic,Petroleum,408,megawatthours
+OIL,2026-06-30T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-30T07,MIDA,Mid-Atlantic,Petroleum,427,megawatthours
+OIL,2026-06-30T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-30T06,MIDA,Mid-Atlantic,Petroleum,423,megawatthours
+OIL,2026-06-30T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-30T05,MIDA,Mid-Atlantic,Petroleum,910,megawatthours
+OIL,2026-06-30T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-30T04,MIDA,Mid-Atlantic,Petroleum,704,megawatthours
+OIL,2026-06-30T04,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-30T03,MIDA,Mid-Atlantic,Petroleum,2670,megawatthours
+OIL,2026-06-30T03,NE,New England,Petroleum,6,megawatthours
+OIL,2026-06-30T02,MIDA,Mid-Atlantic,Petroleum,3325,megawatthours
+OIL,2026-06-30T02,NE,New England,Petroleum,6,megawatthours
+OIL,2026-06-30T01,MIDA,Mid-Atlantic,Petroleum,2725,megawatthours
+OIL,2026-06-30T01,NE,New England,Petroleum,6,megawatthours
+OIL,2026-06-30T00,MIDA,Mid-Atlantic,Petroleum,1919,megawatthours
+OIL,2026-06-30T00,NE,New England,Petroleum,63,megawatthours
+OIL,2026-06-29T23,MIDA,Mid-Atlantic,Petroleum,1763,megawatthours
+OIL,2026-06-29T23,NE,New England,Petroleum,63,megawatthours
+OIL,2026-06-29T22,MIDA,Mid-Atlantic,Petroleum,1677,megawatthours
+OIL,2026-06-29T22,NE,New England,Petroleum,34,megawatthours
+OIL,2026-06-29T21,MIDA,Mid-Atlantic,Petroleum,1675,megawatthours
+OIL,2026-06-29T21,NE,New England,Petroleum,5,megawatthours
+OIL,2026-06-29T20,MIDA,Mid-Atlantic,Petroleum,1682,megawatthours
+OIL,2026-06-29T20,NE,New England,Petroleum,16,megawatthours
+OIL,2026-06-29T19,MIDA,Mid-Atlantic,Petroleum,1673,megawatthours
+OIL,2026-06-29T19,NE,New England,Petroleum,21,megawatthours
+OIL,2026-06-29T18,MIDA,Mid-Atlantic,Petroleum,1559,megawatthours
+OIL,2026-06-29T18,NE,New England,Petroleum,47,megawatthours
+OIL,2026-06-29T17,MIDA,Mid-Atlantic,Petroleum,1482,megawatthours
+OIL,2026-06-29T17,NE,New England,Petroleum,37,megawatthours
+OIL,2026-06-29T16,MIDA,Mid-Atlantic,Petroleum,1240,megawatthours
+OIL,2026-06-29T16,NE,New England,Petroleum,104,megawatthours
+OIL,2026-06-29T15,MIDA,Mid-Atlantic,Petroleum,338,megawatthours
+OIL,2026-06-29T15,NE,New England,Petroleum,89,megawatthours
+OIL,2026-06-29T14,MIDA,Mid-Atlantic,Petroleum,326,megawatthours
+OIL,2026-06-29T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T13,MIDA,Mid-Atlantic,Petroleum,310,megawatthours
+OIL,2026-06-29T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T12,MIDA,Mid-Atlantic,Petroleum,237,megawatthours
+OIL,2026-06-29T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T11,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
+OIL,2026-06-29T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T10,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-29T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T09,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-29T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T08,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-29T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T07,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-29T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T06,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-29T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T05,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-29T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-29T04,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-29T03,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-29T02,MIDA,Mid-Atlantic,Petroleum,807,megawatthours
+OIL,2026-06-29T01,MIDA,Mid-Atlantic,Petroleum,949,megawatthours
+OIL,2026-06-29T00,MIDA,Mid-Atlantic,Petroleum,981,megawatthours
+OIL,2026-06-28T23,MIDA,Mid-Atlantic,Petroleum,936,megawatthours
+OIL,2026-06-28T22,MIDA,Mid-Atlantic,Petroleum,841,megawatthours
+OIL,2026-06-28T21,MIDA,Mid-Atlantic,Petroleum,802,megawatthours
+OIL,2026-06-28T20,MIDA,Mid-Atlantic,Petroleum,972,megawatthours
+OIL,2026-06-28T19,MIDA,Mid-Atlantic,Petroleum,819,megawatthours
+OIL,2026-06-28T18,MIDA,Mid-Atlantic,Petroleum,285,megawatthours
+OIL,2026-06-28T17,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
+OIL,2026-06-28T16,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
+OIL,2026-06-28T15,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-28T14,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-28T13,MIDA,Mid-Atlantic,Petroleum,240,megawatthours
+OIL,2026-06-28T12,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-28T11,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
+OIL,2026-06-28T10,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-28T09,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-28T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-28T07,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-06-28T06,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-28T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-28T04,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-28T03,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-28T02,MIDA,Mid-Atlantic,Petroleum,508,megawatthours
+OIL,2026-06-28T01,MIDA,Mid-Atlantic,Petroleum,529,megawatthours
+OIL,2026-06-28T00,MIDA,Mid-Atlantic,Petroleum,521,megawatthours
+OIL,2026-06-27T23,MIDA,Mid-Atlantic,Petroleum,506,megawatthours
+OIL,2026-06-27T22,MIDA,Mid-Atlantic,Petroleum,523,megawatthours
+OIL,2026-06-27T21,MIDA,Mid-Atlantic,Petroleum,520,megawatthours
+OIL,2026-06-27T20,MIDA,Mid-Atlantic,Petroleum,451,megawatthours
+OIL,2026-06-27T19,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-27T18,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-06-27T17,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-27T16,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-27T15,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
+OIL,2026-06-27T14,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
+OIL,2026-06-27T13,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-27T12,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-27T11,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
+OIL,2026-06-27T10,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-27T09,MIDA,Mid-Atlantic,Petroleum,234,megawatthours
+OIL,2026-06-27T08,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-27T07,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
+OIL,2026-06-27T06,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-06-27T05,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-27T04,MIDA,Mid-Atlantic,Petroleum,278,megawatthours
+OIL,2026-06-27T04,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-27T03,MIDA,Mid-Atlantic,Petroleum,758,megawatthours
+OIL,2026-06-27T03,NE,New England,Petroleum,52,megawatthours
+OIL,2026-06-27T02,MIDA,Mid-Atlantic,Petroleum,1026,megawatthours
+OIL,2026-06-27T02,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-27T01,MIDA,Mid-Atlantic,Petroleum,1074,megawatthours
+OIL,2026-06-27T01,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-27T00,MIDA,Mid-Atlantic,Petroleum,1057,megawatthours
+OIL,2026-06-27T00,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-26T23,MIDA,Mid-Atlantic,Petroleum,1145,megawatthours
+OIL,2026-06-26T23,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-26T22,MIDA,Mid-Atlantic,Petroleum,1285,megawatthours
+OIL,2026-06-26T22,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-26T21,MIDA,Mid-Atlantic,Petroleum,1346,megawatthours
+OIL,2026-06-26T21,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-26T20,MIDA,Mid-Atlantic,Petroleum,903,megawatthours
+OIL,2026-06-26T20,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-26T19,MIDA,Mid-Atlantic,Petroleum,782,megawatthours
+OIL,2026-06-26T19,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-26T18,MIDA,Mid-Atlantic,Petroleum,938,megawatthours
+OIL,2026-06-26T18,NE,New England,Petroleum,85,megawatthours
+OIL,2026-06-26T17,MIDA,Mid-Atlantic,Petroleum,940,megawatthours
+OIL,2026-06-26T17,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-26T16,MIDA,Mid-Atlantic,Petroleum,544,megawatthours
+OIL,2026-06-26T16,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-26T15,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-26T15,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-26T14,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-26T14,NE,New England,Petroleum,59,megawatthours
+OIL,2026-06-26T13,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-26T13,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-26T12,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-26T12,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-26T11,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
+OIL,2026-06-26T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-26T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-26T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-26T09,MIDA,Mid-Atlantic,Petroleum,232,megawatthours
+OIL,2026-06-26T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-26T08,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-26T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-26T07,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-26T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-26T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-26T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-26T05,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-26T05,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-26T04,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-26T04,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-26T03,MIDA,Mid-Atlantic,Petroleum,685,megawatthours
+OIL,2026-06-26T03,NE,New England,Petroleum,52,megawatthours
+OIL,2026-06-26T02,MIDA,Mid-Atlantic,Petroleum,697,megawatthours
+OIL,2026-06-26T02,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-26T01,MIDA,Mid-Atlantic,Petroleum,847,megawatthours
+OIL,2026-06-26T01,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-26T00,MIDA,Mid-Atlantic,Petroleum,833,megawatthours
+OIL,2026-06-26T00,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-25T23,MIDA,Mid-Atlantic,Petroleum,765,megawatthours
+OIL,2026-06-25T23,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-25T22,MIDA,Mid-Atlantic,Petroleum,725,megawatthours
+OIL,2026-06-25T22,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-25T21,MIDA,Mid-Atlantic,Petroleum,797,megawatthours
+OIL,2026-06-25T21,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-25T20,MIDA,Mid-Atlantic,Petroleum,797,megawatthours
+OIL,2026-06-25T20,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-25T19,MIDA,Mid-Atlantic,Petroleum,522,megawatthours
+OIL,2026-06-25T19,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-25T18,MIDA,Mid-Atlantic,Petroleum,525,megawatthours
+OIL,2026-06-25T18,NE,New England,Petroleum,85,megawatthours
+OIL,2026-06-25T17,MIDA,Mid-Atlantic,Petroleum,445,megawatthours
+OIL,2026-06-25T17,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-25T16,MIDA,Mid-Atlantic,Petroleum,448,megawatthours
+OIL,2026-06-25T16,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-25T15,MIDA,Mid-Atlantic,Petroleum,395,megawatthours
+OIL,2026-06-25T15,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-25T14,MIDA,Mid-Atlantic,Petroleum,396,megawatthours
+OIL,2026-06-25T14,NE,New England,Petroleum,59,megawatthours
+OIL,2026-06-25T13,MIDA,Mid-Atlantic,Petroleum,401,megawatthours
+OIL,2026-06-25T13,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-25T12,MIDA,Mid-Atlantic,Petroleum,359,megawatthours
+OIL,2026-06-25T12,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-25T11,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
+OIL,2026-06-25T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-25T10,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-25T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-25T09,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-25T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-25T08,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-25T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-25T07,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
+OIL,2026-06-25T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-25T06,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-25T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-25T05,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-25T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-25T04,MIDA,Mid-Atlantic,Petroleum,265,megawatthours
+OIL,2026-06-25T04,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-25T03,MIDA,Mid-Atlantic,Petroleum,283,megawatthours
+OIL,2026-06-25T03,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-25T02,MIDA,Mid-Atlantic,Petroleum,636,megawatthours
+OIL,2026-06-25T02,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-25T01,MIDA,Mid-Atlantic,Petroleum,714,megawatthours
+OIL,2026-06-25T01,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-25T00,MIDA,Mid-Atlantic,Petroleum,817,megawatthours
+OIL,2026-06-25T00,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T23,MIDA,Mid-Atlantic,Petroleum,749,megawatthours
+OIL,2026-06-24T23,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T22,MIDA,Mid-Atlantic,Petroleum,680,megawatthours
+OIL,2026-06-24T22,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T21,MIDA,Mid-Atlantic,Petroleum,447,megawatthours
+OIL,2026-06-24T21,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T20,MIDA,Mid-Atlantic,Petroleum,286,megawatthours
+OIL,2026-06-24T20,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T19,MIDA,Mid-Atlantic,Petroleum,232,megawatthours
+OIL,2026-06-24T19,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T18,MIDA,Mid-Atlantic,Petroleum,300,megawatthours
+OIL,2026-06-24T18,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T17,MIDA,Mid-Atlantic,Petroleum,386,megawatthours
+OIL,2026-06-24T17,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T16,MIDA,Mid-Atlantic,Petroleum,390,megawatthours
+OIL,2026-06-24T16,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T15,MIDA,Mid-Atlantic,Petroleum,392,megawatthours
+OIL,2026-06-24T15,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T14,MIDA,Mid-Atlantic,Petroleum,393,megawatthours
+OIL,2026-06-24T14,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T13,MIDA,Mid-Atlantic,Petroleum,397,megawatthours
+OIL,2026-06-24T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-24T12,MIDA,Mid-Atlantic,Petroleum,402,megawatthours
+OIL,2026-06-24T12,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T11,MIDA,Mid-Atlantic,Petroleum,233,megawatthours
+OIL,2026-06-24T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-24T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-24T10,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T09,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-24T09,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T08,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
+OIL,2026-06-24T08,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T07,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-24T07,NE,New England,Petroleum,1,megawatthours
+OIL,2026-06-24T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-24T06,NE,New England,Petroleum,3,megawatthours
+OIL,2026-06-24T05,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-24T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-24T04,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-24T04,NE,New England,Petroleum,44,megawatthours
+OIL,2026-06-24T03,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-24T03,NE,New England,Petroleum,44,megawatthours
+OIL,2026-06-24T02,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
+OIL,2026-06-24T02,NE,New England,Petroleum,44,megawatthours
+OIL,2026-06-24T01,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
+OIL,2026-06-24T01,NE,New England,Petroleum,44,megawatthours
+OIL,2026-06-24T00,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
+OIL,2026-06-24T00,NE,New England,Petroleum,45,megawatthours
+OIL,2026-06-23T23,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
+OIL,2026-06-23T23,NE,New England,Petroleum,45,megawatthours
+OIL,2026-06-23T22,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
+OIL,2026-06-23T22,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T21,MIDA,Mid-Atlantic,Petroleum,320,megawatthours
+OIL,2026-06-23T21,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T20,MIDA,Mid-Atlantic,Petroleum,366,megawatthours
+OIL,2026-06-23T20,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T19,MIDA,Mid-Atlantic,Petroleum,369,megawatthours
+OIL,2026-06-23T19,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T18,MIDA,Mid-Atlantic,Petroleum,475,megawatthours
+OIL,2026-06-23T18,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T17,MIDA,Mid-Atlantic,Petroleum,478,megawatthours
+OIL,2026-06-23T17,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T16,MIDA,Mid-Atlantic,Petroleum,479,megawatthours
+OIL,2026-06-23T16,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T15,MIDA,Mid-Atlantic,Petroleum,480,megawatthours
+OIL,2026-06-23T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T14,MIDA,Mid-Atlantic,Petroleum,481,megawatthours
+OIL,2026-06-23T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T13,MIDA,Mid-Atlantic,Petroleum,482,megawatthours
+OIL,2026-06-23T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T12,MIDA,Mid-Atlantic,Petroleum,485,megawatthours
+OIL,2026-06-23T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T11,MIDA,Mid-Atlantic,Petroleum,235,megawatthours
+OIL,2026-06-23T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T10,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-06-23T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T09,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
+OIL,2026-06-23T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T08,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
+OIL,2026-06-23T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T07,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-23T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T06,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-23T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T05,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
+OIL,2026-06-23T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-23T04,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
+OIL,2026-06-23T03,MIDA,Mid-Atlantic,Petroleum,314,megawatthours
+OIL,2026-06-23T02,MIDA,Mid-Atlantic,Petroleum,1184,megawatthours
+OIL,2026-06-23T01,MIDA,Mid-Atlantic,Petroleum,1326,megawatthours
+OIL,2026-06-23T00,MIDA,Mid-Atlantic,Petroleum,1411,megawatthours
+OIL,2026-06-22T23,MIDA,Mid-Atlantic,Petroleum,1488,megawatthours
+OIL,2026-06-22T22,MIDA,Mid-Atlantic,Petroleum,1641,megawatthours
+OIL,2026-06-22T21,MIDA,Mid-Atlantic,Petroleum,1571,megawatthours
+OIL,2026-06-22T20,MIDA,Mid-Atlantic,Petroleum,1442,megawatthours
+OIL,2026-06-22T19,MIDA,Mid-Atlantic,Petroleum,1468,megawatthours
+OIL,2026-06-22T18,MIDA,Mid-Atlantic,Petroleum,1270,megawatthours
+OIL,2026-06-22T17,MIDA,Mid-Atlantic,Petroleum,749,megawatthours
+OIL,2026-06-22T16,MIDA,Mid-Atlantic,Petroleum,320,megawatthours
+OIL,2026-06-22T15,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-22T14,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-22T13,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-22T12,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-22T11,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-22T10,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-22T09,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
+OIL,2026-06-22T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-22T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-22T06,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-22T05,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-22T04,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-22T03,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-22T02,MIDA,Mid-Atlantic,Petroleum,784,megawatthours
+OIL,2026-06-22T01,MIDA,Mid-Atlantic,Petroleum,972,megawatthours
+OIL,2026-06-22T00,MIDA,Mid-Atlantic,Petroleum,980,megawatthours
+OIL,2026-06-21T23,MIDA,Mid-Atlantic,Petroleum,816,megawatthours
+OIL,2026-06-21T22,MIDA,Mid-Atlantic,Petroleum,781,megawatthours
+OIL,2026-06-21T21,MIDA,Mid-Atlantic,Petroleum,795,megawatthours
+OIL,2026-06-21T20,MIDA,Mid-Atlantic,Petroleum,824,megawatthours
+OIL,2026-06-21T19,MIDA,Mid-Atlantic,Petroleum,314,megawatthours
+OIL,2026-06-21T18,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
+OIL,2026-06-21T17,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
+OIL,2026-06-21T16,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
+OIL,2026-06-21T15,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-21T14,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-21T13,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-21T12,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-21T11,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-21T10,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-21T09,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-21T08,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-21T07,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-21T06,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-21T05,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
+OIL,2026-06-21T04,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
+OIL,2026-06-21T04,NE,New England,Petroleum,8,megawatthours
+OIL,2026-06-21T03,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
+OIL,2026-06-21T03,NE,New England,Petroleum,8,megawatthours
+OIL,2026-06-21T02,MIDA,Mid-Atlantic,Petroleum,601,megawatthours
+OIL,2026-06-21T02,NE,New England,Petroleum,8,megawatthours
+OIL,2026-06-21T01,MIDA,Mid-Atlantic,Petroleum,639,megawatthours
+OIL,2026-06-21T01,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-21T00,MIDA,Mid-Atlantic,Petroleum,702,megawatthours
+OIL,2026-06-21T00,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T23,MIDA,Mid-Atlantic,Petroleum,570,megawatthours
+OIL,2026-06-20T23,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T22,MIDA,Mid-Atlantic,Petroleum,708,megawatthours
+OIL,2026-06-20T22,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T21,MIDA,Mid-Atlantic,Petroleum,740,megawatthours
+OIL,2026-06-20T21,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T20,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-20T20,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T19,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
+OIL,2026-06-20T19,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T18,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
+OIL,2026-06-20T18,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T17,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
+OIL,2026-06-20T17,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T16,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
+OIL,2026-06-20T16,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T15,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-20T15,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T14,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-20T14,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T13,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-20T13,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T12,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-20T12,NE,New England,Petroleum,4,megawatthours
+OIL,2026-06-20T11,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-20T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-20T10,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-20T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-20T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-20T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-20T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-20T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-20T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-20T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-20T06,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-20T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-20T05,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
+OIL,2026-06-20T05,NE,New England,Petroleum,8,megawatthours
+OIL,2026-06-20T04,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
+OIL,2026-06-20T04,NE,New England,Petroleum,8,megawatthours
+OIL,2026-06-20T03,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
+OIL,2026-06-20T03,NE,New England,Petroleum,8,megawatthours
+OIL,2026-06-20T02,MIDA,Mid-Atlantic,Petroleum,674,megawatthours
+OIL,2026-06-20T02,NE,New England,Petroleum,8,megawatthours
+OIL,2026-06-20T01,MIDA,Mid-Atlantic,Petroleum,820,megawatthours
+OIL,2026-06-20T01,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-20T00,MIDA,Mid-Atlantic,Petroleum,761,megawatthours
+OIL,2026-06-20T00,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T23,MIDA,Mid-Atlantic,Petroleum,621,megawatthours
+OIL,2026-06-19T23,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T22,MIDA,Mid-Atlantic,Petroleum,699,megawatthours
+OIL,2026-06-19T22,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T21,MIDA,Mid-Atlantic,Petroleum,833,megawatthours
+OIL,2026-06-19T21,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T20,MIDA,Mid-Atlantic,Petroleum,353,megawatthours
+OIL,2026-06-19T20,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T19,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
+OIL,2026-06-19T19,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T18,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
+OIL,2026-06-19T18,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T17,MIDA,Mid-Atlantic,Petroleum,207,megawatthours
+OIL,2026-06-19T17,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T16,MIDA,Mid-Atlantic,Petroleum,196,megawatthours
+OIL,2026-06-19T16,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T15,MIDA,Mid-Atlantic,Petroleum,182,megawatthours
+OIL,2026-06-19T15,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T14,MIDA,Mid-Atlantic,Petroleum,182,megawatthours
+OIL,2026-06-19T14,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T13,MIDA,Mid-Atlantic,Petroleum,183,megawatthours
+OIL,2026-06-19T13,NE,New England,Petroleum,9,megawatthours
+OIL,2026-06-19T12,MIDA,Mid-Atlantic,Petroleum,185,megawatthours
+OIL,2026-06-19T12,NE,New England,Petroleum,4,megawatthours
+OIL,2026-06-19T11,MIDA,Mid-Atlantic,Petroleum,185,megawatthours
+OIL,2026-06-19T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-19T10,MIDA,Mid-Atlantic,Petroleum,187,megawatthours
+OIL,2026-06-19T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-19T09,MIDA,Mid-Atlantic,Petroleum,247,megawatthours
+OIL,2026-06-19T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-19T08,MIDA,Mid-Atlantic,Petroleum,290,megawatthours
+OIL,2026-06-19T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-19T07,MIDA,Mid-Atlantic,Petroleum,290,megawatthours
+OIL,2026-06-19T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-19T06,MIDA,Mid-Atlantic,Petroleum,285,megawatthours
+OIL,2026-06-19T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-19T05,MIDA,Mid-Atlantic,Petroleum,300,megawatthours
+OIL,2026-06-19T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-19T04,MIDA,Mid-Atlantic,Petroleum,740,megawatthours
+OIL,2026-06-19T04,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-19T03,MIDA,Mid-Atlantic,Petroleum,838,megawatthours
+OIL,2026-06-19T03,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-19T02,MIDA,Mid-Atlantic,Petroleum,1396,megawatthours
+OIL,2026-06-19T02,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-19T01,MIDA,Mid-Atlantic,Petroleum,1604,megawatthours
+OIL,2026-06-19T01,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-19T00,MIDA,Mid-Atlantic,Petroleum,1587,megawatthours
+OIL,2026-06-19T00,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-18T23,MIDA,Mid-Atlantic,Petroleum,1540,megawatthours
+OIL,2026-06-18T23,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-18T22,MIDA,Mid-Atlantic,Petroleum,1584,megawatthours
+OIL,2026-06-18T22,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-18T21,MIDA,Mid-Atlantic,Petroleum,1596,megawatthours
+OIL,2026-06-18T21,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-18T20,MIDA,Mid-Atlantic,Petroleum,1569,megawatthours
+OIL,2026-06-18T20,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-18T19,MIDA,Mid-Atlantic,Petroleum,1481,megawatthours
+OIL,2026-06-18T19,NE,New England,Petroleum,18,megawatthours
+OIL,2026-06-18T18,MIDA,Mid-Atlantic,Petroleum,1176,megawatthours
+OIL,2026-06-18T18,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T17,MIDA,Mid-Atlantic,Petroleum,912,megawatthours
+OIL,2026-06-18T17,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T16,MIDA,Mid-Atlantic,Petroleum,849,megawatthours
+OIL,2026-06-18T16,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T15,MIDA,Mid-Atlantic,Petroleum,538,megawatthours
+OIL,2026-06-18T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T14,MIDA,Mid-Atlantic,Petroleum,287,megawatthours
+OIL,2026-06-18T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T13,MIDA,Mid-Atlantic,Petroleum,306,megawatthours
+OIL,2026-06-18T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T12,MIDA,Mid-Atlantic,Petroleum,331,megawatthours
+OIL,2026-06-18T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T11,MIDA,Mid-Atlantic,Petroleum,335,megawatthours
+OIL,2026-06-18T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T10,MIDA,Mid-Atlantic,Petroleum,337,megawatthours
+OIL,2026-06-18T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T09,MIDA,Mid-Atlantic,Petroleum,287,megawatthours
+OIL,2026-06-18T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T08,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-18T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T07,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-18T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T06,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-18T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T05,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-18T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-18T04,MIDA,Mid-Atlantic,Petroleum,324,megawatthours
+OIL,2026-06-18T04,NE,New England,Petroleum,22,megawatthours
+OIL,2026-06-18T03,MIDA,Mid-Atlantic,Petroleum,847,megawatthours
+OIL,2026-06-18T03,NE,New England,Petroleum,22,megawatthours
+OIL,2026-06-18T02,MIDA,Mid-Atlantic,Petroleum,859,megawatthours
+OIL,2026-06-18T02,NE,New England,Petroleum,22,megawatthours
+OIL,2026-06-18T01,MIDA,Mid-Atlantic,Petroleum,1038,megawatthours
+OIL,2026-06-18T01,NE,New England,Petroleum,22,megawatthours
+OIL,2026-06-18T00,MIDA,Mid-Atlantic,Petroleum,1103,megawatthours
+OIL,2026-06-18T00,NE,New England,Petroleum,22,megawatthours
+OIL,2026-06-17T23,MIDA,Mid-Atlantic,Petroleum,1089,megawatthours
+OIL,2026-06-17T23,NE,New England,Petroleum,23,megawatthours
+OIL,2026-06-17T22,MIDA,Mid-Atlantic,Petroleum,1117,megawatthours
+OIL,2026-06-17T22,NE,New England,Petroleum,22,megawatthours
+OIL,2026-06-17T21,MIDA,Mid-Atlantic,Petroleum,1026,megawatthours
+OIL,2026-06-17T21,NE,New England,Petroleum,23,megawatthours
+OIL,2026-06-17T20,MIDA,Mid-Atlantic,Petroleum,977,megawatthours
+OIL,2026-06-17T20,NE,New England,Petroleum,23,megawatthours
+OIL,2026-06-17T19,MIDA,Mid-Atlantic,Petroleum,901,megawatthours
+OIL,2026-06-17T19,NE,New England,Petroleum,5,megawatthours
+OIL,2026-06-17T18,MIDA,Mid-Atlantic,Petroleum,530,megawatthours
+OIL,2026-06-17T18,NE,New England,Petroleum,7,megawatthours
+OIL,2026-06-17T17,MIDA,Mid-Atlantic,Petroleum,267,megawatthours
+OIL,2026-06-17T17,NE,New England,Petroleum,7,megawatthours
+OIL,2026-06-17T16,MIDA,Mid-Atlantic,Petroleum,248,megawatthours
+OIL,2026-06-17T16,NE,New England,Petroleum,11,megawatthours
+OIL,2026-06-17T15,MIDA,Mid-Atlantic,Petroleum,234,megawatthours
+OIL,2026-06-17T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T14,MIDA,Mid-Atlantic,Petroleum,249,megawatthours
+OIL,2026-06-17T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T13,MIDA,Mid-Atlantic,Petroleum,235,megawatthours
+OIL,2026-06-17T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T12,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-17T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T11,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-17T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T10,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-17T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T09,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-06-17T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T08,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-17T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T07,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-17T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T06,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
+OIL,2026-06-17T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T05,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
+OIL,2026-06-17T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-17T04,MIDA,Mid-Atlantic,Petroleum,207,megawatthours
+OIL,2026-06-17T04,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-17T03,MIDA,Mid-Atlantic,Petroleum,206,megawatthours
+OIL,2026-06-17T03,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-17T02,MIDA,Mid-Atlantic,Petroleum,204,megawatthours
+OIL,2026-06-17T02,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-17T01,MIDA,Mid-Atlantic,Petroleum,204,megawatthours
+OIL,2026-06-17T01,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-17T00,MIDA,Mid-Atlantic,Petroleum,205,megawatthours
+OIL,2026-06-17T00,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-16T23,MIDA,Mid-Atlantic,Petroleum,206,megawatthours
+OIL,2026-06-16T23,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-16T22,MIDA,Mid-Atlantic,Petroleum,206,megawatthours
+OIL,2026-06-16T22,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-16T21,MIDA,Mid-Atlantic,Petroleum,248,megawatthours
+OIL,2026-06-16T21,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-16T20,MIDA,Mid-Atlantic,Petroleum,263,megawatthours
+OIL,2026-06-16T20,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-16T19,MIDA,Mid-Atlantic,Petroleum,286,megawatthours
+OIL,2026-06-16T19,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-16T18,MIDA,Mid-Atlantic,Petroleum,312,megawatthours
+OIL,2026-06-16T18,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-16T17,MIDA,Mid-Atlantic,Petroleum,236,megawatthours
+OIL,2026-06-16T17,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-16T16,MIDA,Mid-Atlantic,Petroleum,356,megawatthours
+OIL,2026-06-16T16,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T15,MIDA,Mid-Atlantic,Petroleum,455,megawatthours
+OIL,2026-06-16T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T14,MIDA,Mid-Atlantic,Petroleum,426,megawatthours
+OIL,2026-06-16T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T13,MIDA,Mid-Atlantic,Petroleum,375,megawatthours
+OIL,2026-06-16T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T12,MIDA,Mid-Atlantic,Petroleum,373,megawatthours
+OIL,2026-06-16T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T11,MIDA,Mid-Atlantic,Petroleum,376,megawatthours
+OIL,2026-06-16T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T10,MIDA,Mid-Atlantic,Petroleum,376,megawatthours
+OIL,2026-06-16T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T09,MIDA,Mid-Atlantic,Petroleum,378,megawatthours
+OIL,2026-06-16T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T08,MIDA,Mid-Atlantic,Petroleum,376,megawatthours
+OIL,2026-06-16T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T07,MIDA,Mid-Atlantic,Petroleum,373,megawatthours
+OIL,2026-06-16T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T06,MIDA,Mid-Atlantic,Petroleum,369,megawatthours
+OIL,2026-06-16T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-16T05,MIDA,Mid-Atlantic,Petroleum,364,megawatthours
+OIL,2026-06-16T05,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-16T04,MIDA,Mid-Atlantic,Petroleum,391,megawatthours
+OIL,2026-06-16T04,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-16T03,MIDA,Mid-Atlantic,Petroleum,983,megawatthours
+OIL,2026-06-16T03,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-16T02,MIDA,Mid-Atlantic,Petroleum,1171,megawatthours
+OIL,2026-06-16T02,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-16T01,MIDA,Mid-Atlantic,Petroleum,1171,megawatthours
+OIL,2026-06-16T01,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-16T00,MIDA,Mid-Atlantic,Petroleum,751,megawatthours
+OIL,2026-06-16T00,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-15T23,MIDA,Mid-Atlantic,Petroleum,356,megawatthours
+OIL,2026-06-15T23,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-15T22,MIDA,Mid-Atlantic,Petroleum,352,megawatthours
+OIL,2026-06-15T22,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-15T21,MIDA,Mid-Atlantic,Petroleum,338,megawatthours
+OIL,2026-06-15T21,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-15T20,MIDA,Mid-Atlantic,Petroleum,210,megawatthours
+OIL,2026-06-15T20,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-15T19,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
+OIL,2026-06-15T19,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-15T18,MIDA,Mid-Atlantic,Petroleum,359,megawatthours
+OIL,2026-06-15T18,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-15T17,MIDA,Mid-Atlantic,Petroleum,301,megawatthours
+OIL,2026-06-15T17,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-15T16,MIDA,Mid-Atlantic,Petroleum,354,megawatthours
+OIL,2026-06-15T16,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T15,MIDA,Mid-Atlantic,Petroleum,346,megawatthours
+OIL,2026-06-15T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T14,MIDA,Mid-Atlantic,Petroleum,358,megawatthours
+OIL,2026-06-15T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T13,MIDA,Mid-Atlantic,Petroleum,358,megawatthours
+OIL,2026-06-15T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T12,MIDA,Mid-Atlantic,Petroleum,359,megawatthours
+OIL,2026-06-15T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T11,MIDA,Mid-Atlantic,Petroleum,361,megawatthours
+OIL,2026-06-15T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T10,MIDA,Mid-Atlantic,Petroleum,365,megawatthours
+OIL,2026-06-15T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T09,MIDA,Mid-Atlantic,Petroleum,365,megawatthours
+OIL,2026-06-15T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T08,MIDA,Mid-Atlantic,Petroleum,361,megawatthours
+OIL,2026-06-15T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T07,MIDA,Mid-Atlantic,Petroleum,357,megawatthours
+OIL,2026-06-15T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T06,MIDA,Mid-Atlantic,Petroleum,351,megawatthours
+OIL,2026-06-15T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T05,MIDA,Mid-Atlantic,Petroleum,351,megawatthours
+OIL,2026-06-15T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-15T04,MIDA,Mid-Atlantic,Petroleum,625,megawatthours
+OIL,2026-06-15T04,NE,New England,Petroleum,75,megawatthours
+OIL,2026-06-15T03,MIDA,Mid-Atlantic,Petroleum,1422,megawatthours
+OIL,2026-06-15T03,NE,New England,Petroleum,74,megawatthours
+OIL,2026-06-15T02,MIDA,Mid-Atlantic,Petroleum,1579,megawatthours
+OIL,2026-06-15T02,NE,New England,Petroleum,73,megawatthours
+OIL,2026-06-15T01,MIDA,Mid-Atlantic,Petroleum,1871,megawatthours
+OIL,2026-06-15T01,NE,New England,Petroleum,73,megawatthours
+OIL,2026-06-15T00,MIDA,Mid-Atlantic,Petroleum,2158,megawatthours
+OIL,2026-06-15T00,NE,New England,Petroleum,74,megawatthours
+OIL,2026-06-14T23,MIDA,Mid-Atlantic,Petroleum,1967,megawatthours
+OIL,2026-06-14T23,NE,New England,Petroleum,231,megawatthours
+OIL,2026-06-14T22,MIDA,Mid-Atlantic,Petroleum,1743,megawatthours
+OIL,2026-06-14T22,NE,New England,Petroleum,118,megawatthours
+OIL,2026-06-14T21,MIDA,Mid-Atlantic,Petroleum,1477,megawatthours
+OIL,2026-06-14T21,NE,New England,Petroleum,51,megawatthours
+OIL,2026-06-14T20,MIDA,Mid-Atlantic,Petroleum,1388,megawatthours
+OIL,2026-06-14T20,NE,New England,Petroleum,68,megawatthours
+OIL,2026-06-14T19,MIDA,Mid-Atlantic,Petroleum,1033,megawatthours
+OIL,2026-06-14T19,NE,New England,Petroleum,29,megawatthours
+OIL,2026-06-14T18,MIDA,Mid-Atlantic,Petroleum,768,megawatthours
+OIL,2026-06-14T18,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T17,MIDA,Mid-Atlantic,Petroleum,921,megawatthours
+OIL,2026-06-14T17,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T16,MIDA,Mid-Atlantic,Petroleum,794,megawatthours
+OIL,2026-06-14T16,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T15,MIDA,Mid-Atlantic,Petroleum,351,megawatthours
+OIL,2026-06-14T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T14,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-14T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T13,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-14T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T12,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-14T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T11,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-06-14T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T10,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-14T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T09,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-14T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T08,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-14T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T07,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-14T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T06,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-06-14T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T05,MIDA,Mid-Atlantic,Petroleum,297,megawatthours
+OIL,2026-06-14T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-14T04,MIDA,Mid-Atlantic,Petroleum,619,megawatthours
+OIL,2026-06-14T04,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-14T03,MIDA,Mid-Atlantic,Petroleum,1230,megawatthours
+OIL,2026-06-14T03,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-14T02,MIDA,Mid-Atlantic,Petroleum,1296,megawatthours
+OIL,2026-06-14T02,NE,New England,Petroleum,40,megawatthours
+OIL,2026-06-14T01,MIDA,Mid-Atlantic,Petroleum,1498,megawatthours
+OIL,2026-06-14T01,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-14T00,MIDA,Mid-Atlantic,Petroleum,1479,megawatthours
+OIL,2026-06-14T00,NE,New England,Petroleum,40,megawatthours
+OIL,2026-06-13T23,MIDA,Mid-Atlantic,Petroleum,1204,megawatthours
+OIL,2026-06-13T23,NE,New England,Petroleum,40,megawatthours
+OIL,2026-06-13T22,MIDA,Mid-Atlantic,Petroleum,1015,megawatthours
+OIL,2026-06-13T22,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T21,MIDA,Mid-Atlantic,Petroleum,1053,megawatthours
+OIL,2026-06-13T21,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T20,MIDA,Mid-Atlantic,Petroleum,915,megawatthours
+OIL,2026-06-13T20,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T19,MIDA,Mid-Atlantic,Petroleum,610,megawatthours
+OIL,2026-06-13T19,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T18,MIDA,Mid-Atlantic,Petroleum,609,megawatthours
+OIL,2026-06-13T18,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T17,MIDA,Mid-Atlantic,Petroleum,836,megawatthours
+OIL,2026-06-13T17,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T16,MIDA,Mid-Atlantic,Petroleum,777,megawatthours
+OIL,2026-06-13T16,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T15,MIDA,Mid-Atlantic,Petroleum,237,megawatthours
+OIL,2026-06-13T15,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T14,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-13T14,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T13,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-13T13,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T12,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-06-13T12,NE,New England,Petroleum,41,megawatthours
+OIL,2026-06-13T11,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
+OIL,2026-06-13T11,NE,New England,Petroleum,32,megawatthours
+OIL,2026-06-13T10,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-13T10,NE,New England,Petroleum,32,megawatthours
+OIL,2026-06-13T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-13T09,NE,New England,Petroleum,32,megawatthours
+OIL,2026-06-13T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-13T08,NE,New England,Petroleum,32,megawatthours
+OIL,2026-06-13T07,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-13T07,NE,New England,Petroleum,32,megawatthours
+OIL,2026-06-13T06,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-13T06,NE,New England,Petroleum,32,megawatthours
+OIL,2026-06-13T05,MIDA,Mid-Atlantic,Petroleum,815,megawatthours
+OIL,2026-06-13T05,NE,New England,Petroleum,32,megawatthours
+OIL,2026-06-13T04,MIDA,Mid-Atlantic,Petroleum,2655,megawatthours
+OIL,2026-06-13T04,NE,New England,Petroleum,105,megawatthours
+OIL,2026-06-13T03,MIDA,Mid-Atlantic,Petroleum,3024,megawatthours
+OIL,2026-06-13T03,NE,New England,Petroleum,136,megawatthours
+OIL,2026-06-13T02,MIDA,Mid-Atlantic,Petroleum,3025,megawatthours
+OIL,2026-06-13T02,NE,New England,Petroleum,137,megawatthours
+OIL,2026-06-13T01,MIDA,Mid-Atlantic,Petroleum,3243,megawatthours
+OIL,2026-06-13T01,NE,New England,Petroleum,174,megawatthours
+OIL,2026-06-13T00,MIDA,Mid-Atlantic,Petroleum,3276,megawatthours
+OIL,2026-06-13T00,NE,New England,Petroleum,696,megawatthours
+OIL,2026-06-12T23,MIDA,Mid-Atlantic,Petroleum,3228,megawatthours
+OIL,2026-06-12T23,NE,New England,Petroleum,660,megawatthours
+OIL,2026-06-12T22,MIDA,Mid-Atlantic,Petroleum,3064,megawatthours
+OIL,2026-06-12T22,NE,New England,Petroleum,140,megawatthours
+OIL,2026-06-12T21,MIDA,Mid-Atlantic,Petroleum,3071,megawatthours
+OIL,2026-06-12T21,NE,New England,Petroleum,136,megawatthours
+OIL,2026-06-12T20,MIDA,Mid-Atlantic,Petroleum,2866,megawatthours
+OIL,2026-06-12T20,NE,New England,Petroleum,135,megawatthours
+OIL,2026-06-12T19,MIDA,Mid-Atlantic,Petroleum,2258,megawatthours
+OIL,2026-06-12T19,NE,New England,Petroleum,181,megawatthours
+OIL,2026-06-12T18,MIDA,Mid-Atlantic,Petroleum,2040,megawatthours
+OIL,2026-06-12T18,NE,New England,Petroleum,219,megawatthours
+OIL,2026-06-12T17,MIDA,Mid-Atlantic,Petroleum,1778,megawatthours
+OIL,2026-06-12T17,NE,New England,Petroleum,140,megawatthours
+OIL,2026-06-12T16,MIDA,Mid-Atlantic,Petroleum,1697,megawatthours
+OIL,2026-06-12T16,NE,New England,Petroleum,194,megawatthours
+OIL,2026-06-12T15,MIDA,Mid-Atlantic,Petroleum,1295,megawatthours
+OIL,2026-06-12T15,NE,New England,Petroleum,164,megawatthours
+OIL,2026-06-12T14,MIDA,Mid-Atlantic,Petroleum,565,megawatthours
+OIL,2026-06-12T14,NE,New England,Petroleum,132,megawatthours
+OIL,2026-06-12T13,MIDA,Mid-Atlantic,Petroleum,536,megawatthours
+OIL,2026-06-12T13,NE,New England,Petroleum,134,megawatthours
+OIL,2026-06-12T12,MIDA,Mid-Atlantic,Petroleum,530,megawatthours
+OIL,2026-06-12T12,NE,New England,Petroleum,139,megawatthours
+OIL,2026-06-12T11,MIDA,Mid-Atlantic,Petroleum,557,megawatthours
+OIL,2026-06-12T11,NE,New England,Petroleum,129,megawatthours
+OIL,2026-06-12T10,MIDA,Mid-Atlantic,Petroleum,461,megawatthours
+OIL,2026-06-12T10,NE,New England,Petroleum,118,megawatthours
+OIL,2026-06-12T09,MIDA,Mid-Atlantic,Petroleum,415,megawatthours
+OIL,2026-06-12T09,NE,New England,Petroleum,95,megawatthours
+OIL,2026-06-12T08,MIDA,Mid-Atlantic,Petroleum,428,megawatthours
+OIL,2026-06-12T08,NE,New England,Petroleum,53,megawatthours
+OIL,2026-06-12T07,MIDA,Mid-Atlantic,Petroleum,576,megawatthours
+OIL,2026-06-12T07,NE,New England,Petroleum,38,megawatthours
+OIL,2026-06-12T06,MIDA,Mid-Atlantic,Petroleum,715,megawatthours
+OIL,2026-06-12T06,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-12T05,MIDA,Mid-Atlantic,Petroleum,872,megawatthours
+OIL,2026-06-12T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-12T04,MIDA,Mid-Atlantic,Petroleum,1197,megawatthours
+OIL,2026-06-12T04,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-12T03,MIDA,Mid-Atlantic,Petroleum,1769,megawatthours
+OIL,2026-06-12T03,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-12T02,MIDA,Mid-Atlantic,Petroleum,2832,megawatthours
+OIL,2026-06-12T02,NE,New England,Petroleum,37,megawatthours
+OIL,2026-06-12T01,MIDA,Mid-Atlantic,Petroleum,4010,megawatthours
+OIL,2026-06-12T01,NE,New England,Petroleum,98,megawatthours
+OIL,2026-06-12T00,MIDA,Mid-Atlantic,Petroleum,3898,megawatthours
+OIL,2026-06-12T00,NE,New England,Petroleum,517,megawatthours
+OIL,2026-06-11T23,MIDA,Mid-Atlantic,Petroleum,3171,megawatthours
+OIL,2026-06-11T23,NE,New England,Petroleum,732,megawatthours
+OIL,2026-06-11T22,MIDA,Mid-Atlantic,Petroleum,2469,megawatthours
+OIL,2026-06-11T22,NE,New England,Petroleum,778,megawatthours
+OIL,2026-06-11T21,MIDA,Mid-Atlantic,Petroleum,2305,megawatthours
+OIL,2026-06-11T21,NE,New England,Petroleum,819,megawatthours
+OIL,2026-06-11T20,MIDA,Mid-Atlantic,Petroleum,2248,megawatthours
+OIL,2026-06-11T20,NE,New England,Petroleum,1202,megawatthours
+OIL,2026-06-11T19,MIDA,Mid-Atlantic,Petroleum,2268,megawatthours
+OIL,2026-06-11T19,NE,New England,Petroleum,710,megawatthours
+OIL,2026-06-11T18,MIDA,Mid-Atlantic,Petroleum,1897,megawatthours
+OIL,2026-06-11T18,NE,New England,Petroleum,639,megawatthours
+OIL,2026-06-11T17,MIDA,Mid-Atlantic,Petroleum,1588,megawatthours
+OIL,2026-06-11T17,NE,New England,Petroleum,466,megawatthours
+OIL,2026-06-11T16,MIDA,Mid-Atlantic,Petroleum,1500,megawatthours
+OIL,2026-06-11T16,NE,New England,Petroleum,275,megawatthours
+OIL,2026-06-11T15,MIDA,Mid-Atlantic,Petroleum,836,megawatthours
+OIL,2026-06-11T15,NE,New England,Petroleum,195,megawatthours
+OIL,2026-06-11T14,MIDA,Mid-Atlantic,Petroleum,278,megawatthours
+OIL,2026-06-11T14,NE,New England,Petroleum,237,megawatthours
+OIL,2026-06-11T13,MIDA,Mid-Atlantic,Petroleum,280,megawatthours
+OIL,2026-06-11T13,NE,New England,Petroleum,152,megawatthours
+OIL,2026-06-11T12,MIDA,Mid-Atlantic,Petroleum,419,megawatthours
+OIL,2026-06-11T12,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-11T11,MIDA,Mid-Atlantic,Petroleum,404,megawatthours
+OIL,2026-06-11T11,NE,New England,Petroleum,15,megawatthours
+OIL,2026-06-11T10,MIDA,Mid-Atlantic,Petroleum,284,megawatthours
+OIL,2026-06-11T10,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-11T09,MIDA,Mid-Atlantic,Petroleum,262,megawatthours
+OIL,2026-06-11T09,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-11T08,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-11T08,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-11T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-11T07,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-11T06,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-11T06,NE,New England,Petroleum,23,megawatthours
+OIL,2026-06-11T05,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
+OIL,2026-06-11T05,NE,New England,Petroleum,26,megawatthours
+OIL,2026-06-11T04,MIDA,Mid-Atlantic,Petroleum,272,megawatthours
+OIL,2026-06-11T04,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-11T03,MIDA,Mid-Atlantic,Petroleum,1199,megawatthours
+OIL,2026-06-11T03,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-11T02,MIDA,Mid-Atlantic,Petroleum,1909,megawatthours
+OIL,2026-06-11T02,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-11T01,MIDA,Mid-Atlantic,Petroleum,1937,megawatthours
+OIL,2026-06-11T01,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-11T00,MIDA,Mid-Atlantic,Petroleum,1905,megawatthours
+OIL,2026-06-11T00,NE,New England,Petroleum,28,megawatthours
+OIL,2026-06-10T23,MIDA,Mid-Atlantic,Petroleum,1616,megawatthours
+OIL,2026-06-10T23,NE,New England,Petroleum,27,megawatthours
+OIL,2026-06-10T22,MIDA,Mid-Atlantic,Petroleum,1490,megawatthours
+OIL,2026-06-10T22,NE,New England,Petroleum,15,megawatthours
+OIL,2026-06-10T21,MIDA,Mid-Atlantic,Petroleum,1699,megawatthours
+OIL,2026-06-10T21,NE,New England,Petroleum,15,megawatthours
+OIL,2026-06-10T20,MIDA,Mid-Atlantic,Petroleum,1596,megawatthours
+OIL,2026-06-10T20,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-10T19,MIDA,Mid-Atlantic,Petroleum,1164,megawatthours
+OIL,2026-06-10T19,NE,New England,Petroleum,52,megawatthours
+OIL,2026-06-10T18,MIDA,Mid-Atlantic,Petroleum,685,megawatthours
+OIL,2026-06-10T18,NE,New England,Petroleum,62,megawatthours
+OIL,2026-06-10T17,MIDA,Mid-Atlantic,Petroleum,269,megawatthours
+OIL,2026-06-10T17,NE,New England,Petroleum,52,megawatthours
+OIL,2026-06-10T16,MIDA,Mid-Atlantic,Petroleum,272,megawatthours
+OIL,2026-06-10T16,NE,New England,Petroleum,25,megawatthours
+OIL,2026-06-10T15,MIDA,Mid-Atlantic,Petroleum,248,megawatthours
+OIL,2026-06-10T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T14,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
+OIL,2026-06-10T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T13,MIDA,Mid-Atlantic,Petroleum,209,megawatthours
+OIL,2026-06-10T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T12,MIDA,Mid-Atlantic,Petroleum,204,megawatthours
+OIL,2026-06-10T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T11,MIDA,Mid-Atlantic,Petroleum,187,megawatthours
+OIL,2026-06-10T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T10,MIDA,Mid-Atlantic,Petroleum,186,megawatthours
+OIL,2026-06-10T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T09,MIDA,Mid-Atlantic,Petroleum,183,megawatthours
+OIL,2026-06-10T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T08,MIDA,Mid-Atlantic,Petroleum,182,megawatthours
+OIL,2026-06-10T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T07,MIDA,Mid-Atlantic,Petroleum,183,megawatthours
+OIL,2026-06-10T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T06,MIDA,Mid-Atlantic,Petroleum,180,megawatthours
+OIL,2026-06-10T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T05,MIDA,Mid-Atlantic,Petroleum,180,megawatthours
+OIL,2026-06-10T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-10T04,MIDA,Mid-Atlantic,Petroleum,316,megawatthours
+OIL,2026-06-10T04,NE,New England,Petroleum,48,megawatthours
+OIL,2026-06-10T03,MIDA,Mid-Atlantic,Petroleum,351,megawatthours
+OIL,2026-06-10T03,NE,New England,Petroleum,48,megawatthours
+OIL,2026-06-10T02,MIDA,Mid-Atlantic,Petroleum,1428,megawatthours
+OIL,2026-06-10T02,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-10T01,MIDA,Mid-Atlantic,Petroleum,1802,megawatthours
+OIL,2026-06-10T01,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-10T00,MIDA,Mid-Atlantic,Petroleum,1504,megawatthours
+OIL,2026-06-10T00,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-09T23,MIDA,Mid-Atlantic,Petroleum,1496,megawatthours
+OIL,2026-06-09T23,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-09T22,MIDA,Mid-Atlantic,Petroleum,1479,megawatthours
+OIL,2026-06-09T22,NE,New England,Petroleum,50,megawatthours
+OIL,2026-06-09T21,MIDA,Mid-Atlantic,Petroleum,1286,megawatthours
+OIL,2026-06-09T21,NE,New England,Petroleum,79,megawatthours
+OIL,2026-06-09T20,MIDA,Mid-Atlantic,Petroleum,1297,megawatthours
+OIL,2026-06-09T20,NE,New England,Petroleum,171,megawatthours
+OIL,2026-06-09T19,MIDA,Mid-Atlantic,Petroleum,767,megawatthours
+OIL,2026-06-09T19,NE,New England,Petroleum,196,megawatthours
+OIL,2026-06-09T18,MIDA,Mid-Atlantic,Petroleum,178,megawatthours
+OIL,2026-06-09T18,NE,New England,Petroleum,26,megawatthours
+OIL,2026-06-09T17,MIDA,Mid-Atlantic,Petroleum,179,megawatthours
+OIL,2026-06-09T17,NE,New England,Petroleum,23,megawatthours
+OIL,2026-06-09T16,MIDA,Mid-Atlantic,Petroleum,253,megawatthours
+OIL,2026-06-09T16,NE,New England,Petroleum,23,megawatthours
+OIL,2026-06-09T15,MIDA,Mid-Atlantic,Petroleum,306,megawatthours
+OIL,2026-06-09T15,NE,New England,Petroleum,24,megawatthours
+OIL,2026-06-09T14,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
+OIL,2026-06-09T14,NE,New England,Petroleum,24,megawatthours
+OIL,2026-06-09T13,MIDA,Mid-Atlantic,Petroleum,188,megawatthours
+OIL,2026-06-09T13,NE,New England,Petroleum,23,megawatthours
+OIL,2026-06-09T12,MIDA,Mid-Atlantic,Petroleum,185,megawatthours
+OIL,2026-06-09T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-09T11,MIDA,Mid-Atlantic,Petroleum,182,megawatthours
+OIL,2026-06-09T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-09T10,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
+OIL,2026-06-09T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-09T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-09T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-09T08,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-09T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-09T07,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-09T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-09T06,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-09T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-09T05,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-09T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-09T04,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-09T04,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-09T03,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-09T03,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-09T02,MIDA,Mid-Atlantic,Petroleum,850,megawatthours
+OIL,2026-06-09T02,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-09T01,MIDA,Mid-Atlantic,Petroleum,1049,megawatthours
+OIL,2026-06-09T01,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-09T00,MIDA,Mid-Atlantic,Petroleum,1145,megawatthours
+OIL,2026-06-09T00,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-08T23,MIDA,Mid-Atlantic,Petroleum,1129,megawatthours
+OIL,2026-06-08T23,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-08T22,MIDA,Mid-Atlantic,Petroleum,996,megawatthours
+OIL,2026-06-08T22,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-08T21,MIDA,Mid-Atlantic,Petroleum,773,megawatthours
+OIL,2026-06-08T21,NE,New England,Petroleum,13,megawatthours
+OIL,2026-06-08T20,MIDA,Mid-Atlantic,Petroleum,783,megawatthours
+OIL,2026-06-08T20,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-08T19,MIDA,Mid-Atlantic,Petroleum,688,megawatthours
+OIL,2026-06-08T19,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-08T18,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-08T18,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-08T17,MIDA,Mid-Atlantic,Petroleum,291,megawatthours
+OIL,2026-06-08T17,NE,New England,Petroleum,14,megawatthours
+OIL,2026-06-08T16,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-08T16,NE,New England,Petroleum,12,megawatthours
+OIL,2026-06-08T15,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-08T15,NE,New England,Petroleum,3,megawatthours
+OIL,2026-06-08T14,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-08T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T13,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-08T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T12,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-08T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T11,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-08T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-08T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-08T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-08T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-08T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-08T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-08T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-08T04,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-08T03,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-08T02,MIDA,Mid-Atlantic,Petroleum,850,megawatthours
+OIL,2026-06-08T01,MIDA,Mid-Atlantic,Petroleum,1049,megawatthours
+OIL,2026-06-08T00,MIDA,Mid-Atlantic,Petroleum,1145,megawatthours
+OIL,2026-06-07T23,MIDA,Mid-Atlantic,Petroleum,1129,megawatthours
+OIL,2026-06-07T22,MIDA,Mid-Atlantic,Petroleum,996,megawatthours
+OIL,2026-06-07T21,MIDA,Mid-Atlantic,Petroleum,773,megawatthours
+OIL,2026-06-07T20,MIDA,Mid-Atlantic,Petroleum,783,megawatthours
+OIL,2026-06-07T19,MIDA,Mid-Atlantic,Petroleum,688,megawatthours
+OIL,2026-06-07T18,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-07T17,MIDA,Mid-Atlantic,Petroleum,291,megawatthours
+OIL,2026-06-07T16,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-07T15,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-07T14,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-07T13,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-07T12,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-07T11,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-07T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-07T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-07T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-07T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-07T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-07T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-07T04,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-07T04,NE,New England,Petroleum,65,megawatthours
+OIL,2026-06-07T03,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-07T03,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-07T02,MIDA,Mid-Atlantic,Petroleum,850,megawatthours
+OIL,2026-06-07T02,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-07T01,MIDA,Mid-Atlantic,Petroleum,1049,megawatthours
+OIL,2026-06-07T01,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-07T00,MIDA,Mid-Atlantic,Petroleum,1145,megawatthours
+OIL,2026-06-07T00,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-06T23,MIDA,Mid-Atlantic,Petroleum,1129,megawatthours
+OIL,2026-06-06T23,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-06T22,MIDA,Mid-Atlantic,Petroleum,996,megawatthours
+OIL,2026-06-06T22,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-06T21,MIDA,Mid-Atlantic,Petroleum,773,megawatthours
+OIL,2026-06-06T21,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-06T20,MIDA,Mid-Atlantic,Petroleum,783,megawatthours
+OIL,2026-06-06T20,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-06T19,MIDA,Mid-Atlantic,Petroleum,688,megawatthours
+OIL,2026-06-06T19,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-06T18,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-06T18,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-06T17,MIDA,Mid-Atlantic,Petroleum,291,megawatthours
+OIL,2026-06-06T17,NE,New England,Petroleum,97,megawatthours
+OIL,2026-06-06T16,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-06T16,NE,New England,Petroleum,95,megawatthours
+OIL,2026-06-06T15,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-06T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T14,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-06T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T13,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-06T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T12,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-06T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T11,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-06T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-06T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-06T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-06T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-06T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-06T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-06T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-06T05,NE,New England,Petroleum,65,megawatthours
+OIL,2026-06-06T04,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-06T04,NE,New England,Petroleum,65,megawatthours
+OIL,2026-06-06T03,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-06T03,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-06T02,MIDA,Mid-Atlantic,Petroleum,850,megawatthours
+OIL,2026-06-06T02,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-06T01,MIDA,Mid-Atlantic,Petroleum,1049,megawatthours
+OIL,2026-06-06T01,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-06T00,MIDA,Mid-Atlantic,Petroleum,1145,megawatthours
+OIL,2026-06-06T00,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-05T23,MIDA,Mid-Atlantic,Petroleum,1129,megawatthours
+OIL,2026-06-05T23,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-05T22,MIDA,Mid-Atlantic,Petroleum,996,megawatthours
+OIL,2026-06-05T22,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-05T21,MIDA,Mid-Atlantic,Petroleum,773,megawatthours
+OIL,2026-06-05T21,NE,New England,Petroleum,67,megawatthours
+OIL,2026-06-05T20,MIDA,Mid-Atlantic,Petroleum,783,megawatthours
+OIL,2026-06-05T20,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-05T19,MIDA,Mid-Atlantic,Petroleum,688,megawatthours
+OIL,2026-06-05T19,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-05T18,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-05T18,NE,New England,Petroleum,66,megawatthours
+OIL,2026-06-05T17,MIDA,Mid-Atlantic,Petroleum,291,megawatthours
+OIL,2026-06-05T17,NE,New England,Petroleum,97,megawatthours
+OIL,2026-06-05T16,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-05T16,NE,New England,Petroleum,95,megawatthours
+OIL,2026-06-05T15,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-05T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T14,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-05T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T13,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-05T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T12,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-05T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T11,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-05T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-05T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-05T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-05T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-05T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-05T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-05T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-05T04,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-05T04,NE,New England,Petroleum,95,megawatthours
+OIL,2026-06-05T03,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-05T03,NE,New England,Petroleum,95,megawatthours
+OIL,2026-06-05T02,MIDA,Mid-Atlantic,Petroleum,850,megawatthours
+OIL,2026-06-05T02,NE,New England,Petroleum,96,megawatthours
+OIL,2026-06-05T01,MIDA,Mid-Atlantic,Petroleum,1049,megawatthours
+OIL,2026-06-05T01,NE,New England,Petroleum,96,megawatthours
+OIL,2026-06-05T00,MIDA,Mid-Atlantic,Petroleum,1145,megawatthours
+OIL,2026-06-05T00,NE,New England,Petroleum,96,megawatthours
+OIL,2026-06-04T23,MIDA,Mid-Atlantic,Petroleum,1129,megawatthours
+OIL,2026-06-04T23,NE,New England,Petroleum,96,megawatthours
+OIL,2026-06-04T22,MIDA,Mid-Atlantic,Petroleum,996,megawatthours
+OIL,2026-06-04T22,NE,New England,Petroleum,96,megawatthours
+OIL,2026-06-04T21,MIDA,Mid-Atlantic,Petroleum,773,megawatthours
+OIL,2026-06-04T21,NE,New England,Petroleum,97,megawatthours
+OIL,2026-06-04T20,MIDA,Mid-Atlantic,Petroleum,783,megawatthours
+OIL,2026-06-04T20,NE,New England,Petroleum,97,megawatthours
+OIL,2026-06-04T19,MIDA,Mid-Atlantic,Petroleum,688,megawatthours
+OIL,2026-06-04T19,NE,New England,Petroleum,95,megawatthours
+OIL,2026-06-04T18,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-04T18,NE,New England,Petroleum,16,megawatthours
+OIL,2026-06-04T17,MIDA,Mid-Atlantic,Petroleum,291,megawatthours
+OIL,2026-06-04T17,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T16,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-04T16,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T15,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-04T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T14,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-04T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T13,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-04T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T12,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-04T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T11,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-04T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-04T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-04T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-04T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-04T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-04T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-04T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-04T04,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-04T04,NE,New England,Petroleum,36,megawatthours
+OIL,2026-06-04T03,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-04T03,NE,New England,Petroleum,37,megawatthours
+OIL,2026-06-04T02,MIDA,Mid-Atlantic,Petroleum,850,megawatthours
+OIL,2026-06-04T02,NE,New England,Petroleum,37,megawatthours
+OIL,2026-06-04T01,MIDA,Mid-Atlantic,Petroleum,1049,megawatthours
+OIL,2026-06-04T01,NE,New England,Petroleum,49,megawatthours
+OIL,2026-06-04T00,MIDA,Mid-Atlantic,Petroleum,1145,megawatthours
+OIL,2026-06-04T00,NE,New England,Petroleum,54,megawatthours
+OIL,2026-06-03T23,MIDA,Mid-Atlantic,Petroleum,1129,megawatthours
+OIL,2026-06-03T23,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T22,MIDA,Mid-Atlantic,Petroleum,996,megawatthours
+OIL,2026-06-03T22,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T21,MIDA,Mid-Atlantic,Petroleum,773,megawatthours
+OIL,2026-06-03T21,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T20,MIDA,Mid-Atlantic,Petroleum,783,megawatthours
+OIL,2026-06-03T20,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T19,MIDA,Mid-Atlantic,Petroleum,688,megawatthours
+OIL,2026-06-03T19,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T18,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-03T18,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T17,MIDA,Mid-Atlantic,Petroleum,291,megawatthours
+OIL,2026-06-03T17,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T16,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-03T16,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T15,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-03T15,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T14,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-03T14,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T13,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-03T13,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T12,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-03T12,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T11,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-03T11,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-03T10,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-03T09,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-03T08,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-03T07,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-03T06,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-03T05,NE,New England,Petroleum,0,megawatthours
+OIL,2026-06-03T04,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-03T03,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-03T02,MIDA,Mid-Atlantic,Petroleum,850,megawatthours
+OIL,2026-06-03T01,MIDA,Mid-Atlantic,Petroleum,1049,megawatthours
+OIL,2026-06-03T00,MIDA,Mid-Atlantic,Petroleum,1145,megawatthours
+OIL,2026-06-02T23,MIDA,Mid-Atlantic,Petroleum,1129,megawatthours
+OIL,2026-06-02T22,MIDA,Mid-Atlantic,Petroleum,996,megawatthours
+OIL,2026-06-02T21,MIDA,Mid-Atlantic,Petroleum,773,megawatthours
+OIL,2026-06-02T20,MIDA,Mid-Atlantic,Petroleum,783,megawatthours
+OIL,2026-06-02T19,MIDA,Mid-Atlantic,Petroleum,688,megawatthours
+OIL,2026-06-02T18,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-02T17,MIDA,Mid-Atlantic,Petroleum,291,megawatthours
+OIL,2026-06-02T16,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-02T15,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-02T14,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-02T13,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-02T12,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-02T11,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-02T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-02T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-02T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-02T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-02T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-02T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-02T04,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-02T03,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-06-02T02,MIDA,Mid-Atlantic,Petroleum,850,megawatthours
+OIL,2026-06-02T01,MIDA,Mid-Atlantic,Petroleum,1049,megawatthours
+OIL,2026-06-02T00,MIDA,Mid-Atlantic,Petroleum,1145,megawatthours
+OIL,2026-06-01T23,MIDA,Mid-Atlantic,Petroleum,1129,megawatthours
+OIL,2026-06-01T22,MIDA,Mid-Atlantic,Petroleum,996,megawatthours
+OIL,2026-06-01T21,MIDA,Mid-Atlantic,Petroleum,773,megawatthours
+OIL,2026-06-01T20,MIDA,Mid-Atlantic,Petroleum,783,megawatthours
+OIL,2026-06-01T19,MIDA,Mid-Atlantic,Petroleum,688,megawatthours
+OIL,2026-06-01T18,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-01T17,MIDA,Mid-Atlantic,Petroleum,291,megawatthours
+OIL,2026-06-01T16,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-06-01T15,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
+OIL,2026-06-01T14,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-06-01T13,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-06-01T12,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-01T11,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
+OIL,2026-06-01T10,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-06-01T09,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
+OIL,2026-06-01T08,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-06-01T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-06-01T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-06-01T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
+OIL,2026-06-01T04,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
+OIL,2026-06-01T03,MIDA,Mid-Atlantic,Petroleum,572,megawatthours
+OIL,2026-06-01T02,MIDA,Mid-Atlantic,Petroleum,938,megawatthours
+OIL,2026-06-01T01,MIDA,Mid-Atlantic,Petroleum,1066,megawatthours
+OIL,2026-06-01T00,MIDA,Mid-Atlantic,Petroleum,1090,megawatthours
+OIL,2026-05-31T23,MIDA,Mid-Atlantic,Petroleum,1091,megawatthours
+OIL,2026-05-31T22,MIDA,Mid-Atlantic,Petroleum,1226,megawatthours
+OIL,2026-05-31T21,MIDA,Mid-Atlantic,Petroleum,516,megawatthours
+OIL,2026-05-31T20,MIDA,Mid-Atlantic,Petroleum,277,megawatthours
+OIL,2026-05-31T19,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-05-31T18,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-05-31T17,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-05-31T16,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-05-31T15,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
+OIL,2026-05-31T14,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-05-31T13,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-05-31T12,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
+OIL,2026-05-31T11,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-05-31T10,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-05-31T09,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
+OIL,2026-05-31T08,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-05-31T07,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
+OIL,2026-05-31T06,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
+OIL,2026-05-31T05,MIDA,Mid-Atlantic,Petroleum,262,megawatthours
+OIL,2026-05-31T04,MIDA,Mid-Atlantic,Petroleum,414,megawatthours
 OIL,2026-05-31T03,MIDA,Mid-Atlantic,Petroleum,447,megawatthours
 OIL,2026-05-31T02,MIDA,Mid-Atlantic,Petroleum,586,megawatthours
 OIL,2026-05-31T01,MIDA,Mid-Atlantic,Petroleum,730,megawatthours
@@ -23,71 +1462,119 @@ OIL,2026-05-30T07,MIDA,Mid-Atlantic,Petroleum,209,megawatthours
 OIL,2026-05-30T06,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
 OIL,2026-05-30T05,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
 OIL,2026-05-30T04,MIDA,Mid-Atlantic,Petroleum,209,megawatthours
+OIL,2026-05-30T04,NE,New England,Petroleum,43,megawatthours
 OIL,2026-05-30T03,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
+OIL,2026-05-30T03,NE,New England,Petroleum,43,megawatthours
 OIL,2026-05-30T02,MIDA,Mid-Atlantic,Petroleum,766,megawatthours
+OIL,2026-05-30T02,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-30T01,MIDA,Mid-Atlantic,Petroleum,865,megawatthours
+OIL,2026-05-30T01,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-30T00,MIDA,Mid-Atlantic,Petroleum,855,megawatthours
+OIL,2026-05-30T00,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-29T23,MIDA,Mid-Atlantic,Petroleum,668,megawatthours
+OIL,2026-05-29T23,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-29T22,MIDA,Mid-Atlantic,Petroleum,471,megawatthours
+OIL,2026-05-29T22,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-29T21,MIDA,Mid-Atlantic,Petroleum,525,megawatthours
+OIL,2026-05-29T21,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-29T20,MIDA,Mid-Atlantic,Petroleum,527,megawatthours
+OIL,2026-05-29T20,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-29T19,MIDA,Mid-Atlantic,Petroleum,572,megawatthours
+OIL,2026-05-29T19,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-29T18,MIDA,Mid-Atlantic,Petroleum,433,megawatthours
+OIL,2026-05-29T18,NE,New England,Petroleum,47,megawatthours
 OIL,2026-05-29T17,MIDA,Mid-Atlantic,Petroleum,256,megawatthours
+OIL,2026-05-29T17,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-29T16,MIDA,Mid-Atlantic,Petroleum,293,megawatthours
+OIL,2026-05-29T16,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-29T15,MIDA,Mid-Atlantic,Petroleum,270,megawatthours
+OIL,2026-05-29T15,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-29T14,MIDA,Mid-Atlantic,Petroleum,252,megawatthours
+OIL,2026-05-29T14,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-29T13,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-05-29T13,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-29T12,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
+OIL,2026-05-29T12,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-29T11,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-05-29T11,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-29T10,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-05-29T10,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-29T09,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
+OIL,2026-05-29T09,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-29T08,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
+OIL,2026-05-29T08,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-29T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-05-29T07,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-29T06,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
+OIL,2026-05-29T06,NE,New England,Petroleum,194,megawatthours
 OIL,2026-05-29T05,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
+OIL,2026-05-29T05,NE,New England,Petroleum,43,megawatthours
 OIL,2026-05-29T04,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
+OIL,2026-05-29T04,NE,New England,Petroleum,43,megawatthours
 OIL,2026-05-29T03,MIDA,Mid-Atlantic,Petroleum,465,megawatthours
+OIL,2026-05-29T03,NE,New England,Petroleum,43,megawatthours
 OIL,2026-05-29T02,MIDA,Mid-Atlantic,Petroleum,1089,megawatthours
+OIL,2026-05-29T02,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-29T01,MIDA,Mid-Atlantic,Petroleum,1226,megawatthours
+OIL,2026-05-29T01,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-29T00,MIDA,Mid-Atlantic,Petroleum,927,megawatthours
+OIL,2026-05-29T00,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-28T23,MIDA,Mid-Atlantic,Petroleum,922,megawatthours
+OIL,2026-05-28T23,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-28T22,MIDA,Mid-Atlantic,Petroleum,768,megawatthours
+OIL,2026-05-28T22,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-28T21,MIDA,Mid-Atlantic,Petroleum,718,megawatthours
+OIL,2026-05-28T21,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-28T20,MIDA,Mid-Atlantic,Petroleum,747,megawatthours
+OIL,2026-05-28T20,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-28T19,MIDA,Mid-Atlantic,Petroleum,727,megawatthours
+OIL,2026-05-28T19,NE,New England,Petroleum,44,megawatthours
 OIL,2026-05-28T18,MIDA,Mid-Atlantic,Petroleum,743,megawatthours
+OIL,2026-05-28T18,NE,New England,Petroleum,47,megawatthours
 OIL,2026-05-28T17,MIDA,Mid-Atlantic,Petroleum,860,megawatthours
+OIL,2026-05-28T17,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-28T16,MIDA,Mid-Atlantic,Petroleum,503,megawatthours
+OIL,2026-05-28T16,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-28T15,MIDA,Mid-Atlantic,Petroleum,399,megawatthours
+OIL,2026-05-28T15,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-28T14,MIDA,Mid-Atlantic,Petroleum,400,megawatthours
+OIL,2026-05-28T14,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-28T13,MIDA,Mid-Atlantic,Petroleum,335,megawatthours
+OIL,2026-05-28T13,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-28T12,MIDA,Mid-Atlantic,Petroleum,236,megawatthours
+OIL,2026-05-28T12,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-28T11,MIDA,Mid-Atlantic,Petroleum,236,megawatthours
+OIL,2026-05-28T11,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-28T10,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
+OIL,2026-05-28T10,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-28T09,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
+OIL,2026-05-28T09,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-28T08,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
+OIL,2026-05-28T08,NE,New England,Petroleum,159,megawatthours
 OIL,2026-05-28T07,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
+OIL,2026-05-28T07,NE,New England,Petroleum,160,megawatthours
 OIL,2026-05-28T06,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
+OIL,2026-05-28T06,NE,New England,Petroleum,194,megawatthours
 OIL,2026-05-28T05,MIDA,Mid-Atlantic,Petroleum,247,megawatthours
+OIL,2026-05-28T05,NE,New England,Petroleum,49,megawatthours
 OIL,2026-05-28T04,MIDA,Mid-Atlantic,Petroleum,757,megawatthours
-OIL,2026-05-28T04,NE,New England,Petroleum,14,megawatthours
+OIL,2026-05-28T04,NE,New England,Petroleum,82,megawatthours
 OIL,2026-05-28T03,MIDA,Mid-Atlantic,Petroleum,860,megawatthours
-OIL,2026-05-28T03,NE,New England,Petroleum,14,megawatthours
+OIL,2026-05-28T03,NE,New England,Petroleum,19,megawatthours
 OIL,2026-05-28T02,MIDA,Mid-Atlantic,Petroleum,1562,megawatthours
-OIL,2026-05-28T02,NE,New England,Petroleum,14,megawatthours
+OIL,2026-05-28T02,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-28T01,MIDA,Mid-Atlantic,Petroleum,1770,megawatthours
-OIL,2026-05-28T01,NE,New England,Petroleum,14,megawatthours
+OIL,2026-05-28T01,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-28T00,MIDA,Mid-Atlantic,Petroleum,1758,megawatthours
-OIL,2026-05-28T00,NE,New England,Petroleum,14,megawatthours
+OIL,2026-05-28T00,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-27T23,MIDA,Mid-Atlantic,Petroleum,1759,megawatthours
-OIL,2026-05-27T23,NE,New England,Petroleum,14,megawatthours
+OIL,2026-05-27T23,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-27T22,MIDA,Mid-Atlantic,Petroleum,1721,megawatthours
-OIL,2026-05-27T22,NE,New England,Petroleum,14,megawatthours
+OIL,2026-05-27T22,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-27T21,MIDA,Mid-Atlantic,Petroleum,1500,megawatthours
-OIL,2026-05-27T21,NE,New England,Petroleum,14,megawatthours
+OIL,2026-05-27T21,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-27T20,MIDA,Mid-Atlantic,Petroleum,980,megawatthours
-OIL,2026-05-27T20,NE,New England,Petroleum,42,megawatthours
+OIL,2026-05-27T20,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-27T19,MIDA,Mid-Atlantic,Petroleum,927,megawatthours
 OIL,2026-05-27T19,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-27T18,MIDA,Mid-Atlantic,Petroleum,935,megawatthours
@@ -117,7 +1604,7 @@ OIL,2026-05-27T07,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-27T06,MIDA,Mid-Atlantic,Petroleum,405,megawatthours
 OIL,2026-05-27T06,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-27T05,MIDA,Mid-Atlantic,Petroleum,407,megawatthours
-OIL,2026-05-27T05,NE,New England,Petroleum,14,megawatthours
+OIL,2026-05-27T05,NE,New England,Petroleum,0,megawatthours
 OIL,2026-05-27T04,MIDA,Mid-Atlantic,Petroleum,491,megawatthours
 OIL,2026-05-27T04,NE,New England,Petroleum,14,megawatthours
 OIL,2026-05-27T03,MIDA,Mid-Atlantic,Petroleum,1012,megawatthours
@@ -355,7 +1842,7 @@ OIL,2026-05-21T20,NE,New England,Petroleum,14,megawatthours
 OIL,2026-05-21T19,MIDA,Mid-Atlantic,Petroleum,577,megawatthours
 OIL,2026-05-21T19,NE,New England,Petroleum,16,megawatthours
 OIL,2026-05-21T18,MIDA,Mid-Atlantic,Petroleum,370,megawatthours
-OIL,2026-05-21T18,NE,New England,Petroleum,0,megawatthours
+OIL,2026-05-21T18,NE,New England,Petroleum,15,megawatthours
 OIL,2026-05-21T17,MIDA,Mid-Atlantic,Petroleum,373,megawatthours
 OIL,2026-05-21T17,NE,New England,Petroleum,14,megawatthours
 OIL,2026-05-21T16,MIDA,Mid-Atlantic,Petroleum,376,megawatthours
@@ -18512,1490 +19999,3 @@ OIL,2025-04-11T19,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
 OIL,2025-04-11T19,NE,New England,Petroleum,22,megawatthours
 OIL,2025-04-11T18,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
 OIL,2025-04-11T18,NE,New England,Petroleum,63,megawatthours
-OIL,2025-04-11T17,MIDA,Mid-Atlantic,Petroleum,210,megawatthours
-OIL,2025-04-11T17,NE,New England,Petroleum,13,megawatthours
-OIL,2025-04-11T16,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-04-11T16,NE,New England,Petroleum,21,megawatthours
-OIL,2025-04-11T15,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
-OIL,2025-04-11T15,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-11T14,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-04-11T14,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-11T13,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
-OIL,2025-04-11T13,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-11T12,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
-OIL,2025-04-11T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-11T11,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
-OIL,2025-04-11T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-11T10,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-04-11T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-11T09,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
-OIL,2025-04-11T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-11T08,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
-OIL,2025-04-11T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-11T07,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
-OIL,2025-04-11T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-11T06,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
-OIL,2025-04-11T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-11T05,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
-OIL,2025-04-11T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-11T04,MIDA,Mid-Atlantic,Petroleum,529,megawatthours
-OIL,2025-04-11T04,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-11T03,MIDA,Mid-Atlantic,Petroleum,560,megawatthours
-OIL,2025-04-11T03,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-11T02,MIDA,Mid-Atlantic,Petroleum,529,megawatthours
-OIL,2025-04-11T02,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-11T01,MIDA,Mid-Atlantic,Petroleum,625,megawatthours
-OIL,2025-04-11T01,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-11T00,MIDA,Mid-Atlantic,Petroleum,712,megawatthours
-OIL,2025-04-11T00,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T23,MIDA,Mid-Atlantic,Petroleum,616,megawatthours
-OIL,2025-04-10T23,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T22,MIDA,Mid-Atlantic,Petroleum,479,megawatthours
-OIL,2025-04-10T22,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T21,MIDA,Mid-Atlantic,Petroleum,381,megawatthours
-OIL,2025-04-10T21,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T20,MIDA,Mid-Atlantic,Petroleum,326,megawatthours
-OIL,2025-04-10T20,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T19,MIDA,Mid-Atlantic,Petroleum,392,megawatthours
-OIL,2025-04-10T19,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T18,MIDA,Mid-Atlantic,Petroleum,358,megawatthours
-OIL,2025-04-10T18,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T17,MIDA,Mid-Atlantic,Petroleum,359,megawatthours
-OIL,2025-04-10T17,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T16,MIDA,Mid-Atlantic,Petroleum,358,megawatthours
-OIL,2025-04-10T16,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T15,MIDA,Mid-Atlantic,Petroleum,342,megawatthours
-OIL,2025-04-10T15,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T14,MIDA,Mid-Atlantic,Petroleum,314,megawatthours
-OIL,2025-04-10T14,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T13,MIDA,Mid-Atlantic,Petroleum,312,megawatthours
-OIL,2025-04-10T13,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T12,MIDA,Mid-Atlantic,Petroleum,393,megawatthours
-OIL,2025-04-10T12,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T11,MIDA,Mid-Atlantic,Petroleum,364,megawatthours
-OIL,2025-04-10T11,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T10,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-04-10T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-10T09,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-04-10T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-10T08,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-04-10T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-10T07,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
-OIL,2025-04-10T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-10T06,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-04-10T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-10T05,MIDA,Mid-Atlantic,Petroleum,325,megawatthours
-OIL,2025-04-10T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-10T04,MIDA,Mid-Atlantic,Petroleum,1272,megawatthours
-OIL,2025-04-10T04,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T03,MIDA,Mid-Atlantic,Petroleum,1298,megawatthours
-OIL,2025-04-10T03,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T02,MIDA,Mid-Atlantic,Petroleum,1282,megawatthours
-OIL,2025-04-10T02,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T01,MIDA,Mid-Atlantic,Petroleum,1331,megawatthours
-OIL,2025-04-10T01,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-10T00,MIDA,Mid-Atlantic,Petroleum,1290,megawatthours
-OIL,2025-04-10T00,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T23,MIDA,Mid-Atlantic,Petroleum,1214,megawatthours
-OIL,2025-04-09T23,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T22,MIDA,Mid-Atlantic,Petroleum,633,megawatthours
-OIL,2025-04-09T22,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T21,MIDA,Mid-Atlantic,Petroleum,379,megawatthours
-OIL,2025-04-09T21,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T20,MIDA,Mid-Atlantic,Petroleum,412,megawatthours
-OIL,2025-04-09T20,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T19,MIDA,Mid-Atlantic,Petroleum,493,megawatthours
-OIL,2025-04-09T19,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T18,MIDA,Mid-Atlantic,Petroleum,577,megawatthours
-OIL,2025-04-09T18,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T17,MIDA,Mid-Atlantic,Petroleum,737,megawatthours
-OIL,2025-04-09T17,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T16,MIDA,Mid-Atlantic,Petroleum,878,megawatthours
-OIL,2025-04-09T16,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T15,MIDA,Mid-Atlantic,Petroleum,957,megawatthours
-OIL,2025-04-09T15,NE,New England,Petroleum,15,megawatthours
-OIL,2025-04-09T14,MIDA,Mid-Atlantic,Petroleum,1223,megawatthours
-OIL,2025-04-09T14,NE,New England,Petroleum,18,megawatthours
-OIL,2025-04-09T13,MIDA,Mid-Atlantic,Petroleum,1455,megawatthours
-OIL,2025-04-09T13,NE,New England,Petroleum,8,megawatthours
-OIL,2025-04-09T12,MIDA,Mid-Atlantic,Petroleum,2022,megawatthours
-OIL,2025-04-09T12,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-09T11,MIDA,Mid-Atlantic,Petroleum,1896,megawatthours
-OIL,2025-04-09T11,NE,New England,Petroleum,7,megawatthours
-OIL,2025-04-09T10,MIDA,Mid-Atlantic,Petroleum,992,megawatthours
-OIL,2025-04-09T10,NE,New England,Petroleum,8,megawatthours
-OIL,2025-04-09T09,MIDA,Mid-Atlantic,Petroleum,390,megawatthours
-OIL,2025-04-09T09,NE,New England,Petroleum,8,megawatthours
-OIL,2025-04-09T08,MIDA,Mid-Atlantic,Petroleum,355,megawatthours
-OIL,2025-04-09T08,NE,New England,Petroleum,8,megawatthours
-OIL,2025-04-09T07,MIDA,Mid-Atlantic,Petroleum,354,megawatthours
-OIL,2025-04-09T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-09T06,MIDA,Mid-Atlantic,Petroleum,351,megawatthours
-OIL,2025-04-09T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-09T05,MIDA,Mid-Atlantic,Petroleum,380,megawatthours
-OIL,2025-04-09T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-09T04,MIDA,Mid-Atlantic,Petroleum,816,megawatthours
-OIL,2025-04-09T04,NE,New England,Petroleum,69,megawatthours
-OIL,2025-04-09T03,MIDA,Mid-Atlantic,Petroleum,979,megawatthours
-OIL,2025-04-09T03,NE,New England,Petroleum,69,megawatthours
-OIL,2025-04-09T02,MIDA,Mid-Atlantic,Petroleum,1191,megawatthours
-OIL,2025-04-09T02,NE,New England,Petroleum,69,megawatthours
-OIL,2025-04-09T01,MIDA,Mid-Atlantic,Petroleum,1377,megawatthours
-OIL,2025-04-09T01,NE,New England,Petroleum,69,megawatthours
-OIL,2025-04-09T00,MIDA,Mid-Atlantic,Petroleum,1104,megawatthours
-OIL,2025-04-09T00,NE,New England,Petroleum,70,megawatthours
-OIL,2025-04-08T23,MIDA,Mid-Atlantic,Petroleum,984,megawatthours
-OIL,2025-04-08T23,NE,New England,Petroleum,34,megawatthours
-OIL,2025-04-08T22,MIDA,Mid-Atlantic,Petroleum,914,megawatthours
-OIL,2025-04-08T22,NE,New England,Petroleum,4,megawatthours
-OIL,2025-04-08T21,MIDA,Mid-Atlantic,Petroleum,901,megawatthours
-OIL,2025-04-08T21,NE,New England,Petroleum,4,megawatthours
-OIL,2025-04-08T20,MIDA,Mid-Atlantic,Petroleum,901,megawatthours
-OIL,2025-04-08T20,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T19,MIDA,Mid-Atlantic,Petroleum,903,megawatthours
-OIL,2025-04-08T19,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T18,MIDA,Mid-Atlantic,Petroleum,907,megawatthours
-OIL,2025-04-08T18,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T17,MIDA,Mid-Atlantic,Petroleum,947,megawatthours
-OIL,2025-04-08T17,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T16,MIDA,Mid-Atlantic,Petroleum,1005,megawatthours
-OIL,2025-04-08T16,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T15,MIDA,Mid-Atlantic,Petroleum,1050,megawatthours
-OIL,2025-04-08T15,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T14,MIDA,Mid-Atlantic,Petroleum,1254,megawatthours
-OIL,2025-04-08T14,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T13,MIDA,Mid-Atlantic,Petroleum,1415,megawatthours
-OIL,2025-04-08T13,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T12,MIDA,Mid-Atlantic,Petroleum,1532,megawatthours
-OIL,2025-04-08T12,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T11,MIDA,Mid-Atlantic,Petroleum,918,megawatthours
-OIL,2025-04-08T11,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T10,MIDA,Mid-Atlantic,Petroleum,364,megawatthours
-OIL,2025-04-08T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-08T09,MIDA,Mid-Atlantic,Petroleum,354,megawatthours
-OIL,2025-04-08T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-08T08,MIDA,Mid-Atlantic,Petroleum,289,megawatthours
-OIL,2025-04-08T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-08T07,MIDA,Mid-Atlantic,Petroleum,268,megawatthours
-OIL,2025-04-08T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-08T06,MIDA,Mid-Atlantic,Petroleum,291,megawatthours
-OIL,2025-04-08T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-08T05,MIDA,Mid-Atlantic,Petroleum,288,megawatthours
-OIL,2025-04-08T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-08T04,MIDA,Mid-Atlantic,Petroleum,287,megawatthours
-OIL,2025-04-08T04,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T03,MIDA,Mid-Atlantic,Petroleum,373,megawatthours
-OIL,2025-04-08T03,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T02,MIDA,Mid-Atlantic,Petroleum,672,megawatthours
-OIL,2025-04-08T02,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T01,MIDA,Mid-Atlantic,Petroleum,663,megawatthours
-OIL,2025-04-08T01,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-08T00,MIDA,Mid-Atlantic,Petroleum,637,megawatthours
-OIL,2025-04-08T00,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T23,MIDA,Mid-Atlantic,Petroleum,617,megawatthours
-OIL,2025-04-07T23,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T22,MIDA,Mid-Atlantic,Petroleum,576,megawatthours
-OIL,2025-04-07T22,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T21,MIDA,Mid-Atlantic,Petroleum,646,megawatthours
-OIL,2025-04-07T21,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T20,MIDA,Mid-Atlantic,Petroleum,628,megawatthours
-OIL,2025-04-07T20,NE,New England,Petroleum,4,megawatthours
-OIL,2025-04-07T19,MIDA,Mid-Atlantic,Petroleum,565,megawatthours
-OIL,2025-04-07T19,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T18,MIDA,Mid-Atlantic,Petroleum,649,megawatthours
-OIL,2025-04-07T18,NE,New England,Petroleum,4,megawatthours
-OIL,2025-04-07T17,MIDA,Mid-Atlantic,Petroleum,652,megawatthours
-OIL,2025-04-07T17,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T16,MIDA,Mid-Atlantic,Petroleum,604,megawatthours
-OIL,2025-04-07T16,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T15,MIDA,Mid-Atlantic,Petroleum,609,megawatthours
-OIL,2025-04-07T15,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T14,MIDA,Mid-Atlantic,Petroleum,563,megawatthours
-OIL,2025-04-07T14,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T13,MIDA,Mid-Atlantic,Petroleum,564,megawatthours
-OIL,2025-04-07T13,NE,New England,Petroleum,3,megawatthours
-OIL,2025-04-07T12,MIDA,Mid-Atlantic,Petroleum,563,megawatthours
-OIL,2025-04-07T12,NE,New England,Petroleum,4,megawatthours
-OIL,2025-04-07T11,MIDA,Mid-Atlantic,Petroleum,495,megawatthours
-OIL,2025-04-07T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-07T10,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-04-07T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-07T09,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-04-07T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-07T08,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
-OIL,2025-04-07T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-07T07,MIDA,Mid-Atlantic,Petroleum,209,megawatthours
-OIL,2025-04-07T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-07T06,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
-OIL,2025-04-07T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-07T05,MIDA,Mid-Atlantic,Petroleum,205,megawatthours
-OIL,2025-04-07T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-07T04,MIDA,Mid-Atlantic,Petroleum,204,megawatthours
-OIL,2025-04-07T03,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-04-07T02,MIDA,Mid-Atlantic,Petroleum,268,megawatthours
-OIL,2025-04-07T01,MIDA,Mid-Atlantic,Petroleum,382,megawatthours
-OIL,2025-04-07T00,MIDA,Mid-Atlantic,Petroleum,458,megawatthours
-OIL,2025-04-06T23,MIDA,Mid-Atlantic,Petroleum,457,megawatthours
-OIL,2025-04-06T22,MIDA,Mid-Atlantic,Petroleum,427,megawatthours
-OIL,2025-04-06T21,MIDA,Mid-Atlantic,Petroleum,360,megawatthours
-OIL,2025-04-06T20,MIDA,Mid-Atlantic,Petroleum,361,megawatthours
-OIL,2025-04-06T19,MIDA,Mid-Atlantic,Petroleum,362,megawatthours
-OIL,2025-04-06T18,MIDA,Mid-Atlantic,Petroleum,361,megawatthours
-OIL,2025-04-06T17,MIDA,Mid-Atlantic,Petroleum,363,megawatthours
-OIL,2025-04-06T16,MIDA,Mid-Atlantic,Petroleum,363,megawatthours
-OIL,2025-04-06T15,MIDA,Mid-Atlantic,Petroleum,366,megawatthours
-OIL,2025-04-06T14,MIDA,Mid-Atlantic,Petroleum,369,megawatthours
-OIL,2025-04-06T13,MIDA,Mid-Atlantic,Petroleum,372,megawatthours
-OIL,2025-04-06T12,MIDA,Mid-Atlantic,Petroleum,265,megawatthours
-OIL,2025-04-06T11,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-04-06T10,MIDA,Mid-Atlantic,Petroleum,210,megawatthours
-OIL,2025-04-06T09,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
-OIL,2025-04-06T08,MIDA,Mid-Atlantic,Petroleum,206,megawatthours
-OIL,2025-04-06T07,MIDA,Mid-Atlantic,Petroleum,206,megawatthours
-OIL,2025-04-06T06,MIDA,Mid-Atlantic,Petroleum,205,megawatthours
-OIL,2025-04-06T05,MIDA,Mid-Atlantic,Petroleum,203,megawatthours
-OIL,2025-04-06T04,MIDA,Mid-Atlantic,Petroleum,201,megawatthours
-OIL,2025-04-06T04,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-06T03,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-04-06T03,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-06T02,MIDA,Mid-Atlantic,Petroleum,362,megawatthours
-OIL,2025-04-06T02,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-06T01,MIDA,Mid-Atlantic,Petroleum,702,megawatthours
-OIL,2025-04-06T01,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-06T00,MIDA,Mid-Atlantic,Petroleum,962,megawatthours
-OIL,2025-04-06T00,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-05T23,MIDA,Mid-Atlantic,Petroleum,419,megawatthours
-OIL,2025-04-05T23,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-05T22,MIDA,Mid-Atlantic,Petroleum,300,megawatthours
-OIL,2025-04-05T22,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-05T21,MIDA,Mid-Atlantic,Petroleum,540,megawatthours
-OIL,2025-04-05T21,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-05T20,MIDA,Mid-Atlantic,Petroleum,537,megawatthours
-OIL,2025-04-05T20,NE,New England,Petroleum,9,megawatthours
-OIL,2025-04-05T19,MIDA,Mid-Atlantic,Petroleum,547,megawatthours
-OIL,2025-04-05T19,NE,New England,Petroleum,13,megawatthours
-OIL,2025-04-05T18,MIDA,Mid-Atlantic,Petroleum,549,megawatthours
-OIL,2025-04-05T18,NE,New England,Petroleum,13,megawatthours
-OIL,2025-04-05T17,MIDA,Mid-Atlantic,Petroleum,484,megawatthours
-OIL,2025-04-05T17,NE,New England,Petroleum,13,megawatthours
-OIL,2025-04-05T16,MIDA,Mid-Atlantic,Petroleum,209,megawatthours
-OIL,2025-04-05T16,NE,New England,Petroleum,22,megawatthours
-OIL,2025-04-05T15,MIDA,Mid-Atlantic,Petroleum,210,megawatthours
-OIL,2025-04-05T15,NE,New England,Petroleum,22,megawatthours
-OIL,2025-04-05T14,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-04-05T14,NE,New England,Petroleum,22,megawatthours
-OIL,2025-04-05T13,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-04-05T13,NE,New England,Petroleum,22,megawatthours
-OIL,2025-04-05T12,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
-OIL,2025-04-05T12,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-05T11,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
-OIL,2025-04-05T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-05T10,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
-OIL,2025-04-05T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-05T09,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-04-05T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-05T08,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
-OIL,2025-04-05T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-05T07,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
-OIL,2025-04-05T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-05T06,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-04-05T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-05T05,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-04-05T05,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-05T04,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
-OIL,2025-04-05T04,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-05T03,MIDA,Mid-Atlantic,Petroleum,210,megawatthours
-OIL,2025-04-05T03,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-05T02,MIDA,Mid-Atlantic,Petroleum,460,megawatthours
-OIL,2025-04-05T02,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-05T01,MIDA,Mid-Atlantic,Petroleum,874,megawatthours
-OIL,2025-04-05T01,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-05T00,MIDA,Mid-Atlantic,Petroleum,1035,megawatthours
-OIL,2025-04-05T00,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-04T23,MIDA,Mid-Atlantic,Petroleum,998,megawatthours
-OIL,2025-04-04T23,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-04T22,MIDA,Mid-Atlantic,Petroleum,999,megawatthours
-OIL,2025-04-04T22,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-04T21,MIDA,Mid-Atlantic,Petroleum,930,megawatthours
-OIL,2025-04-04T21,NE,New England,Petroleum,19,megawatthours
-OIL,2025-04-04T20,MIDA,Mid-Atlantic,Petroleum,689,megawatthours
-OIL,2025-04-04T20,NE,New England,Petroleum,9,megawatthours
-OIL,2025-04-04T19,MIDA,Mid-Atlantic,Petroleum,530,megawatthours
-OIL,2025-04-04T19,NE,New England,Petroleum,13,megawatthours
-OIL,2025-04-04T18,MIDA,Mid-Atlantic,Petroleum,263,megawatthours
-OIL,2025-04-04T18,NE,New England,Petroleum,13,megawatthours
-OIL,2025-04-04T17,MIDA,Mid-Atlantic,Petroleum,256,megawatthours
-OIL,2025-04-04T17,NE,New England,Petroleum,13,megawatthours
-OIL,2025-04-04T16,MIDA,Mid-Atlantic,Petroleum,259,megawatthours
-OIL,2025-04-04T16,NE,New England,Petroleum,22,megawatthours
-OIL,2025-04-04T15,MIDA,Mid-Atlantic,Petroleum,238,megawatthours
-OIL,2025-04-04T15,NE,New England,Petroleum,22,megawatthours
-OIL,2025-04-04T14,MIDA,Mid-Atlantic,Petroleum,299,megawatthours
-OIL,2025-04-04T14,NE,New England,Petroleum,22,megawatthours
-OIL,2025-04-04T13,MIDA,Mid-Atlantic,Petroleum,537,megawatthours
-OIL,2025-04-04T13,NE,New England,Petroleum,22,megawatthours
-OIL,2025-04-04T12,MIDA,Mid-Atlantic,Petroleum,538,megawatthours
-OIL,2025-04-04T12,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-04T11,MIDA,Mid-Atlantic,Petroleum,329,megawatthours
-OIL,2025-04-04T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-04T10,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-04-04T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-04T09,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-04-04T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-04T08,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-04-04T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-04T07,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-04-04T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-04T06,MIDA,Mid-Atlantic,Petroleum,205,megawatthours
-OIL,2025-04-04T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-04T05,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-04-04T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-04T04,MIDA,Mid-Atlantic,Petroleum,325,megawatthours
-OIL,2025-04-04T04,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-04T03,MIDA,Mid-Atlantic,Petroleum,327,megawatthours
-OIL,2025-04-04T03,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-04T02,MIDA,Mid-Atlantic,Petroleum,355,megawatthours
-OIL,2025-04-04T02,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-04T01,MIDA,Mid-Atlantic,Petroleum,386,megawatthours
-OIL,2025-04-04T01,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-04T00,MIDA,Mid-Atlantic,Petroleum,412,megawatthours
-OIL,2025-04-04T00,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-03T23,MIDA,Mid-Atlantic,Petroleum,405,megawatthours
-OIL,2025-04-03T23,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-03T22,MIDA,Mid-Atlantic,Petroleum,408,megawatthours
-OIL,2025-04-03T22,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-03T21,MIDA,Mid-Atlantic,Petroleum,410,megawatthours
-OIL,2025-04-03T21,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-03T20,MIDA,Mid-Atlantic,Petroleum,430,megawatthours
-OIL,2025-04-03T20,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-03T19,MIDA,Mid-Atlantic,Petroleum,359,megawatthours
-OIL,2025-04-03T19,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-03T18,MIDA,Mid-Atlantic,Petroleum,330,megawatthours
-OIL,2025-04-03T18,NE,New England,Petroleum,16,megawatthours
-OIL,2025-04-03T17,MIDA,Mid-Atlantic,Petroleum,328,megawatthours
-OIL,2025-04-03T17,NE,New England,Petroleum,41,megawatthours
-OIL,2025-04-03T16,MIDA,Mid-Atlantic,Petroleum,334,megawatthours
-OIL,2025-04-03T16,NE,New England,Petroleum,28,megawatthours
-OIL,2025-04-03T15,MIDA,Mid-Atlantic,Petroleum,335,megawatthours
-OIL,2025-04-03T15,NE,New England,Petroleum,18,megawatthours
-OIL,2025-04-03T14,MIDA,Mid-Atlantic,Petroleum,287,megawatthours
-OIL,2025-04-03T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T13,MIDA,Mid-Atlantic,Petroleum,270,megawatthours
-OIL,2025-04-03T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T12,MIDA,Mid-Atlantic,Petroleum,234,megawatthours
-OIL,2025-04-03T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T11,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-04-03T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T10,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
-OIL,2025-04-03T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T09,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-04-03T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T08,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
-OIL,2025-04-03T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T07,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-04-03T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T06,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
-OIL,2025-04-03T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
-OIL,2025-04-03T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-03T04,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
-OIL,2025-04-03T04,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-03T03,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
-OIL,2025-04-03T03,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-03T02,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-04-03T02,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-03T01,MIDA,Mid-Atlantic,Petroleum,236,megawatthours
-OIL,2025-04-03T01,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-03T00,MIDA,Mid-Atlantic,Petroleum,311,megawatthours
-OIL,2025-04-03T00,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T23,MIDA,Mid-Atlantic,Petroleum,311,megawatthours
-OIL,2025-04-02T23,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T22,MIDA,Mid-Atlantic,Petroleum,312,megawatthours
-OIL,2025-04-02T22,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T21,MIDA,Mid-Atlantic,Petroleum,316,megawatthours
-OIL,2025-04-02T21,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T20,MIDA,Mid-Atlantic,Petroleum,269,megawatthours
-OIL,2025-04-02T20,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T19,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
-OIL,2025-04-02T19,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T18,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
-OIL,2025-04-02T18,NE,New England,Petroleum,13,megawatthours
-OIL,2025-04-02T17,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-04-02T17,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T16,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-04-02T16,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T15,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-04-02T15,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T14,MIDA,Mid-Atlantic,Petroleum,244,megawatthours
-OIL,2025-04-02T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T13,MIDA,Mid-Atlantic,Petroleum,270,megawatthours
-OIL,2025-04-02T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T12,MIDA,Mid-Atlantic,Petroleum,258,megawatthours
-OIL,2025-04-02T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T11,MIDA,Mid-Atlantic,Petroleum,248,megawatthours
-OIL,2025-04-02T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T10,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
-OIL,2025-04-02T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T09,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-04-02T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T08,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-04-02T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T07,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
-OIL,2025-04-02T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T06,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-04-02T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-02T05,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-04-02T05,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T04,MIDA,Mid-Atlantic,Petroleum,255,megawatthours
-OIL,2025-04-02T04,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T03,MIDA,Mid-Atlantic,Petroleum,256,megawatthours
-OIL,2025-04-02T03,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T02,MIDA,Mid-Atlantic,Petroleum,250,megawatthours
-OIL,2025-04-02T02,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T01,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
-OIL,2025-04-02T01,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-02T00,MIDA,Mid-Atlantic,Petroleum,210,megawatthours
-OIL,2025-04-02T00,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-01T23,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
-OIL,2025-04-01T23,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-01T22,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-04-01T22,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-01T21,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
-OIL,2025-04-01T21,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-01T20,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-04-01T20,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-01T19,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-04-01T19,NE,New England,Petroleum,14,megawatthours
-OIL,2025-04-01T18,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-04-01T18,NE,New England,Petroleum,13,megawatthours
-OIL,2025-04-01T17,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
-OIL,2025-04-01T17,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T16,MIDA,Mid-Atlantic,Petroleum,244,megawatthours
-OIL,2025-04-01T16,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T15,MIDA,Mid-Atlantic,Petroleum,246,megawatthours
-OIL,2025-04-01T15,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T14,MIDA,Mid-Atlantic,Petroleum,243,megawatthours
-OIL,2025-04-01T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T13,MIDA,Mid-Atlantic,Petroleum,242,megawatthours
-OIL,2025-04-01T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T12,MIDA,Mid-Atlantic,Petroleum,251,megawatthours
-OIL,2025-04-01T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T11,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
-OIL,2025-04-01T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T10,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
-OIL,2025-04-01T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T09,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-04-01T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T08,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-04-01T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T07,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-04-01T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T06,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-04-01T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T05,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-04-01T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-04-01T04,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-04-01T04,NE,New England,Petroleum,75,megawatthours
-OIL,2025-04-01T03,MIDA,Mid-Atlantic,Petroleum,246,megawatthours
-OIL,2025-04-01T03,NE,New England,Petroleum,76,megawatthours
-OIL,2025-04-01T02,MIDA,Mid-Atlantic,Petroleum,252,megawatthours
-OIL,2025-04-01T02,NE,New England,Petroleum,77,megawatthours
-OIL,2025-04-01T01,MIDA,Mid-Atlantic,Petroleum,486,megawatthours
-OIL,2025-04-01T01,NE,New England,Petroleum,77,megawatthours
-OIL,2025-04-01T00,MIDA,Mid-Atlantic,Petroleum,503,megawatthours
-OIL,2025-04-01T00,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T23,MIDA,Mid-Atlantic,Petroleum,648,megawatthours
-OIL,2025-03-31T23,NE,New England,Petroleum,78,megawatthours
-OIL,2025-03-31T22,MIDA,Mid-Atlantic,Petroleum,628,megawatthours
-OIL,2025-03-31T22,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T21,MIDA,Mid-Atlantic,Petroleum,952,megawatthours
-OIL,2025-03-31T21,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T20,MIDA,Mid-Atlantic,Petroleum,929,megawatthours
-OIL,2025-03-31T20,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-31T19,MIDA,Mid-Atlantic,Petroleum,985,megawatthours
-OIL,2025-03-31T19,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-31T18,MIDA,Mid-Atlantic,Petroleum,575,megawatthours
-OIL,2025-03-31T18,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-31T17,MIDA,Mid-Atlantic,Petroleum,249,megawatthours
-OIL,2025-03-31T17,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T16,MIDA,Mid-Atlantic,Petroleum,249,megawatthours
-OIL,2025-03-31T16,NE,New England,Petroleum,78,megawatthours
-OIL,2025-03-31T15,MIDA,Mid-Atlantic,Petroleum,252,megawatthours
-OIL,2025-03-31T15,NE,New England,Petroleum,78,megawatthours
-OIL,2025-03-31T14,MIDA,Mid-Atlantic,Petroleum,404,megawatthours
-OIL,2025-03-31T14,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T13,MIDA,Mid-Atlantic,Petroleum,473,megawatthours
-OIL,2025-03-31T13,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T12,MIDA,Mid-Atlantic,Petroleum,464,megawatthours
-OIL,2025-03-31T12,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T11,MIDA,Mid-Atlantic,Petroleum,242,megawatthours
-OIL,2025-03-31T11,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-31T10,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
-OIL,2025-03-31T10,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T09,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-03-31T09,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-31T08,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-03-31T08,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T07,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
-OIL,2025-03-31T07,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-31T06,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
-OIL,2025-03-31T06,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
-OIL,2025-03-31T05,NE,New England,Petroleum,75,megawatthours
-OIL,2025-03-31T04,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
-OIL,2025-03-31T04,NE,New England,Petroleum,75,megawatthours
-OIL,2025-03-31T03,MIDA,Mid-Atlantic,Petroleum,238,megawatthours
-OIL,2025-03-31T03,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-31T02,MIDA,Mid-Atlantic,Petroleum,253,megawatthours
-OIL,2025-03-31T02,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T01,MIDA,Mid-Atlantic,Petroleum,259,megawatthours
-OIL,2025-03-31T01,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-31T00,MIDA,Mid-Atlantic,Petroleum,316,megawatthours
-OIL,2025-03-31T00,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T23,MIDA,Mid-Atlantic,Petroleum,544,megawatthours
-OIL,2025-03-30T23,NE,New England,Petroleum,78,megawatthours
-OIL,2025-03-30T22,MIDA,Mid-Atlantic,Petroleum,648,megawatthours
-OIL,2025-03-30T22,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T21,MIDA,Mid-Atlantic,Petroleum,607,megawatthours
-OIL,2025-03-30T21,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T20,MIDA,Mid-Atlantic,Petroleum,242,megawatthours
-OIL,2025-03-30T20,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-30T19,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
-OIL,2025-03-30T19,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-30T18,MIDA,Mid-Atlantic,Petroleum,201,megawatthours
-OIL,2025-03-30T18,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-30T17,MIDA,Mid-Atlantic,Petroleum,186,megawatthours
-OIL,2025-03-30T17,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T16,MIDA,Mid-Atlantic,Petroleum,183,megawatthours
-OIL,2025-03-30T16,NE,New England,Petroleum,78,megawatthours
-OIL,2025-03-30T15,MIDA,Mid-Atlantic,Petroleum,202,megawatthours
-OIL,2025-03-30T15,NE,New England,Petroleum,78,megawatthours
-OIL,2025-03-30T14,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-03-30T14,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T13,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-03-30T13,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T12,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-03-30T12,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T11,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-03-30T11,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-30T10,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-03-30T10,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T09,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
-OIL,2025-03-30T09,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-30T08,MIDA,Mid-Atlantic,Petroleum,219,megawatthours
-OIL,2025-03-30T08,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T07,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
-OIL,2025-03-30T07,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-30T06,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
-OIL,2025-03-30T06,NE,New England,Petroleum,77,megawatthours
-OIL,2025-03-30T05,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-03-30T05,NE,New England,Petroleum,76,megawatthours
-OIL,2025-03-30T04,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
-OIL,2025-03-30T04,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-30T03,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
-OIL,2025-03-30T03,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-30T02,MIDA,Mid-Atlantic,Petroleum,232,megawatthours
-OIL,2025-03-30T02,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-30T01,MIDA,Mid-Atlantic,Petroleum,349,megawatthours
-OIL,2025-03-30T01,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-30T00,MIDA,Mid-Atlantic,Petroleum,333,megawatthours
-OIL,2025-03-30T00,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-29T23,MIDA,Mid-Atlantic,Petroleum,340,megawatthours
-OIL,2025-03-29T23,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-29T22,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-03-29T22,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-29T21,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-03-29T21,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-29T20,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-03-29T20,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-29T19,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-03-29T19,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T18,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-03-29T18,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T17,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-03-29T17,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T16,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-03-29T16,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T15,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-03-29T15,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T14,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
-OIL,2025-03-29T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T13,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
-OIL,2025-03-29T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T12,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-03-29T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T11,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
-OIL,2025-03-29T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T10,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-03-29T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T09,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
-OIL,2025-03-29T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T08,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-03-29T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T07,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
-OIL,2025-03-29T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T06,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
-OIL,2025-03-29T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-29T05,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-03-29T05,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-29T04,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-03-29T04,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-29T03,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-03-29T03,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-29T02,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-03-29T02,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-29T01,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-03-29T01,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-29T00,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
-OIL,2025-03-29T00,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-28T23,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-03-28T23,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-28T22,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-03-28T22,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-28T21,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
-OIL,2025-03-28T21,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-28T20,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-03-28T20,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-28T19,MIDA,Mid-Atlantic,Petroleum,235,megawatthours
-OIL,2025-03-28T19,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T18,MIDA,Mid-Atlantic,Petroleum,252,megawatthours
-OIL,2025-03-28T18,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T17,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
-OIL,2025-03-28T17,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T16,MIDA,Mid-Atlantic,Petroleum,340,megawatthours
-OIL,2025-03-28T16,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T15,MIDA,Mid-Atlantic,Petroleum,614,megawatthours
-OIL,2025-03-28T15,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T14,MIDA,Mid-Atlantic,Petroleum,630,megawatthours
-OIL,2025-03-28T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T13,MIDA,Mid-Atlantic,Petroleum,689,megawatthours
-OIL,2025-03-28T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T12,MIDA,Mid-Atlantic,Petroleum,667,megawatthours
-OIL,2025-03-28T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T11,MIDA,Mid-Atlantic,Petroleum,598,megawatthours
-OIL,2025-03-28T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T10,MIDA,Mid-Atlantic,Petroleum,672,megawatthours
-OIL,2025-03-28T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T09,MIDA,Mid-Atlantic,Petroleum,305,megawatthours
-OIL,2025-03-28T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T08,MIDA,Mid-Atlantic,Petroleum,232,megawatthours
-OIL,2025-03-28T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T07,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
-OIL,2025-03-28T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T06,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-03-28T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T05,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-03-28T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-28T04,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-03-28T04,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-28T03,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-03-28T03,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-28T02,MIDA,Mid-Atlantic,Petroleum,256,megawatthours
-OIL,2025-03-28T02,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-28T01,MIDA,Mid-Atlantic,Petroleum,300,megawatthours
-OIL,2025-03-28T01,NE,New England,Petroleum,27,megawatthours
-OIL,2025-03-28T00,MIDA,Mid-Atlantic,Petroleum,309,megawatthours
-OIL,2025-03-28T00,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-27T23,MIDA,Mid-Atlantic,Petroleum,260,megawatthours
-OIL,2025-03-27T23,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-27T22,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-03-27T22,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-27T21,MIDA,Mid-Atlantic,Petroleum,261,megawatthours
-OIL,2025-03-27T21,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-27T20,MIDA,Mid-Atlantic,Petroleum,240,megawatthours
-OIL,2025-03-27T20,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-27T19,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
-OIL,2025-03-27T19,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-27T18,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-03-27T18,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-27T17,MIDA,Mid-Atlantic,Petroleum,231,megawatthours
-OIL,2025-03-27T17,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-27T16,MIDA,Mid-Atlantic,Petroleum,287,megawatthours
-OIL,2025-03-27T16,NE,New England,Petroleum,20,megawatthours
-OIL,2025-03-27T15,MIDA,Mid-Atlantic,Petroleum,1032,megawatthours
-OIL,2025-03-27T15,NE,New England,Petroleum,29,megawatthours
-OIL,2025-03-27T14,MIDA,Mid-Atlantic,Petroleum,1462,megawatthours
-OIL,2025-03-27T14,NE,New England,Petroleum,29,megawatthours
-OIL,2025-03-27T13,MIDA,Mid-Atlantic,Petroleum,1690,megawatthours
-OIL,2025-03-27T13,NE,New England,Petroleum,30,megawatthours
-OIL,2025-03-27T12,MIDA,Mid-Atlantic,Petroleum,1747,megawatthours
-OIL,2025-03-27T12,NE,New England,Petroleum,8,megawatthours
-OIL,2025-03-27T11,MIDA,Mid-Atlantic,Petroleum,1314,megawatthours
-OIL,2025-03-27T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-27T10,MIDA,Mid-Atlantic,Petroleum,626,megawatthours
-OIL,2025-03-27T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-27T09,MIDA,Mid-Atlantic,Petroleum,287,megawatthours
-OIL,2025-03-27T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-27T08,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-03-27T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-27T07,MIDA,Mid-Atlantic,Petroleum,227,megawatthours
-OIL,2025-03-27T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-27T06,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-03-27T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-27T05,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-03-27T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-27T04,MIDA,Mid-Atlantic,Petroleum,235,megawatthours
-OIL,2025-03-27T04,NE,New England,Petroleum,24,megawatthours
-OIL,2025-03-27T03,MIDA,Mid-Atlantic,Petroleum,268,megawatthours
-OIL,2025-03-27T03,NE,New England,Petroleum,24,megawatthours
-OIL,2025-03-27T02,MIDA,Mid-Atlantic,Petroleum,267,megawatthours
-OIL,2025-03-27T02,NE,New England,Petroleum,25,megawatthours
-OIL,2025-03-27T01,MIDA,Mid-Atlantic,Petroleum,266,megawatthours
-OIL,2025-03-27T01,NE,New England,Petroleum,25,megawatthours
-OIL,2025-03-27T00,MIDA,Mid-Atlantic,Petroleum,260,megawatthours
-OIL,2025-03-27T00,NE,New England,Petroleum,25,megawatthours
-OIL,2025-03-26T23,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
-OIL,2025-03-26T23,NE,New England,Petroleum,25,megawatthours
-OIL,2025-03-26T22,MIDA,Mid-Atlantic,Petroleum,211,megawatthours
-OIL,2025-03-26T22,NE,New England,Petroleum,25,megawatthours
-OIL,2025-03-26T21,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-03-26T21,NE,New England,Petroleum,43,megawatthours
-OIL,2025-03-26T20,MIDA,Mid-Atlantic,Petroleum,221,megawatthours
-OIL,2025-03-26T20,NE,New England,Petroleum,44,megawatthours
-OIL,2025-03-26T19,MIDA,Mid-Atlantic,Petroleum,283,megawatthours
-OIL,2025-03-26T19,NE,New England,Petroleum,44,megawatthours
-OIL,2025-03-26T18,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
-OIL,2025-03-26T18,NE,New England,Petroleum,32,megawatthours
-OIL,2025-03-26T17,MIDA,Mid-Atlantic,Petroleum,218,megawatthours
-OIL,2025-03-26T17,NE,New England,Petroleum,12,megawatthours
-OIL,2025-03-26T16,MIDA,Mid-Atlantic,Petroleum,229,megawatthours
-OIL,2025-03-26T16,NE,New England,Petroleum,53,megawatthours
-OIL,2025-03-26T15,MIDA,Mid-Atlantic,Petroleum,246,megawatthours
-OIL,2025-03-26T15,NE,New England,Petroleum,91,megawatthours
-OIL,2025-03-26T14,MIDA,Mid-Atlantic,Petroleum,309,megawatthours
-OIL,2025-03-26T14,NE,New England,Petroleum,90,megawatthours
-OIL,2025-03-26T13,MIDA,Mid-Atlantic,Petroleum,313,megawatthours
-OIL,2025-03-26T13,NE,New England,Petroleum,96,megawatthours
-OIL,2025-03-26T12,MIDA,Mid-Atlantic,Petroleum,309,megawatthours
-OIL,2025-03-26T12,NE,New England,Petroleum,54,megawatthours
-OIL,2025-03-26T11,MIDA,Mid-Atlantic,Petroleum,265,megawatthours
-OIL,2025-03-26T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-26T10,MIDA,Mid-Atlantic,Petroleum,226,megawatthours
-OIL,2025-03-26T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-26T09,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
-OIL,2025-03-26T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-26T08,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-03-26T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-26T07,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-03-26T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-26T06,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-03-26T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-26T05,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
-OIL,2025-03-26T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-26T04,MIDA,Mid-Atlantic,Petroleum,230,megawatthours
-OIL,2025-03-26T04,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-26T03,MIDA,Mid-Atlantic,Petroleum,267,megawatthours
-OIL,2025-03-26T03,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-26T02,MIDA,Mid-Atlantic,Petroleum,263,megawatthours
-OIL,2025-03-26T02,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-26T01,MIDA,Mid-Atlantic,Petroleum,254,megawatthours
-OIL,2025-03-26T01,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-26T00,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-03-26T00,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-25T23,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
-OIL,2025-03-25T23,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-25T22,MIDA,Mid-Atlantic,Petroleum,212,megawatthours
-OIL,2025-03-25T22,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-25T21,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-03-25T21,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-25T20,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
-OIL,2025-03-25T20,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-25T19,MIDA,Mid-Atlantic,Petroleum,216,megawatthours
-OIL,2025-03-25T19,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-25T18,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
-OIL,2025-03-25T18,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-25T17,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-03-25T17,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-25T16,MIDA,Mid-Atlantic,Petroleum,237,megawatthours
-OIL,2025-03-25T16,NE,New England,Petroleum,6,megawatthours
-OIL,2025-03-25T15,MIDA,Mid-Atlantic,Petroleum,232,megawatthours
-OIL,2025-03-25T15,NE,New England,Petroleum,9,megawatthours
-OIL,2025-03-25T14,MIDA,Mid-Atlantic,Petroleum,233,megawatthours
-OIL,2025-03-25T14,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-25T13,MIDA,Mid-Atlantic,Petroleum,232,megawatthours
-OIL,2025-03-25T13,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-25T12,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-03-25T12,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-25T11,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
-OIL,2025-03-25T11,NE,New England,Petroleum,109,megawatthours
-OIL,2025-03-25T10,MIDA,Mid-Atlantic,Petroleum,225,megawatthours
-OIL,2025-03-25T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-25T09,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-03-25T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-25T08,MIDA,Mid-Atlantic,Petroleum,220,megawatthours
-OIL,2025-03-25T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-25T07,MIDA,Mid-Atlantic,Petroleum,217,megawatthours
-OIL,2025-03-25T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-25T06,MIDA,Mid-Atlantic,Petroleum,215,megawatthours
-OIL,2025-03-25T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-25T05,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
-OIL,2025-03-25T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-25T04,MIDA,Mid-Atlantic,Petroleum,214,megawatthours
-OIL,2025-03-25T04,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-25T03,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-03-25T03,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-25T02,MIDA,Mid-Atlantic,Petroleum,207,megawatthours
-OIL,2025-03-25T02,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-25T01,MIDA,Mid-Atlantic,Petroleum,274,megawatthours
-OIL,2025-03-25T01,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-25T00,MIDA,Mid-Atlantic,Petroleum,323,megawatthours
-OIL,2025-03-25T00,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-24T23,MIDA,Mid-Atlantic,Petroleum,312,megawatthours
-OIL,2025-03-24T23,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-24T22,MIDA,Mid-Atlantic,Petroleum,310,megawatthours
-OIL,2025-03-24T22,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-24T21,MIDA,Mid-Atlantic,Petroleum,473,megawatthours
-OIL,2025-03-24T21,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-24T20,MIDA,Mid-Atlantic,Petroleum,520,megawatthours
-OIL,2025-03-24T20,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-24T19,MIDA,Mid-Atlantic,Petroleum,535,megawatthours
-OIL,2025-03-24T19,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-24T18,MIDA,Mid-Atlantic,Petroleum,623,megawatthours
-OIL,2025-03-24T18,NE,New England,Petroleum,5,megawatthours
-OIL,2025-03-24T17,MIDA,Mid-Atlantic,Petroleum,719,megawatthours
-OIL,2025-03-24T17,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T16,MIDA,Mid-Atlantic,Petroleum,610,megawatthours
-OIL,2025-03-24T16,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T15,MIDA,Mid-Atlantic,Petroleum,501,megawatthours
-OIL,2025-03-24T15,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T14,MIDA,Mid-Atlantic,Petroleum,441,megawatthours
-OIL,2025-03-24T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T13,MIDA,Mid-Atlantic,Petroleum,536,megawatthours
-OIL,2025-03-24T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T12,MIDA,Mid-Atlantic,Petroleum,535,megawatthours
-OIL,2025-03-24T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T11,MIDA,Mid-Atlantic,Petroleum,237,megawatthours
-OIL,2025-03-24T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T10,MIDA,Mid-Atlantic,Petroleum,90,megawatthours
-OIL,2025-03-24T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T09,MIDA,Mid-Atlantic,Petroleum,89,megawatthours
-OIL,2025-03-24T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T08,MIDA,Mid-Atlantic,Petroleum,88,megawatthours
-OIL,2025-03-24T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T07,MIDA,Mid-Atlantic,Petroleum,88,megawatthours
-OIL,2025-03-24T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T06,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-24T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T05,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-24T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-24T04,MIDA,Mid-Atlantic,Petroleum,92,megawatthours
-OIL,2025-03-24T03,MIDA,Mid-Atlantic,Petroleum,97,megawatthours
-OIL,2025-03-24T02,MIDA,Mid-Atlantic,Petroleum,142,megawatthours
-OIL,2025-03-24T01,MIDA,Mid-Atlantic,Petroleum,105,megawatthours
-OIL,2025-03-24T00,MIDA,Mid-Atlantic,Petroleum,104,megawatthours
-OIL,2025-03-23T23,MIDA,Mid-Atlantic,Petroleum,103,megawatthours
-OIL,2025-03-23T22,MIDA,Mid-Atlantic,Petroleum,103,megawatthours
-OIL,2025-03-23T21,MIDA,Mid-Atlantic,Petroleum,103,megawatthours
-OIL,2025-03-23T20,MIDA,Mid-Atlantic,Petroleum,102,megawatthours
-OIL,2025-03-23T19,MIDA,Mid-Atlantic,Petroleum,93,megawatthours
-OIL,2025-03-23T18,MIDA,Mid-Atlantic,Petroleum,93,megawatthours
-OIL,2025-03-23T17,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-23T16,MIDA,Mid-Atlantic,Petroleum,107,megawatthours
-OIL,2025-03-23T15,MIDA,Mid-Atlantic,Petroleum,125,megawatthours
-OIL,2025-03-23T14,MIDA,Mid-Atlantic,Petroleum,126,megawatthours
-OIL,2025-03-23T13,MIDA,Mid-Atlantic,Petroleum,127,megawatthours
-OIL,2025-03-23T12,MIDA,Mid-Atlantic,Petroleum,127,megawatthours
-OIL,2025-03-23T11,MIDA,Mid-Atlantic,Petroleum,113,megawatthours
-OIL,2025-03-23T10,MIDA,Mid-Atlantic,Petroleum,103,megawatthours
-OIL,2025-03-23T09,MIDA,Mid-Atlantic,Petroleum,100,megawatthours
-OIL,2025-03-23T08,MIDA,Mid-Atlantic,Petroleum,97,megawatthours
-OIL,2025-03-23T07,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-23T06,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-23T05,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-23T04,MIDA,Mid-Atlantic,Petroleum,93,megawatthours
-OIL,2025-03-23T04,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-23T03,MIDA,Mid-Atlantic,Petroleum,92,megawatthours
-OIL,2025-03-23T03,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-23T02,MIDA,Mid-Atlantic,Petroleum,118,megawatthours
-OIL,2025-03-23T02,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-23T01,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-23T01,NE,New England,Petroleum,39,megawatthours
-OIL,2025-03-23T00,MIDA,Mid-Atlantic,Petroleum,99,megawatthours
-OIL,2025-03-23T00,NE,New England,Petroleum,39,megawatthours
-OIL,2025-03-22T23,MIDA,Mid-Atlantic,Petroleum,91,megawatthours
-OIL,2025-03-22T23,NE,New England,Petroleum,39,megawatthours
-OIL,2025-03-22T22,MIDA,Mid-Atlantic,Petroleum,82,megawatthours
-OIL,2025-03-22T22,NE,New England,Petroleum,39,megawatthours
-OIL,2025-03-22T21,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-22T21,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-22T20,MIDA,Mid-Atlantic,Petroleum,86,megawatthours
-OIL,2025-03-22T20,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-22T19,MIDA,Mid-Atlantic,Petroleum,104,megawatthours
-OIL,2025-03-22T19,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-22T18,MIDA,Mid-Atlantic,Petroleum,106,megawatthours
-OIL,2025-03-22T18,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-22T17,MIDA,Mid-Atlantic,Petroleum,108,megawatthours
-OIL,2025-03-22T17,NE,New England,Petroleum,46,megawatthours
-OIL,2025-03-22T16,MIDA,Mid-Atlantic,Petroleum,109,megawatthours
-OIL,2025-03-22T16,NE,New England,Petroleum,46,megawatthours
-OIL,2025-03-22T15,MIDA,Mid-Atlantic,Petroleum,143,megawatthours
-OIL,2025-03-22T15,NE,New England,Petroleum,47,megawatthours
-OIL,2025-03-22T14,MIDA,Mid-Atlantic,Petroleum,97,megawatthours
-OIL,2025-03-22T14,NE,New England,Petroleum,40,megawatthours
-OIL,2025-03-22T13,MIDA,Mid-Atlantic,Petroleum,93,megawatthours
-OIL,2025-03-22T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-22T12,MIDA,Mid-Atlantic,Petroleum,95,megawatthours
-OIL,2025-03-22T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-22T11,MIDA,Mid-Atlantic,Petroleum,97,megawatthours
-OIL,2025-03-22T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-22T10,MIDA,Mid-Atlantic,Petroleum,100,megawatthours
-OIL,2025-03-22T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-22T09,MIDA,Mid-Atlantic,Petroleum,103,megawatthours
-OIL,2025-03-22T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-22T08,MIDA,Mid-Atlantic,Petroleum,104,megawatthours
-OIL,2025-03-22T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-22T07,MIDA,Mid-Atlantic,Petroleum,102,megawatthours
-OIL,2025-03-22T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-22T06,MIDA,Mid-Atlantic,Petroleum,101,megawatthours
-OIL,2025-03-22T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-22T05,MIDA,Mid-Atlantic,Petroleum,99,megawatthours
-OIL,2025-03-22T05,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-22T04,MIDA,Mid-Atlantic,Petroleum,130,megawatthours
-OIL,2025-03-22T04,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-22T03,MIDA,Mid-Atlantic,Petroleum,138,megawatthours
-OIL,2025-03-22T03,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-22T02,MIDA,Mid-Atlantic,Petroleum,173,megawatthours
-OIL,2025-03-22T02,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-22T01,MIDA,Mid-Atlantic,Petroleum,257,megawatthours
-OIL,2025-03-22T01,NE,New England,Petroleum,39,megawatthours
-OIL,2025-03-22T00,MIDA,Mid-Atlantic,Petroleum,258,megawatthours
-OIL,2025-03-22T00,NE,New England,Petroleum,39,megawatthours
-OIL,2025-03-21T23,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-03-21T23,NE,New England,Petroleum,39,megawatthours
-OIL,2025-03-21T22,MIDA,Mid-Atlantic,Petroleum,228,megawatthours
-OIL,2025-03-21T22,NE,New England,Petroleum,39,megawatthours
-OIL,2025-03-21T21,MIDA,Mid-Atlantic,Petroleum,222,megawatthours
-OIL,2025-03-21T21,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-21T20,MIDA,Mid-Atlantic,Petroleum,242,megawatthours
-OIL,2025-03-21T20,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-21T19,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-03-21T19,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-21T18,MIDA,Mid-Atlantic,Petroleum,247,megawatthours
-OIL,2025-03-21T18,NE,New England,Petroleum,38,megawatthours
-OIL,2025-03-21T17,MIDA,Mid-Atlantic,Petroleum,264,megawatthours
-OIL,2025-03-21T17,NE,New England,Petroleum,46,megawatthours
-OIL,2025-03-21T16,MIDA,Mid-Atlantic,Petroleum,262,megawatthours
-OIL,2025-03-21T16,NE,New England,Petroleum,46,megawatthours
-OIL,2025-03-21T15,MIDA,Mid-Atlantic,Petroleum,404,megawatthours
-OIL,2025-03-21T15,NE,New England,Petroleum,47,megawatthours
-OIL,2025-03-21T14,MIDA,Mid-Atlantic,Petroleum,403,megawatthours
-OIL,2025-03-21T14,NE,New England,Petroleum,40,megawatthours
-OIL,2025-03-21T13,MIDA,Mid-Atlantic,Petroleum,485,megawatthours
-OIL,2025-03-21T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-21T12,MIDA,Mid-Atlantic,Petroleum,444,megawatthours
-OIL,2025-03-21T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-21T11,MIDA,Mid-Atlantic,Petroleum,447,megawatthours
-OIL,2025-03-21T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-21T10,MIDA,Mid-Atlantic,Petroleum,192,megawatthours
-OIL,2025-03-21T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-21T09,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-21T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-21T08,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-21T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-21T07,MIDA,Mid-Atlantic,Petroleum,78,megawatthours
-OIL,2025-03-21T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-21T06,MIDA,Mid-Atlantic,Petroleum,79,megawatthours
-OIL,2025-03-21T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-21T05,MIDA,Mid-Atlantic,Petroleum,77,megawatthours
-OIL,2025-03-21T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-21T04,MIDA,Mid-Atlantic,Petroleum,76,megawatthours
-OIL,2025-03-21T04,NE,New England,Petroleum,31,megawatthours
-OIL,2025-03-21T03,MIDA,Mid-Atlantic,Petroleum,149,megawatthours
-OIL,2025-03-21T03,NE,New England,Petroleum,31,megawatthours
-OIL,2025-03-21T02,MIDA,Mid-Atlantic,Petroleum,580,megawatthours
-OIL,2025-03-21T02,NE,New England,Petroleum,31,megawatthours
-OIL,2025-03-21T01,MIDA,Mid-Atlantic,Petroleum,667,megawatthours
-OIL,2025-03-21T01,NE,New England,Petroleum,32,megawatthours
-OIL,2025-03-21T00,MIDA,Mid-Atlantic,Petroleum,555,megawatthours
-OIL,2025-03-21T00,NE,New England,Petroleum,32,megawatthours
-OIL,2025-03-20T23,MIDA,Mid-Atlantic,Petroleum,605,megawatthours
-OIL,2025-03-20T23,NE,New England,Petroleum,32,megawatthours
-OIL,2025-03-20T22,MIDA,Mid-Atlantic,Petroleum,868,megawatthours
-OIL,2025-03-20T22,NE,New England,Petroleum,32,megawatthours
-OIL,2025-03-20T21,MIDA,Mid-Atlantic,Petroleum,991,megawatthours
-OIL,2025-03-20T21,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-20T20,MIDA,Mid-Atlantic,Petroleum,978,megawatthours
-OIL,2025-03-20T20,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-20T19,MIDA,Mid-Atlantic,Petroleum,312,megawatthours
-OIL,2025-03-20T19,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-20T18,MIDA,Mid-Atlantic,Petroleum,282,megawatthours
-OIL,2025-03-20T18,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-20T17,MIDA,Mid-Atlantic,Petroleum,251,megawatthours
-OIL,2025-03-20T17,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-20T16,MIDA,Mid-Atlantic,Petroleum,319,megawatthours
-OIL,2025-03-20T16,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-20T15,MIDA,Mid-Atlantic,Petroleum,310,megawatthours
-OIL,2025-03-20T15,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-20T14,MIDA,Mid-Atlantic,Petroleum,320,megawatthours
-OIL,2025-03-20T14,NE,New England,Petroleum,10,megawatthours
-OIL,2025-03-20T13,MIDA,Mid-Atlantic,Petroleum,290,megawatthours
-OIL,2025-03-20T13,NE,New England,Petroleum,20,megawatthours
-OIL,2025-03-20T12,MIDA,Mid-Atlantic,Petroleum,425,megawatthours
-OIL,2025-03-20T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-20T11,MIDA,Mid-Atlantic,Petroleum,412,megawatthours
-OIL,2025-03-20T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-20T10,MIDA,Mid-Atlantic,Petroleum,107,megawatthours
-OIL,2025-03-20T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-20T09,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-20T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-20T08,MIDA,Mid-Atlantic,Petroleum,98,megawatthours
-OIL,2025-03-20T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-20T07,MIDA,Mid-Atlantic,Petroleum,96,megawatthours
-OIL,2025-03-20T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-20T06,MIDA,Mid-Atlantic,Petroleum,92,megawatthours
-OIL,2025-03-20T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-20T05,MIDA,Mid-Atlantic,Petroleum,88,megawatthours
-OIL,2025-03-20T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-20T04,MIDA,Mid-Atlantic,Petroleum,131,megawatthours
-OIL,2025-03-20T04,NE,New England,Petroleum,238,megawatthours
-OIL,2025-03-20T03,MIDA,Mid-Atlantic,Petroleum,331,megawatthours
-OIL,2025-03-20T03,NE,New England,Petroleum,238,megawatthours
-OIL,2025-03-20T02,MIDA,Mid-Atlantic,Petroleum,404,megawatthours
-OIL,2025-03-20T02,NE,New England,Petroleum,241,megawatthours
-OIL,2025-03-20T01,MIDA,Mid-Atlantic,Petroleum,444,megawatthours
-OIL,2025-03-20T01,NE,New England,Petroleum,243,megawatthours
-OIL,2025-03-20T00,MIDA,Mid-Atlantic,Petroleum,528,megawatthours
-OIL,2025-03-20T00,NE,New England,Petroleum,243,megawatthours
-OIL,2025-03-19T23,MIDA,Mid-Atlantic,Petroleum,481,megawatthours
-OIL,2025-03-19T23,NE,New England,Petroleum,244,megawatthours
-OIL,2025-03-19T22,MIDA,Mid-Atlantic,Petroleum,346,megawatthours
-OIL,2025-03-19T22,NE,New England,Petroleum,245,megawatthours
-OIL,2025-03-19T21,MIDA,Mid-Atlantic,Petroleum,341,megawatthours
-OIL,2025-03-19T21,NE,New England,Petroleum,236,megawatthours
-OIL,2025-03-19T20,MIDA,Mid-Atlantic,Petroleum,410,megawatthours
-OIL,2025-03-19T20,NE,New England,Petroleum,235,megawatthours
-OIL,2025-03-19T19,MIDA,Mid-Atlantic,Petroleum,137,megawatthours
-OIL,2025-03-19T19,NE,New England,Petroleum,233,megawatthours
-OIL,2025-03-19T18,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-19T18,NE,New England,Petroleum,233,megawatthours
-OIL,2025-03-19T17,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-19T17,NE,New England,Petroleum,234,megawatthours
-OIL,2025-03-19T16,MIDA,Mid-Atlantic,Petroleum,90,megawatthours
-OIL,2025-03-19T16,NE,New England,Petroleum,233,megawatthours
-OIL,2025-03-19T15,MIDA,Mid-Atlantic,Petroleum,106,megawatthours
-OIL,2025-03-19T15,NE,New England,Petroleum,234,megawatthours
-OIL,2025-03-19T14,MIDA,Mid-Atlantic,Petroleum,368,megawatthours
-OIL,2025-03-19T14,NE,New England,Petroleum,234,megawatthours
-OIL,2025-03-19T13,MIDA,Mid-Atlantic,Petroleum,602,megawatthours
-OIL,2025-03-19T13,NE,New England,Petroleum,240,megawatthours
-OIL,2025-03-19T12,MIDA,Mid-Atlantic,Petroleum,655,megawatthours
-OIL,2025-03-19T12,NE,New England,Petroleum,247,megawatthours
-OIL,2025-03-19T11,MIDA,Mid-Atlantic,Petroleum,538,megawatthours
-OIL,2025-03-19T11,NE,New England,Petroleum,111,megawatthours
-OIL,2025-03-19T10,MIDA,Mid-Atlantic,Petroleum,175,megawatthours
-OIL,2025-03-19T10,NE,New England,Petroleum,96,megawatthours
-OIL,2025-03-19T09,MIDA,Mid-Atlantic,Petroleum,89,megawatthours
-OIL,2025-03-19T09,NE,New England,Petroleum,96,megawatthours
-OIL,2025-03-19T08,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-19T08,NE,New England,Petroleum,96,megawatthours
-OIL,2025-03-19T07,MIDA,Mid-Atlantic,Petroleum,84,megawatthours
-OIL,2025-03-19T07,NE,New England,Petroleum,96,megawatthours
-OIL,2025-03-19T06,MIDA,Mid-Atlantic,Petroleum,84,megawatthours
-OIL,2025-03-19T06,NE,New England,Petroleum,96,megawatthours
-OIL,2025-03-19T05,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-19T05,NE,New England,Petroleum,29,megawatthours
-OIL,2025-03-19T04,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-19T03,MIDA,Mid-Atlantic,Petroleum,124,megawatthours
-OIL,2025-03-19T02,MIDA,Mid-Atlantic,Petroleum,336,megawatthours
-OIL,2025-03-19T01,MIDA,Mid-Atlantic,Petroleum,366,megawatthours
-OIL,2025-03-19T00,MIDA,Mid-Atlantic,Petroleum,340,megawatthours
-OIL,2025-03-18T23,MIDA,Mid-Atlantic,Petroleum,321,megawatthours
-OIL,2025-03-18T22,MIDA,Mid-Atlantic,Petroleum,302,megawatthours
-OIL,2025-03-18T21,MIDA,Mid-Atlantic,Petroleum,277,megawatthours
-OIL,2025-03-18T20,MIDA,Mid-Atlantic,Petroleum,252,megawatthours
-OIL,2025-03-18T19,MIDA,Mid-Atlantic,Petroleum,257,megawatthours
-OIL,2025-03-18T18,MIDA,Mid-Atlantic,Petroleum,258,megawatthours
-OIL,2025-03-18T17,MIDA,Mid-Atlantic,Petroleum,296,megawatthours
-OIL,2025-03-18T16,MIDA,Mid-Atlantic,Petroleum,297,megawatthours
-OIL,2025-03-18T15,MIDA,Mid-Atlantic,Petroleum,301,megawatthours
-OIL,2025-03-18T14,MIDA,Mid-Atlantic,Petroleum,583,megawatthours
-OIL,2025-03-18T13,MIDA,Mid-Atlantic,Petroleum,987,megawatthours
-OIL,2025-03-18T12,MIDA,Mid-Atlantic,Petroleum,1182,megawatthours
-OIL,2025-03-18T11,MIDA,Mid-Atlantic,Petroleum,724,megawatthours
-OIL,2025-03-18T10,MIDA,Mid-Atlantic,Petroleum,115,megawatthours
-OIL,2025-03-18T09,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-18T08,MIDA,Mid-Atlantic,Petroleum,92,megawatthours
-OIL,2025-03-18T07,MIDA,Mid-Atlantic,Petroleum,91,megawatthours
-OIL,2025-03-18T06,MIDA,Mid-Atlantic,Petroleum,90,megawatthours
-OIL,2025-03-18T05,MIDA,Mid-Atlantic,Petroleum,88,megawatthours
-OIL,2025-03-18T04,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-18T03,MIDA,Mid-Atlantic,Petroleum,106,megawatthours
-OIL,2025-03-18T02,MIDA,Mid-Atlantic,Petroleum,392,megawatthours
-OIL,2025-03-18T01,MIDA,Mid-Atlantic,Petroleum,346,megawatthours
-OIL,2025-03-18T00,MIDA,Mid-Atlantic,Petroleum,381,megawatthours
-OIL,2025-03-17T23,MIDA,Mid-Atlantic,Petroleum,334,megawatthours
-OIL,2025-03-17T22,MIDA,Mid-Atlantic,Petroleum,299,megawatthours
-OIL,2025-03-17T21,MIDA,Mid-Atlantic,Petroleum,250,megawatthours
-OIL,2025-03-17T20,MIDA,Mid-Atlantic,Petroleum,283,megawatthours
-OIL,2025-03-17T19,MIDA,Mid-Atlantic,Petroleum,303,megawatthours
-OIL,2025-03-17T18,MIDA,Mid-Atlantic,Petroleum,315,megawatthours
-OIL,2025-03-17T17,MIDA,Mid-Atlantic,Petroleum,343,megawatthours
-OIL,2025-03-17T16,MIDA,Mid-Atlantic,Petroleum,384,megawatthours
-OIL,2025-03-17T15,MIDA,Mid-Atlantic,Petroleum,353,megawatthours
-OIL,2025-03-17T14,MIDA,Mid-Atlantic,Petroleum,309,megawatthours
-OIL,2025-03-17T13,MIDA,Mid-Atlantic,Petroleum,414,megawatthours
-OIL,2025-03-17T12,MIDA,Mid-Atlantic,Petroleum,430,megawatthours
-OIL,2025-03-17T11,MIDA,Mid-Atlantic,Petroleum,398,megawatthours
-OIL,2025-03-17T10,MIDA,Mid-Atlantic,Petroleum,96,megawatthours
-OIL,2025-03-17T09,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-17T08,MIDA,Mid-Atlantic,Petroleum,84,megawatthours
-OIL,2025-03-17T07,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-17T06,MIDA,Mid-Atlantic,Petroleum,78,megawatthours
-OIL,2025-03-17T05,MIDA,Mid-Atlantic,Petroleum,118,megawatthours
-OIL,2025-03-17T04,MIDA,Mid-Atlantic,Petroleum,75,megawatthours
-OIL,2025-03-17T03,MIDA,Mid-Atlantic,Petroleum,74,megawatthours
-OIL,2025-03-17T02,MIDA,Mid-Atlantic,Petroleum,86,megawatthours
-OIL,2025-03-17T01,MIDA,Mid-Atlantic,Petroleum,71,megawatthours
-OIL,2025-03-17T00,MIDA,Mid-Atlantic,Petroleum,70,megawatthours
-OIL,2025-03-16T23,MIDA,Mid-Atlantic,Petroleum,179,megawatthours
-OIL,2025-03-16T22,MIDA,Mid-Atlantic,Petroleum,180,megawatthours
-OIL,2025-03-16T21,MIDA,Mid-Atlantic,Petroleum,142,megawatthours
-OIL,2025-03-16T20,MIDA,Mid-Atlantic,Petroleum,74,megawatthours
-OIL,2025-03-16T19,MIDA,Mid-Atlantic,Petroleum,75,megawatthours
-OIL,2025-03-16T18,MIDA,Mid-Atlantic,Petroleum,76,megawatthours
-OIL,2025-03-16T17,MIDA,Mid-Atlantic,Petroleum,77,megawatthours
-OIL,2025-03-16T16,MIDA,Mid-Atlantic,Petroleum,79,megawatthours
-OIL,2025-03-16T15,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-16T14,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-16T13,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-16T12,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-16T11,MIDA,Mid-Atlantic,Petroleum,88,megawatthours
-OIL,2025-03-16T10,MIDA,Mid-Atlantic,Petroleum,91,megawatthours
-OIL,2025-03-16T09,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-16T08,MIDA,Mid-Atlantic,Petroleum,95,megawatthours
-OIL,2025-03-16T07,MIDA,Mid-Atlantic,Petroleum,93,megawatthours
-OIL,2025-03-16T06,MIDA,Mid-Atlantic,Petroleum,90,megawatthours
-OIL,2025-03-16T05,MIDA,Mid-Atlantic,Petroleum,91,megawatthours
-OIL,2025-03-16T04,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-16T04,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-16T03,MIDA,Mid-Atlantic,Petroleum,95,megawatthours
-OIL,2025-03-16T03,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-16T02,MIDA,Mid-Atlantic,Petroleum,112,megawatthours
-OIL,2025-03-16T02,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-16T01,MIDA,Mid-Atlantic,Petroleum,95,megawatthours
-OIL,2025-03-16T01,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-16T00,MIDA,Mid-Atlantic,Petroleum,78,megawatthours
-OIL,2025-03-16T00,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-15T23,MIDA,Mid-Atlantic,Petroleum,78,megawatthours
-OIL,2025-03-15T23,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-15T22,MIDA,Mid-Atlantic,Petroleum,76,megawatthours
-OIL,2025-03-15T22,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-15T21,MIDA,Mid-Atlantic,Petroleum,76,megawatthours
-OIL,2025-03-15T21,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-15T20,MIDA,Mid-Atlantic,Petroleum,77,megawatthours
-OIL,2025-03-15T20,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-15T19,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-15T19,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-15T18,MIDA,Mid-Atlantic,Petroleum,208,megawatthours
-OIL,2025-03-15T18,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-15T17,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-15T17,NE,New England,Petroleum,41,megawatthours
-OIL,2025-03-15T16,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-15T16,NE,New England,Petroleum,41,megawatthours
-OIL,2025-03-15T15,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-15T15,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T14,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-15T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T13,MIDA,Mid-Atlantic,Petroleum,86,megawatthours
-OIL,2025-03-15T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T12,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-15T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T11,MIDA,Mid-Atlantic,Petroleum,91,megawatthours
-OIL,2025-03-15T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T10,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-15T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T09,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-15T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T08,MIDA,Mid-Atlantic,Petroleum,90,megawatthours
-OIL,2025-03-15T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T07,MIDA,Mid-Atlantic,Petroleum,86,megawatthours
-OIL,2025-03-15T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T06,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-15T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-15T05,MIDA,Mid-Atlantic,Petroleum,84,megawatthours
-OIL,2025-03-15T05,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-15T04,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-15T04,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-15T03,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-15T03,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-15T02,MIDA,Mid-Atlantic,Petroleum,84,megawatthours
-OIL,2025-03-15T02,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-15T01,MIDA,Mid-Atlantic,Petroleum,73,megawatthours
-OIL,2025-03-15T01,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-15T00,MIDA,Mid-Atlantic,Petroleum,73,megawatthours
-OIL,2025-03-15T00,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-14T23,MIDA,Mid-Atlantic,Petroleum,74,megawatthours
-OIL,2025-03-14T23,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-14T22,MIDA,Mid-Atlantic,Petroleum,90,megawatthours
-OIL,2025-03-14T22,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-14T21,MIDA,Mid-Atlantic,Petroleum,78,megawatthours
-OIL,2025-03-14T21,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-14T20,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-14T20,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-14T19,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-14T19,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-14T18,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-14T18,NE,New England,Petroleum,35,megawatthours
-OIL,2025-03-14T17,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-14T17,NE,New England,Petroleum,41,megawatthours
-OIL,2025-03-14T16,MIDA,Mid-Atlantic,Petroleum,84,megawatthours
-OIL,2025-03-14T16,NE,New England,Petroleum,41,megawatthours
-OIL,2025-03-14T15,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-14T15,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T14,MIDA,Mid-Atlantic,Petroleum,91,megawatthours
-OIL,2025-03-14T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T13,MIDA,Mid-Atlantic,Petroleum,110,megawatthours
-OIL,2025-03-14T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T12,MIDA,Mid-Atlantic,Petroleum,109,megawatthours
-OIL,2025-03-14T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T11,MIDA,Mid-Atlantic,Petroleum,93,megawatthours
-OIL,2025-03-14T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T10,MIDA,Mid-Atlantic,Petroleum,96,megawatthours
-OIL,2025-03-14T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T09,MIDA,Mid-Atlantic,Petroleum,98,megawatthours
-OIL,2025-03-14T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T08,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-14T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T07,MIDA,Mid-Atlantic,Petroleum,88,megawatthours
-OIL,2025-03-14T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T06,MIDA,Mid-Atlantic,Petroleum,86,megawatthours
-OIL,2025-03-14T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T05,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-14T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-14T04,MIDA,Mid-Atlantic,Petroleum,86,megawatthours
-OIL,2025-03-14T04,NE,New England,Petroleum,49,megawatthours
-OIL,2025-03-14T03,MIDA,Mid-Atlantic,Petroleum,86,megawatthours
-OIL,2025-03-14T03,NE,New England,Petroleum,48,megawatthours
-OIL,2025-03-14T02,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-14T02,NE,New England,Petroleum,49,megawatthours
-OIL,2025-03-14T01,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-14T01,NE,New England,Petroleum,50,megawatthours
-OIL,2025-03-14T00,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-14T00,NE,New England,Petroleum,50,megawatthours
-OIL,2025-03-13T23,MIDA,Mid-Atlantic,Petroleum,77,megawatthours
-OIL,2025-03-13T23,NE,New England,Petroleum,50,megawatthours
-OIL,2025-03-13T22,MIDA,Mid-Atlantic,Petroleum,77,megawatthours
-OIL,2025-03-13T22,NE,New England,Petroleum,49,megawatthours
-OIL,2025-03-13T21,MIDA,Mid-Atlantic,Petroleum,79,megawatthours
-OIL,2025-03-13T21,NE,New England,Petroleum,48,megawatthours
-OIL,2025-03-13T20,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-13T20,NE,New England,Petroleum,48,megawatthours
-OIL,2025-03-13T19,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-13T19,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T18,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-13T18,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T17,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-13T17,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T16,MIDA,Mid-Atlantic,Petroleum,99,megawatthours
-OIL,2025-03-13T16,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T15,MIDA,Mid-Atlantic,Petroleum,110,megawatthours
-OIL,2025-03-13T15,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T14,MIDA,Mid-Atlantic,Petroleum,112,megawatthours
-OIL,2025-03-13T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T13,MIDA,Mid-Atlantic,Petroleum,116,megawatthours
-OIL,2025-03-13T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T12,MIDA,Mid-Atlantic,Petroleum,118,megawatthours
-OIL,2025-03-13T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T11,MIDA,Mid-Atlantic,Petroleum,97,megawatthours
-OIL,2025-03-13T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T10,MIDA,Mid-Atlantic,Petroleum,97,megawatthours
-OIL,2025-03-13T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T09,MIDA,Mid-Atlantic,Petroleum,96,megawatthours
-OIL,2025-03-13T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T08,MIDA,Mid-Atlantic,Petroleum,93,megawatthours
-OIL,2025-03-13T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T07,MIDA,Mid-Atlantic,Petroleum,88,megawatthours
-OIL,2025-03-13T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T06,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-13T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-13T05,MIDA,Mid-Atlantic,Petroleum,86,megawatthours
-OIL,2025-03-13T05,NE,New England,Petroleum,49,megawatthours
-OIL,2025-03-13T04,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-13T04,NE,New England,Petroleum,49,megawatthours
-OIL,2025-03-13T03,MIDA,Mid-Atlantic,Petroleum,99,megawatthours
-OIL,2025-03-13T03,NE,New England,Petroleum,48,megawatthours
-OIL,2025-03-13T02,MIDA,Mid-Atlantic,Petroleum,108,megawatthours
-OIL,2025-03-13T02,NE,New England,Petroleum,49,megawatthours
-OIL,2025-03-13T01,MIDA,Mid-Atlantic,Petroleum,109,megawatthours
-OIL,2025-03-13T01,NE,New England,Petroleum,50,megawatthours
-OIL,2025-03-13T00,MIDA,Mid-Atlantic,Petroleum,106,megawatthours
-OIL,2025-03-13T00,NE,New England,Petroleum,50,megawatthours
-OIL,2025-03-12T23,MIDA,Mid-Atlantic,Petroleum,97,megawatthours
-OIL,2025-03-12T23,NE,New England,Petroleum,50,megawatthours
-OIL,2025-03-12T22,MIDA,Mid-Atlantic,Petroleum,92,megawatthours
-OIL,2025-03-12T22,NE,New England,Petroleum,49,megawatthours
-OIL,2025-03-12T21,MIDA,Mid-Atlantic,Petroleum,93,megawatthours
-OIL,2025-03-12T21,NE,New England,Petroleum,48,megawatthours
-OIL,2025-03-12T20,MIDA,Mid-Atlantic,Petroleum,95,megawatthours
-OIL,2025-03-12T20,NE,New England,Petroleum,48,megawatthours
-OIL,2025-03-12T19,MIDA,Mid-Atlantic,Petroleum,104,megawatthours
-OIL,2025-03-12T19,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T18,MIDA,Mid-Atlantic,Petroleum,96,megawatthours
-OIL,2025-03-12T18,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T17,MIDA,Mid-Atlantic,Petroleum,97,megawatthours
-OIL,2025-03-12T17,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T16,MIDA,Mid-Atlantic,Petroleum,99,megawatthours
-OIL,2025-03-12T16,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T15,MIDA,Mid-Atlantic,Petroleum,139,megawatthours
-OIL,2025-03-12T15,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T14,MIDA,Mid-Atlantic,Petroleum,190,megawatthours
-OIL,2025-03-12T14,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T13,MIDA,Mid-Atlantic,Petroleum,130,megawatthours
-OIL,2025-03-12T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T12,MIDA,Mid-Atlantic,Petroleum,128,megawatthours
-OIL,2025-03-12T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T11,MIDA,Mid-Atlantic,Petroleum,112,megawatthours
-OIL,2025-03-12T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T10,MIDA,Mid-Atlantic,Petroleum,113,megawatthours
-OIL,2025-03-12T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T09,MIDA,Mid-Atlantic,Petroleum,150,megawatthours
-OIL,2025-03-12T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T08,MIDA,Mid-Atlantic,Petroleum,105,megawatthours
-OIL,2025-03-12T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T07,MIDA,Mid-Atlantic,Petroleum,101,megawatthours
-OIL,2025-03-12T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T06,MIDA,Mid-Atlantic,Petroleum,102,megawatthours
-OIL,2025-03-12T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T05,MIDA,Mid-Atlantic,Petroleum,101,megawatthours
-OIL,2025-03-12T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-12T04,MIDA,Mid-Atlantic,Petroleum,120,megawatthours
-OIL,2025-03-12T04,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-12T03,MIDA,Mid-Atlantic,Petroleum,185,megawatthours
-OIL,2025-03-12T03,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-12T02,MIDA,Mid-Atlantic,Petroleum,223,megawatthours
-OIL,2025-03-12T02,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-12T01,MIDA,Mid-Atlantic,Petroleum,207,megawatthours
-OIL,2025-03-12T01,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-12T00,MIDA,Mid-Atlantic,Petroleum,255,megawatthours
-OIL,2025-03-12T00,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T23,MIDA,Mid-Atlantic,Petroleum,245,megawatthours
-OIL,2025-03-11T23,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T22,MIDA,Mid-Atlantic,Petroleum,213,megawatthours
-OIL,2025-03-11T22,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T21,MIDA,Mid-Atlantic,Petroleum,79,megawatthours
-OIL,2025-03-11T21,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T20,MIDA,Mid-Atlantic,Petroleum,79,megawatthours
-OIL,2025-03-11T20,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T19,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-11T19,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T18,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-11T18,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T17,MIDA,Mid-Atlantic,Petroleum,82,megawatthours
-OIL,2025-03-11T17,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T16,MIDA,Mid-Atlantic,Petroleum,101,megawatthours
-OIL,2025-03-11T16,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T15,MIDA,Mid-Atlantic,Petroleum,169,megawatthours
-OIL,2025-03-11T15,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T14,MIDA,Mid-Atlantic,Petroleum,179,megawatthours
-OIL,2025-03-11T14,NE,New England,Petroleum,13,megawatthours
-OIL,2025-03-11T13,MIDA,Mid-Atlantic,Petroleum,248,megawatthours
-OIL,2025-03-11T13,NE,New England,Petroleum,33,megawatthours
-OIL,2025-03-11T12,MIDA,Mid-Atlantic,Petroleum,292,megawatthours
-OIL,2025-03-11T12,NE,New England,Petroleum,90,megawatthours
-OIL,2025-03-11T11,MIDA,Mid-Atlantic,Petroleum,278,megawatthours
-OIL,2025-03-11T11,NE,New England,Petroleum,108,megawatthours
-OIL,2025-03-11T10,MIDA,Mid-Atlantic,Petroleum,224,megawatthours
-OIL,2025-03-11T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-11T09,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-11T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-11T08,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-11T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-11T07,MIDA,Mid-Atlantic,Petroleum,84,megawatthours
-OIL,2025-03-11T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-11T06,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-11T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-11T05,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-11T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-11T04,MIDA,Mid-Atlantic,Petroleum,82,megawatthours
-OIL,2025-03-11T04,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-11T03,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-11T03,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-11T02,MIDA,Mid-Atlantic,Petroleum,77,megawatthours
-OIL,2025-03-11T02,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-11T01,MIDA,Mid-Atlantic,Petroleum,96,megawatthours
-OIL,2025-03-11T01,NE,New England,Petroleum,16,megawatthours
-OIL,2025-03-11T00,MIDA,Mid-Atlantic,Petroleum,97,megawatthours
-OIL,2025-03-11T00,NE,New England,Petroleum,16,megawatthours
-OIL,2025-03-10T23,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-10T23,NE,New England,Petroleum,16,megawatthours
-OIL,2025-03-10T22,MIDA,Mid-Atlantic,Petroleum,77,megawatthours
-OIL,2025-03-10T22,NE,New England,Petroleum,16,megawatthours
-OIL,2025-03-10T21,MIDA,Mid-Atlantic,Petroleum,77,megawatthours
-OIL,2025-03-10T21,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-10T20,MIDA,Mid-Atlantic,Petroleum,78,megawatthours
-OIL,2025-03-10T20,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-10T19,MIDA,Mid-Atlantic,Petroleum,78,megawatthours
-OIL,2025-03-10T19,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-10T18,MIDA,Mid-Atlantic,Petroleum,79,megawatthours
-OIL,2025-03-10T18,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-10T17,MIDA,Mid-Atlantic,Petroleum,99,megawatthours
-OIL,2025-03-10T17,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-10T16,MIDA,Mid-Atlantic,Petroleum,100,megawatthours
-OIL,2025-03-10T16,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-10T15,MIDA,Mid-Atlantic,Petroleum,103,megawatthours
-OIL,2025-03-10T15,NE,New England,Petroleum,15,megawatthours
-OIL,2025-03-10T14,MIDA,Mid-Atlantic,Petroleum,103,megawatthours
-OIL,2025-03-10T14,NE,New England,Petroleum,16,megawatthours
-OIL,2025-03-10T13,MIDA,Mid-Atlantic,Petroleum,84,megawatthours
-OIL,2025-03-10T13,NE,New England,Petroleum,17,megawatthours
-OIL,2025-03-10T12,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-10T12,NE,New England,Petroleum,12,megawatthours
-OIL,2025-03-10T11,MIDA,Mid-Atlantic,Petroleum,82,megawatthours
-OIL,2025-03-10T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-10T10,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-10T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-10T09,MIDA,Mid-Atlantic,Petroleum,85,megawatthours
-OIL,2025-03-10T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-10T08,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-10T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-10T07,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-10T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-10T06,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-10T06,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-10T05,MIDA,Mid-Atlantic,Petroleum,79,megawatthours
-OIL,2025-03-10T05,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-10T04,MIDA,Mid-Atlantic,Petroleum,81,megawatthours
-OIL,2025-03-10T04,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-10T03,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-10T03,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-10T02,MIDA,Mid-Atlantic,Petroleum,92,megawatthours
-OIL,2025-03-10T02,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-10T01,MIDA,Mid-Atlantic,Petroleum,89,megawatthours
-OIL,2025-03-10T01,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-10T00,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-10T00,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-09T23,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-09T23,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-09T22,MIDA,Mid-Atlantic,Petroleum,89,megawatthours
-OIL,2025-03-09T22,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-09T21,MIDA,Mid-Atlantic,Petroleum,90,megawatthours
-OIL,2025-03-09T21,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-09T20,MIDA,Mid-Atlantic,Petroleum,90,megawatthours
-OIL,2025-03-09T20,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-09T19,MIDA,Mid-Atlantic,Petroleum,91,megawatthours
-OIL,2025-03-09T19,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-09T18,MIDA,Mid-Atlantic,Petroleum,110,megawatthours
-OIL,2025-03-09T18,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-09T17,MIDA,Mid-Atlantic,Petroleum,78,megawatthours
-OIL,2025-03-09T17,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-09T16,MIDA,Mid-Atlantic,Petroleum,89,megawatthours
-OIL,2025-03-09T16,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-09T15,MIDA,Mid-Atlantic,Petroleum,105,megawatthours
-OIL,2025-03-09T15,NE,New England,Petroleum,37,megawatthours
-OIL,2025-03-09T14,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-09T14,NE,New England,Petroleum,36,megawatthours
-OIL,2025-03-09T13,MIDA,Mid-Atlantic,Petroleum,79,megawatthours
-OIL,2025-03-09T13,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-09T12,MIDA,Mid-Atlantic,Petroleum,79,megawatthours
-OIL,2025-03-09T12,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-09T11,MIDA,Mid-Atlantic,Petroleum,80,megawatthours
-OIL,2025-03-09T11,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-09T10,MIDA,Mid-Atlantic,Petroleum,83,megawatthours
-OIL,2025-03-09T10,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-09T09,MIDA,Mid-Atlantic,Petroleum,86,megawatthours
-OIL,2025-03-09T09,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-09T08,MIDA,Mid-Atlantic,Petroleum,87,megawatthours
-OIL,2025-03-09T08,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-09T07,MIDA,Mid-Atlantic,Petroleum,94,megawatthours
-OIL,2025-03-09T07,NE,New England,Petroleum,0,megawatthours
-OIL,2025-03-09T06,MIDA,Mid-Atlantic,Petroleum,101,megawatthours

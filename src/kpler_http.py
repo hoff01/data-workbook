@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from typing import Any
 
 import requests
@@ -30,6 +31,7 @@ class KplerHttpClient:
         self.session.headers.update(
             {
                 "Accept": "text/csv,application/json;q=0.9,*/*;q=0.8",
+                "User-Agent": os.environ.get("KPLER_USER_AGENT", "US-Balances-Kpler-Pull/1.0"),
                 "X-Client": "python-pulls-kpler-direct",
             }
         )

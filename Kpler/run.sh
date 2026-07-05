@@ -4,6 +4,16 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV="$ROOT_DIR/.venv"
 PYTHON="$VENV/bin/python"
+LOCAL_ENV="$ROOT_DIR/config/local.env"
+
+load_local_env() {
+  if [[ -f "$LOCAL_ENV" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "$LOCAL_ENV"
+    set +a
+  fi
+}
 
 setup() {
   if [[ ! -x "$PYTHON" ]]; then
@@ -21,16 +31,19 @@ case "${1:-setup-preflight}" in
     if [[ ! -x "$PYTHON" ]]; then
       setup
     fi
+    load_local_env
     "$PYTHON" "$ROOT_DIR/src/kpler_pull.py" --preflight
     ;;
   run)
     if [[ ! -x "$PYTHON" ]]; then
       setup
     fi
+    load_local_env
     "$PYTHON" "$ROOT_DIR/src/kpler_pull.py"
     ;;
   setup-preflight)
     setup
+    load_local_env
     "$PYTHON" "$ROOT_DIR/src/kpler_pull.py" --preflight
     ;;
   *)

@@ -171,6 +171,11 @@ with_product_estimation=False
 start_date=date(2018, 1, 1)
 ```
 
+Diesel PADD 1 import guide pull sets should use direct `flows` API calls with `products=["Gasoil/Diesel"]` and daily granularity:
+
+- `us_diesel_padd1ab_import_guides`: `flowDirection=import`, `toZones=["PADD 1A", "PADD 1B"]`, split by origin countries, origin trading regions, origin PADDs, and products, with `withIntraCountry=false`. The output exposes PADD 1A/B Canada imports and non-Canada imports as Kpler guide rows.
+- `us_diesel_padd1c_import_guides`: `flowDirection=import`, `toZones=["PADD 1C"]`, split by origin countries, origin trading regions, origin PADDs, and products, with `withIntraCountry=true`. The output exposes PADD 1C total imports, Canada imports, non-Canada imports, and U.S. intracountry imports.
+
 ## Product Mapping
 
 Use these Kpler product names:

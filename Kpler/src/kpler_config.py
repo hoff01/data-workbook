@@ -110,6 +110,7 @@ def ensure_directories() -> None:
         CONFIG_DIR,
         RAW_DIR / "external",
         RAW_DIR / "domestic_padd",
+        RAW_DIR / "padd1_import_guides",
         OUTPUT_DIR / "daily",
         OUTPUT_DIR / "weekly",
         OUTPUT_DIR / "monthly",
@@ -119,12 +120,61 @@ def ensure_directories() -> None:
         path.mkdir(parents=True, exist_ok=True)
 
 
+def optional_list(value: Any) -> list[str] | None:
+    if value in (None, ""):
+        return None
+    return list(value)
+
+
+def build_padd1_import_guide_specs(
+    products: dict[str, Any],
+    guide_config: dict[str, Any],
+    config: RuntimeConfig,
+) -> list[PullSpec]:
+    if not guide_config:
+        return []
+    commodities = list(guide_config.get("commodities") or [])
+    regions = guide_config.get("regions") or {}
+    splits = list(guide_config.get("splits") or ["origin countries", "origin trading regions", "products"])
+    specs: list[PullSpec] = []
+    for commodity in commodities:
+        product = products.get(commodity)
+        if not product:
+            continue
+        for region_key, region in regions.items():
+            specs.append(
+                PullSpec(
+                    name=f"us_{commodity}_{region_key}_import_guides",
+                    family="padd1_import_guides",
+                    geography="us",
+                    commodity=commodity,
+                    kpler_product=str(product["kpler_product"]),
+                    flow_direction="import",
+                    split=splits,
+                    from_zones=optional_list(region.get("from_zones")),
+                    to_zones=optional_list(region.get("to_zones")),
+                    with_intra_country=bool(region.get("with_intra_country", guide_config.get("with_intra_country", False))),
+                    with_intra_region=config.with_intra_region,
+                    with_forecast=config.with_forecast,
+                    only_realized=config.only_realized,
+                    unit=config.unit,
+                    granularity=config.granularity,
+                    start_date=config.start_date,
+                    end_date=config.end_date,
+                    region_detail=str(region_key),
+                    route_group=str(region.get("route_group", f"{region_key}_imports_by_origin")),
+                )
+            )
+    return specs
+
+
 def build_pull_specs(config: RuntimeConfig) -> list[PullSpec]:
     products = load_yaml(CONFIG_DIR / "products.yml")["products"]
     regions = load_yaml(CONFIG_DIR / "regions.yml")
     pull_sets = load_yaml(CONFIG_DIR / "pull_sets.yml")
     external = pull_sets["external"]
     domestic = pull_sets["domestic_padd"]
+    padd1_import_guides = pull_sets.get("padd1_import_guides", {})
 
     specs: list[PullSpec] = []
     for commodity, product in products.items():
@@ -240,6 +290,7 @@ def build_pull_specs(config: RuntimeConfig) -> list[PullSpec]:
                 end_date=config.end_date,
             )
         )
+    specs.extend(build_padd1_import_guide_specs(products, padd1_import_guides, config))
     return specs
 
 
@@ -247,5 +298,5 @@ def credential_pair() -> tuple[str, str]:
     email = os.environ.get("KPLER_EMAIL") or os.environ.get("KPLER_USERNAME") or ""
     password = os.environ.get("KPLER_PASSWORD") or ""
     if not email or not password:
-        raise RuntimeError("Missing Kpler credentials. Set KPLER_EMAIL and KPLER_PASSWORD.")
+        raise RuntimeError("Missing Kpler credentials. Set KPLER_USERNAME or KPLER_EMAIL, plus KPLER_PASSWORD.")
     return email, password

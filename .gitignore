@@ -19,3 +19,6 @@ email_recipients.txt
 *.log
 *.zip
 PET.txt
+Kpler/config/local.env
+Kpler/config/local.env.ps1
+Kpler/config/.env
