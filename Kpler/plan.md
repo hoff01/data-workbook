@@ -2,9 +2,9 @@
 
 ## Objective
 
-Build a Kpler liquids flows pull inside `Kpler/` that creates daily source datasets and balance-ready weekly and monthly outputs for clean products. The pipeline must support U.S. and Europe external trade flows, plus a separate U.S. PADD domestic movement view. Outputs should be stable, reproducible, and directly usable in balance workbooks without manual reshaping.
+Build a Kpler liquids flows pull inside `Kpler/` that creates daily source datasets and balance-ready weekly and monthly outputs for clean products. The pipeline must support U.S. and Europe external trade flows, a U.S. PADD domestic movement view, and Diesel/Jet balance guide rows for the dashboard. Outputs should be stable, reproducible, and directly usable in balance workbooks without manual reshaping.
 
-The pull should start on `2018-01-01`, use daily granularity, use `KBD`, include forecast/predictive data, and redownload the full history each run unless a later implementation explicitly adds a validated cache layer.
+The pull should start on `2018-01-01`, use `KBD`, include forecast/predictive data, and redownload the full history each run unless a later implementation explicitly adds a validated cache layer. Standard context outputs use daily granularity. Balance guide pulls use Kpler `eia-weekly` and `monthly` granularity directly.
 
 ## Documentation Basis
 
@@ -155,7 +155,7 @@ Important notes:
 - `with_forecast=True` is the Kpler equivalent of predictive/on.
 - `with_intra_country=False` is required for external imports and exports.
 - Keep `with_intra_region=True` unless testing shows it suppresses required region-level movements. The Kpler default for flows is documented as true, and the balance use case needs complete region-to-region totals.
-- Use daily pulls only. Weekly and monthly outputs should be computed locally from daily data so missing dates can be zero-filled before averaging.
+- Use daily pulls for standard context outputs. For balance guide rows, use direct `eia-weekly` and `monthly` pulls so guide periods line up with EIA weekly and monthly balance dates.
 
 Domestic PADD movement pull sets should use:
 
@@ -171,10 +171,26 @@ with_product_estimation=False
 start_date=date(2018, 1, 1)
 ```
 
-Diesel PADD 1 import guide pull sets should use direct `flows` API calls with `products=["Gasoil/Diesel"]` and daily granularity:
+Balance guide pull sets should use direct `flows` API calls with `eia-weekly` and `monthly` granularity. Keep `fromZones`/`toZones` at `United States`, request PADD splits, and filter PADD 1A/B/C, PADD 3, and PADD 5 locally. Direct PADD 1A/B/C zone requests failed with `Unable to bind a FromTo`, so do not use those subregions as direct Kpler zones for these guide pulls.
 
-- `us_diesel_padd1ab_import_guides`: `flowDirection=import`, `toZones=["PADD 1A", "PADD 1B"]`, split by origin countries, origin trading regions, origin PADDs, and products, with `withIntraCountry=false`. The output exposes PADD 1A/B Canada imports and non-Canada imports as Kpler guide rows.
-- `us_diesel_padd1c_import_guides`: `flowDirection=import`, `toZones=["PADD 1C"]`, split by origin countries, origin trading regions, origin PADDs, and products, with `withIntraCountry=true`. The output exposes PADD 1C total imports, Canada imports, non-Canada imports, and U.S. intracountry imports.
+Diesel `Gasoil/Diesel` guide rows:
+
+- PADD 1A/B imports split into Canada and non-Canada by origin country.
+- PADD 1C imports with `withIntraCountry=true`, reported as total plus retained Canada/non-Canada/intracountry columns.
+- PADD 1A/B exports split into Europe and Other; Europe includes Northwest Europe plus Med/Black Sea style trading regions.
+- PADD 1C total exports only.
+- PADD 3 exports split into Africa, Europe, Latin America, and Other.
+- PADD 5 total imports and exports.
+- PADD 3 domestic receipts into PADD 1A/B and PADD 1C with `withIntraCountry=true`.
+- U.S. total imports from Canada/non-Canada and exports to Europe/Latin America with `withIntraCountry=false`.
+
+Jet `Kero/Jet` guide rows:
+
+- PADD 1 imports split into Canada and non-Canada.
+- PADD 1 total exports.
+- PADD 3 exports split into Europe, Latin America, and Other.
+- PADD 3 domestic receipts into PADD 1 and PADD 5 with `withIntraCountry=true`.
+- PADD 5 total imports and exports with `withIntraCountry=false`.
 
 ## Product Mapping
 

@@ -29,7 +29,7 @@ notepad .\config\local.env.ps1
 
 `KPLER_EMAIL` is also accepted if that is the login name on your Kpler account. Do not paste credentials into Python source files; `Kpler/config/local.env.ps1`, `Kpler/config/local.env`, and `Kpler/config/.env` are ignored by git for local secret storage.
 
-The pipeline pulls daily Kpler `Flows` data from `2018-01-01`, includes forecast/predictive flows, fills missing daily dates with `0.0`, and writes daily, Friday-ending weekly 7-day averages, and monthly average CSVs.
+The pipeline pulls Kpler `Flows` data from `2018-01-01` and includes forecast/predictive flows. Standard context outputs still pull daily data and write daily, Friday-ending weekly averages, and monthly averages. Balance guide pulls use direct Kpler `eia-weekly` and `monthly` granularities so the guide rows line up with EIA week-ending and monthly balance periods.
 
 Implementation notes:
 
@@ -56,10 +56,10 @@ export KPLER_PASSWORD="..."
 ./run.sh run
 ```
 
-Diesel-specific guide pulls include:
+Balance guide pulls include:
 
-- PADD 1A/B `Gasoil/Diesel` imports split by origin country, with Canada and non-Canada guide totals.
-- PADD 1C `Gasoil/Diesel` imports split by origin country and origin PADD with `withIntraCountry=true`.
-- Weekly and monthly outputs derived from daily Kpler pulls in `output/weekly/us_diesel_padd1_import_guides_weekly.csv` and `output/monthly/us_diesel_padd1_import_guides_monthly.csv`.
+- Diesel `Gasoil/Diesel`: PADD 1A/B Canada and non-Canada imports, PADD 1A/B Europe and Other exports, PADD 1C total imports and exports, PADD 3 exports to Africa/Europe/Latin America/Other, PADD 5 total imports and exports, PADD 3 receipts into PADD 1A/B and PADD 1C, and U.S. total imports from Canada/non-Canada plus exports to Europe/Latin America.
+- Jet `Kero/Jet`: PADD 1 Canada and non-Canada imports, PADD 1 total exports, PADD 3 exports to Europe/Latin America/Other, PADD 3 receipts into PADD 1 and PADD 5, and PADD 5 total imports and exports.
+- PADD subregions are filtered locally from `Origin Padds` and `Destination Padds` splits while `fromZones`/`toZones` stay at `United States`; direct PADD 1A/B/C zones were rejected by the Kpler API bind step.
 
 See [plan.md](plan.md) for the detailed implementation plan.

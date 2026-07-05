@@ -111,6 +111,7 @@ def ensure_directories() -> None:
         RAW_DIR / "external",
         RAW_DIR / "domestic_padd",
         RAW_DIR / "padd1_import_guides",
+        RAW_DIR / "balance_guides",
         OUTPUT_DIR / "daily",
         OUTPUT_DIR / "weekly",
         OUTPUT_DIR / "monthly",
@@ -123,7 +124,52 @@ def ensure_directories() -> None:
 def optional_list(value: Any) -> list[str] | None:
     if value in (None, ""):
         return None
+    if isinstance(value, str):
+        return [value]
     return list(value)
+
+
+def build_balance_guide_specs(
+    products: dict[str, Any],
+    guide_config: dict[str, Any],
+    config: RuntimeConfig,
+) -> list[PullSpec]:
+    if not guide_config:
+        return []
+    frequencies = guide_config.get("frequencies") or {"weekly": "eia-weekly", "monthly": "monthly"}
+    pulls = guide_config.get("pulls") or {}
+    specs: list[PullSpec] = []
+    for frequency_key, granularity in frequencies.items():
+        for pull_key, pull in pulls.items():
+            commodities = list(pull.get("commodities") or [])
+            for commodity in commodities:
+                product = products.get(commodity)
+                if not product:
+                    continue
+                specs.append(
+                    PullSpec(
+                        name=f"us_{commodity}_{frequency_key}_{pull_key}",
+                        family="balance_guides",
+                        geography="us",
+                        commodity=commodity,
+                        kpler_product=str(product["kpler_product"]),
+                        flow_direction=str(pull["flow_direction"]),
+                        split=list(pull.get("splits") or ["total"]),
+                        from_zones=optional_list(pull.get("from_zones")),
+                        to_zones=optional_list(pull.get("to_zones")),
+                        with_intra_country=bool(pull.get("with_intra_country", guide_config.get("with_intra_country", False))),
+                        with_intra_region=config.with_intra_region,
+                        with_forecast=config.with_forecast,
+                        only_realized=config.only_realized,
+                        unit=config.unit,
+                        granularity=str(granularity),
+                        start_date=config.start_date,
+                        end_date=config.end_date,
+                        region_detail=str(frequency_key),
+                        route_group=str(pull_key),
+                    )
+                )
+    return specs
 
 
 def build_padd1_import_guide_specs(
@@ -175,6 +221,7 @@ def build_pull_specs(config: RuntimeConfig) -> list[PullSpec]:
     external = pull_sets["external"]
     domestic = pull_sets["domestic_padd"]
     padd1_import_guides = pull_sets.get("padd1_import_guides", {})
+    balance_guides = pull_sets.get("balance_guides", {})
 
     specs: list[PullSpec] = []
     for commodity, product in products.items():
@@ -291,6 +338,7 @@ def build_pull_specs(config: RuntimeConfig) -> list[PullSpec]:
             )
         )
     specs.extend(build_padd1_import_guide_specs(products, padd1_import_guides, config))
+    specs.extend(build_balance_guide_specs(products, balance_guides, config))
     return specs
 
 

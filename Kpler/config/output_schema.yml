@@ -59,3 +59,38 @@ padd1_import_guide_columns:
   - padd1c_imports_canada_kbd
   - padd1c_imports_non_canada_kbd
   - padd1c_imports_intra_us_kbd
+
+balance_guide_columns:
+  - commodity
+  - padd1_imports_total_kbd
+  - padd1_imports_canada_kbd
+  - padd1_imports_non_canada_kbd
+  - padd1_exports_total_kbd
+  - padd1ab_imports_total_kbd
+  - padd1ab_imports_canada_kbd
+  - padd1ab_imports_non_canada_kbd
+  - padd1ab_exports_total_kbd
+  - padd1ab_exports_europe_kbd
+  - padd1ab_exports_other_kbd
+  - padd1c_imports_total_kbd
+  - padd1c_imports_canada_kbd
+  - padd1c_imports_non_canada_kbd
+  - padd1c_imports_intra_us_kbd
+  - padd1c_exports_total_kbd
+  - padd3_to_padd1_kbd
+  - padd3_to_padd1ab_kbd
+  - padd3_to_padd1c_kbd
+  - padd3_to_padd5_kbd
+  - padd3_exports_total_kbd
+  - padd3_exports_africa_kbd
+  - padd3_exports_europe_kbd
+  - padd3_exports_latin_america_kbd
+  - padd3_exports_other_kbd
+  - padd5_imports_total_kbd
+  - padd5_exports_total_kbd
+  - us_imports_total_kbd
+  - us_imports_canada_kbd
+  - us_imports_non_canada_kbd
+  - us_exports_total_kbd
+  - us_exports_europe_kbd
+  - us_exports_latin_america_kbd

@@ -1,13 +1,13 @@
 {
   "balances": {
     "diesel": {
-      "generated_at": "2026-07-04T23:04:14.522Z",
+      "generated_at": "2026-07-05T01:53:10.103Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-06-26",
       "path": "Diesel_Balance/manifest.json"
     },
     "jet": {
-      "generated_at": "2026-07-04T23:04:14.639Z",
+      "generated_at": "2026-07-05T01:53:10.222Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-06-26",
       "path": "Jet_Balance/manifest.json"
@@ -110,7 +110,7 @@
       "mode": "eia_fallback",
       "name": "kpler",
       "path": "Kpler/manifest.json",
-      "rows": 18336,
+      "rows": 18396,
       "status": "pass"
     },
     {
@@ -274,12 +274,12 @@
       "rows": 545
     }
   },
-  "generated_at": "2026-07-04T23:04:21.319163+00:00",
+  "generated_at": "2026-07-05T01:55:06.164709+00:00",
   "kpler": {
-    "generated_at": "2026-07-04T22:44:34.506118+00:00",
+    "generated_at": "2026-07-05T01:53:03.297238+00:00",
     "mode": "eia_fallback",
     "path": "Kpler/manifest.json",
-    "rows": 18336
+    "rows": 18396
   },
   "kpler_padd1_eia_split": {
     "generated_at": "2026-06-26T04:50:45.546169+00:00",

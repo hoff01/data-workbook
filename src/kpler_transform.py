@@ -47,6 +47,19 @@ PADD1_IMPORT_GUIDE_DESTINATIONS = {
     "padd1ab": ["PADD1A", "PADDIA", "NEWENGLAND", "PADD1B", "PADDIB", "CENTRALATLANTIC"],
     "padd1c": ["PADD1C", "PADDIC", "LOWERATLANTIC"],
 }
+BALANCE_GUIDE_FREQUENCIES = {
+    "weekly": ("week_ending", "weekly"),
+    "monthly": ("month", "monthly"),
+}
+PADD_MATCHES = {
+    "padd1ab": ["PADD1A", "PADDIA", "NEWENGLAND", "PADD1B", "PADDIB", "CENTRALATLANTIC"],
+    "padd1c": ["PADD1C", "PADDIC", "LOWERATLANTIC"],
+    "padd1": ["PADD1", "PADDI", "EASTCOAST"],
+    "padd2": ["PADD2", "PADDII", "MIDWEST"],
+    "padd3": ["PADD3", "PADDIII", "GULFCOAST"],
+    "padd4": ["PADD4", "PADDIV", "ROCKYMOUNTAIN"],
+    "padd5": ["PADD5", "PADDV", "WESTCOAST"],
+}
 
 
 def empty_long() -> pl.DataFrame:
@@ -474,10 +487,203 @@ def build_padd1_import_guide_outputs(long_rows: pl.DataFrame, start_date: date, 
     return outputs
 
 
+def padd_group(value: Any) -> str:
+    text = compact_name(value)
+    if not text:
+        return ""
+    for group in ["padd1ab", "padd1c", "padd2", "padd3", "padd4", "padd5"]:
+        if any(token in text for token in PADD_MATCHES[group]):
+            return group
+    if any(token in text for token in PADD_MATCHES["padd1"]):
+        return "padd1"
+    return ""
+
+
+def is_padd1(group: str) -> bool:
+    return group in {"padd1", "padd1ab", "padd1c"}
+
+
+def is_canada(country: Any) -> bool:
+    return clean_name(country).lower() == "canada"
+
+
+def is_united_states(country: Any) -> bool:
+    return clean_name(country).lower() in {"united states", "united states of america", "usa"}
+
+
+def balance_destination_group(row: dict[str, Any], regions: dict[str, Any]) -> str:
+    return classify_us_group(row.get("destination_country", ""), row.get("destination_trading_region", ""), regions)
+
+
+def add_balance_value(summary: dict[str, dict[str, float]], period: str, column: str, value: float) -> None:
+    if not period or not column or not value:
+        return
+    bucket = summary.setdefault(period, {})
+    bucket[column] = float(bucket.get(column, 0.0)) + float(value)
+
+
+def guide_period(value: Any, frequency: str) -> str:
+    text = clean_name(value)
+    if not text:
+        return ""
+    return text[:10] if frequency == "weekly" else text[:7]
+
+
+def derive_balance_guide_columns(values: dict[str, float]) -> None:
+    for prefix in ["padd1", "padd1ab", "padd1c", "us"]:
+        total_col = f"{prefix}_imports_total_kbd"
+        canada_col = f"{prefix}_imports_canada_kbd"
+        non_canada_col = f"{prefix}_imports_non_canada_kbd"
+        if total_col in values or canada_col in values:
+            values[non_canada_col] = max(0.0, values.get(total_col, 0.0) - values.get(canada_col, 0.0))
+    values["padd1ab_exports_other_kbd"] = max(
+        0.0,
+        values.get("padd1ab_exports_total_kbd", 0.0) - values.get("padd1ab_exports_europe_kbd", 0.0),
+    )
+    values["padd3_exports_other_kbd"] = max(
+        0.0,
+        values.get("padd3_exports_total_kbd", 0.0)
+        - values.get("padd3_exports_africa_kbd", 0.0)
+        - values.get("padd3_exports_europe_kbd", 0.0)
+        - values.get("padd3_exports_latin_america_kbd", 0.0),
+    )
+
+
+def balance_guide_frame(
+    rows: pl.DataFrame,
+    commodity: str,
+    frequency: str,
+    period_column: str,
+    schema: list[str],
+) -> pl.DataFrame:
+    regions = load_region_config()
+    summary: dict[str, dict[str, float]] = {}
+    subset = rows.filter((pl.col("commodity") == commodity) & (pl.col("region_detail") == frequency))
+    for row in subset.iter_rows(named=True):
+        route = row.get("route_group", "")
+        period = guide_period(row.get("date", ""), frequency)
+        value = float(row.get("value_kbd") or 0.0)
+        origin_group = padd_group(row.get("origin_padd", ""))
+        destination_group = padd_group(row.get("destination_padd", ""))
+        destination_trade_group = balance_destination_group(row, regions)
+        origin_country = row.get("origin_country", "")
+
+        if route == "padd1_imports_external":
+            if commodity == "diesel" and destination_group == "padd1ab":
+                add_balance_value(summary, period, "padd1ab_imports_total_kbd", value)
+                if is_canada(origin_country):
+                    add_balance_value(summary, period, "padd1ab_imports_canada_kbd", value)
+            elif commodity == "jet" and is_padd1(destination_group):
+                add_balance_value(summary, period, "padd1_imports_total_kbd", value)
+                if is_canada(origin_country):
+                    add_balance_value(summary, period, "padd1_imports_canada_kbd", value)
+
+        elif route == "padd1c_imports_intracountry" and commodity == "diesel" and destination_group == "padd1c":
+            add_balance_value(summary, period, "padd1c_imports_total_kbd", value)
+            if is_canada(origin_country):
+                add_balance_value(summary, period, "padd1c_imports_canada_kbd", value)
+            if is_united_states(origin_country):
+                add_balance_value(summary, period, "padd1c_imports_intra_us_kbd", value)
+
+        elif route == "padd1_exports_external":
+            if commodity == "diesel":
+                if origin_group == "padd1ab":
+                    add_balance_value(summary, period, "padd1ab_exports_total_kbd", value)
+                    if destination_trade_group == "europe":
+                        add_balance_value(summary, period, "padd1ab_exports_europe_kbd", value)
+                elif origin_group == "padd1c":
+                    add_balance_value(summary, period, "padd1c_exports_total_kbd", value)
+            elif commodity == "jet" and is_padd1(origin_group):
+                add_balance_value(summary, period, "padd1_exports_total_kbd", value)
+
+        elif route == "padd3_exports_external" and origin_group == "padd3":
+            add_balance_value(summary, period, "padd3_exports_total_kbd", value)
+            if destination_trade_group in {"africa", "europe", "latin_america"}:
+                add_balance_value(summary, period, f"padd3_exports_{destination_trade_group}_kbd", value)
+
+        elif route == "padd5_imports_external" and destination_group == "padd5":
+            add_balance_value(summary, period, "padd5_imports_total_kbd", value)
+
+        elif route == "padd5_exports_external" and origin_group == "padd5":
+            add_balance_value(summary, period, "padd5_exports_total_kbd", value)
+
+        elif route == "us_imports_external":
+            add_balance_value(summary, period, "us_imports_total_kbd", value)
+            if is_canada(origin_country):
+                add_balance_value(summary, period, "us_imports_canada_kbd", value)
+
+        elif route == "us_exports_external":
+            add_balance_value(summary, period, "us_exports_total_kbd", value)
+            if destination_trade_group in {"europe", "latin_america"}:
+                add_balance_value(summary, period, f"us_exports_{destination_trade_group}_kbd", value)
+
+        elif route == "padd3_domestic_receipts" and origin_group == "padd3":
+            if destination_group == "padd1ab":
+                add_balance_value(summary, period, "padd3_to_padd1ab_kbd", value)
+                add_balance_value(summary, period, "padd3_to_padd1_kbd", value)
+            elif destination_group == "padd1c":
+                add_balance_value(summary, period, "padd3_to_padd1c_kbd", value)
+                add_balance_value(summary, period, "padd3_to_padd1_kbd", value)
+            elif destination_group == "padd5":
+                add_balance_value(summary, period, "padd3_to_padd5_kbd", value)
+
+    output_rows: list[dict[str, Any]] = []
+    for period, values in sorted(summary.items()):
+        derive_balance_guide_columns(values)
+        output_rows.append({period_column: period, "commodity": commodity, **values})
+    frame = pl.DataFrame(output_rows) if output_rows else pl.DataFrame({period_column: []}, schema={period_column: pl.Utf8})
+    return ensure_columns(frame, [period_column, *schema])
+
+
+def write_balance_guide_output_set(name: str, weekly: pl.DataFrame, monthly: pl.DataFrame, schema: list[str]) -> dict[str, Any]:
+    daily_path = OUTPUT_DIR / "daily" / f"{name}_daily.csv"
+    weekly_path = OUTPUT_DIR / "weekly" / f"{name}_weekly.csv"
+    monthly_path = OUTPUT_DIR / "monthly" / f"{name}_monthly.csv"
+    daily = pl.DataFrame({"date": []}, schema={"date": pl.Utf8})
+    daily = ensure_columns(daily, ["date", *schema])
+    daily.write_csv(daily_path)
+    weekly.write_csv(weekly_path)
+    monthly.write_csv(monthly_path)
+    weekly_dates = weekly["week_ending"].to_list() if "week_ending" in weekly.columns and weekly.height else []
+    monthly_dates = monthly["month"].to_list() if "month" in monthly.columns and monthly.height else []
+    dates = [*weekly_dates, *monthly_dates]
+    return {
+        "daily_path": str(daily_path),
+        "weekly_path": str(weekly_path),
+        "monthly_path": str(monthly_path),
+        "daily_rows": 0,
+        "weekly_rows": int(weekly.height),
+        "monthly_rows": int(monthly.height),
+        "min_date": min(dates) if dates else "",
+        "max_date": max(dates) if dates else "",
+    }
+
+
+def build_balance_guide_outputs(long_rows: pl.DataFrame) -> dict[str, dict[str, Any]]:
+    outputs: dict[str, dict[str, Any]] = {}
+    schema = load_yaml(CONFIG_DIR / "output_schema.yml")["balance_guide_columns"]
+    rows = long_rows.filter(pl.col("family") == "balance_guides")
+    if rows.is_empty():
+        return outputs
+    for commodity in ["diesel", "jet"]:
+        weekly = balance_guide_frame(rows, commodity, "weekly", "week_ending", schema)
+        monthly = balance_guide_frame(rows, commodity, "monthly", "month", schema)
+        if weekly.is_empty() and monthly.is_empty():
+            continue
+        outputs[f"us_{commodity}_balance_guides"] = write_balance_guide_output_set(
+            f"us_{commodity}_balance_guides",
+            weekly,
+            monthly,
+            schema,
+        )
+    return outputs
+
+
 def build_outputs(long_rows: pl.DataFrame, start_date: date, end_date: date) -> dict[str, dict[str, Any]]:
     outputs: dict[str, dict[str, Any]] = {}
     outputs.update(build_us_external_outputs(long_rows, start_date, end_date))
     outputs.update(build_europe_external_outputs(long_rows, start_date, end_date))
     outputs.update(build_domestic_padd_outputs(long_rows, start_date, end_date))
     outputs.update(build_padd1_import_guide_outputs(long_rows, start_date, end_date))
+    outputs.update(build_balance_guide_outputs(long_rows))
     return outputs

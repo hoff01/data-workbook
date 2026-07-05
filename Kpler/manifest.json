@@ -1,115 +1,115 @@
 {
-  "generated_at": "2026-07-04T22:44:34.506118+00:00",
+  "generated_at": "2026-07-05T01:53:03.297238+00:00",
   "kpler_access_mode": "eia_fallback_no_credentials",
   "mode": "eia_fallback",
   "normalized_long": {
-    "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/normalized_long.csv",
-    "rows": 18336
+    "path": "Kpler/raw/daily/normalized_long.csv",
+    "rows": 18396
   },
   "outputs": {
     "europe_diesel": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/europe_diesel_daily.csv",
-      "daily_rows": 3118,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/europe_diesel_daily.csv",
+      "daily_rows": 3152,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/europe_diesel_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/europe_diesel_weekly.csv",
-      "weekly_rows": 444
+      "monthly_path": "Kpler/output/monthly/europe_diesel_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/europe_diesel_weekly.csv",
+      "weekly_rows": 449
     },
     "europe_gasoline": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/europe_gasoline_daily.csv",
-      "daily_rows": 3118,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/europe_gasoline_daily.csv",
+      "daily_rows": 3152,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/europe_gasoline_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/europe_gasoline_weekly.csv",
-      "weekly_rows": 444
+      "monthly_path": "Kpler/output/monthly/europe_gasoline_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/europe_gasoline_weekly.csv",
+      "weekly_rows": 449
     },
     "europe_jet": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/europe_jet_daily.csv",
-      "daily_rows": 3118,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/europe_jet_daily.csv",
+      "daily_rows": 3152,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/europe_jet_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/europe_jet_weekly.csv",
-      "weekly_rows": 444
+      "monthly_path": "Kpler/output/monthly/europe_jet_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/europe_jet_weekly.csv",
+      "weekly_rows": 449
     },
     "us_diesel": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_diesel_daily.csv",
-      "daily_rows": 3118,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/us_diesel_daily.csv",
+      "daily_rows": 3152,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_diesel_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_diesel_weekly.csv",
-      "weekly_rows": 444
+      "monthly_path": "Kpler/output/monthly/us_diesel_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/us_diesel_weekly.csv",
+      "weekly_rows": 449
     },
     "us_diesel_padd_movements": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_diesel_padd_movements_daily.csv",
-      "daily_rows": 3118,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/us_diesel_padd_movements_daily.csv",
+      "daily_rows": 3152,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_diesel_padd_movements_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_diesel_padd_movements_weekly.csv",
-      "weekly_rows": 444
+      "monthly_path": "Kpler/output/monthly/us_diesel_padd_movements_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/us_diesel_padd_movements_weekly.csv",
+      "weekly_rows": 449
     },
     "us_gasoline": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_gasoline_daily.csv",
-      "daily_rows": 3118,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/us_gasoline_daily.csv",
+      "daily_rows": 3152,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_gasoline_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_gasoline_weekly.csv",
-      "weekly_rows": 444
+      "monthly_path": "Kpler/output/monthly/us_gasoline_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/us_gasoline_weekly.csv",
+      "weekly_rows": 449
     },
     "us_gasoline_padd_movements": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_gasoline_padd_movements_daily.csv",
-      "daily_rows": 3118,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/us_gasoline_padd_movements_daily.csv",
+      "daily_rows": 3152,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_gasoline_padd_movements_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_gasoline_padd_movements_weekly.csv",
-      "weekly_rows": 444
+      "monthly_path": "Kpler/output/monthly/us_gasoline_padd_movements_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/us_gasoline_padd_movements_weekly.csv",
+      "weekly_rows": 449
     },
     "us_jet": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_jet_daily.csv",
-      "daily_rows": 3118,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/us_jet_daily.csv",
+      "daily_rows": 3152,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_jet_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_jet_weekly.csv",
-      "weekly_rows": 444
+      "monthly_path": "Kpler/output/monthly/us_jet_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/us_jet_weekly.csv",
+      "weekly_rows": 449
     },
     "us_jet_padd_movements": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_jet_padd_movements_daily.csv",
-      "daily_rows": 3118,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/us_jet_padd_movements_daily.csv",
+      "daily_rows": 3152,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_jet_padd_movements_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_jet_padd_movements_weekly.csv",
-      "weekly_rows": 444
+      "monthly_path": "Kpler/output/monthly/us_jet_padd_movements_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/us_jet_padd_movements_weekly.csv",
+      "weekly_rows": 449
     },
     "us_padd_movements": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_padd_movements_daily.csv",
-      "daily_rows": 9354,
-      "max_date": "2026-07-15",
+      "daily_path": "Kpler/output/daily/us_padd_movements_daily.csv",
+      "daily_rows": 9456,
+      "max_date": "2026-08-18",
       "min_date": "2018-01-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_padd_movements_monthly.csv",
-      "monthly_rows": 103,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_padd_movements_weekly.csv",
+      "monthly_path": "Kpler/output/monthly/us_padd_movements_monthly.csv",
+      "monthly_rows": 104,
+      "weekly_path": "Kpler/output/weekly/us_padd_movements_weekly.csv",
       "weekly_rows": 0
     }
   },
   "pipeline_name": "kpler_flows",
-  "pull_count": 29,
+  "pull_count": 57,
   "pull_status": {
     "us_diesel_exports": {
       "assumption": "no Kpler credentials; EIA import/export values are staged as Kpler-shaped rows",
@@ -125,7 +125,7 @@
     },
     "us_gasoline_exports": {
       "assumption": "no Kpler credentials; EIA import/export values are staged as Kpler-shaped rows",
-      "rows": 3012,
+      "rows": 3042,
       "source": "EIA clean weekly/monthly exports",
       "status": "eia_fallback"
     },
@@ -137,7 +137,7 @@
     },
     "us_jet_exports": {
       "assumption": "no Kpler credentials; EIA import/export values are staged as Kpler-shaped rows",
-      "rows": 3012,
+      "rows": 3042,
       "source": "EIA clean weekly/monthly exports",
       "status": "eia_fallback"
     },
@@ -151,7 +151,7 @@
   "pulls": [
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -178,7 +178,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -205,7 +205,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -251,7 +251,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -297,7 +297,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -338,7 +338,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -379,7 +379,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -414,7 +414,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -449,7 +449,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "domestic_padd",
       "flow_direction": "export",
       "from_zones": [
@@ -478,7 +478,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -505,7 +505,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -532,7 +532,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -578,7 +578,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -624,7 +624,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -665,7 +665,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -706,7 +706,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -741,7 +741,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -776,7 +776,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "domestic_padd",
       "flow_direction": "export",
       "from_zones": [
@@ -805,7 +805,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -832,7 +832,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -859,7 +859,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -905,7 +905,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -951,7 +951,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -992,7 +992,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -1033,7 +1033,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "import",
       "from_zones": null,
@@ -1068,7 +1068,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "external",
       "flow_direction": "export",
       "from_zones": [
@@ -1103,7 +1103,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-07-15",
+      "end_date": "2026-08-18",
       "family": "domestic_padd",
       "flow_direction": "export",
       "from_zones": [
@@ -1132,27 +1132,56 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
-      "family": "padd1_import_guides",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
       "flow_direction": "import",
       "from_zones": null,
       "geography": "us",
-      "granularity": "daily",
+      "granularity": "eia-weekly",
       "kpler_product": "Gasoil/Diesel",
-      "name": "us_diesel_padd1ab_import_guides",
+      "name": "us_diesel_weekly_padd1_imports_external",
       "only_realized": false,
-      "region_detail": "padd1ab",
-      "route_group": "padd1ab_imports_by_origin",
+      "region_detail": "weekly",
+      "route_group": "padd1_imports_external",
       "split": [
         "origin countries",
         "origin trading regions",
         "origin padds",
+        "destination padds",
         "products"
       ],
       "start_date": "2018-01-01",
       "to_zones": [
-        "PADD 1A",
-        "PADD 1B"
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_weekly_padd1_imports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd1_imports_external",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
       ],
       "unit": "kbd",
       "with_forecast": true,
@@ -1161,26 +1190,786 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-07-15",
-      "family": "padd1_import_guides",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
       "flow_direction": "import",
       "from_zones": null,
       "geography": "us",
-      "granularity": "daily",
+      "granularity": "eia-weekly",
       "kpler_product": "Gasoil/Diesel",
-      "name": "us_diesel_padd1c_import_guides",
+      "name": "us_diesel_weekly_padd1c_imports_intracountry",
       "only_realized": false,
-      "region_detail": "padd1c",
-      "route_group": "padd1c_imports_by_origin",
+      "region_detail": "weekly",
+      "route_group": "padd1c_imports_intracountry",
       "split": [
         "origin countries",
         "origin trading regions",
         "origin padds",
+        "destination padds",
         "products"
       ],
       "start_date": "2018-01-01",
       "to_zones": [
-        "PADD 1C"
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": true,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_weekly_padd1_exports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd1_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_weekly_padd1_exports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd1_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_weekly_padd3_exports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd3_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_weekly_padd3_exports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd3_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_weekly_padd5_imports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd5_imports_external",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_weekly_padd5_imports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd5_imports_external",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_weekly_padd5_exports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd5_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_weekly_padd5_exports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd5_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_weekly_us_imports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "us_imports_external",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_weekly_us_exports_external",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "us_exports_external",
+      "split": [
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_weekly_padd3_domestic_receipts",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd3_domestic_receipts",
+      "split": [
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": true,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "eia-weekly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_weekly_padd3_domestic_receipts",
+      "only_realized": false,
+      "region_detail": "weekly",
+      "route_group": "padd3_domestic_receipts",
+      "split": [
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": true,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_monthly_padd1_imports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd1_imports_external",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_monthly_padd1_imports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd1_imports_external",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_monthly_padd1c_imports_intracountry",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd1c_imports_intracountry",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": true,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_monthly_padd1_exports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd1_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_monthly_padd1_exports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd1_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_monthly_padd3_exports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd3_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_monthly_padd3_exports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd3_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_monthly_padd5_imports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd5_imports_external",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_monthly_padd5_imports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd5_imports_external",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_monthly_padd5_exports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd5_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_monthly_padd5_exports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd5_exports_external",
+      "split": [
+        "origin padds",
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "import",
+      "from_zones": null,
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_monthly_us_imports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "us_imports_external",
+      "split": [
+        "origin countries",
+        "origin trading regions",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_monthly_us_exports_external",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "us_exports_external",
+      "split": [
+        "destination trading regions",
+        "destination countries",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": null,
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": false,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "diesel",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Gasoil/Diesel",
+      "name": "us_diesel_monthly_padd3_domestic_receipts",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd3_domestic_receipts",
+      "split": [
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
+      ],
+      "unit": "kbd",
+      "with_forecast": true,
+      "with_intra_country": true,
+      "with_intra_region": true
+    },
+    {
+      "commodity": "jet",
+      "end_date": "2026-08-18",
+      "family": "balance_guides",
+      "flow_direction": "export",
+      "from_zones": [
+        "United States"
+      ],
+      "geography": "us",
+      "granularity": "monthly",
+      "kpler_product": "Kero/Jet",
+      "name": "us_jet_monthly_padd3_domestic_receipts",
+      "only_realized": false,
+      "region_detail": "monthly",
+      "route_group": "padd3_domestic_receipts",
+      "split": [
+        "origin padds",
+        "destination padds",
+        "products"
+      ],
+      "start_date": "2018-01-01",
+      "to_zones": [
+        "United States"
       ],
       "unit": "kbd",
       "with_forecast": true,
@@ -1190,7 +1979,7 @@
   ],
   "runtime_config": {
     "concurrency": 2,
-    "end_date": "2026-07-15",
+    "end_date": "2026-08-18",
     "granularity": "daily",
     "only_realized": false,
     "retry_backoff_seconds": 10.0,
@@ -1211,211 +2000,211 @@
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_diesel_daily.csv",
-        "rows": 3118
+        "path": "Kpler/output/daily/us_diesel_daily.csv",
+        "rows": 3152
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_diesel_weekly.csv",
-        "rows": 444
+        "path": "Kpler/output/weekly/us_diesel_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_diesel_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/us_diesel_monthly.csv",
+        "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_jet_daily.csv",
-        "rows": 3118
+        "path": "Kpler/output/daily/us_jet_daily.csv",
+        "rows": 3152
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_jet_weekly.csv",
-        "rows": 444
+        "path": "Kpler/output/weekly/us_jet_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_jet_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/us_jet_monthly.csv",
+        "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_gasoline_daily.csv",
-        "rows": 3118
+        "path": "Kpler/output/daily/us_gasoline_daily.csv",
+        "rows": 3152
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_gasoline_weekly.csv",
-        "rows": 444
+        "path": "Kpler/output/weekly/us_gasoline_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_gasoline_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/us_gasoline_monthly.csv",
+        "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/europe_diesel_daily.csv",
-        "rows": 3118
+        "path": "Kpler/output/daily/europe_diesel_daily.csv",
+        "rows": 3152
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/europe_diesel_weekly.csv",
-        "rows": 444
+        "path": "Kpler/output/weekly/europe_diesel_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/europe_diesel_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/europe_diesel_monthly.csv",
+        "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/europe_jet_daily.csv",
-        "rows": 3118
+        "path": "Kpler/output/daily/europe_jet_daily.csv",
+        "rows": 3152
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/europe_jet_weekly.csv",
-        "rows": 444
+        "path": "Kpler/output/weekly/europe_jet_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/europe_jet_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/europe_jet_monthly.csv",
+        "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/europe_gasoline_daily.csv",
-        "rows": 3118
+        "path": "Kpler/output/daily/europe_gasoline_daily.csv",
+        "rows": 3152
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/europe_gasoline_weekly.csv",
-        "rows": 444
+        "path": "Kpler/output/weekly/europe_gasoline_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/europe_gasoline_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/europe_gasoline_monthly.csv",
+        "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_diesel_padd_movements_daily.csv",
-        "rows": 3118
+        "path": "Kpler/output/daily/us_diesel_padd_movements_daily.csv",
+        "rows": 3152
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_diesel_padd_movements_weekly.csv",
-        "rows": 444
+        "path": "Kpler/output/weekly/us_diesel_padd_movements_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_diesel_padd_movements_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/us_diesel_padd_movements_monthly.csv",
+        "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_jet_padd_movements_daily.csv",
-        "rows": 3118
+        "path": "Kpler/output/daily/us_jet_padd_movements_daily.csv",
+        "rows": 3152
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_jet_padd_movements_weekly.csv",
-        "rows": 444
+        "path": "Kpler/output/weekly/us_jet_padd_movements_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_jet_padd_movements_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/us_jet_padd_movements_monthly.csv",
+        "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_gasoline_padd_movements_daily.csv",
-        "rows": 3118
+        "path": "Kpler/output/daily/us_gasoline_padd_movements_daily.csv",
+        "rows": 3152
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_gasoline_padd_movements_weekly.csv",
-        "rows": 444
+        "path": "Kpler/output/weekly/us_gasoline_padd_movements_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_gasoline_padd_movements_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/us_gasoline_padd_movements_monthly.csv",
+        "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_padd_movements_daily.csv",
-        "rows": 9354
+        "path": "Kpler/output/daily/us_padd_movements_daily.csv",
+        "rows": 9456
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_padd_movements_weekly.csv",
+        "path": "Kpler/output/weekly/us_padd_movements_weekly.csv",
         "rows": 0
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_padd_movements_monthly.csv",
-        "rows": 103
+        "path": "Kpler/output/monthly/us_padd_movements_monthly.csv",
+        "rows": 104
       }
     ],
     "no_duplicate_dates": true,

@@ -40,25 +40,123 @@ domestic_padd:
     - destination padds
     - products
 
-padd1_import_guides:
-  commodities:
-    - diesel
-  splits:
-    - origin countries
-    - origin trading regions
-    - origin padds
-    - destination padds
-    - products
-  regions:
-    padd1ab:
-      label: PADD 1A/B imports by origin country
+balance_guides:
+  frequencies:
+    weekly: eia-weekly
+    monthly: monthly
+  pulls:
+    padd1_imports_external:
+      commodities:
+        - diesel
+        - jet
+      flow_direction: import
       to_zones:
         - United States
+      splits:
+        - origin countries
+        - origin trading regions
+        - origin padds
+        - destination padds
+        - products
       with_intra_country: false
-      route_group: padd1ab_imports_by_origin
-    padd1c:
-      label: PADD 1C imports by origin country with intracountry
+    padd1c_imports_intracountry:
+      commodities:
+        - diesel
+      flow_direction: import
       to_zones:
         - United States
+      splits:
+        - origin countries
+        - origin trading regions
+        - origin padds
+        - destination padds
+        - products
       with_intra_country: true
-      route_group: padd1c_imports_by_origin
+    padd1_exports_external:
+      commodities:
+        - diesel
+        - jet
+      flow_direction: export
+      from_zones:
+        - United States
+      splits:
+        - origin padds
+        - destination trading regions
+        - destination countries
+        - products
+      with_intra_country: false
+    padd3_exports_external:
+      commodities:
+        - diesel
+        - jet
+      flow_direction: export
+      from_zones:
+        - United States
+      splits:
+        - origin padds
+        - destination trading regions
+        - destination countries
+        - products
+      with_intra_country: false
+    padd5_imports_external:
+      commodities:
+        - diesel
+        - jet
+      flow_direction: import
+      to_zones:
+        - United States
+      splits:
+        - origin countries
+        - origin trading regions
+        - destination padds
+        - products
+      with_intra_country: false
+    padd5_exports_external:
+      commodities:
+        - diesel
+        - jet
+      flow_direction: export
+      from_zones:
+        - United States
+      splits:
+        - origin padds
+        - destination trading regions
+        - destination countries
+        - products
+      with_intra_country: false
+    us_imports_external:
+      commodities:
+        - diesel
+      flow_direction: import
+      to_zones:
+        - United States
+      splits:
+        - origin countries
+        - origin trading regions
+        - products
+      with_intra_country: false
+    us_exports_external:
+      commodities:
+        - diesel
+      flow_direction: export
+      from_zones:
+        - United States
+      splits:
+        - destination trading regions
+        - destination countries
+        - products
+      with_intra_country: false
+    padd3_domestic_receipts:
+      commodities:
+        - diesel
+        - jet
+      flow_direction: export
+      from_zones:
+        - United States
+      to_zones:
+        - United States
+      splits:
+        - origin padds
+        - destination padds
+        - products
+      with_intra_country: true

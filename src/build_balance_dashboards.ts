@@ -175,19 +175,39 @@ type KplerGuidePoint = {
   importsKbd: number | null;
   importsCanadaKbd: number | null;
   importsNonCanadaKbd: number | null;
+  usImportsCanadaKbd?: number | null;
+  usImportsNonCanadaKbd?: number | null;
+  usExportsEuropeKbd?: number | null;
+  usExportsLatinAmericaKbd?: number | null;
+  padd1ImportsKbd?: number | null;
+  padd1ImportsCanadaKbd?: number | null;
+  padd1ImportsNonCanadaKbd?: number | null;
+  padd1ExportsKbd?: number | null;
   padd1abImportsKbd?: number | null;
   padd1abImportsCanadaKbd?: number | null;
   padd1abImportsNonCanadaKbd?: number | null;
+  padd1abExportsKbd?: number | null;
+  padd1abExportsEuropeKbd?: number | null;
+  padd1abExportsOtherKbd?: number | null;
   padd1cImportsKbd?: number | null;
   padd1cImportsCanadaKbd?: number | null;
   padd1cImportsNonCanadaKbd?: number | null;
   padd1cImportsIntraUsKbd?: number | null;
+  padd1cExportsKbd?: number | null;
   exportsKbd: number | null;
   exportsLatinAmericaKbd: number | null;
   exportsEuropeKbd: number | null;
   exportsAfricaKbd: number | null;
   exportsOtherKbd: number | null;
   exportsNonEuropeKbd: number | null;
+  padd3ExportsKbd?: number | null;
+  padd3ExportsLatinAmericaKbd?: number | null;
+  padd3ExportsEuropeKbd?: number | null;
+  padd3ExportsAfricaKbd?: number | null;
+  padd3ExportsOtherKbd?: number | null;
+  padd5ImportsKbd?: number | null;
+  padd5ExportsKbd?: number | null;
+  padd3ToPadd1Kbd: number | null;
   padd3ToPadd1abKbd: number | null;
   padd3ToPadd1cKbd: number | null;
   padd3ToPadd5Kbd: number | null;
@@ -2609,10 +2629,11 @@ function readKplerManifest(): KplerManifest {
 }
 
 function productKplerGuidePaths(config: ProductConfig, manifest: KplerManifest = readKplerManifest()): { monthly: string; weekly: string } {
-  const key = `us_${config.key}`;
+  const key = `us_${config.key}_balance_guides`;
+  const legacyKey = `us_${config.key}`;
   return {
-    monthly: manifest.outputs?.[key]?.monthly_path || `Kpler/output/monthly/${key}_monthly.csv`,
-    weekly: manifest.outputs?.[key]?.weekly_path || `Kpler/output/weekly/${key}_weekly.csv`,
+    monthly: manifest.outputs?.[key]?.monthly_path || (fileExists(`Kpler/output/monthly/${key}_monthly.csv`) ? `Kpler/output/monthly/${key}_monthly.csv` : manifest.outputs?.[legacyKey]?.monthly_path || `Kpler/output/monthly/${legacyKey}_monthly.csv`),
+    weekly: manifest.outputs?.[key]?.weekly_path || (fileExists(`Kpler/output/weekly/${key}_weekly.csv`) ? `Kpler/output/weekly/${key}_weekly.csv` : manifest.outputs?.[legacyKey]?.weekly_path || `Kpler/output/weekly/${legacyKey}_weekly.csv`),
   };
 }
 
@@ -2685,72 +2706,103 @@ function kplerRowsByPeriod(rows: CsvRow[], periodColumn: "month" | "week_ending"
 
 function buildKplerGuidePoints(
   rows: CsvRow[],
-  movementRows: CsvRow[],
-  padd1ImportRows: CsvRow[],
   periodColumn: "month" | "week_ending",
   zeroAsMissing: boolean,
 ): KplerGuidePoint[] {
   const rowsByPeriod = kplerRowsByPeriod(rows, periodColumn);
-  const movementByPeriod = kplerRowsByPeriod(movementRows, periodColumn);
-  const padd1ImportsByPeriod = kplerRowsByPeriod(padd1ImportRows, periodColumn);
-  return Array.from(new Set([...rowsByPeriod.keys(), ...movementByPeriod.keys(), ...padd1ImportsByPeriod.keys()]))
+  return Array.from(rowsByPeriod.keys())
     .map((period) => {
       const row = rowsByPeriod.get(period);
-      const movementRow = movementByPeriod.get(period);
-      const padd1ImportRow = padd1ImportsByPeriod.get(period);
-      const importsKbd = optionalKplerGuideNumber(row, "imports_total_kbd", zeroAsMissing);
-      const exportsKbd = optionalKplerGuideNumber(row, "exports_total_kbd", zeroAsMissing);
-      const broadImportsCanadaKbd = optionalKplerGuideNumber(row, "imports_canada_kbd", zeroAsMissing);
-      const broadImportsNonCanadaKbd =
-        optionalKplerGuideColumnSum(
-          row,
-          ["imports_latin_america_kbd", "imports_europe_kbd", "imports_asia_kbd", "imports_middle_east_kbd", "imports_africa_kbd", "imports_other_kbd"],
-          zeroAsMissing,
-        ) ?? derivedKplerGuideDifference(importsKbd, [broadImportsCanadaKbd], zeroAsMissing);
-      const padd1abImportsKbd = optionalKplerGuideNumber(padd1ImportRow, "padd1ab_imports_total_kbd", zeroAsMissing);
-      const padd1abImportsCanadaKbd = optionalKplerGuideNumber(padd1ImportRow, "padd1ab_imports_canada_kbd", zeroAsMissing);
+      const value = (column: string) => optionalKplerGuideNumber(row, column, zeroAsMissing);
+      const importsKbd = value("us_imports_total_kbd") ?? value("imports_total_kbd");
+      const exportsKbd = value("us_exports_total_kbd") ?? value("exports_total_kbd");
+      const usImportsCanadaKbd = value("us_imports_canada_kbd") ?? value("imports_canada_kbd");
+      const usImportsNonCanadaKbd =
+        value("us_imports_non_canada_kbd") ?? derivedKplerGuideDifference(importsKbd, [usImportsCanadaKbd], zeroAsMissing);
+      const usExportsEuropeKbd = value("us_exports_europe_kbd") ?? value("exports_europe_kbd");
+      const usExportsLatinAmericaKbd = value("us_exports_latin_america_kbd") ?? value("exports_latin_america_kbd");
+      const padd1ImportsKbd = value("padd1_imports_total_kbd");
+      const padd1ImportsCanadaKbd = value("padd1_imports_canada_kbd");
+      const padd1ImportsNonCanadaKbd =
+        value("padd1_imports_non_canada_kbd") ?? derivedKplerGuideDifference(padd1ImportsKbd, [padd1ImportsCanadaKbd], zeroAsMissing);
+      const padd1ExportsKbd = value("padd1_exports_total_kbd");
+      const padd1abImportsKbd = value("padd1ab_imports_total_kbd");
+      const padd1abImportsCanadaKbd = value("padd1ab_imports_canada_kbd");
       const padd1abImportsNonCanadaKbd =
-        optionalKplerGuideNumber(padd1ImportRow, "padd1ab_imports_non_canada_kbd", zeroAsMissing) ??
+        value("padd1ab_imports_non_canada_kbd") ??
         derivedKplerGuideDifference(padd1abImportsKbd, [padd1abImportsCanadaKbd], zeroAsMissing);
-      const padd1cImportsKbd = optionalKplerGuideNumber(padd1ImportRow, "padd1c_imports_total_kbd", zeroAsMissing);
-      const padd1cImportsCanadaKbd = optionalKplerGuideNumber(padd1ImportRow, "padd1c_imports_canada_kbd", zeroAsMissing);
+      const padd1abExportsKbd = value("padd1ab_exports_total_kbd");
+      const padd1abExportsEuropeKbd = value("padd1ab_exports_europe_kbd");
+      const padd1abExportsOtherKbd =
+        value("padd1ab_exports_other_kbd") ?? derivedKplerGuideDifference(padd1abExportsKbd, [padd1abExportsEuropeKbd], zeroAsMissing);
+      const padd1cImportsKbd = value("padd1c_imports_total_kbd");
+      const padd1cImportsCanadaKbd = value("padd1c_imports_canada_kbd");
       const padd1cImportsNonCanadaKbd =
-        optionalKplerGuideNumber(padd1ImportRow, "padd1c_imports_non_canada_kbd", zeroAsMissing) ??
+        value("padd1c_imports_non_canada_kbd") ??
         derivedKplerGuideDifference(padd1cImportsKbd, [padd1cImportsCanadaKbd], zeroAsMissing);
-      const padd1cImportsIntraUsKbd = optionalKplerGuideNumber(padd1ImportRow, "padd1c_imports_intra_us_kbd", zeroAsMissing);
-      const exportsLatinAmericaKbd = optionalKplerGuideNumber(row, "exports_latin_america_kbd", zeroAsMissing);
-      const exportsEuropeKbd = optionalKplerGuideNumber(row, "exports_europe_kbd", zeroAsMissing);
-      const exportsAfricaKbd = optionalKplerGuideNumber(row, "exports_africa_kbd", zeroAsMissing);
+      const padd1cImportsIntraUsKbd = value("padd1c_imports_intra_us_kbd");
+      const padd1cExportsKbd = value("padd1c_exports_total_kbd");
+      const padd3ExportsKbd = value("padd3_exports_total_kbd");
+      const padd3ExportsLatinAmericaKbd = value("padd3_exports_latin_america_kbd");
+      const padd3ExportsEuropeKbd = value("padd3_exports_europe_kbd");
+      const padd3ExportsAfricaKbd = value("padd3_exports_africa_kbd");
+      const padd3ExportsOtherKbd =
+        value("padd3_exports_other_kbd") ??
+        derivedKplerGuideDifference(padd3ExportsKbd, [padd3ExportsLatinAmericaKbd, padd3ExportsEuropeKbd, padd3ExportsAfricaKbd], zeroAsMissing);
+      const padd5ImportsKbd = value("padd5_imports_total_kbd");
+      const padd5ExportsKbd = value("padd5_exports_total_kbd");
+      const exportsLatinAmericaKbd = padd3ExportsLatinAmericaKbd ?? value("exports_latin_america_kbd");
+      const exportsEuropeKbd = padd3ExportsEuropeKbd ?? value("exports_europe_kbd");
+      const exportsAfricaKbd = padd3ExportsAfricaKbd ?? value("exports_africa_kbd");
       const exportsOtherKbd =
+        padd3ExportsOtherKbd ??
         optionalKplerGuideColumnSum(row, ["exports_canada_kbd", "exports_asia_kbd", "exports_middle_east_kbd", "exports_other_kbd"], zeroAsMissing) ??
         derivedKplerGuideDifference(exportsKbd, [exportsLatinAmericaKbd, exportsEuropeKbd, exportsAfricaKbd], zeroAsMissing);
       const exportsNonEuropeKbd =
-        optionalKplerGuideColumnSum(
-          row,
-          ["exports_canada_kbd", "exports_latin_america_kbd", "exports_asia_kbd", "exports_middle_east_kbd", "exports_africa_kbd", "exports_other_kbd"],
-          zeroAsMissing,
-        ) ?? derivedKplerGuideDifference(exportsKbd, [exportsEuropeKbd], zeroAsMissing);
+        padd1abExportsOtherKbd ??
+        optionalKplerGuideColumnSum(row, ["exports_canada_kbd", "exports_latin_america_kbd", "exports_asia_kbd", "exports_middle_east_kbd", "exports_africa_kbd", "exports_other_kbd"], zeroAsMissing) ??
+        derivedKplerGuideDifference(exportsKbd, [exportsEuropeKbd], zeroAsMissing);
       return {
         period,
         importsKbd,
-        importsCanadaKbd: padd1abImportsCanadaKbd ?? broadImportsCanadaKbd,
-        importsNonCanadaKbd: padd1abImportsNonCanadaKbd ?? broadImportsNonCanadaKbd,
+        importsCanadaKbd: usImportsCanadaKbd ?? padd1ImportsCanadaKbd ?? padd1abImportsCanadaKbd,
+        importsNonCanadaKbd: usImportsNonCanadaKbd ?? padd1ImportsNonCanadaKbd ?? padd1abImportsNonCanadaKbd,
+        ...(usImportsCanadaKbd !== null ? { usImportsCanadaKbd } : {}),
+        ...(usImportsNonCanadaKbd !== null ? { usImportsNonCanadaKbd } : {}),
+        ...(usExportsEuropeKbd !== null ? { usExportsEuropeKbd } : {}),
+        ...(usExportsLatinAmericaKbd !== null ? { usExportsLatinAmericaKbd } : {}),
+        ...(padd1ImportsKbd !== null ? { padd1ImportsKbd } : {}),
+        ...(padd1ImportsCanadaKbd !== null ? { padd1ImportsCanadaKbd } : {}),
+        ...(padd1ImportsNonCanadaKbd !== null ? { padd1ImportsNonCanadaKbd } : {}),
+        ...(padd1ExportsKbd !== null ? { padd1ExportsKbd } : {}),
         ...(padd1abImportsKbd !== null ? { padd1abImportsKbd } : {}),
         ...(padd1abImportsCanadaKbd !== null ? { padd1abImportsCanadaKbd } : {}),
         ...(padd1abImportsNonCanadaKbd !== null ? { padd1abImportsNonCanadaKbd } : {}),
+        ...(padd1abExportsKbd !== null ? { padd1abExportsKbd } : {}),
+        ...(padd1abExportsEuropeKbd !== null ? { padd1abExportsEuropeKbd } : {}),
+        ...(padd1abExportsOtherKbd !== null ? { padd1abExportsOtherKbd } : {}),
         ...(padd1cImportsKbd !== null ? { padd1cImportsKbd } : {}),
         ...(padd1cImportsCanadaKbd !== null ? { padd1cImportsCanadaKbd } : {}),
         ...(padd1cImportsNonCanadaKbd !== null ? { padd1cImportsNonCanadaKbd } : {}),
         ...(padd1cImportsIntraUsKbd !== null ? { padd1cImportsIntraUsKbd } : {}),
+        ...(padd1cExportsKbd !== null ? { padd1cExportsKbd } : {}),
         exportsKbd,
         exportsLatinAmericaKbd,
         exportsEuropeKbd,
         exportsAfricaKbd,
         exportsOtherKbd,
         exportsNonEuropeKbd,
-        padd3ToPadd1abKbd: optionalKplerGuideNumber(movementRow, "padd3_to_padd1ab_kbd", zeroAsMissing),
-        padd3ToPadd1cKbd: optionalKplerGuideNumber(movementRow, "padd3_to_padd1c_kbd", zeroAsMissing),
-        padd3ToPadd5Kbd: optionalKplerGuideNumber(movementRow, "padd3_to_padd5_kbd", zeroAsMissing),
+        ...(padd3ExportsKbd !== null ? { padd3ExportsKbd } : {}),
+        ...(padd3ExportsLatinAmericaKbd !== null ? { padd3ExportsLatinAmericaKbd } : {}),
+        ...(padd3ExportsEuropeKbd !== null ? { padd3ExportsEuropeKbd } : {}),
+        ...(padd3ExportsAfricaKbd !== null ? { padd3ExportsAfricaKbd } : {}),
+        ...(padd3ExportsOtherKbd !== null ? { padd3ExportsOtherKbd } : {}),
+        ...(padd5ImportsKbd !== null ? { padd5ImportsKbd } : {}),
+        ...(padd5ExportsKbd !== null ? { padd5ExportsKbd } : {}),
+        padd3ToPadd1Kbd: value("padd3_to_padd1_kbd"),
+        padd3ToPadd1abKbd: value("padd3_to_padd1ab_kbd"),
+        padd3ToPadd1cKbd: value("padd3_to_padd1c_kbd"),
+        padd3ToPadd5Kbd: value("padd3_to_padd5_kbd"),
       };
     })
     .sort((a, b) => a.period.localeCompare(b.period));
@@ -2758,21 +2810,15 @@ function buildKplerGuidePoints(
 
 function buildKplerGuides(config: ProductConfig, manifest: KplerManifest = readKplerManifest()): DashboardBundle["kplerGuides"] {
   const paths = productKplerGuidePaths(config, manifest);
-  const movementPaths = productKplerMovementGuidePaths(config, manifest);
-  const padd1ImportPaths = productKplerPadd1ImportGuidePaths(config, manifest);
   const zeroAsMissing = manifest.mode === "eia_fallback" || manifest.kpler_access_mode === "eia_fallback_no_credentials";
   const monthlyRows = rowsForOptionalCsv(paths.monthly);
   const weeklyRows = rowsForOptionalCsv(paths.weekly);
-  const monthlyMovementRows = rowsForOptionalCsv(movementPaths.monthly);
-  const weeklyMovementRows = rowsForOptionalCsv(movementPaths.weekly);
-  const monthlyPadd1ImportRows = rowsForOptionalCsv(padd1ImportPaths.monthly);
-  const weeklyPadd1ImportRows = rowsForOptionalCsv(padd1ImportPaths.weekly);
   return {
     note: zeroAsMissing
       ? "Synthetic Kpler fallback guide values are shown only when the fallback output has a non-zero realized value; padded zeroes are rendered blank."
       : "Kpler import/export guide values are read-only and do not feed balance calculations.",
-    monthly: buildKplerGuidePoints(monthlyRows, monthlyMovementRows, monthlyPadd1ImportRows, "month", zeroAsMissing),
-    weekly: buildKplerGuidePoints(weeklyRows, weeklyMovementRows, weeklyPadd1ImportRows, "week_ending", zeroAsMissing),
+    monthly: buildKplerGuidePoints(monthlyRows, "month", zeroAsMissing),
+    weekly: buildKplerGuidePoints(weeklyRows, "week_ending", zeroAsMissing),
   };
 }
 
@@ -4544,8 +4590,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       return lines;
     }
 	    function movementLineLabel(flow, direction){ return (direction === 'in' ? 'from ' + balanceRegionDisplayLabel(flow.fromRegionKey) : 'to ' + balanceRegionDisplayLabel(flow.toRegionKey)) + ' - ' + flow.modeLabel; }
-	    function kplerReceiptMovementGuideTarget(flow){ if (!flow || flow.fromRegionKey !== 'padd3' || flow.modeKey !== 'tankerBarge') return ''; return {padd1ab:'padd3ToPadd1abTankerBarge',padd1c:'padd3ToPadd1cTankerBarge',padd5:'padd3ToPadd5TankerBarge'}[flow.toRegionKey] || ''; }
-	    function kplerReceiptMovementGuideLine(flow){ const target = kplerReceiptMovementGuideTarget(flow); return target ? kplerGuideLine(target, 'Kpler ' + movementLineLabel(flow, 'in') + ' Guide') : null; }
+	    function kplerReceiptMovementGuideTarget(flow){ if (!flow || flow.fromRegionKey !== 'padd3' || flow.modeKey !== 'tankerBarge') return ''; return {padd1:'padd3ToPadd1TankerBarge',padd1ab:'padd3ToPadd1abTankerBarge',padd1c:'padd3ToPadd1cTankerBarge',padd5:'padd3ToPadd5TankerBarge'}[flow.toRegionKey] || ''; }
+	    function kplerReceiptMovementGuideLine(flow){ const target = kplerReceiptMovementGuideTarget(flow); return target ? kplerGuideLine(target, 'Imports from P3') : null; }
 		    function showGrossInterPaddRows(regionKey){ return regionKey !== 'us'; }
 		    function receiptSourceGroupKey(regionKey){ return regionKey === 'padd1ab' || regionKey === 'padd1c' ? 'padd1' : regionKey; }
 		    function receiptSourceGroupLabel(sourceKey){ const labels = {padd1:'P1 Receipts',padd2:'P2 Receipts',padd3:'P3 Receipts',padd4:'P4 Receipts',padd5:'P5 Receipts'}; return labels[sourceKey] || balanceRegionDisplayLabel(sourceKey) + ' Receipts'; }
@@ -4555,8 +4601,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 		    function p3ReceiptSubtotalFlows(regionKey){ if (isAggregateBalanceRegion(regionKey)) return []; const flows = movementRowsForRegion(regionKey, 'in').filter(flow => flow.fromRegionKey === 'padd3'); const modes = new Set(flows.map(flow => flow.modeKey)); return modes.has('pipeline') && modes.has('tankerBarge') ? flows : []; }
     function hasShipmentFlows(regionKey){ return showGrossInterPaddRows(regionKey) && movementRowsForRegion(regionKey, 'out').length > 0; }
     function shipmentLines(_regionKey){ return []; }
-    function importBreakoutLines(regionKey){ if (D.product?.key !== 'diesel' || regionKey !== 'padd1ab') return []; if (state.frequency === 'monthly') return [{id:'canadaImports',label:'Canada Imports (EIA)',kind:'item importSource'},{id:'canadaImportsAdjustment',label:'Canada Imports Override',kind:'item muted adjustment importOverride'},kplerGuideLine('padd1abImportsCanada'),{id:'nonCanadaImports',label:'Non-Canada Imports (EIA)',kind:'item importSource'},{id:'nonCanadaImportsAdjustment',label:'Non-Canada Imports Override',kind:'item muted adjustment importOverride'},kplerGuideLine('padd1abImportsNonCanada')]; return [kplerGuideLine('padd1abImportsCanada'),kplerGuideLine('padd1abImportsNonCanada')]; }
-    function exportBreakoutLines(regionKey){ return state.frequency === 'monthly' && regionKey === 'padd3' ? [{id:'exportsLatinAmerica',label:'Exports to Latin America',kind:'item muted exportDestination'},{id:'exportsLatinAmericaAdjustment',label:'Exports to Latin America Override',kind:'item muted adjustment exportDestinationOverride'},kplerGuideLine('exportsLatinAmerica'),{id:'exportsEurope',label:'Exports to Europe',kind:'item muted exportDestination'},{id:'exportsEuropeAdjustment',label:'Exports to Europe Override',kind:'item muted adjustment exportDestinationOverride'},kplerGuideLine('exportsEurope'),{id:'exportsAfrica',label:'Exports to Africa',kind:'item muted exportDestination'},{id:'exportsAfricaAdjustment',label:'Exports to Africa Override',kind:'item muted adjustment exportDestinationOverride'},kplerGuideLine('exportsAfrica'),{id:'exportsOther',label:'Exports to Other',kind:'item muted exportDestination'},{id:'exportsOtherAdjustment',label:'Exports to Other Override',kind:'item muted adjustment exportDestinationOverride'},kplerGuideLine('exportsOther')] : []; }
+    function importBreakoutLines(regionKey){ if (D.product?.key === 'diesel' && regionKey === 'padd1ab') { if (state.frequency === 'monthly') return [{id:'canadaImports',label:'Canada Imports (EIA)',kind:'item importSource'},{id:'canadaImportsAdjustment',label:'Canada Imports Override',kind:'item muted adjustment importOverride'},kplerGuideLine('padd1abImportsCanada'),{id:'nonCanadaImports',label:'Non-Canada Imports (EIA)',kind:'item importSource'},{id:'nonCanadaImportsAdjustment',label:'Non-Canada Imports Override',kind:'item muted adjustment importOverride'},kplerGuideLine('padd1abImportsNonCanada')]; return [kplerGuideLine('padd1abImportsCanada'),kplerGuideLine('padd1abImportsNonCanada')]; } if (D.product?.key === 'jet' && regionKey === 'padd1') return [kplerGuideLine('padd1ImportsCanada'),kplerGuideLine('padd1ImportsNonCanada')]; return []; }
+    function exportBreakoutLines(regionKey){ if (regionKey !== 'padd3') return []; const base = [{id:'exportsLatinAmerica',label:'Latin America Exports',kind:'item muted exportDestination'},{id:'exportsLatinAmericaAdjustment',label:'Latin America Exports Override',kind:'item muted adjustment exportDestinationOverride'},kplerGuideLine('padd3ExportsLatinAmerica'),{id:'exportsEurope',label:'Europe Exports',kind:'item muted exportDestination'},{id:'exportsEuropeAdjustment',label:'Europe Exports Override',kind:'item muted adjustment exportDestinationOverride'},kplerGuideLine('padd3ExportsEurope')]; const africa = D.product?.key === 'diesel' ? [{id:'exportsAfrica',label:'Africa Exports',kind:'item muted exportDestination'},{id:'exportsAfricaAdjustment',label:'Africa Exports Override',kind:'item muted adjustment exportDestinationOverride'},kplerGuideLine('padd3ExportsAfrica')] : []; return [...base,...africa,{id:'exportsOther',label:'Other Exports',kind:'item muted exportDestination'},{id:'exportsOtherAdjustment',label:'Other Exports Override',kind:'item muted adjustment exportDestinationOverride'},kplerGuideLine('padd3ExportsOther')]; }
     function isExportDestinationLine(lineId){ return ['exportsLatinAmerica','exportsEurope','exportsAfrica','exportsOther'].includes(lineId); }
 	    function balanceLines(regionKey){
 	      const cacheKey = state.frequency + '|' + regionKey;
@@ -4572,9 +4618,9 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	      const productionImportSpacer = productionLines.length ? [{id:'productionImportSpacer',label:'',kind:'divider supplySpacer'}] : [];
 	      const importLines = importBreakoutLines(regionKey);
 	      const exportLines = exportBreakoutLines(regionKey);
-	      const importGuideLines = regionKey === 'us' ? [kplerGuideLine('imports', 'Total Kpler Imports Guide')] : baseRegion && !importLines.length ? [{id:'importsAdjustment',label:'Imports Adjustment',kind:'item muted adjustment'},...(regionKey === 'padd3' ? [] : [kplerGuideLine(D.product?.key === 'diesel' && regionKey === 'padd1c' ? 'padd1cImports' : 'imports')])] : [];
-	      const padd1abDieselExportGuides = D.product?.key === 'diesel' && regionKey === 'padd1ab';
-	      const exportGuideLines = regionKey === 'us' ? [kplerGuideLine('exports', 'Total Kpler Exports Guide')] : baseRegion && !exportLines.length && !forceZeroExports(regionKey) ? [{id:'exportsAdjustment',label:'Exports Adjustment',kind:'item muted adjustment'},...(padd1abDieselExportGuides ? [kplerGuideLine('exportsEurope'), kplerGuideLine('exportsNonEurope')] : [kplerGuideLine('exports')])] : [];
+	      const importGuideLines = regionKey === 'us' ? (D.product?.key === 'diesel' ? [kplerGuideLine('usImportsCanada'), kplerGuideLine('usImportsNonCanada')] : []) : baseRegion && !importLines.length ? [{id:'importsAdjustment',label:'Imports Adjustment',kind:'item muted adjustment'},...({padd1c:['padd1cImports'],padd5:['padd5Imports']}[regionKey] || []).map(flow => kplerGuideLine(flow))] : [];
+	      const exportGuideFlows = D.product?.key === 'diesel' && regionKey === 'padd1ab' ? ['padd1abExportsEurope','padd1abExportsOther'] : D.product?.key === 'diesel' && regionKey === 'padd1c' ? ['padd1cExports'] : D.product?.key === 'jet' && regionKey === 'padd1' ? ['padd1Exports'] : regionKey === 'padd5' ? ['padd5Exports'] : [];
+	      const exportGuideLines = regionKey === 'us' ? (D.product?.key === 'diesel' ? [kplerGuideLine('usExportsEurope'), kplerGuideLine('usExportsLatinAmerica')] : []) : baseRegion && !exportLines.length && (!forceZeroExports(regionKey) || exportGuideFlows.length) ? [{id:'exportsAdjustment',label:'Exports Adjustment',kind:'item muted adjustment'},...exportGuideFlows.map(flow => kplerGuideLine(flow))] : [];
 	      const importsTotalLine = {id:'imports',label:importLines.length ? 'Total Imports' : state.frequency === 'weekly' ? 'Imports' : 'Total Imports',kind:importLines.length ? 'subtotal anchor importTotal' : 'anchor'};
 	      const exportsTotalLine = {id:'exports',label:exportLines.length || regionKey === 'padd3' ? 'Total Exports' : 'Exports',kind:exportLines.length ? 'subtotal anchor exportTotal' : 'item'};
 	      const lines = [{id:'supplySection',label:'Supply',kind:'section'},...productionLines,...productionImportSpacer,...importLines,importsTotalLine,...importGuideLines,...receiptRows,...(showGrossMovements && p3Receipts.length ? [{id:'receiptsP3',label:'Total P3 Receipts',kind:'subtotal receiptSubtotal'}] : []),...(showGrossMovements ? [{id:'receiptsIn',label:'Total Receipts',kind:receipts.length ? 'subtotal anchor' : 'item muted'}] : []),{id:'totalSupply',label:'Total supply',kind:'subtotal'},{id:'supplyDemandDivider',label:'',kind:'divider'},{id:'demandSection',label:'Demand',kind:'section'},{id:'demand',label:'Product supplied',kind:'item'},...(baseRegion ? [{id:'demandAdjustment',label:'Product Supplied Adjustment',kind:'item muted adjustment'}] : []),...exportLines,exportsTotalLine,...exportGuideLines,...(showGrossMovements ? [{id:'receiptsOut',label:'Shipments to other PADDs',kind:hasShipments ? 'subtotal' : 'item muted'},...shipments] : []),{id:'totalDemand',label:'Total demand',kind:'subtotal'},{id:'buildDaily',label:'Build/(draw) per day',kind:'balanceSummary draw'},...(state.frequency === 'monthly' ? [weeklyGuideLine('buildTotal')] : []),{id:'buildTotal',label:'Total period build/(draw)',kind:'balanceSummary draw'},{id:'stocks',label:'Ending stocks',kind:'stock'},{id:'daysForwardCover',label:'Days of Forward Cover',kind:'item muted cover'}];
@@ -5603,7 +5649,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function weeklyGuideLine(lineId){ return {id:'weeklyGuide:' + lineId,label:weeklyGuideLabel(lineId),kind:lineId === 'buildTotal' ? 'guide balanceGuide' : 'guide'}; }
     function isWeeklyGuideLine(lineId){ return String(lineId || '').startsWith('weeklyGuide:'); }
     function weeklyGuideTargetLineId(lineId){ return String(lineId || '').replace(/^weeklyGuide:/, ''); }
-	    function kplerGuideLabel(flow){ const labels = {imports:'U.S. Kpler Imports Guide',importsCanada:'Kpler Canada Imports Guide',importsNonCanada:'Kpler Non-Canada Imports Guide',padd1abImports:'Kpler PADD 1A/B Imports Guide',padd1abImportsCanada:'Kpler PADD 1A/B Canada Imports Guide',padd1abImportsNonCanada:'Kpler PADD 1A/B Non-Canada Imports Guide',padd1cImports:'Kpler PADD 1C Imports Guide',padd1cImportsCanada:'Kpler PADD 1C Canada Imports Guide',padd1cImportsNonCanada:'Kpler PADD 1C Non-Canada Imports Guide',padd1cImportsIntraUs:'Kpler PADD 1C Intracountry Imports Guide',exports:'U.S. Kpler Exports Guide',exportsLatinAmerica:'Kpler Latin America Exports Guide',exportsEurope:'Kpler Europe Exports Guide',exportsAfrica:'Kpler Africa Exports Guide',exportsOther:'Kpler Other Exports Guide',exportsNonEurope:'Kpler Non-Europe Exports Guide',padd3ToPadd1abTankerBarge:'Kpler from P3 Gulf Coast - Tanker/Barge Guide',padd3ToPadd1cTankerBarge:'Kpler from P3 Gulf Coast - Tanker/Barge Guide',padd3ToPadd5TankerBarge:'Kpler from P3 Gulf Coast - Tanker/Barge Guide'}; return labels[flow] || 'Kpler Guide'; }
+	    function kplerGuideLabel(flow){ const labels = {imports:'Total Imports',importsCanada:'Canada Imports',importsNonCanada:'Non-Canada Imports',usImportsCanada:'Canada Imports',usImportsNonCanada:'Non-Canada Imports',usExportsEurope:'Europe Exports',usExportsLatinAmerica:'Latin America Exports',padd1Imports:'Total Imports',padd1ImportsCanada:'Canada Imports',padd1ImportsNonCanada:'Non-Canada Imports',padd1Exports:'Total Exports',padd1abImports:'Total Imports',padd1abImportsCanada:'Canada Imports',padd1abImportsNonCanada:'Non-Canada Imports',padd1abExportsEurope:'Europe Exports',padd1abExportsOther:'Other Exports',padd1cImports:'Total Imports',padd1cImportsCanada:'Canada Imports',padd1cImportsNonCanada:'Non-Canada Imports',padd1cImportsIntraUs:'Intracountry Imports',padd1cExports:'Total Exports',exports:'Total Exports',exportsLatinAmerica:'Latin America Exports',exportsEurope:'Europe Exports',exportsAfrica:'Africa Exports',exportsOther:'Other Exports',exportsNonEurope:'Other Exports',padd3ExportsLatinAmerica:'Latin America Exports',padd3ExportsEurope:'Europe Exports',padd3ExportsAfrica:'Africa Exports',padd3ExportsOther:'Other Exports',padd5Imports:'Total Imports',padd5Exports:'Total Exports',padd3ToPadd1TankerBarge:'Imports from P3',padd3ToPadd1abTankerBarge:'Imports from P3',padd3ToPadd1cTankerBarge:'Imports from P3',padd3ToPadd5TankerBarge:'Imports from P3'}; return labels[flow] || 'Kpler Guide'; }
 	    function kplerGuideLine(flow, label){ return {id:'kplerGuide:' + flow,label:label || kplerGuideLabel(flow),kind:'guide kplerGuide'}; }
 	    function isKplerGuideLine(lineId){ return String(lineId || '').startsWith('kplerGuide:'); }
 	    function kplerGuideTargetLineId(lineId){ return String(lineId || '').replace(/^kplerGuide:/, ''); }
@@ -5751,7 +5797,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	    function kplerGuideValue(frequency, period, flow){
 	      const row = kplerGuideIndex()[frequency === 'weekly' ? 'weekly' : 'monthly'].get(String(period || '').slice(0, frequency === 'weekly' ? 10 : 7));
 	      if (!row) return null;
-	      const fields = {imports:'importsKbd',importsCanada:'importsCanadaKbd',importsNonCanada:'importsNonCanadaKbd',padd1abImports:'padd1abImportsKbd',padd1abImportsCanada:'padd1abImportsCanadaKbd',padd1abImportsNonCanada:'padd1abImportsNonCanadaKbd',padd1cImports:'padd1cImportsKbd',padd1cImportsCanada:'padd1cImportsCanadaKbd',padd1cImportsNonCanada:'padd1cImportsNonCanadaKbd',padd1cImportsIntraUs:'padd1cImportsIntraUsKbd',exports:'exportsKbd',exportsLatinAmerica:'exportsLatinAmericaKbd',exportsEurope:'exportsEuropeKbd',exportsAfrica:'exportsAfricaKbd',exportsOther:'exportsOtherKbd',exportsNonEurope:'exportsNonEuropeKbd',padd3ToPadd1abTankerBarge:'padd3ToPadd1abKbd',padd3ToPadd1cTankerBarge:'padd3ToPadd1cKbd',padd3ToPadd5TankerBarge:'padd3ToPadd5Kbd'};
+	      const fields = {imports:'importsKbd',importsCanada:'importsCanadaKbd',importsNonCanada:'importsNonCanadaKbd',usImportsCanada:'usImportsCanadaKbd',usImportsNonCanada:'usImportsNonCanadaKbd',usExportsEurope:'usExportsEuropeKbd',usExportsLatinAmerica:'usExportsLatinAmericaKbd',padd1Imports:'padd1ImportsKbd',padd1ImportsCanada:'padd1ImportsCanadaKbd',padd1ImportsNonCanada:'padd1ImportsNonCanadaKbd',padd1Exports:'padd1ExportsKbd',padd1abImports:'padd1abImportsKbd',padd1abImportsCanada:'padd1abImportsCanadaKbd',padd1abImportsNonCanada:'padd1abImportsNonCanadaKbd',padd1abExports:'padd1abExportsKbd',padd1abExportsEurope:'padd1abExportsEuropeKbd',padd1abExportsOther:'padd1abExportsOtherKbd',padd1cImports:'padd1cImportsKbd',padd1cImportsCanada:'padd1cImportsCanadaKbd',padd1cImportsNonCanada:'padd1cImportsNonCanadaKbd',padd1cImportsIntraUs:'padd1cImportsIntraUsKbd',padd1cExports:'padd1cExportsKbd',exports:'exportsKbd',exportsLatinAmerica:'exportsLatinAmericaKbd',exportsEurope:'exportsEuropeKbd',exportsAfrica:'exportsAfricaKbd',exportsOther:'exportsOtherKbd',exportsNonEurope:'exportsNonEuropeKbd',padd3Exports:'padd3ExportsKbd',padd3ExportsLatinAmerica:'padd3ExportsLatinAmericaKbd',padd3ExportsEurope:'padd3ExportsEuropeKbd',padd3ExportsAfrica:'padd3ExportsAfricaKbd',padd3ExportsOther:'padd3ExportsOtherKbd',padd5Imports:'padd5ImportsKbd',padd5Exports:'padd5ExportsKbd',padd3ToPadd1TankerBarge:'padd3ToPadd1Kbd',padd3ToPadd1abTankerBarge:'padd3ToPadd1abKbd',padd3ToPadd1cTankerBarge:'padd3ToPadd1cKbd',padd3ToPadd5TankerBarge:'padd3ToPadd5Kbd'};
 	      const value = row[fields[flow] || ''];
 	      if (value === null || value === undefined || value === '') return null;
 	      return Number.isFinite(Number(value)) ? Number(value) : null;
