@@ -45,6 +45,15 @@ Check dynamic settings without calling Kpler:
 
 See `Kpler/config/env.example` for all runtime environment variables.
 
+To run only the dashboard balance guide pulls, set:
+
+```bash
+export KPLER_PULL_FAMILIES="balance_guides"
+./run.sh run
+```
+
+This still uses Kpler `eia-weekly` and `monthly` periods, includes predictive flows, and skips the broader daily context pulls.
+
 macOS/Linux:
 
 ```bash
@@ -56,10 +65,12 @@ export KPLER_PASSWORD="..."
 ./run.sh run
 ```
 
+Balance guide pulls use one Kpler `split` per Flow request because the direct API rejects multiple `split` values. PADD routing is handled with exact Kpler zones such as `PADD 1 - A`, `PADD 1 - B`, `PADD 1 - C`, `PADD 3`, and `PADD 5`.
+
 Balance guide pulls include:
 
 - Diesel `Gasoil/Diesel`: PADD 1A/B Canada and non-Canada imports, PADD 1A/B Europe and Other exports, PADD 1C total imports and exports, PADD 3 exports to Africa/Europe/Latin America/Other, PADD 5 total imports and exports, PADD 3 receipts into PADD 1A/B and PADD 1C, and U.S. total imports from Canada/non-Canada plus exports to Europe/Latin America.
 - Jet `Kero/Jet`: PADD 1 Canada and non-Canada imports, PADD 1 total exports, PADD 3 exports to Europe/Latin America/Other, PADD 3 receipts into PADD 1 and PADD 5, and PADD 5 total imports and exports.
-- PADD subregions are filtered locally from `Origin Padds` and `Destination Padds` splits while `fromZones`/`toZones` stay at `United States`; direct PADD 1A/B/C zones were rejected by the Kpler API bind step.
+- PADD subregions are requested directly with Kpler's exact zone spelling. Earlier `PADD 1A` style zones were rejected by Kpler's API bind step.
 
 See [plan.md](plan.md) for the detailed implementation plan.

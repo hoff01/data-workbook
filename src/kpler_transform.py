@@ -122,6 +122,12 @@ def value_column(frame: pl.DataFrame) -> str | None:
     return None
 
 
+def normalized_date_expr(column: str) -> pl.Expr:
+    raw = pl.col(column).cast(pl.Utf8)
+    normalized = pl.when(raw.str.contains(r"^\d{4}-\d{2}$")).then(pl.concat_str([raw, pl.lit("-01")])).otherwise(raw)
+    return normalized.cast(pl.Date, strict=False).cast(pl.Utf8).alias("date")
+
+
 def kpler_content_to_long(content: bytes, spec: PullSpec) -> pl.DataFrame:
     frame = raw_csv_to_frame(content)
     if frame.is_empty():
@@ -165,7 +171,7 @@ def base_literals(spec: PullSpec, source_hash: str) -> list[pl.Expr]:
 
 def long_like_to_long(frame: pl.DataFrame, spec: PullSpec, source_hash: str, dcol: str, vcol: str) -> pl.DataFrame:
     expressions = [
-        pl.col(dcol).cast(pl.Date, strict=False).cast(pl.Utf8).alias("date"),
+        normalized_date_expr(dcol),
         pl.col(vcol).cast(pl.Float64, strict=False).alias("value_kbd"),
         *base_literals(spec, source_hash),
     ]
@@ -188,7 +194,7 @@ def wide_to_long(frame: pl.DataFrame, spec: PullSpec, source_hash: str, dcol: st
     split_targets = [split_to_column(name) for name in spec.split]
     out = melted.select(
         [
-            pl.col(dcol).cast(pl.Date, strict=False).cast(pl.Utf8).alias("date"),
+            normalized_date_expr(dcol),
             pl.col("dynamic_column").cast(pl.Utf8),
             pl.col("value_kbd").cast(pl.Float64, strict=False),
             *base_literals(spec, source_hash),
@@ -568,43 +574,43 @@ def balance_guide_frame(
         destination_trade_group = balance_destination_group(row, regions)
         origin_country = row.get("origin_country", "")
 
-        if route == "padd1_imports_external":
-            if commodity == "diesel" and destination_group == "padd1ab":
-                add_balance_value(summary, period, "padd1ab_imports_total_kbd", value)
-                if is_canada(origin_country):
-                    add_balance_value(summary, period, "padd1ab_imports_canada_kbd", value)
-            elif commodity == "jet" and is_padd1(destination_group):
-                add_balance_value(summary, period, "padd1_imports_total_kbd", value)
-                if is_canada(origin_country):
-                    add_balance_value(summary, period, "padd1_imports_canada_kbd", value)
+        if route in {"diesel_padd1ab_imports_external", "padd1_imports_external"} and commodity == "diesel":
+            add_balance_value(summary, period, "padd1ab_imports_total_kbd", value)
+            if is_canada(origin_country):
+                add_balance_value(summary, period, "padd1ab_imports_canada_kbd", value)
 
-        elif route == "padd1c_imports_intracountry" and commodity == "diesel" and destination_group == "padd1c":
+        elif route in {"jet_padd1_imports_external", "padd1_imports_external"} and commodity == "jet":
+            add_balance_value(summary, period, "padd1_imports_total_kbd", value)
+            if is_canada(origin_country):
+                add_balance_value(summary, period, "padd1_imports_canada_kbd", value)
+
+        elif route in {"diesel_padd1c_imports_intracountry", "padd1c_imports_intracountry"} and commodity == "diesel":
             add_balance_value(summary, period, "padd1c_imports_total_kbd", value)
             if is_canada(origin_country):
                 add_balance_value(summary, period, "padd1c_imports_canada_kbd", value)
             if is_united_states(origin_country):
                 add_balance_value(summary, period, "padd1c_imports_intra_us_kbd", value)
 
-        elif route == "padd1_exports_external":
-            if commodity == "diesel":
-                if origin_group == "padd1ab":
-                    add_balance_value(summary, period, "padd1ab_exports_total_kbd", value)
-                    if destination_trade_group == "europe":
-                        add_balance_value(summary, period, "padd1ab_exports_europe_kbd", value)
-                elif origin_group == "padd1c":
-                    add_balance_value(summary, period, "padd1c_exports_total_kbd", value)
-            elif commodity == "jet" and is_padd1(origin_group):
-                add_balance_value(summary, period, "padd1_exports_total_kbd", value)
+        elif route in {"diesel_padd1ab_exports_external", "padd1_exports_external"} and commodity == "diesel":
+            add_balance_value(summary, period, "padd1ab_exports_total_kbd", value)
+            if destination_trade_group == "europe":
+                add_balance_value(summary, period, "padd1ab_exports_europe_kbd", value)
 
-        elif route == "padd3_exports_external" and origin_group == "padd3":
+        elif route in {"diesel_padd1c_exports_external", "padd1_exports_external"} and commodity == "diesel":
+            add_balance_value(summary, period, "padd1c_exports_total_kbd", value)
+
+        elif route in {"jet_padd1_exports_external", "padd1_exports_external"} and commodity == "jet":
+            add_balance_value(summary, period, "padd1_exports_total_kbd", value)
+
+        elif route == "padd3_exports_external":
             add_balance_value(summary, period, "padd3_exports_total_kbd", value)
             if destination_trade_group in {"africa", "europe", "latin_america"}:
                 add_balance_value(summary, period, f"padd3_exports_{destination_trade_group}_kbd", value)
 
-        elif route == "padd5_imports_external" and destination_group == "padd5":
+        elif route == "padd5_imports_external":
             add_balance_value(summary, period, "padd5_imports_total_kbd", value)
 
-        elif route == "padd5_exports_external" and origin_group == "padd5":
+        elif route == "padd5_exports_external":
             add_balance_value(summary, period, "padd5_exports_total_kbd", value)
 
         elif route == "us_imports_external":
@@ -617,15 +623,19 @@ def balance_guide_frame(
             if destination_trade_group in {"europe", "latin_america"}:
                 add_balance_value(summary, period, f"us_exports_{destination_trade_group}_kbd", value)
 
-        elif route == "padd3_domestic_receipts" and origin_group == "padd3":
-            if destination_group == "padd1ab":
-                add_balance_value(summary, period, "padd3_to_padd1ab_kbd", value)
-                add_balance_value(summary, period, "padd3_to_padd1_kbd", value)
-            elif destination_group == "padd1c":
-                add_balance_value(summary, period, "padd3_to_padd1c_kbd", value)
-                add_balance_value(summary, period, "padd3_to_padd1_kbd", value)
-            elif destination_group == "padd5":
-                add_balance_value(summary, period, "padd3_to_padd5_kbd", value)
+        elif route in {"diesel_padd3_to_padd1ab", "padd3_domestic_receipts"} and commodity == "diesel":
+            add_balance_value(summary, period, "padd3_to_padd1ab_kbd", value)
+            add_balance_value(summary, period, "padd3_to_padd1_kbd", value)
+
+        elif route in {"diesel_padd3_to_padd1c", "padd3_domestic_receipts"} and commodity == "diesel":
+            add_balance_value(summary, period, "padd3_to_padd1c_kbd", value)
+            add_balance_value(summary, period, "padd3_to_padd1_kbd", value)
+
+        elif route == "jet_padd3_to_padd1" and commodity == "jet":
+            add_balance_value(summary, period, "padd3_to_padd1_kbd", value)
+
+        elif route in {"jet_padd3_to_padd5", "padd3_domestic_receipts"} and commodity == "jet":
+            add_balance_value(summary, period, "padd3_to_padd5_kbd", value)
 
     output_rows: list[dict[str, Any]] = []
     for period, values in sorted(summary.items()):

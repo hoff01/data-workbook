@@ -171,7 +171,7 @@ with_product_estimation=False
 start_date=date(2018, 1, 1)
 ```
 
-Balance guide pull sets should use direct `flows` API calls with `eia-weekly` and `monthly` granularity. Keep `fromZones`/`toZones` at `United States`, request PADD splits, and filter PADD 1A/B/C, PADD 3, and PADD 5 locally. Direct PADD 1A/B/C zone requests failed with `Unable to bind a FromTo`, so do not use those subregions as direct Kpler zones for these guide pulls.
+Balance guide pull sets should use direct `flows` API calls with `eia-weekly` and `monthly` granularity. The direct API allows only one `split` value per request, so each guide route uses exact `fromZones`/`toZones` filters and a single split. Kpler's exact subregion spelling is `PADD 1 - A`, `PADD 1 - B`, and `PADD 1 - C`; `PADD 1A` style zone names failed with `Unable to bind a FromTo`.
 
 Diesel `Gasoil/Diesel` guide rows:
 

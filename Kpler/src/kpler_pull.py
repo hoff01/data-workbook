@@ -32,14 +32,14 @@ SPLIT_PARAM_VALUES = {
 }
 
 
-def list_param(values: list[str] | None) -> list[str] | None:
-    return list(values) if values else None
+def list_param(values: list[str] | None) -> str | None:
+    return ",".join(values) if values else None
 
 
-def split_param(values: list[str] | None) -> list[str] | None:
+def split_param(values: list[str] | None) -> str | None:
     if not values:
         return None
-    return [SPLIT_PARAM_VALUES.get(item.lower(), item) for item in values]
+    return ",".join(SPLIT_PARAM_VALUES.get(item.lower(), item) for item in values)
 
 
 def bool_param(value: bool | None) -> str | None:
@@ -284,6 +284,28 @@ def build_eia_fallback_long(specs: list[PullSpec], start_date: date, end_date: d
     return pl.DataFrame(rows).select(LONG_COLUMNS), status
 
 
+def csv_filter_values(value: str | None) -> set[str]:
+    if not value:
+        return set()
+    return {item.strip() for item in value.split(",") if item.strip()}
+
+
+def filter_pull_specs(specs: list[PullSpec]) -> list[PullSpec]:
+    families = csv_filter_values(os.environ.get("KPLER_PULL_FAMILIES"))
+    names = csv_filter_values(os.environ.get("KPLER_PULL_NAMES"))
+    route_groups = csv_filter_values(os.environ.get("KPLER_PULL_ROUTE_GROUPS"))
+    filtered = [
+        spec
+        for spec in specs
+        if (not families or spec.family in families)
+        and (not names or spec.name in names)
+        and (not route_groups or spec.route_group in route_groups)
+    ]
+    if (families or names or route_groups) and not filtered:
+        raise RuntimeError("Kpler pull filters matched no specs.")
+    return filtered
+
+
 def spec_to_kpler_params(spec: PullSpec, snapshot_date=None) -> dict[str, Any]:
     return {
         "flowDirection": spec.flow_direction,
@@ -361,7 +383,7 @@ def dry_run_manifest(specs: list[PullSpec]) -> dict[str, Any]:
 def run(args: argparse.Namespace) -> int:
     ensure_directories()
     config = runtime_config()
-    specs = build_pull_specs(config)
+    specs = filter_pull_specs(build_pull_specs(config))
     if args.dry_run or args.preflight:
         payload = dry_run_manifest(specs)
         payload["runtime_config"] = {

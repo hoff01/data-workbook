@@ -45,45 +45,61 @@ balance_guides:
     weekly: eia-weekly
     monthly: monthly
   pulls:
-    padd1_imports_external:
+    diesel_padd1ab_imports_external:
       commodities:
         - diesel
+      flow_direction: import
+      to_zones:
+        - PADD 1 - A
+        - PADD 1 - B
+      splits:
+        - origin countries
+      with_intra_country: false
+    jet_padd1_imports_external:
+      commodities:
         - jet
       flow_direction: import
       to_zones:
-        - United States
+        - PADD 1
       splits:
         - origin countries
-        - origin trading regions
-        - origin padds
-        - destination padds
-        - products
       with_intra_country: false
-    padd1c_imports_intracountry:
+    diesel_padd1c_imports_intracountry:
       commodities:
         - diesel
       flow_direction: import
       to_zones:
-        - United States
+        - PADD 1 - C
       splits:
         - origin countries
-        - origin trading regions
-        - origin padds
-        - destination padds
-        - products
       with_intra_country: true
-    padd1_exports_external:
+    diesel_padd1ab_exports_external:
       commodities:
         - diesel
+      flow_direction: export
+      from_zones:
+        - PADD 1 - A
+        - PADD 1 - B
+      splits:
+        - destination trading regions
+      with_intra_country: false
+    diesel_padd1c_exports_external:
+      commodities:
+        - diesel
+      flow_direction: export
+      from_zones:
+        - PADD 1 - C
+      splits:
+        - total
+      with_intra_country: false
+    jet_padd1_exports_external:
+      commodities:
         - jet
       flow_direction: export
       from_zones:
-        - United States
+        - PADD 1
       splits:
-        - origin padds
-        - destination trading regions
-        - destination countries
-        - products
+        - total
       with_intra_country: false
     padd3_exports_external:
       commodities:
@@ -91,12 +107,9 @@ balance_guides:
         - jet
       flow_direction: export
       from_zones:
-        - United States
+        - PADD 3
       splits:
-        - origin padds
         - destination trading regions
-        - destination countries
-        - products
       with_intra_country: false
     padd5_imports_external:
       commodities:
@@ -104,12 +117,9 @@ balance_guides:
         - jet
       flow_direction: import
       to_zones:
-        - United States
+        - PADD 5
       splits:
-        - origin countries
-        - origin trading regions
-        - destination padds
-        - products
+        - total
       with_intra_country: false
     padd5_exports_external:
       commodities:
@@ -117,12 +127,9 @@ balance_guides:
         - jet
       flow_direction: export
       from_zones:
-        - United States
+        - PADD 5
       splits:
-        - origin padds
-        - destination trading regions
-        - destination countries
-        - products
+        - total
       with_intra_country: false
     us_imports_external:
       commodities:
@@ -132,8 +139,6 @@ balance_guides:
         - United States
       splits:
         - origin countries
-        - origin trading regions
-        - products
       with_intra_country: false
     us_exports_external:
       commodities:
@@ -143,20 +148,49 @@ balance_guides:
         - United States
       splits:
         - destination trading regions
-        - destination countries
-        - products
       with_intra_country: false
-    padd3_domestic_receipts:
+    diesel_padd3_to_padd1ab:
       commodities:
         - diesel
+      flow_direction: export
+      from_zones:
+        - PADD 3
+      to_zones:
+        - PADD 1 - A
+        - PADD 1 - B
+      splits:
+        - total
+      with_intra_country: true
+    diesel_padd3_to_padd1c:
+      commodities:
+        - diesel
+      flow_direction: export
+      from_zones:
+        - PADD 3
+      to_zones:
+        - PADD 1 - C
+      splits:
+        - total
+      with_intra_country: true
+    jet_padd3_to_padd1:
+      commodities:
         - jet
       flow_direction: export
       from_zones:
-        - United States
+        - PADD 3
       to_zones:
-        - United States
+        - PADD 1
       splits:
-        - origin padds
-        - destination padds
-        - products
+        - total
+      with_intra_country: true
+    jet_padd3_to_padd5:
+      commodities:
+        - jet
+      flow_direction: export
+      from_zones:
+        - PADD 3
+      to_zones:
+        - PADD 5
+      splits:
+        - total
       with_intra_country: true
