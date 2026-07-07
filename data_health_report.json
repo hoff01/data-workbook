@@ -1,13 +1,13 @@
 {
   "balances": {
     "diesel": {
-      "generated_at": "2026-07-05T02:29:17.300Z",
+      "generated_at": "2026-07-07T02:07:49.065Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-06-26",
       "path": "Diesel_Balance/manifest.json"
     },
     "jet": {
-      "generated_at": "2026-07-05T02:29:17.405Z",
+      "generated_at": "2026-07-07T02:07:49.202Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-06-26",
       "path": "Jet_Balance/manifest.json"
@@ -15,7 +15,7 @@
   },
   "checks": [
     {
-      "columns": 49,
+      "columns": 53,
       "exists": true,
       "max_date": "2026-06-26",
       "min_date": "2016-01-01",
@@ -25,7 +25,7 @@
       "status": "pass"
     },
     {
-      "columns": 45,
+      "columns": 49,
       "exists": true,
       "max_date": "2026-06-26",
       "min_date": "2016-01-01",
@@ -35,7 +35,7 @@
       "status": "pass"
     },
     {
-      "columns": 106,
+      "columns": 114,
       "exists": true,
       "max_date": "2026-06-26",
       "min_date": "2016-01-01",
@@ -58,10 +58,10 @@
       "max_allowed_age_days": 14,
       "name": "eia_weekly_freshness",
       "status": "pass",
-      "today": "2026-07-04"
+      "today": "2026-07-06"
     },
     {
-      "columns": 220,
+      "columns": 232,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -71,7 +71,7 @@
       "status": "pass"
     },
     {
-      "columns": 213,
+      "columns": 225,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -81,7 +81,7 @@
       "status": "pass"
     },
     {
-      "columns": 611,
+      "columns": 619,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -104,7 +104,7 @@
       "max_allowed_age_days": 150,
       "name": "eia_monthly_freshness",
       "status": "pass",
-      "today": "2026-07-04"
+      "today": "2026-07-06"
     },
     {
       "mode": "live",
@@ -114,10 +114,10 @@
       "status": "pass"
     },
     {
-      "mode": "eia_fallback",
+      "mode": "existing_raw",
       "name": "kpler_padd1_eia_split",
       "path": "Kpler/padd1_eia_split_manifest.json",
-      "rows": 15258,
+      "rows": 2148,
       "status": "pass"
     },
     {
@@ -176,13 +176,13 @@
       "name": "power_generation_dfo",
       "run_end": "2026-07-04",
       "status": "pass",
-      "today": "2026-07-04"
+      "today": "2026-07-06"
     },
     {
       "generated_day": "2026-07-04",
       "name": "power_generation_dfo_hourly",
       "status": "pass",
-      "today": "2026-07-04"
+      "today": "2026-07-06"
     }
   ],
   "eia_capacity": {
@@ -224,7 +224,7 @@
   },
   "eia_monthly": {
     "diesel": {
-      "columns": 220,
+      "columns": 232,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -232,7 +232,7 @@
       "rows": 124
     },
     "gasoline": {
-      "columns": 611,
+      "columns": 619,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -240,7 +240,7 @@
       "rows": 124
     },
     "jet": {
-      "columns": 213,
+      "columns": 225,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -250,7 +250,7 @@
   },
   "eia_weekly": {
     "diesel": {
-      "columns": 49,
+      "columns": 53,
       "exists": true,
       "max_date": "2026-06-26",
       "min_date": "2016-01-01",
@@ -258,7 +258,7 @@
       "rows": 545
     },
     "gasoline": {
-      "columns": 106,
+      "columns": 114,
       "exists": true,
       "max_date": "2026-06-26",
       "min_date": "2016-01-01",
@@ -266,7 +266,7 @@
       "rows": 545
     },
     "jet": {
-      "columns": 45,
+      "columns": 49,
       "exists": true,
       "max_date": "2026-06-26",
       "min_date": "2016-01-01",
@@ -274,18 +274,18 @@
       "rows": 545
     }
   },
-  "generated_at": "2026-07-05T02:29:25.754683+00:00",
+  "generated_at": "2026-07-07T02:07:56.619898+00:00",
   "kpler": {
-    "generated_at": "2026-07-05T02:29:09.585718+00:00",
+    "generated_at": "2026-07-07T01:53:52.204513+00:00",
     "mode": "live",
     "path": "Kpler/manifest.json",
     "rows": 122655
   },
   "kpler_padd1_eia_split": {
-    "generated_at": "2026-06-26T04:50:45.546169+00:00",
-    "mode": "eia_fallback",
+    "generated_at": "2026-07-07T01:53:27.861077+00:00",
+    "mode": "existing_raw",
     "path": "Kpler/padd1_eia_split_manifest.json",
-    "rows": 15258
+    "rows": 2148
   },
   "power_generation_dfo": {
     "generated_at": "2026-07-04T23:04:02.415404+00:00",
@@ -318,5 +318,5 @@
   "summary": {
     "pass": 21
   },
-  "today": "2026-07-04"
+  "today": "2026-07-06"
 }

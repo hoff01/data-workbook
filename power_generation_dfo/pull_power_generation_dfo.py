@@ -7,8 +7,17 @@ from datetime import date, datetime, timezone
 import json
 import os
 from pathlib import Path
+import sys
 import urllib.parse
 import urllib.request
+
+REPO_DIR = Path(__file__).resolve().parents[1]
+if str(REPO_DIR) not in sys.path:
+    sys.path.insert(0, str(REPO_DIR))
+from src.env_loader import load_env_files
+
+
+load_env_files()
 
 
 OUT_DIR = Path(__file__).resolve().parent

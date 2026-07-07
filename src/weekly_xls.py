@@ -23,6 +23,11 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import xlrd
 
+from env_loader import load_env_files
+
+
+load_env_files()
+
 
 OUT_DIR = Path("eia_weekly")
 CACHE_DIR = OUT_DIR / "cache"

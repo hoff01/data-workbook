@@ -11,6 +11,11 @@ from typing import Any
 from urllib.request import Request, urlopen
 from zipfile import ZipFile
 
+from env_loader import load_env_files
+
+
+load_env_files()
+
 
 OUT_DIR = Path("eia_capacity")
 RAW_DIR = OUT_DIR / "raw"

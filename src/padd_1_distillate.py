@@ -9,6 +9,11 @@ import shutil
 import urllib.parse
 import urllib.request
 
+from env_loader import load_env_files
+
+
+load_env_files()
+
 
 OUT_DIR = Path("padd_1")
 RAW_PATH = OUT_DIR / "prime_supplier_raw.csv"

@@ -12,6 +12,8 @@ eia_summary_dashboard/logs/
 tmp/
 test-results/
 logs/
+/.env
+_not_pushed_junk/
 vendor/headroom/
 **/.matplotlib-cache/
 plan.me
@@ -22,3 +24,5 @@ PET.txt
 Kpler/config/local.env
 Kpler/config/local.env.ps1
 Kpler/config/.env
+.env.local
+Kpler/config/.env.local

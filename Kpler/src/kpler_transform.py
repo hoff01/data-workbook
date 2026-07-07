@@ -521,6 +521,10 @@ def balance_destination_group(row: dict[str, Any], regions: dict[str, Any]) -> s
     return classify_us_group(row.get("destination_country", ""), row.get("destination_trading_region", ""), regions)
 
 
+def include_balance_import_row(row: dict[str, Any]) -> bool:
+    return bool(row.get("with_intra_country")) or not is_united_states(row.get("origin_country", ""))
+
+
 def add_balance_value(summary: dict[str, dict[str, float]], period: str, column: str, value: float) -> None:
     if not period or not column or not value:
         return
@@ -575,16 +579,22 @@ def balance_guide_frame(
         origin_country = row.get("origin_country", "")
 
         if route in {"diesel_padd1ab_imports_external", "padd1_imports_external"} and commodity == "diesel":
+            if not include_balance_import_row(row):
+                continue
             add_balance_value(summary, period, "padd1ab_imports_total_kbd", value)
             if is_canada(origin_country):
                 add_balance_value(summary, period, "padd1ab_imports_canada_kbd", value)
 
         elif route in {"jet_padd1_imports_external", "padd1_imports_external"} and commodity == "jet":
+            if not include_balance_import_row(row):
+                continue
             add_balance_value(summary, period, "padd1_imports_total_kbd", value)
             if is_canada(origin_country):
                 add_balance_value(summary, period, "padd1_imports_canada_kbd", value)
 
         elif route in {"diesel_padd1c_imports_intracountry", "padd1c_imports_intracountry"} and commodity == "diesel":
+            if not include_balance_import_row(row):
+                continue
             add_balance_value(summary, period, "padd1c_imports_total_kbd", value)
             if is_canada(origin_country):
                 add_balance_value(summary, period, "padd1c_imports_canada_kbd", value)
@@ -642,7 +652,13 @@ def balance_guide_frame(
         derive_balance_guide_columns(values)
         output_rows.append({period_column: period, "commodity": commodity, **values})
     frame = pl.DataFrame(output_rows) if output_rows else pl.DataFrame({period_column: []}, schema={period_column: pl.Utf8})
-    return ensure_columns(frame, [period_column, *schema])
+    frame = ensure_columns(frame, [period_column, *schema])
+    guide_value_columns = [column for column in frame.columns if column.endswith("_kbd")]
+    if guide_value_columns:
+        frame = frame.with_columns(
+            pl.col(column).cast(pl.Float64, strict=False).fill_null(0.0).alias(column) for column in guide_value_columns
+        )
+    return frame
 
 
 def write_balance_guide_output_set(name: str, weekly: pl.DataFrame, monthly: pl.DataFrame, schema: list[str]) -> dict[str, Any]:

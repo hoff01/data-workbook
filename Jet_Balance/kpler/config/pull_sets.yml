@@ -72,7 +72,7 @@ balance_guides:
         - PADD 1 - C
       splits:
         - origin countries
-      with_intra_country: true
+      with_intra_country: false
     diesel_padd1ab_exports_external:
       commodities:
         - diesel

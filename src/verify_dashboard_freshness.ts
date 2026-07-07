@@ -222,13 +222,58 @@ function verifyBalanceSubtotalFormatting(indexHtml: string, config: ProductConfi
 
 function verifyBalanceSupplySpacing(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} production/import spacer row`, indexHtml, "const productionImportSpacer = productionLines.length ? [{id:'productionImportSpacer',label:'',kind:'divider supplySpacer'}] : [];");
-  assertIncludes(`${config.key} spacer is between production and imports`, indexHtml, "...productionLines,...productionImportSpacer,...importLines,importsTotalLine");
+  assertIncludes(`${config.key} spacer is before weekly imports block`, indexHtml, "...productionLines,...productionImportSpacer,...importBlockLines");
+  assertIncludes(`${config.key} weekly imports row precedes override and split Kpler lines`, indexHtml, "const importBlockLines = state.frequency === 'weekly' ? [importsTotalLine,...importLines,...importTotalGuideLines,...importGuideLines] : [...importLines,importsTotalLine,...importTotalGuideLines,...importGuideLines];");
+  assertIncludes(`${config.key} weekly imports adjustment uses override label`, indexHtml, "label:'Imports Override',kind:'item muted adjustment importOverride'");
+  assertIncludes(`${config.key} adjustment rows render generic adjustment label`, indexHtml, "function balanceLineDisplayLabel(line){ return isBalanceAdjustmentLine(line.id) ? 'Adjustment' : line.label; }");
+  assertIncludes(`${config.key} Lower Atlantic monthly imports get override`, indexHtml, "const monthlyLowerAtlanticImportGuide = state.frequency === 'monthly' && D.product?.key === 'diesel' && regionKey === 'padd1c';");
+  assertIncludes(`${config.key} Northeast Kpler import total is only grey import guide`, indexHtml, "function isKplerTotalImportGuideLine(lineId){ return isKplerGuideLine(lineId) && kplerGuideTargetLineId(lineId) === 'padd1abImports'; }");
+  assertIncludes(`${config.key} Northeast Kpler export total is grey`, indexHtml, "function isKplerTotalExportGuideLine(lineId){ return isKplerGuideLine(lineId) && kplerGuideTargetLineId(lineId) === 'padd1abExportsTotal'; }");
+  assertIncludes(`${config.key} Kpler total imports use grey guide class`, indexHtml, "kplerImportTotalGuideRow");
+  assertIncludes(`${config.key} Northeast Kpler export total uses grey guide class`, indexHtml, "kplerExportTotalGuideRow");
+  assertIncludes(`${config.key} Northeast Kpler export total sums split guide rows`, indexHtml, "if (flow === 'padd1abExportsTotal')");
 }
 
 function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} balance frequency switch clears stale viewport restore`, indexHtml, "if (state.sheet === 'balance') { clearPendingTableViewportRestore('balanceTable'); pendingBalanceScrollPeriod = ''; forceBalancePeriodScroll = true; }");
   assertIncludes(`${config.key} balance force scroll bypasses viewport restore`, indexHtml, "else if (forceScroll) { clearPendingTableViewportRestore('balanceTable'); scrollTableToPeriod('balanceTable', targetPeriod, signature, true); }");
   assertIncludes(`${config.key} balance table scroll gets delayed layout retries`, indexHtml, "const retryDelays = wrap.id === 'crudeRunsTableWrap' ? [120,360] : [40,120,360];");
+}
+
+function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} balance sheets declare shared crude context`, indexHtml, "const needsBalanceContext = sheet === 'balance' || sheet === 'charts';");
+  assertIncludes(`${config.key} weekly balance loads weekly crude runs`, indexHtml, "if (frequency === 'weekly' && (needsBalanceContext || sheet === 'crude')) await ensureCrudeWeeklyData();");
+  assertIncludes(`${config.key} balance loads reference context before rendering crude-derived rows`, indexHtml, "if (needsBalanceContext || sheet === 'reference' || sheet === 'outages' || sheet === 'crude') await ensureReferenceData();");
+  assertIncludes(`${config.key} frequency switches use shared data loader`, indexHtml, "try { await ensureDataForState({...state,frequency:nextFrequency}); }");
+  assertIncludes(`${config.key} refresh button reloads dashboard data before rerender`, indexHtml, "document.getElementById('refreshBtn').addEventListener('click', () => { refreshDashboardData('Dashboard refreshed'); });");
+  assertIncludes(`${config.key} F9 is routed through safe dashboard refresh`, indexHtml, "const isF9 = e.key === 'F9' || e.keyCode === 120;");
+  assertIncludes(`${config.key} F9 recalculation loads dependencies first`, indexHtml, "refreshDashboardData('Dashboard recalculated');");
+  assertIncludes(`${config.key} balance bootstrap refreshes server settings after data load`, indexHtml, "else if (state.sheet === 'balance' || state.sheet === 'charts' || state.sheet === 'outages' || state.sheet === 'crude') { refreshWorkbookSettings(); }");
+}
+
+function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} chart history minimum`, indexHtml, "const MIN_CHART_HISTORY_YEAR = 2017;");
+  assertIncludes(`${config.key} chart band years exclude pre-2017`, indexHtml, "context.years.filter(year => year >= MIN_CHART_HISTORY_YEAR && year < context.currentYear)");
+  assertIncludes(`${config.key} chart row filter excludes pre-2017`, indexHtml, "chartRowPeriodYear(row) >= MIN_CHART_HISTORY_YEAR");
+  assertIncludes(`${config.key} requested derived chart metrics`, indexHtml, "'periodBuildDrawKb','netLengthKbd'");
+  assertIncludes(`${config.key} requested receipts chart metric`, indexHtml, "'receiptsKbd'");
+  assertIncludes(`${config.key} requested PADD3 shipment chart metric`, indexHtml, "'padd3ShipmentsToPadd1Kbd'");
+  assertIncludes(`${config.key} Kpler chart metrics registered`, indexHtml, "const KPLER_CHART_METRICS = new Set(['kplerImportsKbd'");
+  assertIncludes(`${config.key} Kpler periods are completed only`, indexHtml, "function completedKplerPeriod(period, frequency=state.frequency)");
+  assertIncludes(`${config.key} Kpler charts are actual-only`, indexHtml, "function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey); }");
+  assertIncludes(`${config.key} Kpler charts disable forecast path`, indexHtml, "const nextYearPath = !actualOnly && state.showNextYearForecast && state.showForecast");
+  assertIncludes(`${config.key} Kpler legend disables forecast`, indexHtml, "const nextLegend = !actualOnly && state.showNextYearForecast");
+  assertIncludes(`${config.key} optional all-zero charts are suppressed`, indexHtml, "if (OPTIONAL_NONZERO_CHART_METRICS.has(metricKey)) return values.some(value => Math.abs(value) > .0001);");
+  assertIncludes(`${config.key} PADD3 shipment chart is PADD3-only`, indexHtml, "if (metricKey === 'padd3ShipmentsToPadd1Kbd' && regionKey !== 'padd3') return false;");
+  assertIncludes(`${config.key} chart metric availability is region-specific`, indexHtml, "function orderedChartMetrics(regionKey=state.chartRegion){ return CHART_METRICS.filter(metricKey => chartMetricHasVisibleData(regionKey, metricKey, state.frequency)); }");
+  assertIncludes(`${config.key} chart shell signature includes metric availability`, indexHtml, "chartMetricsSignature(chartRegions), localDateText()");
+  assertIncludes(`${config.key} chart hydration uses derived metric rows`, indexHtml, "const rows = chartRowsForMetric(regionKey, metricKey, state.frequency, baseRows);");
+  assertIncludes(`${config.key} chart export uses derived metric rows`, indexHtml, "return chartRowsForMetric(regionKey, metricKey, state.frequency).map(row =>");
+  assertIncludes(`${config.key} chart zoom modal container`, indexHtml, "id=\"chartZoomModal\"");
+  assertIncludes(`${config.key} chart zoom opens balance modal`, indexHtml, "function openBalanceChartZoom(card, zoomKey)");
+  assertIncludes(`${config.key} chart zoom opens crude modal`, indexHtml, "function openCrudeChartZoom(card, metricKey)");
+  assertIncludes(`${config.key} chart zoom closes with X`, indexHtml, "data-close-chart-zoom");
+  assertIncludes(`${config.key} chart zoom close leaves grid state alone`, indexHtml, "function closeChartZoomModal(){ const modal = chartZoomModal(); if (!modal) return; modal.hidden = true; modal.innerHTML = ''; }");
 }
 
 function verifyYieldAdjustmentRowOrder(indexHtml: string, config: ProductConfig): void {
@@ -271,6 +316,12 @@ function verifyCrudeRunsSectionCleanup(indexHtml: string, config: ProductConfig)
 function verifyCrudeRunsRowFormatting(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} crude runs row uses operating capacity band`, indexHtml, "{id:'crudeRunsKbd',label:'Crude Runs',kind:'subtotal'}");
   assertIncludes(`${config.key} crude runs row keeps operating row class`, indexHtml, "['operatingCapacityKbd','crudeRunsKbd'].includes(line.id) ? ' operatingRow' : ''");
+  assertIncludes(`${config.key} historical crude outage estimate starts in 2022`, indexHtml, "function useHistoricalCrudeOutageEstimate(period){ return periodMonthValue(period) >= '2022-01'; }");
+  assertIncludes(`${config.key} historical unplanned outage formula`, indexHtml, "function historicalUnplannedMaintenanceKbd(operableCapacityKbd, plannedMaintenanceKbd, crudeRunsKbd){ return Math.max(0, Number(operableCapacityKbd || 0) - Number(plannedMaintenanceKbd || 0) - Number(crudeRunsKbd || 0)); }");
+  assertIncludes(`${config.key} pre-2022 planned/unplanned outages stay blank`, indexHtml, "plannedMaintenanceKbd:planned === null ? null : round2(planned),unplannedMaintenanceKbd:unplanned === null ? null : round2(unplanned)");
+  assertIncludes(`${config.key} balance PADD split preserves pre-2022 outage blanks`, indexHtml, "const scaleNullable = key => crudePoint[key] === null || crudePoint[key] === undefined ? null : scale(key);");
+  assertIncludes(`${config.key} balance aggregate preserves all-null outage blanks`, indexHtml, "const nullableSum = key => parts.every(point => point[key] === null || point[key] === undefined) ? null : round2(sum(key));");
+  assertIncludes(`${config.key} crude CSV export preserves blanks`, indexHtml, "out[entry.period] = value === null || value === undefined || !Number.isFinite(numeric) ? '' : round2(numeric);");
 }
 
 function assignedJson<T>(text: string, marker: string): T {
@@ -338,6 +389,8 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
   verifyBalanceSubtotalFormatting(indexHtml, config);
   verifyBalanceSupplySpacing(indexHtml, config);
   verifyBalanceSmartWindowScroll(indexHtml, config);
+  verifyBalanceCrudeContextLoading(indexHtml, config);
+  verifyChartTabExpansion(indexHtml, config);
   verifyYieldAdjustmentRowOrder(indexHtml, config);
   verifyYieldWeeklyGuideStopsAtLatestActual(indexHtml, config);
   verifyCrudeRunsDefaultActivation(indexHtml, config);

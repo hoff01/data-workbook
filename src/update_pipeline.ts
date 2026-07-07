@@ -1,3 +1,4 @@
+import "./env.js";
 import { spawn } from "node:child_process";
 import { performance } from "node:perf_hooks";
 

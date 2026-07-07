@@ -1,3 +1,4 @@
+import "./env.js";
 import { readdir, rename, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { gzipSync } from "node:zlib";

@@ -172,6 +172,80 @@ def load_existing_raw(specs: list[PullSpec]) -> tuple[list[pl.DataFrame], dict[s
     return frames, status
 
 
+def boolish(value: Any) -> bool:
+    return str(value).strip().lower() in {"1", "true", "yes", "y"}
+
+
+def balance_raw_split_group(row: dict[str, Any]) -> str:
+    route = str(row.get("route_group", ""))
+    commodity = str(row.get("commodity", ""))
+    flow = str(row.get("flow_direction", ""))
+    if commodity != "diesel":
+        return ""
+    if flow == "import":
+        if route == "diesel_padd1ab_imports_external":
+            return "padd1ab"
+        if route == "diesel_padd1c_imports_intracountry":
+            origin = str(row.get("origin_country", "")).strip().lower()
+            if not boolish(row.get("with_intra_country")) and origin in {"united states", "united states of america", "usa"}:
+                return ""
+            return "padd1c"
+    if flow == "export":
+        if route == "diesel_padd1ab_exports_external":
+            return "padd1ab"
+        if route == "diesel_padd1c_exports_external":
+            return "padd1c"
+    return ""
+
+
+def load_existing_balance_guide_split_raw(specs: list[PullSpec]) -> tuple[list[pl.DataFrame], dict[str, Any]]:
+    path = RAW_DIR / "normalized_long.csv"
+    if not path.exists():
+        raise RuntimeError(f"missing existing Kpler raw file: {path}")
+    rows = pl.read_csv(path, infer_schema_length=0)
+    spec_by_key = {(spec.commodity, spec.flow_direction): spec for spec in specs}
+    output_rows: list[dict[str, Any]] = []
+    counts: dict[tuple[str, str], int] = {}
+    for row in rows.iter_rows(named=True):
+        group = balance_raw_split_group(row)
+        if not group:
+            continue
+        key = (str(row.get("commodity", "")), str(row.get("flow_direction", "")))
+        spec = spec_by_key.get(key)
+        if not spec:
+            continue
+        value = as_float(row.get("value_kbd"))
+        if not value:
+            continue
+        padd_label = {"padd1ab": "PADD 1A/B", "padd1c": "PADD 1C"}[group]
+        output_rows.append(
+            {
+                **{column: row.get(column, "") for column in LONG_COLUMNS},
+                "pull_set": spec.name,
+                "family": "padd1_split",
+                "value_kbd": value,
+                "destination_padd": padd_label if spec.flow_direction == "import" else "",
+                "origin_padd": padd_label if spec.flow_direction == "export" else "",
+                "source_hash": f"existing_balance_guides:{row.get('source_hash', '')}",
+            }
+        )
+        counts[key] = counts.get(key, 0) + 1
+    if not output_rows:
+        raise RuntimeError(f"existing balance-guide raw file has no PADD 1 split rows: {path}")
+    frame = pl.DataFrame(output_rows).select(LONG_COLUMNS)
+    frames = [frame]
+    status: dict[str, Any] = {}
+    for spec in specs:
+        count = counts.get((spec.commodity, spec.flow_direction), 0)
+        status[spec.name] = {
+            "status": "existing_balance_guide_raw",
+            "raw": {"path": str(path), "rows": int(rows.height)},
+            "rows": count,
+            "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
+        }
+    return frames, status
+
+
 def eia_padd1_daily_values(
     path: Path,
     commodity: str,
@@ -246,7 +320,10 @@ def build_eia_padd1_fallback_long(specs: list[PullSpec]) -> tuple[pl.DataFrame, 
 def pull_kpler_long(specs: list[PullSpec], use_existing_raw: bool = False) -> tuple[pl.DataFrame, dict[str, Any]]:
     config = runtime_config()
     if use_existing_raw:
-        frames, status = load_existing_raw(specs)
+        try:
+            frames, status = load_existing_raw(specs)
+        except RuntimeError:
+            frames, status = load_existing_balance_guide_split_raw(specs)
     elif not has_kpler_credentials():
         return build_eia_padd1_fallback_long(specs)
     else:

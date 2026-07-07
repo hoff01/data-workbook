@@ -10,11 +10,53 @@ import yaml
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
+REPO_DIR = BASE_DIR.parent
 CONFIG_DIR = BASE_DIR / "config"
 RAW_DIR = BASE_DIR / "raw" / "daily"
 OUTPUT_DIR = BASE_DIR / "output"
 LOG_DIR = BASE_DIR / "logs"
 ARCHIVE_DIR = BASE_DIR / "archive"
+
+
+def _parse_env_value(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
+
+
+def _load_env_file(path: Path, protected_keys: set[str], *, override: bool = False) -> None:
+    if not path.exists():
+        return
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[7:].strip()
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if not key or key.startswith("#") or key in protected_keys:
+            continue
+        value = _parse_env_value(value)
+        if value == "":
+            continue
+        if override or key not in os.environ:
+            os.environ[key] = value
+
+
+def load_env_files() -> None:
+    protected_keys = set(os.environ)
+    _load_env_file(REPO_DIR / ".env", protected_keys)
+    _load_env_file(REPO_DIR / ".env.local", protected_keys, override=True)
+    _load_env_file(CONFIG_DIR / "local.env", protected_keys, override=True)
+    _load_env_file(CONFIG_DIR / ".env", protected_keys, override=True)
+    _load_env_file(CONFIG_DIR / ".env.local", protected_keys, override=True)
+
+
+load_env_files()
 
 
 @dataclass(frozen=True)

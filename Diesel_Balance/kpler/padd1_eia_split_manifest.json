@@ -3,10 +3,10 @@
     {
       "added_columns": 12,
       "date_column": "Date",
-      "latest": "2026-03-15",
+      "latest": "2026-04-15",
       "oldest": "2016-01-15",
       "path": "eia_monthly/diesel.csv",
-      "rows": 123,
+      "rows": 124,
       "split_source_columns": [
         "East Coast (PADD 1) Exports of Distillate Fuel Oil (Thousand Barrels per Day)",
         "East Coast (PADD 1) Exports of Distillate Fuel Oil to Europe (Thousand Barrels per Day)",
@@ -17,7 +17,7 @@
     {
       "added_columns": 4,
       "date_column": "week_ending",
-      "latest": "2026-06-19",
+      "latest": "2026-06-26",
       "oldest": "2016-01-01",
       "path": "eia_weekly/diesel.csv",
       "rows": 545,
@@ -28,10 +28,10 @@
     {
       "added_columns": 12,
       "date_column": "Date",
-      "latest": "2026-03-15",
+      "latest": "2026-04-15",
       "oldest": "2016-01-15",
       "path": "eia_monthly/jet.csv",
-      "rows": 123,
+      "rows": 124,
       "split_source_columns": [
         "East Coast (PADD 1) Exports of Kerosene-Type Jet Fuel (Thousand Barrels per Day)",
         "East Coast (PADD 1) Exports of Kerosene-Type Jet Fuel to Europe (Thousand Barrels per Day)",
@@ -42,7 +42,7 @@
     {
       "added_columns": 4,
       "date_column": "week_ending",
-      "latest": "2026-06-19",
+      "latest": "2026-06-26",
       "oldest": "2016-01-01",
       "path": "eia_weekly/jet.csv",
       "rows": 545,
@@ -53,10 +53,10 @@
     {
       "added_columns": 8,
       "date_column": "Date",
-      "latest": "2026-03-15",
+      "latest": "2026-04-15",
       "oldest": "2016-01-15",
       "path": "eia_monthly/gasoline.csv",
-      "rows": 123,
+      "rows": 124,
       "split_source_columns": [
         "East Coast (PADD 1) Imports of Finished Motor Gasoline (Thousand Barrels per Day)",
         "East Coast (PADD 1) Imports of Fuel Ethanol (Thousand Barrels per Day)",
@@ -66,7 +66,7 @@
     {
       "added_columns": 8,
       "date_column": "week_ending",
-      "latest": "2026-06-19",
+      "latest": "2026-06-26",
       "oldest": "2016-01-01",
       "path": "eia_weekly/gasoline.csv",
       "rows": 545,
@@ -77,56 +77,74 @@
       ]
     }
   ],
-  "generated_at": "2026-06-26T04:50:45.546169+00:00",
-  "mode": "eia_fallback",
+  "generated_at": "2026-07-07T01:53:27.861077+00:00",
+  "mode": "existing_raw",
   "normalized_long": {
     "path": "Kpler/output/padd1_split/padd1_import_export_normalized_long.csv",
-    "rows": 15258
+    "rows": 2148
   },
   "pipeline_name": "kpler_padd1_eia_split",
   "pull_count": 6,
   "pull_status": {
     "padd1_split_diesel_exports": {
-      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
-      "rows": 3012,
-      "source": "EIA PADD 1 aggregate import/export columns",
-      "status": "eia_fallback"
+      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
+      "raw": {
+        "path": "Kpler/raw/daily/normalized_long.csv",
+        "rows": 122655
+      },
+      "rows": 453,
+      "status": "existing_balance_guide_raw"
     },
     "padd1_split_diesel_imports": {
-      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
-      "rows": 3078,
-      "source": "EIA PADD 1 aggregate import/export columns",
-      "status": "eia_fallback"
+      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
+      "raw": {
+        "path": "Kpler/raw/daily/normalized_long.csv",
+        "rows": 122655
+      },
+      "rows": 1695,
+      "status": "existing_balance_guide_raw"
     },
     "padd1_split_gasoline_exports": {
-      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
+      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
+      "raw": {
+        "path": "Kpler/raw/daily/normalized_long.csv",
+        "rows": 122655
+      },
       "rows": 0,
-      "source": "EIA PADD 1 aggregate import/export columns",
-      "status": "eia_fallback"
+      "status": "existing_balance_guide_raw"
     },
     "padd1_split_gasoline_imports": {
-      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
-      "rows": 3078,
-      "source": "EIA PADD 1 aggregate import/export columns",
-      "status": "eia_fallback"
+      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
+      "raw": {
+        "path": "Kpler/raw/daily/normalized_long.csv",
+        "rows": 122655
+      },
+      "rows": 0,
+      "status": "existing_balance_guide_raw"
     },
     "padd1_split_jet_exports": {
-      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
-      "rows": 3012,
-      "source": "EIA PADD 1 aggregate import/export columns",
-      "status": "eia_fallback"
+      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
+      "raw": {
+        "path": "Kpler/raw/daily/normalized_long.csv",
+        "rows": 122655
+      },
+      "rows": 0,
+      "status": "existing_balance_guide_raw"
     },
     "padd1_split_jet_imports": {
-      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
-      "rows": 3078,
-      "source": "EIA PADD 1 aggregate import/export columns",
-      "status": "eia_fallback"
+      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
+      "raw": {
+        "path": "Kpler/raw/daily/normalized_long.csv",
+        "rows": 122655
+      },
+      "rows": 0,
+      "status": "existing_balance_guide_raw"
     }
   },
   "pulls": [
     {
       "commodity": "diesel",
-      "end_date": "2026-08-09",
+      "end_date": "2026-08-20",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -152,7 +170,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-08-09",
+      "end_date": "2026-08-20",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -178,7 +196,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-09",
+      "end_date": "2026-08-20",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -204,7 +222,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-09",
+      "end_date": "2026-08-20",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -230,7 +248,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-08-09",
+      "end_date": "2026-08-20",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -256,7 +274,7 @@
     },
     {
       "commodity": "gasoline",
-      "end_date": "2026-08-09",
+      "end_date": "2026-08-20",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -283,7 +301,7 @@
   ],
   "runtime_config": {
     "concurrency": 2,
-    "end_date": "2026-08-09",
+    "end_date": "2026-08-20",
     "granularity": "daily",
     "only_realized": false,
     "retry_backoff_seconds": 10.0,

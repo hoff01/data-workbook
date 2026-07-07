@@ -2,6 +2,9 @@ us_trade_groups:
   canada:
     countries:
       - Canada
+    trading_regions:
+      - East Coast Canada
+      - West Coast Canada
   latin_america:
     countries:
       - Mexico
@@ -57,9 +60,14 @@ us_trade_groups:
     trading_regions:
       - Europe
       - Northwest Europe
+      - North West Europe
+      - North West Europe Zone
       - Mediterranean
       - Med/Black Sea
+      - MED Zone
+      - MED Zone (MED Sea+Black Sea)
       - Black Sea
+      - Other Southern Europe
     countries:
       - Albania
       - Armenia
@@ -111,6 +119,9 @@ us_trade_groups:
       - Far East
       - Indian Subcontinent
       - Southeast Asia
+      - South-East Asia
+      - Eastern Asia
+      - South-Central Asia
     countries:
       - China
       - Hong Kong
@@ -129,6 +140,8 @@ us_trade_groups:
     trading_regions:
       - Middle East
       - Persian Gulf
+      - Mideast Gulf
+      - Other Middle East
     countries:
       - Bahrain
       - Iran
@@ -147,9 +160,12 @@ us_trade_groups:
     trading_regions:
       - Africa
       - East Africa
+      - Eastern Africa
       - North Africa
+      - Other North Africa
       - Southern Africa
       - West Africa
+      - Western Africa
     countries:
       - Algeria
       - Angola

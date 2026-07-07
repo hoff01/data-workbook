@@ -1,3 +1,4 @@
+import "./env.js";
 import { readFile } from "node:fs/promises";
 import { fetchBufferWithRetry } from "./common.js";
 

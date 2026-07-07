@@ -13,8 +13,7 @@ cd Kpler
 Required credentials:
 
 ```powershell
-$env:KPLER_USERNAME = "..."
-$env:KPLER_PASSWORD = "..."
+# Create a repo-root .env or .env.local with KPLER_USERNAME and KPLER_PASSWORD.
 .\run.ps1 -Run
 ```
 
