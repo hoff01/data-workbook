@@ -111,6 +111,15 @@ type RegionalBalancePoint = {
   stockChangeKbd: number;
   stocksKb: number;
   balanceKbd: number;
+  catalyticCrackingFreshFeedKbd?: number | null;
+  catalyticCrackingCapacityKbd?: number | null;
+  catalyticCrackingUtilizationPct?: number | null;
+  cokingFreshFeedKbd?: number | null;
+  cokingCapacityKbd?: number | null;
+  cokingUtilizationPct?: number | null;
+  hydrocrackingFreshFeedKbd?: number | null;
+  hydrocrackingCapacityKbd?: number | null;
+  hydrocrackingUtilizationPct?: number | null;
 };
 
 type CrudeRunsPoint = {
@@ -670,6 +679,57 @@ const CRUDE_RUN_METRICS: CrudeRunsBundle["metrics"] = [
   { key: "exPlannedUtilizationPct", label: "Operating (ex-planned) utilization", unit: "%", digits: 1 },
 ];
 
+type SecondaryUnitMetricValues = Pick<
+  RegionalBalancePoint,
+  | "catalyticCrackingFreshFeedKbd"
+  | "catalyticCrackingCapacityKbd"
+  | "catalyticCrackingUtilizationPct"
+  | "cokingFreshFeedKbd"
+  | "cokingCapacityKbd"
+  | "cokingUtilizationPct"
+  | "hydrocrackingFreshFeedKbd"
+  | "hydrocrackingCapacityKbd"
+  | "hydrocrackingUtilizationPct"
+>;
+
+type SecondaryUnitSpec = {
+  feedLabel: string;
+  capacityLabel: string;
+  freshFeedField: keyof SecondaryUnitMetricValues;
+  capacityField: keyof SecondaryUnitMetricValues;
+  utilizationField: keyof SecondaryUnitMetricValues;
+};
+
+const SECONDARY_UNIT_SPECS: SecondaryUnitSpec[] = [
+  {
+    feedLabel: "Downstream Processing of Fresh Feed Input by Catalytic Cracking Units",
+    capacityLabel: "Refinery Catalytic Cracking, Fresh Feed Downstream Charge Capacity as of January 1",
+    freshFeedField: "catalyticCrackingFreshFeedKbd",
+    capacityField: "catalyticCrackingCapacityKbd",
+    utilizationField: "catalyticCrackingUtilizationPct",
+  },
+  {
+    feedLabel: "Downstream Processing of Fresh Feed Input by Delayed and Fluid Coking Units",
+    capacityLabel: "Refinery Thermal Cracking, Coking Downstream Charge Capacity as of January 1",
+    freshFeedField: "cokingFreshFeedKbd",
+    capacityField: "cokingCapacityKbd",
+    utilizationField: "cokingUtilizationPct",
+  },
+  {
+    feedLabel: "Downstream Processing of Fresh Feed Input by Catalytic Hydrocracking Units",
+    capacityLabel: "Refinery Catalytic Hydrocracking Downstream Charge Capacity as of January 1",
+    freshFeedField: "hydrocrackingFreshFeedKbd",
+    capacityField: "hydrocrackingCapacityKbd",
+    utilizationField: "hydrocrackingUtilizationPct",
+  },
+];
+
+const SECONDARY_UNIT_FIELD_KEYS = SECONDARY_UNIT_SPECS.flatMap((spec) => [
+  spec.freshFeedField,
+  spec.capacityField,
+  spec.utilizationField,
+]);
+
 function regionDefByKey(regionKey: string): { key: string; label: string } | undefined {
   return REGION_DEFS.find((region) => region.key === regionKey);
 }
@@ -1128,6 +1188,64 @@ function monthlyPadd1ImportSplitColumn(config: ProductConfig, regionKey: "padd1a
   return `Estimated PADD ${regionKey === "padd1ab" ? "1A/B" : "1C"} Imports of ${config.fuelLabel} (Kpler Split)`;
 }
 
+function monthlySecondaryUnitColumn(area: PaddAreaKey | "us", spec: SecondaryUnitSpec, metric: "freshFeed" | "capacity"): string {
+  const label = area === "us" ? "U.S." : monthlyArea(area);
+  if (metric === "freshFeed") return `${label} ${spec.feedLabel} (Thousand Barrels per Day)`;
+  return `${label} ${spec.capacityLabel} (Thousand Barrels per Day)`;
+}
+
+function requiredSecondaryUnitColumns(): string[] {
+  return CRUDE_PADD_REGION_KEYS.flatMap((area) =>
+    SECONDARY_UNIT_SPECS.flatMap((spec) => [
+      monthlySecondaryUnitColumn(area, spec, "freshFeed"),
+      monthlySecondaryUnitColumn(area, spec, "capacity"),
+    ]),
+  );
+}
+
+function secondaryUnitUtilizationPct(freshFeedKbd: number | null, capacityKbd: number | null): number | null {
+  if (freshFeedKbd === null || capacityKbd === null || !Number.isFinite(freshFeedKbd) || !Number.isFinite(capacityKbd) || capacityKbd <= 0) return null;
+  return round(safeUtilizationPct(freshFeedKbd, capacityKbd), 1);
+}
+
+function secondaryUnitValuesForRow(row: CsvRow, area: PaddAreaKey | "us"): SecondaryUnitMetricValues {
+  const values: SecondaryUnitMetricValues = {};
+  SECONDARY_UNIT_SPECS.forEach((spec) => {
+    const freshFeedCol = monthlySecondaryUnitColumn(area, spec, "freshFeed");
+    const capacityCol = monthlySecondaryUnitColumn(area, spec, "capacity");
+    const hasFreshFeed = hasColumn(row, freshFeedCol);
+    const hasCapacity = hasColumn(row, capacityCol);
+    if (!hasFreshFeed && !hasCapacity) return;
+    const freshFeedKbd = hasFreshFeed ? valueByColumn(row, freshFeedCol) : null;
+    const capacityKbd = hasCapacity ? valueByColumn(row, capacityCol) : null;
+    values[spec.freshFeedField] = freshFeedKbd === null ? null : round(freshFeedKbd);
+    values[spec.capacityField] = capacityKbd === null ? null : round(capacityKbd);
+    values[spec.utilizationField] = secondaryUnitUtilizationPct(freshFeedKbd, capacityKbd);
+  });
+  return values;
+}
+
+function assignSecondaryUnitValues(point: RegionalBalancePoint, values: SecondaryUnitMetricValues): void {
+  SECONDARY_UNIT_FIELD_KEYS.forEach((field) => {
+    if (Object.prototype.hasOwnProperty.call(values, field)) point[field] = values[field] ?? null;
+  });
+}
+
+function aggregateSecondaryUnitValues(parts: RegionalBalancePoint[]): SecondaryUnitMetricValues {
+  const values: SecondaryUnitMetricValues = {};
+  SECONDARY_UNIT_SPECS.forEach((spec) => {
+    const freshFeeds = parts.map((point) => point[spec.freshFeedField]).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+    const capacities = parts.map((point) => point[spec.capacityField]).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+    if (!freshFeeds.length && !capacities.length) return;
+    const freshFeedKbd = freshFeeds.reduce((sum, value) => sum + value, 0);
+    const capacityKbd = capacities.reduce((sum, value) => sum + value, 0);
+    values[spec.freshFeedField] = round(freshFeedKbd);
+    values[spec.capacityField] = round(capacityKbd);
+    values[spec.utilizationField] = secondaryUnitUtilizationPct(freshFeedKbd, capacityKbd);
+  });
+  return values;
+}
+
 function boundedShare(value: number, fallback: number): number {
   const candidate = Number.isFinite(value) ? value : fallback;
   return Math.min(1, Math.max(0, candidate));
@@ -1279,6 +1397,9 @@ function regionPoint(period: string, status: "actual" | "forecast", regionKey: s
     stockChangeKbd: round(values.stockChangeKbd ?? 0),
     stocksKb: round(values.stocksKb),
     balanceKbd,
+    ...Object.fromEntries(
+      SECONDARY_UNIT_FIELD_KEYS.filter((field) => Object.prototype.hasOwnProperty.call(values, field)).map((field) => [field, values[field] ?? null]),
+    ),
   };
 }
 
@@ -1297,6 +1418,7 @@ function aggregateRegion(period: string, status: "actual" | "forecast", regionKe
     netReceiptsKbd: parts.reduce((sum, point) => sum + point.netReceiptsKbd, 0),
     stockChangeKbd: parts.reduce((sum, point) => sum + point.stockChangeKbd, 0),
     stocksKb: parts.reduce((sum, point) => sum + point.stocksKb, 0),
+    ...aggregateSecondaryUnitValues(parts),
   });
   return {
     ...point,
@@ -1577,6 +1699,7 @@ function directMonthlyRegion(config: ProductConfig, row: CsvRow, period: string,
     ...exportDestinations,
     netReceiptsKbd: isUs ? 0 : valueByColumn(row, netReceiptsCol),
     stocksKb: valueByColumn(row, stocksCol),
+    ...secondaryUnitValuesForRow(row, area),
   });
 }
 
@@ -1613,6 +1736,7 @@ function monthlyPadd1Splits(config: ProductConfig, row: CsvRow, period: string):
   const stocksC =
     valueByColumn(row, `Lower Atlantic (PADD 1C) Ending Stocks of ${config.fuelLabel} (Thousand Barrels)`) ||
     p1.stocksKb * shareC;
+  const padd1SecondaryUnits = secondaryUnitValuesForRow(row, "padd1");
 
   return [
     regionPoint(period, "actual", "padd1ab", "P1-A/B Northeast", {
@@ -1624,6 +1748,7 @@ function monthlyPadd1Splits(config: ProductConfig, row: CsvRow, period: string):
       ...exportDestinationsAB,
       netReceiptsKbd: p1.netReceiptsKbd * shareAB,
       stocksKb: stocksAB,
+      ...padd1SecondaryUnits,
     }),
     regionPoint(period, "actual", "padd1c", "P1-C Lower Atlantic", {
       demandKbd: demandC,
@@ -1669,6 +1794,7 @@ function updateRegionalStockChanges(
   records: Array<{ period: string; status: "actual" | "forecast"; points: Map<string, RegionalBalancePoint> }>,
   divisor: (period: string) => number,
   beforeAggregates?: (record: { period: string; status: "actual" | "forecast"; points: Map<string, RegionalBalancePoint> }) => void,
+  afterAggregates?: (record: { period: string; status: "actual" | "forecast"; points: Map<string, RegionalBalancePoint> }) => void,
 ): void {
   const previous = new Map<string, RegionalBalancePoint>();
   records.forEach((record) => {
@@ -1681,15 +1807,22 @@ function updateRegionalStockChanges(
     });
     beforeAggregates?.(record);
     addRegionalAggregates(config, record.period, record.status, record.points);
+    afterAggregates?.(record);
   });
 }
 
 function monthlyRegionalBalances(config: ProductConfig, rows: CsvRow[]): RegionalBalancePoint[] {
   if (rows.length === 0) return [];
+  ensureColumns(rows, requiredSecondaryUnitColumns(), `${config.monthlyCsv} secondary unit utilization`);
+  const rowsByPeriod = new Map(rows.map((row) => [monthKey(row.Date), row]));
   const actualRecords = rows
     .map((row) => monthlyRegionRecord(config, row))
     .sort((a, b) => a.period.localeCompare(b.period));
-  updateRegionalStockChanges(config, actualRecords, daysInMonth);
+  updateRegionalStockChanges(config, actualRecords, daysInMonth, undefined, (record) => {
+    const row = rowsByPeriod.get(record.period);
+    const usPoint = record.points.get("us");
+    if (row && usPoint) assignSecondaryUnitValues(usPoint, secondaryUnitValuesForRow(row, "us"));
+  });
 
   const actualPoints = actualRecords.flatMap((record) => Array.from(record.points.values()));
   const seasonalPointsByRegionMonth = new Map<string, RegionalBalancePoint[]>();
@@ -3761,12 +3894,18 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       {key:'kplerExportsAfricaKbd',label:'Kpler Exports to Africa',unit:'kbd',digits:0},
       {key:'kplerExportsOtherKbd',label:'Kpler Exports to Other',unit:'kbd',digits:0},
       {key:'stocksKb',label:'Stocks',unit:'kb',digits:0},
-      {key:'daysForwardCover',label:'Days of Forward Cover',unit:'days',digits:1}
+      {key:'daysForwardCover',label:'Days of Forward Cover',unit:'days',digits:1},
+      {key:'catalyticCrackingUtilizationPct',label:'Catalytic Cracking Utilization',unit:'%',digits:1},
+      {key:'cokingUtilizationPct',label:'Coking Utilization',unit:'%',digits:1},
+      {key:'hydrocrackingUtilizationPct',label:'Hydrocracking Utilization',unit:'%',digits:1}
     ];
 	    const CRUDE_METRICS = D.crudeRuns.metrics || [{key:'crudeRunsKbd',label:'Crude runs',unit:'kbd',digits:0},{key:'operableCapacityKbd',label:'Operable capacity',unit:'kbd',digits:0},{key:'idleCapacityKbd',label:'Idle capacity',unit:'kbd',digits:0},{key:'operatingCapacityKbd',label:'Operating capacity',unit:'kbd',digits:0},{key:'utilizationPct',label:'Operable utilization',unit:'%',digits:1},{key:'operatingUtilizationPct',label:'Operating utilization',unit:'%',digits:1},{key:'exPlannedUtilizationPct',label:'Operating (ex-planned) utilization',unit:'%',digits:1}];
-	    const CHART_METRICS = ['balanceKbd','periodBuildDrawKb','netLengthKbd','demandKbd','productionKbd','importsKbd','canadaImportsKbd','nonCanadaImportsKbd','kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','exportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd','receiptsKbd','netReceiptsKbd','padd3ShipmentsToPadd1Kbd','stocksKb','daysForwardCover','exPlannedUtilizationPct'];
+	    const CHART_METRICS = ['balanceKbd','periodBuildDrawKb','netLengthKbd','demandKbd','productionKbd','importsKbd','canadaImportsKbd','nonCanadaImportsKbd','kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','exportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd','receiptsKbd','netReceiptsKbd','padd3ShipmentsToPadd1Kbd','stocksKb','daysForwardCover','exPlannedUtilizationPct','catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct'];
 	    const KPLER_CHART_METRICS = new Set(['kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd']);
-	    const OPTIONAL_NONZERO_CHART_METRICS = new Set(['canadaImportsKbd','nonCanadaImportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','receiptsKbd','padd3ShipmentsToPadd1Kbd',...KPLER_CHART_METRICS]);
+	    const SECONDARY_UNIT_UTILIZATION_METRICS = new Set(['catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct']);
+	    const SECONDARY_UNIT_FIELD_SPECS = [{freshFeedField:'catalyticCrackingFreshFeedKbd',capacityField:'catalyticCrackingCapacityKbd',utilizationField:'catalyticCrackingUtilizationPct'},{freshFeedField:'cokingFreshFeedKbd',capacityField:'cokingCapacityKbd',utilizationField:'cokingUtilizationPct'},{freshFeedField:'hydrocrackingFreshFeedKbd',capacityField:'hydrocrackingCapacityKbd',utilizationField:'hydrocrackingUtilizationPct'}];
+	    const SECONDARY_UNIT_FIELDS = SECONDARY_UNIT_FIELD_SPECS.flatMap(spec => [spec.freshFeedField,spec.capacityField,spec.utilizationField]);
+	    const OPTIONAL_NONZERO_CHART_METRICS = new Set(['canadaImportsKbd','nonCanadaImportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','receiptsKbd','padd3ShipmentsToPadd1Kbd',...KPLER_CHART_METRICS,...SECONDARY_UNIT_UTILIZATION_METRICS]);
     const CHART_SCENARIO_METRICS = [{key:'demand',label:'Demand',lineId:'demand',valueType:'pct'},{key:'yield',label:'Yield',lineId:'yieldAdjustmentPct',valueType:'pct'},{key:'imports',label:'Imports',lineId:'imports',valueType:'kbd_delta'},{key:'exports',label:'Exports',lineId:'exports',valueType:'kbd_delta'},{key:'receipts',label:'Inter-PADD receipts',lineId:'receipts',valueType:'kbd_delta'},{key:'exPlannedUtilization',label:'Operating Utilization (Ex-Planned)',lineId:'exPlannedUtilizationAdjustmentPct',valueType:'pct'}];
     const CHART_SCENARIO_LIMIT = 10;
     const CHART_SCENARIO_OVERLAY_PALETTE = ['#0f9488','#e11d48','#1d4ed8','#d97706','#7c3aed','#0891b2','#15803d','#b91c1c','#4f46e5','#a16207'];
@@ -4590,12 +4729,14 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function seasonalYieldPct(regionKey, period, rawBuckets, crudeInfoByPeriod){ const month = String(monthOf(period)).padStart(2,'0'); const years = Array.isArray(D.forecast?.seasonYears) && D.forecast.seasonYears.length ? D.forecast.seasonYears : [2023,2024,2025]; const yields = years.map(year => { const seasonPeriod = year + '-' + month; const rawBucket = rawBuckets.get(seasonPeriod); const rawPoint = rawBucket?.[regionKey]; if (!rawPoint) return null; const crudeInfo = crudeInfoByPeriod.get(seasonPeriod) || {bucket:{},isActual:true}; const detail = allocatedCrudeDetail(regionKey, seasonPeriod, rawBucket, crudeInfo.bucket, true); return detail.crudeRunsKbd > 0 ? Number(rawPoint.productionKbd || 0) / detail.crudeRunsKbd * 100 : null; }).filter(value => Number.isFinite(value)); return round2(average(yields) || 0); }
     function forceZeroExports(regionKey){ return D.product?.key === 'diesel' && regionKey === 'padd1c'; }
     function adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorPoint){ const isActual = rawPoint.status === 'actual'; const detail = allocatedCrudeDetail(rawPoint.regionKey, rawPoint.period, rawBucket, crudeInfo?.bucket || {}, isActual); let yieldPct = isActual ? round2(detail.crudeRunsKbd > 0 ? Number(rawPoint.productionKbd || 0) / detail.crudeRunsKbd * 100 : 0) : seasonalYieldPct(rawPoint.regionKey, rawPoint.period, rawBuckets, crudeInfoByPeriod); const yieldAdjustmentPct = isActual ? null : balanceAdjustmentValue('monthly', rawPoint.period, rawPoint.regionKey, 'yieldAdjustmentPct'); if (yieldAdjustmentPct !== null) yieldPct = round2(yieldAdjustmentPct); let productionKbd = isActual ? Number(rawPoint.productionKbd || 0) : round2(detail.crudeRunsKbd * yieldPct / 100); const productionOverride = isActual ? null : balanceAdjustmentValue('monthly', rawPoint.period, rawPoint.regionKey, 'production'); if (!isActual) productionKbd = round2(productionOverride === null ? productionKbd : productionOverride); if (!isActual && productionOverride !== null) yieldPct = round2(safePct(productionKbd, detail.crudeRunsKbd)); const demandKbd = isActual ? Number(rawPoint.demandKbd || 0) : round2(applyBalanceAdjustment(Number(rawPoint.demandKbd || 0), 'monthly', rawPoint.period, rawPoint.regionKey, 'demand')); let importsKbd = Number(rawPoint.importsKbd || 0); if (!isActual && rawPoint.regionKey !== 'padd1ab') importsKbd = round2(applyBalanceAdjustment(importsKbd, 'monthly', rawPoint.period, rawPoint.regionKey, 'imports')); const importValues = adjustedImportValues(rawPoint, importsKbd, 'monthly', rawPoint.period, rawPoint.regionKey, isActual); importsKbd = importValues.importsKbd; let exportsKbd = forceZeroExports(rawPoint.regionKey) ? 0 : isActual ? Number(rawPoint.exportsKbd || 0) : round2(applyBalanceAdjustment(Number(rawPoint.exportsKbd || 0), 'monthly', rawPoint.period, rawPoint.regionKey, 'exports')); let exportDestinationValues = adjustedExportDestinationValues(rawPoint, exportsKbd); if (forceZeroExports(rawPoint.regionKey)) exportDestinationValues = adjustedExportDestinationValues(rawPoint, 0); if (rawPoint.regionKey === 'padd3') { exportDestinationValues = isActual ? adjustedExportDestinationValues(rawPoint, exportsKbd) : adjustedPadd3ExportDestinationValues(rawPoint, 'monthly', rawPoint.period, isActual); if (!isActual) exportsKbd = exportDestinationTotal(exportDestinationValues); } const movement = movementSummaryForRegion('monthly', rawPoint.period, rawPoint.regionKey); const receiptsKbd = movement.hasFlows ? movement.receiptsKbd : null; const shipmentsKbd = movement.hasFlows ? movement.shipmentsKbd : null; const netReceiptsKbd = movement.hasFlows ? movement.netReceiptsKbd : Number(rawPoint.netReceiptsKbd || 0); const balanceKbd = round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd); const stocksKb = isActual ? Number(rawPoint.stocksKb || 0) : round2(Number(priorPoint?.stocksKb || rawPoint.stocksKb || 0) + balanceKbd * periodDays(rawPoint.period)); return {...rawPoint,...detail,yieldPct,yieldAdjustmentPct,demandKbd,productionKbd,...importValues,exportsKbd,...exportDestinationValues,netReceiptsKbd,receiptsKbd,shipmentsKbd,stockChangeKbd:isActual ? Number(rawPoint.stockChangeKbd || 0) : balanceKbd,balanceKbd,stocksKb}; }
-    function aggregateAdjustedMonthlyPoint(period, regionKey, parts, frequency='monthly'){ const status = parts.some(point => point.status === 'forecast') ? 'forecast' : 'actual'; const sum = key => parts.reduce((total, point) => total + Number(point[key] || 0), 0); const nullableSum = key => parts.every(point => point[key] === null || point[key] === undefined) ? null : round2(sum(key)); const productionKbd = sum('productionKbd'); const importsKbd = sum('importsKbd'); const canadaImportsKbd = sum('canadaImportsKbd'); const nonCanadaImportsKbd = sum('nonCanadaImportsKbd'); const movement = movementSummaryForRegion(frequency, period, regionKey); const receiptsKbd = movement.hasFlows ? movement.receiptsKbd : sum('receiptsKbd'); const shipmentsKbd = movement.hasFlows ? movement.shipmentsKbd : sum('shipmentsKbd'); const netReceiptsKbd = movement.hasFlows ? movement.netReceiptsKbd : sum('netReceiptsKbd'); const exportsKbd = sum('exportsKbd'); const exportsLatinAmericaKbd = sum('exportsLatinAmericaKbd'); const exportsEuropeKbd = sum('exportsEuropeKbd'); const exportsAfricaKbd = sum('exportsAfricaKbd'); const exportsOtherKbd = sum('exportsOtherKbd'); const demandKbd = sum('demandKbd'); const operableCapacityKbd = sum('operableCapacityKbd'); const operatingCapacityKbd = sum('operatingCapacityKbd'); const plannedMaintenanceKbd = nullableSum('plannedMaintenanceKbd'); const unplannedMaintenanceKbd = nullableSum('unplannedMaintenanceKbd'); const crudeRunsKbd = sum('crudeRunsKbd'); const exPlannedCapacity = Math.max(0, operableCapacityKbd - Number(plannedMaintenanceKbd || 0)); return {period,status,regionKey,regionName:balanceRegionDisplayLabel(regionKey),demandKbd:round2(demandKbd),productionKbd:round2(productionKbd),importsKbd:round2(importsKbd),canadaImportsKbd:round2(canadaImportsKbd),nonCanadaImportsKbd:round2(nonCanadaImportsKbd),exportsKbd:round2(exportsKbd),exportsLatinAmericaKbd:round2(exportsLatinAmericaKbd),exportsEuropeKbd:round2(exportsEuropeKbd),exportsAfricaKbd:round2(exportsAfricaKbd),exportsOtherKbd:round2(exportsOtherKbd),netReceiptsKbd:round2(netReceiptsKbd),receiptsKbd:round2(receiptsKbd),shipmentsKbd:round2(shipmentsKbd),stockChangeKbd:round2(sum('stockChangeKbd')),stocksKb:round2(sum('stocksKb')),balanceKbd:round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd),operableCapacityKbd:round2(operableCapacityKbd),operatingCapacityKbd:round2(operatingCapacityKbd),plannedMaintenanceKbd,unplannedMaintenanceKbd,crudeRunsKbd:round2(crudeRunsKbd),operatingUtilizationPct:round2(safePct(crudeRunsKbd, operatingCapacityKbd)),exPlannedUtilizationPct:round2(safePct(crudeRunsKbd, exPlannedCapacity)),yieldPct:round2(safePct(productionKbd, crudeRunsKbd)),yieldAdjustmentPct:null}; }
+    function secondaryUnitAdjustedValues(parts){ const values = {}; SECONDARY_UNIT_FIELD_SPECS.forEach(spec => { const freshFeeds = parts.map(point => Number(point?.[spec.freshFeedField])).filter(Number.isFinite); const capacities = parts.map(point => Number(point?.[spec.capacityField])).filter(Number.isFinite); if (!freshFeeds.length && !capacities.length) return; const freshFeedKbd = freshFeeds.reduce((sum,value)=>sum+value,0); const capacityKbd = capacities.reduce((sum,value)=>sum+value,0); values[spec.freshFeedField] = round2(freshFeedKbd); values[spec.capacityField] = round2(capacityKbd); values[spec.utilizationField] = capacityKbd > 0 ? round2(safePct(freshFeedKbd, capacityKbd)) : null; }); return values; }
+    function withDirectSecondaryUnitValues(point, directPoint){ if (!point || !directPoint) return point; const values = {}; SECONDARY_UNIT_FIELDS.forEach(field => { if (Object.prototype.hasOwnProperty.call(directPoint, field)) values[field] = directPoint[field] ?? null; }); return Object.keys(values).length ? {...point,...values} : point; }
+    function aggregateAdjustedMonthlyPoint(period, regionKey, parts, frequency='monthly'){ const status = parts.some(point => point.status === 'forecast') ? 'forecast' : 'actual'; const sum = key => parts.reduce((total, point) => total + Number(point[key] || 0), 0); const nullableSum = key => parts.every(point => point[key] === null || point[key] === undefined) ? null : round2(sum(key)); const productionKbd = sum('productionKbd'); const importsKbd = sum('importsKbd'); const canadaImportsKbd = sum('canadaImportsKbd'); const nonCanadaImportsKbd = sum('nonCanadaImportsKbd'); const movement = movementSummaryForRegion(frequency, period, regionKey); const receiptsKbd = movement.hasFlows ? movement.receiptsKbd : sum('receiptsKbd'); const shipmentsKbd = movement.hasFlows ? movement.shipmentsKbd : sum('shipmentsKbd'); const netReceiptsKbd = movement.hasFlows ? movement.netReceiptsKbd : sum('netReceiptsKbd'); const exportsKbd = sum('exportsKbd'); const exportsLatinAmericaKbd = sum('exportsLatinAmericaKbd'); const exportsEuropeKbd = sum('exportsEuropeKbd'); const exportsAfricaKbd = sum('exportsAfricaKbd'); const exportsOtherKbd = sum('exportsOtherKbd'); const demandKbd = sum('demandKbd'); const operableCapacityKbd = sum('operableCapacityKbd'); const operatingCapacityKbd = sum('operatingCapacityKbd'); const plannedMaintenanceKbd = nullableSum('plannedMaintenanceKbd'); const unplannedMaintenanceKbd = nullableSum('unplannedMaintenanceKbd'); const crudeRunsKbd = sum('crudeRunsKbd'); const exPlannedCapacity = Math.max(0, operableCapacityKbd - Number(plannedMaintenanceKbd || 0)); return {period,status,regionKey,regionName:balanceRegionDisplayLabel(regionKey),demandKbd:round2(demandKbd),productionKbd:round2(productionKbd),importsKbd:round2(importsKbd),canadaImportsKbd:round2(canadaImportsKbd),nonCanadaImportsKbd:round2(nonCanadaImportsKbd),exportsKbd:round2(exportsKbd),exportsLatinAmericaKbd:round2(exportsLatinAmericaKbd),exportsEuropeKbd:round2(exportsEuropeKbd),exportsAfricaKbd:round2(exportsAfricaKbd),exportsOtherKbd:round2(exportsOtherKbd),netReceiptsKbd:round2(netReceiptsKbd),receiptsKbd:round2(receiptsKbd),shipmentsKbd:round2(shipmentsKbd),stockChangeKbd:round2(sum('stockChangeKbd')),stocksKb:round2(sum('stocksKb')),balanceKbd:round2(productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd),operableCapacityKbd:round2(operableCapacityKbd),operatingCapacityKbd:round2(operatingCapacityKbd),plannedMaintenanceKbd,unplannedMaintenanceKbd,crudeRunsKbd:round2(crudeRunsKbd),operatingUtilizationPct:round2(safePct(crudeRunsKbd, operatingCapacityKbd)),exPlannedUtilizationPct:round2(safePct(crudeRunsKbd, exPlannedCapacity)),yieldPct:round2(safePct(productionKbd, crudeRunsKbd)),yieldAdjustmentPct:null,...secondaryUnitAdjustedValues(parts)}; }
     function daysForwardCoverLookahead(frequency){ return frequency === 'weekly' ? 8 : 2; }
     function applyDaysForwardCover(rows, frequency){ const lookahead = daysForwardCoverLookahead(frequency); const byRegion = new Map(); rows.forEach(row => { if (!row?.regionKey || !row.period) return; const list = byRegion.get(row.regionKey) || []; list.push(row); byRegion.set(row.regionKey, list); }); byRegion.forEach(list => { list.sort((a,b)=>String(a.period).localeCompare(String(b.period))); const demand = list.map(point => Number(point?.demandKbd)); let sum = 0; let valid = 0; for (let index = 0; index < list.length; index += 1) { if (index === 0) { for (let offset = 1; offset <= lookahead && offset < list.length; offset += 1) { const value = demand[offset]; if (Number.isFinite(value)) { sum += value; valid += 1; } } } else { const leaving = demand[index]; if (Number.isFinite(leaving)) { sum -= leaving; valid -= 1; } const entering = demand[index + lookahead]; if (Number.isFinite(entering)) { sum += entering; valid += 1; } } const avgDemand = valid === lookahead ? sum / lookahead : null; list[index].daysForwardCover = Number.isFinite(avgDemand) && avgDemand > 0 ? round2(Number(list[index].stocksKb || 0) / avgDemand) : NaN; } }); return rows; }
     function crudeInfoIndex(frequency){ const key = calcCacheKey('crudeInfoByPeriod', frequency); if (crudeInfoByPeriodCache.has(key)) return crudeInfoByPeriodCache.get(key); const index = new Map(crudeAllPeriods(frequency).map(([period,bucket,isActual]) => [period,{bucket,isActual}])); crudeInfoByPeriodCache.set(key, index); return index; }
-    function adjustedMonthlyActualBaseline(){ if (adjustedMonthlyActualRowsCache) return adjustedMonthlyActualRowsCache; const rawBuckets = monthlyRawBuckets(); const crudeInfoByPeriod = crudeInfoIndex('monthly'); const priorByRegion = new Map(); const out = []; Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:true}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'monthly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); adjustedMonthlyActualRowsCache = {rows:out,buckets:bucketRows(out),priorByRegion:new Map(priorByRegion)}; return adjustedMonthlyActualRowsCache; }
-    function adjustedMonthlyBalanceRows(){ const key = calcCacheKey('adjustedMonthlyBalanceRows'); if (adjustedMonthlyRowsCache.key === key && adjustedMonthlyRowsCache.rows) return adjustedMonthlyRowsCache.rows; const actualBaseline = adjustedMonthlyActualBaseline(); const rawBuckets = monthlyRawBuckets(); const crudeInfoByPeriod = crudeInfoIndex('monthly'); const priorByRegion = new Map(actualBaseline.priorByRegion); const out = actualBaseline.rows.slice(); Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (!Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:false}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'monthly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); applyDaysForwardCover(out, 'monthly'); adjustedMonthlyRowsCache = {key,rows:out}; return out; }
+    function adjustedMonthlyActualBaseline(){ if (adjustedMonthlyActualRowsCache) return adjustedMonthlyActualRowsCache; const rawBuckets = monthlyRawBuckets(); const crudeInfoByPeriod = crudeInfoIndex('monthly'); const priorByRegion = new Map(); const out = []; Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:true}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, withDirectSecondaryUnitValues(aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'monthly'), rawBucket[regionKey])); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); adjustedMonthlyActualRowsCache = {rows:out,buckets:bucketRows(out),priorByRegion:new Map(priorByRegion)}; return adjustedMonthlyActualRowsCache; }
+    function adjustedMonthlyBalanceRows(){ const key = calcCacheKey('adjustedMonthlyBalanceRows'); if (adjustedMonthlyRowsCache.key === key && adjustedMonthlyRowsCache.rows) return adjustedMonthlyRowsCache.rows; const actualBaseline = adjustedMonthlyActualBaseline(); const rawBuckets = monthlyRawBuckets(); const crudeInfoByPeriod = crudeInfoIndex('monthly'); const priorByRegion = new Map(actualBaseline.priorByRegion); const out = actualBaseline.rows.slice(); Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (!Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:false}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseMonthlyPoint(rawPoint, rawBucket, crudeInfo, rawBuckets, crudeInfoByPeriod, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, withDirectSecondaryUnitValues(aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'monthly'), rawBucket[regionKey])); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); applyDaysForwardCover(out, 'monthly'); adjustedMonthlyRowsCache = {key,rows:out}; return out; }
     function weeklyForecastMonth(period){ return periodMonthValue(period); }
     function adjustedBaseWeeklyPoint(rawPoint, rawBucket, monthlyBucket, crudeInfo, priorPoint){
       const isActual = rawPoint.status === 'actual';
@@ -5200,7 +5341,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	    function finiteNumberOrNull(value){ const n = Number(value); return Number.isFinite(n) ? n : null; }
 	    function chartRowPeriodYear(row){ const period = String(row?.period || ''); return chartPeriodYear(period, period.length === 10 ? 'weekly' : 'monthly'); }
 	    function sortedChartRows(rows){ return (Array.isArray(rows) ? rows : []).filter(row => row && row.period && chartRowPeriodYear(row) >= MIN_CHART_HISTORY_YEAR).slice().sort((a,b)=>String(a.period).localeCompare(String(b.period))); }
-	    function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey); }
+	    function chartMetricMonthlyOnly(metricKey){ return SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }
+	    function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }
 	    function completedKplerPeriod(period, frequency=state.frequency){ const today = localDateText(); const key = String(period || '').slice(0, frequency === 'weekly' ? 10 : 7); if (!key) return false; return frequency === 'weekly' ? key < today : key < today.slice(0,7); }
 	    function kplerFlowForChartMetric(regionKey, metricKey){
 	      const maps = {
@@ -5249,7 +5391,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	      return finiteNumberOrNull(point[metricKey]);
 	    }
 	    function chartRowsForMetric(regionKey, metricKey, frequency=state.frequency, baseRows=null){
-	      const directKpler = chartMetricActualOnly(metricKey);
+	      if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return [];
+	      const directKpler = KPLER_CHART_METRICS.has(metricKey);
 	      const sourceRows = directKpler ? null : (Array.isArray(baseRows) ? baseRows : rowsForRegion(regionKey, frequency));
 	      const sourceSig = directKpler ? 'kpler:' + (D.kplerGuides?.[frequency === 'weekly' ? 'weekly' : 'monthly']?.length || 0) + ':' + localDateText() : 'base:' + sourceRows.length + ':' + (sourceRows.at(-1)?.period || '');
 	      const cacheKey = calcCacheKey('chartRowsForMetric', frequency, regionKey, metricKey, sourceSig);
@@ -5264,7 +5407,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	    }
 	    function chartMetricHasVisibleData(regionKey, metricKey, frequency=state.frequency){
 	      if (metricKey === 'padd3ShipmentsToPadd1Kbd' && regionKey !== 'padd3') return false;
-	      if (chartMetricActualOnly(metricKey) && !kplerFlowForChartMetric(regionKey, metricKey)) return false;
+	      if (KPLER_CHART_METRICS.has(metricKey) && !kplerFlowForChartMetric(regionKey, metricKey)) return false;
+	      if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return false;
 	      const rows = sortedChartRows(chartRowsForMetric(regionKey, metricKey, frequency));
 	      const values = rows.map(row => Number(row[metricKey])).filter(Number.isFinite);
 	      if (!values.length) return false;

@@ -1,7 +1,7 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-07-07T04:06:40.718Z",
+  "generatedAt": "2026-07-07T04:26:03.509Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-04-15",
@@ -74,12 +74,12 @@
     "refinery_unit_capacity": "45106a1e327bf4769a706679807fdaa2dd5fc4ab98a1168672268d4bcf58c5bf"
   },
   "optimization": {
-    "generatedAt": "2026-07-07T04:06:40.758Z",
+    "generatedAt": "2026-07-07T04:26:03.545Z",
     "runtimePlan": {
       "baseRows": 6232,
       "lazyRows": 22830,
       "lazyRowSharePct": 78.6,
-      "basePayloadKb": 1439.2,
+      "basePayloadKb": 1724.6,
       "weeklyPayloadKb": 2324.2,
       "crudeWeeklyPayloadKb": 1116.4,
       "referencePayloadKb": 150.2
@@ -155,7 +155,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 150.2 KB versus 1439.2 KB estimated base payload."
+        "detail": "Reference payload is 150.2 KB versus 1724.6 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",
