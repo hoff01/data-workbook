@@ -4,7 +4,7 @@ import { extname, join, normalize, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { createGzip } from "node:zlib";
 
-type UpdateGroup = "weekly" | "monthly" | "other" | "all";
+type UpdateGroup = "weekly" | "monthly" | "other" | "all" | "power-dfo";
 type JobStatus = "running" | "succeeded" | "failed";
 
 type Job = {
@@ -74,7 +74,7 @@ const PORT = Number(process.env.DASHBOARD_UPDATE_PORT || 8787);
 const SERVER_APP_ID = "balance-dashboard-update-server";
 const SERVER_STARTED_AT = new Date().toISOString();
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-const validGroups = new Set<UpdateGroup>(["weekly", "monthly", "other", "all"]);
+const validGroups = new Set<UpdateGroup>(["weekly", "monthly", "other", "all", "power-dfo"]);
 const maxLines = 600;
 const settingsPath = join(ROOT, "balance_dashboard_settings.json");
 
@@ -316,7 +316,7 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
       group = null;
     }
     if (!group) {
-      writeJson(response, 400, { error: "group must be weekly, monthly, other, or all" });
+      writeJson(response, 400, { error: "group must be weekly, monthly, other, all, or power-dfo" });
       return;
     }
     const alreadyRunning = currentJob?.status === "running";
@@ -422,4 +422,12 @@ server.on("error", (error: NodeJS.ErrnoException) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`Balance dashboard update server: http://${HOST}:${PORT}/`);
+  if (process.env.DASHBOARD_POWER_DFO_STARTUP_REFRESH !== "1") {
+    console.log("Power DFO startup refresh disabled; set DASHBOARD_POWER_DFO_STARTUP_REFRESH=1 to enable it.");
+    return;
+  }
+  setTimeout(() => {
+    const job = startJob("power-dfo");
+    appendJobLine(job, "stdout", "background startup refresh requested for power DFO daily/hourly data and dashboard rebuild");
+  }, 250);
 });

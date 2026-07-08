@@ -222,6 +222,40 @@ type KplerGuidePoint = {
   padd3ToPadd5Kbd: number | null;
 };
 
+type PowerDfoDailyPoint = {
+  date: string;
+  oilGenerationMwh: number;
+  estimatedDfoConsumptionKb: number;
+  estimatedDfoConsumptionKbd: number;
+  burnPercentile: number;
+};
+
+type PowerDfoWeatherDay = {
+  date: string;
+  avgTemperatureF: number | null;
+  hdd65: number | null;
+  cdd65: number | null;
+  source: string;
+  sourceLabel: string;
+  hourCount: number;
+  hddLastYear: number | null;
+  hddFiveYearAvg: number | null;
+  forecast: boolean;
+};
+
+type PowerDfoChartsBundle = {
+  available: boolean;
+  generatedAt: string;
+  latestDailyDate: string;
+  latestWeatherDate: string;
+  p80BurnKb: number;
+  p100BurnKb: number;
+  daily: PowerDfoDailyPoint[];
+  weatherDaily: PowerDfoWeatherDay[];
+  weatherBaselineNote: string;
+  note: string;
+};
+
 type DashboardOptimizationDiagnostics = {
   generatedAt: string;
   runtimePlan: {
@@ -231,6 +265,7 @@ type DashboardOptimizationDiagnostics = {
     basePayloadKb: number;
     weeklyPayloadKb: number;
     crudeWeeklyPayloadKb: number;
+    powerDfoPayloadKb: number;
     referencePayloadKb: number;
   };
   rowCounts: {
@@ -246,6 +281,8 @@ type DashboardOptimizationDiagnostics = {
     sourceHubSources: number;
     refineryCapacityRows: number;
     kplerRows: number;
+    powerDfoDailyRows: number;
+    powerDfoWeatherRows: number;
   };
   lazyChunks: Array<{
     name: RuntimeLazyChunkName;
@@ -343,6 +380,7 @@ type DashboardBundle = {
     monthly: KplerGuidePoint[];
     weekly: KplerGuidePoint[];
   };
+  powerDfoCharts: PowerDfoChartsBundle;
   sourceHub: {
     sources: Array<{
       key: string;
@@ -389,7 +427,7 @@ type DashboardBundle = {
   };
 };
 
-type RuntimeLazyChunkName = "weekly" | "crudeWeekly" | "reference";
+type RuntimeLazyChunkName = "weekly" | "crudeWeekly" | "powerDfo" | "reference";
 
 type RuntimeBaseBundle = {
   product: DashboardBundle["product"];
@@ -425,6 +463,10 @@ type RuntimeCrudeWeeklyChunk = {
   crudeRuns: {
     weekly: Array<Omit<CrudeRunsPoint, "regionName">>;
   };
+};
+
+type RuntimePowerDfoChunk = {
+  powerDfoCharts: PowerDfoChartsBundle;
 };
 
 type RuntimeReferenceChunk = {
@@ -900,6 +942,7 @@ function runtimeDataPaths(productKey: ProductKey): Record<"base" | RuntimeLazyCh
     base: `data/${productKey}_balance_runtime_base.js`,
     weekly: `data/${productKey}_balance_runtime_weekly.js`,
     crudeWeekly: `data/${productKey}_balance_runtime_crude_weekly.js`,
+    powerDfo: `data/${productKey}_balance_runtime_power_dfo.js`,
     reference: `data/${productKey}_balance_runtime_reference.js`,
   };
 }
@@ -966,6 +1009,12 @@ function runtimeCrudeWeeklyChunk(bundle: DashboardBundle): RuntimeCrudeWeeklyChu
   };
 }
 
+function runtimePowerDfoChunk(bundle: DashboardBundle): RuntimePowerDfoChunk {
+  return {
+    powerDfoCharts: bundle.powerDfoCharts,
+  };
+}
+
 function runtimeReferenceChunk(bundle: DashboardBundle): RuntimeReferenceChunk {
   return {
     sourceHub: bundle.sourceHub,
@@ -981,7 +1030,7 @@ function runtimeBaseScript(bundle: DashboardBundle): string {
   const version = encodeURIComponent(bundle.generatedAt);
   return [
     `window.BALANCE_DATA = ${scriptPayload(runtimeBaseBundle(bundle))};`,
-    `window.BALANCE_LAZY_FILES = ${scriptPayload({ weekly: `${lazyFiles.weekly}?v=${version}`, crudeWeekly: `${lazyFiles.crudeWeekly}?v=${version}`, reference: `${lazyFiles.reference}?v=${version}` })};`,
+    `window.BALANCE_LAZY_FILES = ${scriptPayload({ weekly: `${lazyFiles.weekly}?v=${version}`, crudeWeekly: `${lazyFiles.crudeWeekly}?v=${version}`, powerDfo: `${lazyFiles.powerDfo}?v=${version}`, reference: `${lazyFiles.reference}?v=${version}` })};`,
     "window.__BALANCE_CHUNKS__ = window.__BALANCE_CHUNKS__ || {};",
     "",
   ].join("\n");
@@ -989,7 +1038,7 @@ function runtimeBaseScript(bundle: DashboardBundle): string {
 
 function runtimeChunkScript(
   chunkName: RuntimeLazyChunkName,
-  payload: RuntimeWeeklyChunk | RuntimeCrudeWeeklyChunk | RuntimeReferenceChunk,
+  payload: RuntimeWeeklyChunk | RuntimeCrudeWeeklyChunk | RuntimePowerDfoChunk | RuntimeReferenceChunk,
 ): string {
   return `(window.__BALANCE_CHUNKS__ = window.__BALANCE_CHUNKS__ || {}).${chunkName} = ${scriptPayload(payload)};\n`;
 }
@@ -1015,15 +1064,19 @@ function buildOptimizationDiagnostics(bundle: DashboardBundle): DashboardOptimiz
     sourceHubSources: bundle.sourceHub.sources.length,
     refineryCapacityRows: bundle.refineryCapacity.rows.length,
     kplerRows: bundle.kpler.rows,
+    powerDfoDailyRows: bundle.powerDfoCharts.daily.length,
+    powerDfoWeatherRows: bundle.powerDfoCharts.weatherDaily.length,
   };
   const baseRows = rowCounts.monthlyRegional + rowCounts.monthlyCrude + rowCounts.weeklyGuideMonthly + rowCounts.monthlyMovementFlowRows;
   const weeklyRows = rowCounts.weeklyRegional + rowCounts.weeklyMovementFlowRows;
+  const powerDfoRows = rowCounts.powerDfoDailyRows + rowCounts.powerDfoWeatherRows;
   const referenceRows = rowCounts.sourceFiles + rowCounts.sourceHubSources + rowCounts.refineryCapacityRows + rowCounts.kplerRows;
-  const lazyRows = weeklyRows + rowCounts.weeklyCrude + referenceRows;
+  const lazyRows = weeklyRows + rowCounts.weeklyCrude + powerDfoRows + referenceRows;
   const totalRows = Math.max(baseRows + lazyRows, 1);
   const basePayloadKb = payloadKb(runtimeBaseBundle({ ...bundle, optimization: undefined }));
   const weeklyPayloadKb = payloadKb(runtimeWeeklyChunk(bundle));
   const crudeWeeklyPayloadKb = payloadKb(runtimeCrudeWeeklyChunk(bundle));
+  const powerDfoPayloadKb = payloadKb(runtimePowerDfoChunk(bundle));
   const referencePayloadKb = payloadKb(runtimeReferenceChunk(bundle));
   const lazyChunks: DashboardOptimizationDiagnostics["lazyChunks"] = [
     {
@@ -1041,6 +1094,14 @@ function buildOptimizationDiagnostics(bundle: DashboardBundle): DashboardOptimiz
       estimatedKb: crudeWeeklyPayloadKb,
       status: rowCounts.weeklyCrude > 0 ? "optimized" : "watch",
       reason: "Weekly crude-runs rows load when weekly balance, charts, or the Crude runs sheet needs shared crude context.",
+    },
+    {
+      name: "powerDfo",
+      path: runtimePaths.powerDfo,
+      rows: powerDfoRows,
+      estimatedKb: powerDfoPayloadKb,
+      status: bundle.product.key === "diesel" && powerDfoRows > 0 ? "optimized" : "watch",
+      reason: "Northeast power-generation, distillate-burn, and PADD 1 HDD chart data load only for the Diesel Northeast Charts section.",
     },
     {
       name: "reference",
@@ -1101,6 +1162,7 @@ function buildOptimizationDiagnostics(bundle: DashboardBundle): DashboardOptimiz
       basePayloadKb,
       weeklyPayloadKb,
       crudeWeeklyPayloadKb,
+      powerDfoPayloadKb,
       referencePayloadKb,
     },
     rowCounts,
@@ -2991,6 +3053,140 @@ function latestByDate(rows: CsvRow[], column: string): CsvRow | undefined {
   return rows.filter((row) => row[column]).sort((a, b) => a[column].localeCompare(b[column])).at(-1);
 }
 
+function nullableNum(value: string | undefined): number | null {
+  if (value === undefined || value === null) return null;
+  const cleaned = String(value).replaceAll(",", "").trim();
+  if (!cleaned || cleaned === "NA" || cleaned === "--") return null;
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function percentileValue(sortedValues: number[], percentile: number): number {
+  if (sortedValues.length === 0) return 0;
+  const clamped = Math.max(0, Math.min(1, percentile));
+  const index = (sortedValues.length - 1) * clamped;
+  const lower = Math.floor(index);
+  const upper = Math.ceil(index);
+  if (lower === upper) return sortedValues[lower];
+  const weight = index - lower;
+  return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
+}
+
+function percentileRank(sortedValues: number[], value: number): number {
+  if (!sortedValues.length || !Number.isFinite(value)) return 0;
+  let count = 0;
+  while (count < sortedValues.length && sortedValues[count] <= value) count += 1;
+  return round((count / sortedValues.length) * 100, 1);
+}
+
+function emptyPowerDfoCharts(note: string): PowerDfoChartsBundle {
+  return {
+    available: false,
+    generatedAt: "",
+    latestDailyDate: "",
+    latestWeatherDate: "",
+    p80BurnKb: 0,
+    p100BurnKb: 0,
+    daily: [],
+    weatherDaily: [],
+    weatherBaselineNote: "Historical PADD 1 HDD baseline rows are not packaged in the current power_generation_dfo outputs.",
+    note,
+  };
+}
+
+function buildPowerDfoCharts(config: ProductConfig): PowerDfoChartsBundle {
+  if (config.key !== "diesel") {
+    return emptyPowerDfoCharts("Power-generation and distillate-burn charts are only shown in the Diesel Northeast Charts section.");
+  }
+  const dailyRows = rowsForOptionalCsv("power_generation_dfo/estimated_daily_dfo.csv")
+    .filter((row) => /^\d{4}-\d{2}-\d{2}$/.test(row.date || ""))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const weatherRows = rowsForOptionalCsv("power_generation_dfo/weather_14d_padd1_cities.csv")
+    .filter((row) => /^\d{4}-\d{2}-\d{2}T\d{2}$/.test(row.period || ""));
+  if (!dailyRows.length && !weatherRows.length) {
+    return emptyPowerDfoCharts("No power_generation_dfo daily estimate or weather rows are available in this workspace.");
+  }
+  const manifest = jsonFile<{ generated_at?: string }>("power_generation_dfo/manifest.json", {});
+  const forecastManifest = jsonFile<{ generated_at?: string }>("power_generation_dfo/hourly_forecast_manifest.json", {});
+  const generatedAt = forecastManifest.generated_at ?? manifest.generated_at ?? "";
+  const generatedDate = generatedAt.slice(0, 10);
+  const burnValues = dailyRows
+    .map((row) => nullableNum(row.estimated_dfo_consumption))
+    .filter((value): value is number => value !== null)
+    .map((value) => value / 1000)
+    .sort((a, b) => a - b);
+  const daily: PowerDfoDailyPoint[] = dailyRows.map((row) => {
+    const burnKb = (nullableNum(row.estimated_dfo_consumption) ?? 0) / 1000;
+    return {
+      date: row.date,
+      oilGenerationMwh: round(nullableNum(row.padd1_ne_oil_mwh) ?? 0, 1),
+      estimatedDfoConsumptionKb: round(burnKb, 1),
+      estimatedDfoConsumptionKbd: round(burnKb, 1),
+      burnPercentile: percentileRank(burnValues, burnKb),
+    };
+  });
+
+  const weatherBuckets = new Map<string, {
+    date: string;
+    source: string;
+    temp: number[];
+    hdd: number[];
+    cdd: number[];
+  }>();
+  weatherRows.forEach((row) => {
+    const date = row.period.slice(0, 10);
+    const source = String(row.source || "unknown");
+    const bucketKey = `${date}\u0000${source}`;
+    let bucket = weatherBuckets.get(bucketKey);
+    if (!bucket) {
+      bucket = { date, source, temp: [], hdd: [], cdd: [] };
+      weatherBuckets.set(bucketKey, bucket);
+    }
+    const temp = nullableNum(row.avg_temperature_f);
+    const hdd = nullableNum(row.hdd_65);
+    const cdd = nullableNum(row.cdd_65);
+    if (temp !== null) bucket.temp.push(temp);
+    if (hdd !== null) bucket.hdd.push(hdd);
+    if (cdd !== null) bucket.cdd.push(cdd);
+  });
+  const avgOrNull = (values: number[]): number | null => values.length ? round(average(values), 2) : null;
+  const weatherSourceLabel = (source: string): string => {
+    if (source === "nws_hourly") return "NWS hourly";
+    if (source === "extended_from_nws_hourly_profile") return "Extended profile";
+    if (source.startsWith("nearest_")) return `Nearest ${source.slice("nearest_".length).replaceAll("_", " ")}`;
+    return source.replaceAll("_", " ");
+  };
+  const weatherDaily: PowerDfoWeatherDay[] = Array.from(weatherBuckets.entries())
+    .sort((a, b) => a[1].date.localeCompare(b[1].date) || a[1].source.localeCompare(b[1].source))
+    .map(([, bucket]) => ({
+      date: bucket.date,
+      avgTemperatureF: avgOrNull(bucket.temp),
+      hdd65: avgOrNull(bucket.hdd),
+      cdd65: avgOrNull(bucket.cdd),
+      source: bucket.source,
+      sourceLabel: weatherSourceLabel(bucket.source),
+      hourCount: bucket.temp.length || bucket.hdd.length || bucket.cdd.length,
+      hddLastYear: null,
+      hddFiveYearAvg: null,
+      forecast: generatedDate ? bucket.date > generatedDate : true,
+    }));
+
+  const latestDailyDate = daily.at(-1)?.date ?? "";
+  const latestWeatherDate = weatherDaily.at(-1)?.date ?? "";
+  return {
+    available: daily.length > 0 || weatherDaily.length > 0,
+    generatedAt,
+    latestDailyDate,
+    latestWeatherDate,
+    p80BurnKb: round(percentileValue(burnValues, 0.8), 1),
+    p100BurnKb: round(burnValues.at(-1) ?? 0, 1),
+    daily,
+    weatherDaily,
+    weatherBaselineNote: "Historical PADD 1 HDD baseline rows are not packaged in the current power_generation_dfo outputs, so last-year and five-year HDD comparison slots render as unavailable.",
+    note: "PADD 1 Northeast power-sector DFO burn estimate from EIA facility-fuel calibration and MIDA + NE oil-generation data. Daily burn history uses the full packaged file; weather rows render the available 14-day PADD 1 city-basket horizon by forecast source.",
+  };
+}
+
 function buildPowerDfoContext(config: ProductConfig): DashboardBundle["sourceHub"]["context"]["powerDfo"] {
   if (config.key !== "diesel") {
     return {
@@ -3008,7 +3204,7 @@ function buildPowerDfoContext(config: ProductConfig): DashboardBundle["sourceHub
       note: "Power-generation DFO context is only wired into the diesel workbook.",
     };
   }
-  const dailyRows = rowsForOptionalCsv("power_generation_dfo/estimated_daily_dfo_2026.csv");
+  const dailyRows = rowsForOptionalCsv("power_generation_dfo/estimated_daily_dfo.csv");
   const forecastRows = rowsForOptionalCsv("power_generation_dfo/dfo_generation_forecast_24h.csv");
   const weatherRows = rowsForOptionalCsv("power_generation_dfo/weather_14d_padd1_cities.csv");
   const manifest = jsonFile<{
@@ -3124,7 +3320,7 @@ function buildSourceHub(config: ProductConfig, bundleLike: {
       status: powerDfo.available ? "active" : "candidate",
       latest: powerDfo.latestDate || powerDfo.generatedAt || "not packaged",
       coverage: "PADD 1 MIDA + NE oil generation, weather, 24h forecast",
-      rows: rowsForOptionalCsv("power_generation_dfo/estimated_daily_dfo_2026.csv").length,
+      rows: rowsForOptionalCsv("power_generation_dfo/estimated_daily_dfo.csv").length + rowsForOptionalCsv("power_generation_dfo/weather_14d_padd1_cities.csv").length + rowsForOptionalCsv("power_generation_dfo/dfo_generation_forecast_24h.csv").length,
       url: "https://www.eia.gov/opendata/index.php",
       note: powerDfo.note,
     },
@@ -3206,6 +3402,16 @@ function writeSourceCopies(config: ProductConfig, bundle: DashboardBundle): void
       ["padd_1/prime_supplier_raw.csv", join(root, "padd_1", "prime_supplier_raw.csv")],
       ["padd_1/manifest.json", join(root, "padd_1", "manifest.json")],
     );
+    [
+      "power_generation_dfo/estimated_daily_dfo.csv",
+      "power_generation_dfo/daily_padd1_ne_oil_generation.csv",
+      "power_generation_dfo/dfo_generation_forecast_24h.csv",
+      "power_generation_dfo/weather_14d_padd1_cities.csv",
+      "power_generation_dfo/manifest.json",
+      "power_generation_dfo/hourly_forecast_manifest.json",
+    ].forEach((path) => {
+      if (fileExists(path)) copies.push([path, join(root, "power_generation_dfo", basename(path))]);
+    });
   }
   if (fileExists(REFINERY_CAPACITY_PATH)) {
     copies.push([REFINERY_CAPACITY_PATH, join(root, "data", basename(REFINERY_CAPACITY_PATH))]);
@@ -3231,6 +3437,7 @@ function writeSourceCopies(config: ProductConfig, bundle: DashboardBundle): void
   writeFileSync(join(root, runtimePaths.base), runtimeBaseScript(bundle));
   writeFileSync(join(root, runtimePaths.weekly), runtimeChunkScript("weekly", runtimeWeeklyChunk(bundle)));
   writeFileSync(join(root, runtimePaths.crudeWeekly), runtimeChunkScript("crudeWeekly", runtimeCrudeWeeklyChunk(bundle)));
+  writeFileSync(join(root, runtimePaths.powerDfo), runtimeChunkScript("powerDfo", runtimePowerDfoChunk(bundle)));
   writeFileSync(join(root, runtimePaths.reference), runtimeChunkScript("reference", runtimeReferenceChunk(bundle)));
   writeFileSync(join(root, "padd_1", `${config.key}_padd1_summary.csv`), toCsv(bundle.padd1.rows));
   writeFileSync(join(root, "manifest.json"), JSON.stringify({
@@ -3724,8 +3931,9 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     .chartGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding:6px 0 0;position:sticky;left:18px;width:calc(100vw - 36px);max-width:1584px;z-index:1;will-change:transform}#chartControls{grid-template-columns:205px minmax(240px,340px) minmax(280px,1fr)}.chartRegionHeading{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;margin:16px 0 -2px;padding:8px 11px;border-left:8px solid var(--group,#4b5563);border-top:1px solid #cfd7e3;border-bottom:1px solid #dce3ee;background:linear-gradient(90deg,var(--softBand,#f8fafc),rgba(255,255,255,.78));color:#1f2937}.chartRegionHeading:first-child{margin-top:0}.chartRegionHeading span{display:block;color:#566174;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}.chartRegionHeading strong{display:block;font-size:13px;line-height:1.15;font-weight:900}.chartRegionHeading i{font-style:normal;color:#667085;font-size:10px;font-weight:850;white-space:nowrap}.crudeViewportLock{position:relative;width:calc(100vw - 36px);max-width:1584px;z-index:29;will-change:transform}.crudeStickyControls{position:sticky;top:0;z-index:31;background:var(--bg);padding:0 0 10px;margin:0 0 10px;box-shadow:0 8px 18px rgba(15,23,42,.06)}.crudeActiveRegionHeader{position:fixed;display:none;z-index:34;pointer-events:auto;overflow:hidden;border-bottom:4px solid #4b5563;background:linear-gradient(90deg,var(--group,#d8b400),var(--group2,#e9c900));color:var(--groupText,#fff);box-shadow:0 10px 18px rgba(15,23,42,.16)}.crudeActiveRegionHeader.visible{display:block}.crudeActiveRegionHeader .groupInner{min-height:42px}.chartCard{position:relative;background:#fff;border:1px solid #d7dee8;border-radius:10px;box-shadow:0 2px 8px rgba(15,23,42,.08);min-width:0;overflow:hidden;padding:0 10px 12px}.chartCard.scenarioAdjustable:after{content:"";position:absolute;right:0;bottom:0;border-style:solid;border-width:0 0 35px 35px;border-color:transparent transparent #c4372f transparent;pointer-events:none}.chartCard.scenarioAdjustable:before{content:"";position:absolute;right:7px;bottom:7px;width:6px;height:6px;border-radius:50%;background:#fff;z-index:2;pointer-events:none}.chartScenarioLaunch{position:absolute;right:0;bottom:0;width:42px;height:42px;border:0;background:transparent;border-radius:0 0 10px 0;z-index:3;padding:0}.chartScenarioLaunch:focus-visible{outline:2px solid #fff;outline-offset:-4px}.chartCard.zoomed{grid-column:1 / -1}.cardTools{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 0 7px;border-bottom:1px solid #d9dee7}.toolGroup{display:flex;gap:6px;flex-wrap:wrap}.toolBtn{border:1px solid #dce2ec;background:#fbfcfe;border-radius:999px;padding:4px 9px;font-size:10px;font-weight:820;color:#2c3748;box-shadow:0 1px 2px rgba(15,23,42,.05)}.chartTitle{font-size:17px;line-height:1.15;text-align:center;margin:5px 8px 4px;font-weight:820;color:#202838;min-height:39px;display:flex;align-items:center;justify-content:center}.chartSummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 3px 8px}.chartSummaryItem{min-width:0;border:1px solid #e0e6ef;background:#f8fafc;border-radius:7px;padding:6px 7px;text-align:center}.chartSummaryItem span{display:block;color:#667085;font-size:9px;font-weight:850;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chartSummaryItem b{display:block;color:#111827;font-size:12px;line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chartSummaryItem i{display:block;color:#667085;font-size:9px;font-style:normal;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chartSummaryItem.positive b{color:#14764d}.chartSummaryItem.negative b{color:#b42318}.seasonChart{width:100%;height:278px;display:block}.chartCard.zoomed .seasonChart{height:430px}.chartNotice{display:flex;align-items:center;justify-content:center;min-height:118px;padding:22px 14px;color:#667085;font-size:12px;text-align:center;line-height:1.45}.legend{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;color:#3f4d61;font-size:10px;padding:0 14px 8px}.swatch{width:24px;height:3px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}.swatch.dashed{background:repeating-linear-gradient(90deg,currentColor 0 7px,transparent 7px 12px)}.swatch.band{height:8px;background:#d7d9d2}.seasonBand{paint-order:stroke fill}.miniWrap{display:none;overflow:auto;max-height:230px;border-top:1px solid var(--grid)}.chartCard.zoomed .miniWrap{display:block}.miniTable{border-collapse:collapse;width:100%;font-size:10px;white-space:nowrap}.miniTable th,.miniTable td{border-bottom:1px solid var(--grid-soft);padding:5px 6px;text-align:right}.miniTable th:first-child,.miniTable td:first-child{text-align:left;position:sticky;left:0;background:#fff}.miniTable th{background:#f8fafc;color:#566174;text-transform:uppercase}.chartTooltip{position:absolute;z-index:10;display:none;min-width:190px;max-width:260px;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;background:rgba(255,255,255,.96);box-shadow:0 14px 30px rgba(15,23,42,.16);font-size:11px;color:#1f2937;pointer-events:none}.chartTooltip b{display:block;font-size:12px;margin-bottom:4px}.chartTooltip div{display:flex;justify-content:space-between;align-items:center;gap:14px}.chartTooltip span{display:inline-flex;align-items:center;gap:6px;min-width:0}.chartTooltip span i{display:inline-block;width:10px;height:10px;border-radius:999px;flex:0 0 auto}.chartTooltip strong{white-space:nowrap}.chartTooltip em{display:block;margin-top:5px;color:#667085;font-size:10px;font-style:normal}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;border-radius:8px;padding:9px 12px;font-size:12px;box-shadow:0 14px 34px rgba(0,0,0,.24);opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s ease}.toast.show{opacity:1;transform:translateY(0)}
     .swatch.band{background:var(--band)}
     .chartZoomModal{position:fixed;inset:0;z-index:80;background:rgba(15,23,42,.58);display:grid;place-items:center;padding:22px}.chartZoomModal[hidden]{display:none!important}.chartZoomPanel{width:min(1280px,calc(100vw - 44px));max-height:calc(100vh - 44px);overflow:auto;background:#fff;border:1px solid #cfd7e3;border-radius:10px;box-shadow:0 26px 70px rgba(15,23,42,.35);padding:0 12px 14px}.chartZoomCard{border:0;box-shadow:none;padding:0;overflow:visible}.chartZoomCard .seasonChart{height:min(62vh,620px)}.chartZoomCard .miniWrap{display:block;max-height:260px}.chartZoomClose{border:1px solid #cbd5e1;background:#fff;border-radius:999px;width:30px;height:30px;font-size:18px;font-weight:900;line-height:1;color:#1f2937}
+    .northeastPowerSection{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:20px;padding-top:4px}.northeastPowerSection>.chartRegionHeading,.northeastPowerSection>.powerDfoControls,.northeastPowerSection>.northeastOpsLoading{grid-column:1/-1}.powerDfoControls{display:grid;grid-template-columns:minmax(210px,260px) minmax(0,1fr);gap:12px;align-items:end;background:#fff;border:1px solid #d7dee8;border-radius:8px;padding:12px;box-shadow:0 2px 8px rgba(15,23,42,.05)}.powerDfoControls label,.powerZoomField{display:grid;gap:5px;color:#566174;font-size:10px;font-weight:850;text-transform:uppercase}.powerDfoControls .small{align-self:center}.northeastOpsCard{min-height:424px}.powerDfoChart{height:276px}.burnCalendar{padding:0 4px 12px}.burnCalendarGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.burnDay{min-width:0;border:1px solid #e2e8f0;border-radius:8px;padding:8px 6px;text-align:center;box-shadow:0 1px 2px rgba(15,23,42,.05)}.burnDay span{display:block;font-size:10px;font-weight:850}.burnDay b{display:block;font-size:14px;line-height:1.2;margin-top:3px}.burnDay i{display:block;font-size:10px;font-style:normal;margin-top:1px}.burnDay.highBurn{font-weight:900}.burnLegend{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;color:#667085;font-size:10px;margin-top:10px}.legendRamp{width:78px;height:9px;border-radius:999px;border:1px solid #e2e8f0;background:linear-gradient(90deg,#fff,#f3b2ad,#b42318)}.powerDfoNote{padding:0 12px 10px;color:#667085;font-size:11px;line-height:1.4;text-align:center}.powerZoomField{min-width:160px}.chartZoomCard .powerDfoChart{height:min(62vh,620px)}
     .scenarioTool{background:#fff7ed;border-color:#fdba74;color:#9a3412}.scenarioPresetRow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}.scenarioPresetBtn{border:1px solid #d7dee8;background:#fff;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:850;color:#344054}.scenarioPresetBtn.active{background:#1d4ed8;border-color:#1d4ed8;color:#fff}.scenarioImpactGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}.scenarioImpactCard{min-width:0;border:1px solid #e0e6ef;background:#fbfcfe;border-radius:8px;padding:9px 10px}.scenarioImpactCard span{display:block;color:#667085;font-size:9px;font-weight:850;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scenarioImpactCard b{display:block;color:#111827;font-size:15px;line-height:1.2;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scenarioImpactCard i{display:block;color:#667085;font-size:10px;font-style:normal;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scenarioImpactCard.positive b{color:#14764d}.scenarioImpactCard.negative b{color:#b42318}.scenarioAdjustmentList{display:grid;gap:7px;margin:12px 0}.scenarioAdjustmentRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid #dce3ee;border-radius:8px;background:#f8fafc;padding:8px 9px}.scenarioAdjustmentRow strong{display:block;font-size:12px;line-height:1.25;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.scenarioAdjustmentRow span{display:block;font-size:10px;color:#667085;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.scenarioAdjustmentEmpty{border:1px dashed #cfd7e3;border-radius:8px;padding:10px;color:#667085;font-size:12px;text-align:center;background:#f8fafc}
-    @media(max-width:1220px){.options,.controlbar{grid-template-columns:1fr 1fr}.balanceToolbar{grid-template-columns:1fr}.chartGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.latestGrid{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){#chartControls{grid-template-columns:1fr}.shell{padding:12px}.topbar,.sheetHead,.statusline{flex-direction:column;align-items:flex-start}.options,.controlbar,.chartGrid{grid-template-columns:1fr}.chartGrid{left:12px;width:calc(100vw - 24px)}.topbar,.crudeViewportLock{width:calc(100vw - 24px)}.actions{justify-content:flex-start}.select{width:100%;min-width:0}.latestGrid{grid-template-columns:1fr 1fr}.seasonChart{height:250px}.tablewrap{max-height:58vh}.groupInner{grid-template-columns:1fr auto}.groupCode,.groupMeta{display:none}}@media(max-width:460px){.latestGrid{grid-template-columns:1fr}.btn,.chip,.toggle{font-size:11px;padding:7px 9px}}
+    @media(max-width:1220px){.options,.controlbar{grid-template-columns:1fr 1fr}.balanceToolbar{grid-template-columns:1fr}.chartGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.northeastPowerSection{grid-template-columns:repeat(2,minmax(0,1fr))}.hddCard{grid-column:1/-1}.latestGrid{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){#chartControls{grid-template-columns:1fr}.shell{padding:12px}.topbar,.sheetHead,.statusline{flex-direction:column;align-items:flex-start}.options,.controlbar,.chartGrid,.northeastPowerSection{grid-template-columns:1fr}.powerDfoControls{grid-template-columns:1fr}.burnCalendarGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.chartGrid{left:12px;width:calc(100vw - 24px)}.topbar,.crudeViewportLock{width:calc(100vw - 24px)}.actions{justify-content:flex-start}.select{width:100%;min-width:0}.latestGrid{grid-template-columns:1fr 1fr}.seasonChart{height:250px}.tablewrap{max-height:58vh}.groupInner{grid-template-columns:1fr auto}.groupCode,.groupMeta{display:none}}@media(max-width:460px){.latestGrid{grid-template-columns:1fr}.btn,.chip,.toggle{font-size:11px;padding:7px 9px}}
     .btn,.chip,.toggle,.toolBtn,.groupBtn,.groupChartBtn,.headerBtn{white-space:nowrap}.topbar>*{min-width:0}.title{min-width:min(100%,560px)}.actions{min-width:0}.controlbar .small{max-height:none;overflow:visible}.sheetHead>div{min-width:0}.workbookHeaderActions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.headerBtn{border:1px solid #cfd7e3;background:#fff;color:#294f88;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:840;min-height:28px}.groupInner{grid-template-columns:auto minmax(0,1fr) auto auto}.groupInner>div{min-width:0;display:flex;align-items:baseline;gap:8px;overflow:hidden}.groupActions{display:flex!important;align-items:center!important;justify-content:flex-end;gap:8px!important;overflow:visible!important;flex:0 0 auto}.groupCode{flex:0 0 auto}.groupName{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cardTools{align-items:center}.chartTitle{padding:0 8px}.seasonChart text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.chartTooltip{min-width:min(190px,calc(100% - 20px));max-width:min(260px,calc(100% - 20px))}
     .marketMonitor{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 12px}.monitorCard{min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:11px 12px}.monitorCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.monitorCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.monitorCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.monitorCard.positive b{color:#14764d}.monitorCard.negative b{color:#b42318}.viewPresetGrid{display:grid;gap:8px;margin-top:8px}.viewPresetActions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.viewPresetActions .btn{padding:6px 7px;min-height:30px}.quickActionGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.quickActionGrid .btn{width:100%;min-height:34px}.quickActionGrid .btn.full{min-height:34px}.contextPulse{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin:0 0 12px}.signalGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.signalCard{min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 11px}.signalCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.signalCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px}.signalCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:2px}.sourceRibbon{display:flex;gap:8px;flex-wrap:wrap}.sourceBadge{display:inline-flex;align-items:center;gap:6px;border:1px solid #d7dfeb;background:#f8fafc;border-radius:999px;padding:6px 8px;font-size:11px;font-weight:800;color:#2f3b4f}.sourceDot{width:8px;height:8px;border-radius:50%;background:#94a3b8}.sourceDot.active,.sourceDot.packaged{background:#16a34a}.sourceDot.dry_run{background:#d97706}.sourceDot.candidate{background:#2563eb}.sourceGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.sourceCard{min-width:0;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:12px}.sourceCard h3{margin:0;font-size:15px;line-height:1.2}.sourceMeta{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.sourceStatus{border-radius:999px;padding:3px 7px;font-size:10px;font-weight:850;text-transform:uppercase;background:#eef6ff;color:#294f88}.sourceStatus.active,.sourceStatus.packaged{background:#eaf8ef;color:#137047}.sourceStatus.dry_run{background:#fff6df;color:#976100}.sourceStatus.candidate{background:#edf3ff;color:#2452a6}.sourceCard dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 10px;margin:9px 0 0;font-size:12px}.sourceCard dt{color:#667085;font-weight:800}.sourceCard dd{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis}.sourceCard p{font-size:12px;color:#566174;line-height:1.45;margin:9px 0 0}.sourceLink{font-size:11px;color:#1d4ed8;text-decoration:none;font-weight:800;word-break:break-word}.contextTableWrap{overflow:auto;border:1px solid #e1e7f0;border-radius:8px;background:#fff}.contextTable{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}.contextTable th,.contextTable td{border-bottom:1px solid #edf1f6;padding:7px 8px;text-align:right}.contextTable th:first-child,.contextTable td:first-child{text-align:left}.contextTable th{background:#f8fafc;color:#566174;text-transform:uppercase;font-size:10px}.settingsPanel{margin:0 0 12px}.settingsGrid{display:grid;grid-template-columns:minmax(180px,230px) auto minmax(220px,1fr);gap:10px;align-items:end}.settingsInput{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:7px;padding:8px 10px;font-size:12px;font-weight:760;min-height:34px}.settingsStatus{font-size:12px;color:#566174;line-height:1.45}.settingsStatus b{color:#111827}.disclosurePanel{padding:0}.disclosureSummary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;cursor:pointer}.disclosureSummary::-webkit-details-marker{display:none}.disclosureSummary:after{content:'+';display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;border:1px solid #cfd7e3;color:#294f88;font-weight:900;flex:0 0 auto}.disclosurePanel[open] .disclosureSummary:after{content:'-'}.disclosureSummary .caption{margin-bottom:3px}.disclosureBody{border-top:1px solid #edf1f6}.updatePanel{margin:0 0 12px}.updateHeader{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.updateHeader h3{margin:0;font-size:18px;line-height:1.15}.updateButtons{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.updateButtons .btn[disabled]{opacity:.55;cursor:not-allowed}.updateSteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.updateStep{border:1px solid #dce3ee;border-radius:8px;background:#f8fafc;padding:9px}.updateStep b{display:block;font-size:12px}.updateStep span{display:block;color:#667085;font-size:11px;line-height:1.35;margin-top:3px}.updateLog{margin:10px 0 0;max-height:210px;overflow:auto;background:#101828;color:#e5edf8;border-radius:8px;padding:10px;font-size:11px;line-height:1.45;white-space:pre-wrap}.updateStatus.running{background:#fff6df;color:#976100}.updateStatus.succeeded{background:#eaf8ef;color:#137047}.updateStatus.failed,.updateStatus.unavailable{background:#fee4e2;color:#981b1b}.outageForm{margin:0 0 12px}.outageGrid{display:grid;grid-template-columns:minmax(130px,180px) minmax(240px,1.3fr) minmax(240px,1fr) repeat(3,minmax(130px,170px));gap:10px;align-items:end}.outageGrid label{display:grid;gap:5px}.outageGrid label.wide{grid-column:1/-1}.outageActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.outageTable{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}.outageTable th,.outageTable td{border-bottom:1px solid #edf1f6;padding:8px 9px;text-align:left;vertical-align:top}.outageTable th{background:#f8fafc;color:#566174;text-transform:uppercase;font-size:10px}.outageTable td.num{text-align:right}.outageNote{white-space:normal;min-width:210px;color:#566174}.typePill{display:inline-flex;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:850;text-transform:uppercase;background:#edf3ff;color:#244a87}.typePill.planned{background:#eaf8ef;color:#137047}.typePill.unplanned{background:#fee4e2;color:#981b1b}.typePill.other{background:#fff6df;color:#976100}.maintenanceRow td:not(:first-child){color:#b45309}.forecastCell{background:#fffdf4}.editableCell{cursor:text;box-shadow:inset 0 0 0 1px rgba(37,99,235,.18)}.manualCell{background:#dcfce7!important;color:#14532d!important;font-weight:900}.cellEditor{width:100%;border:1px solid #16a34a;border-radius:5px;background:#f0fdf4;color:#14532d;text-align:right;font:inherit;font-weight:850;padding:4px 6px}.adjustableTag{font-size:9px;color:#1d6b45;font-style:normal;font-weight:900;text-transform:uppercase;margin-left:5px}.adjustableRow td{font-weight:900}.operatingRow td{font-weight:840}.emptyRow td{text-align:center;color:#667085;padding:18px}.chartScenarioWorkbench{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:26px;background:rgba(15,23,42,.42)}.scenarioModalPanel{width:min(1180px,calc(100vw - 36px));max-height:min(88vh,920px);overflow:auto;background:#fff;border:1px solid #d7dee8;border-radius:14px;box-shadow:0 24px 64px rgba(15,23,42,.28);padding:18px 18px 16px}.scenarioModalHeader{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.scenarioModalHeader h3{margin:0;font-size:22px;line-height:1.1}.scenarioModalHeader p{margin:5px 0 0;color:#667085;font-size:12px;line-height:1.45;max-width:760px}.scenarioWorkbenchGrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:14px;align-items:start}.scenarioSummaryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 12px}.scenarioSummaryCard{background:#f8fafc;border:1px solid #d7dee8;border-radius:8px;padding:11px 12px}.scenarioSummaryCard span{display:block;color:#667085;font-size:10px;text-transform:uppercase;font-weight:850}.scenarioSummaryCard b{display:block;color:#111827;font-size:18px;line-height:1.2;margin-top:4px}.scenarioSummaryCard i{display:block;color:#667085;font-size:11px;font-style:normal;margin-top:3px}.scenarioSummaryCard.positive b{color:#14764d}.scenarioSummaryCard.negative b{color:#b42318}.scenarioDraftGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.scenarioDraftGrid label{display:grid;gap:5px}.scenarioDraftGrid label.wide{grid-column:1/-1}.scenarioReadOnly{display:flex;align-items:center;min-height:34px;padding:8px 10px;border:1px solid #d7dee8;border-radius:7px;background:#f8fafc;color:#1f2937;font-size:12px;font-weight:760}.scenarioRangeRow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.scenarioRangeRow output{font-size:12px;font-weight:850;color:#1f2937;white-space:nowrap}.scenarioHint{font-size:12px;color:#566174;line-height:1.45;margin-top:10px}.scenarioActions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.scenarioStatus{font-size:12px;color:#566174;line-height:1.45;min-height:18px}.scenarioList{display:grid;gap:8px}.scenarioListEmpty{border:1px dashed #cfd7e3;border-radius:8px;padding:16px;color:#667085;font-size:12px;text-align:center;background:#f8fafc}.scenarioRow{border:1px solid #dce3ee;border-radius:8px;padding:10px 11px;background:#fff}.scenarioRowTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.scenarioRowTop strong{display:block;font-size:13px;line-height:1.25}.scenarioRowTop span{display:block;color:#667085;font-size:11px;margin-top:2px}.scenarioRowMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.scenarioMetaPill{display:inline-flex;align-items:center;border-radius:999px;background:#f8fafc;border:1px solid #dce3ee;padding:4px 8px;font-size:10px;font-weight:820;color:#344054}.scenarioRowActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.scenarioCheck{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:760;color:#1f2937}.scenarioCheck input{margin:0}.scenarioDraftPill{display:inline-flex;align-items:center;border-radius:999px;background:#fff6df;color:#976100;padding:4px 8px;font-size:10px;font-weight:850}.scenarioScopeNote{font-size:11px;color:#667085;line-height:1.4;margin-top:8px}
 	    .outageForm .select,.outageForm .settingsInput,#capacityAdjustmentPanel .select,#capacityAdjustmentPanel .settingsInput{font-weight:620}
@@ -3756,6 +3964,10 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     .kplerGuideRow td:first-child{background:#fff7ed!important;color:#9a3412!important;border-left:8px solid #c56a3a}
     .kplerImportTotalGuideRow td,.kplerExportTotalGuideRow td{background:#eef1f5!important;color:#475467!important;font-style:normal;font-weight:840;border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1}
     .kplerImportTotalGuideRow td:first-child,.kplerExportTotalGuideRow td:first-child{background:#eef1f5!important;color:#344054!important;border-left:8px solid #8a96a8}
+    .offlineProductionGuideRow td{background:#fff7ed!important;color:#9a3412!important;font-style:italic;font-weight:820;border-top:1px solid #f4c9a4;border-bottom:1px solid #f4c9a4}
+    .offlineProductionGuideRow td:first-child{background:#fff7ed!important;color:#9a3412!important;border-left:8px solid #c56a3a}
+    .offlineProductionTotalGuideRow td{background:#eef1f5!important;color:#475467!important;font-style:normal;font-weight:840;border-top:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1}
+    .offlineProductionTotalGuideRow td:first-child{background:#eef1f5!important;color:#344054!important;border-left:8px solid #8a96a8}
     .importSourceRow td{background:#fff9d8!important;color:#1f2937;font-weight:900;border-top:1px solid #d9c476;border-bottom:1px solid #d9c476}
     .importSourceRow td:first-child{background:#fff9d8!important;border-left:8px solid var(--group);color:#1f2937!important}
     .importOverrideRow td{background:#dff3d7!important;color:#123818!important;border-top:1px solid #9cc891!important;border-bottom:1px solid #9cc891!important;font-weight:820}
@@ -3851,8 +4063,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     <section id="balanceSheet" class="sheet"><div class="sheetHead"><div><h2 id="balanceTitle">Monthly Balance</h2><p id="balanceSubtitle"></p></div><div class="workbookHeaderActions"><button class="headerBtn" id="expandGroupsBtn" type="button">Expand all</button><button class="headerBtn" id="collapseGroupsBtn" type="button">Collapse all</button><span class="pill">collapsible PADD groups</span></div></div><section class="marketMonitor" id="balanceMonitor" aria-label="Balance diagnostics"></section><div class="tablewrap" id="balanceTableWrap" tabindex="0" aria-label="Scrollable balance table"><table class="balanceMatrix" id="balanceTable"></table></div></section>
     <section id="chartsSheet" class="sheet" hidden><div class="sheetHead"><div><h2 id="chartsTitle">Monthly | U.S. Charts</h2><p>Cards match the reference layout: region-prefixed titles, shaded five-year range, dashed average, prior-year line, current-year actual/forecast path, hover values, zoom table, export, copy, and saved-forecast overlays.</p></div><span class="pill" id="chartCount">7 charts</span></div><div class="chartGrid" id="chartGrid"></div><section class="chartScenarioWorkbench" id="chartScenarioWorkbench" hidden></section></section>
     <section id="crudeRunsSheet" class="sheet" hidden><div class="sheetHead crudeViewportLock"><div><h2 id="crudeRunsTitle">Monthly | Crude Runs Forecast</h2><p>Forecast operable capacity carries forward from monthly EIA actuals, idle capacity is manual, and operating capacity equals operable less idle. Forecast crude runs equal operating capacity less planned Atmos offline and unplanned Atmos offline, with a 3-day linear post-outage ramp-down applied automatically.</p></div><span class="pill" id="crudeRunsCount">0 columns</span></div><div class="controlbar crudeStickyControls crudeViewportLock" id="crudeRunsControls"><div class="panel pad"><div class="caption">View</div><div class="seg"><button class="toggle active" data-frequency="monthly" type="button">Monthly</button><button class="toggle" data-frequency="weekly" type="button">Weekly</button></div></div><div class="panel pad"><div class="caption">Crude region</div><select id="crudeRegionSelect" class="select" aria-label="Crude runs region"></select></div><div class="panel pad"><div class="caption">Forecast end</div><div class="small" id="crudeLatestLine"></div></div><div class="panel pad"><div class="caption">Outage schedule</div><button class="btn primary full" id="openOutagesFromCrudeBtn" type="button">Add outage</button></div></div><div class="tablewrap" id="crudeRunsTableWrap" tabindex="0" aria-label="Full crude runs table"><table class="balanceMatrix" id="crudeRunsTable"></table></div><div class="crudeActiveRegionHeader" id="crudeActiveRegionHeader"></div><div class="chartGrid" id="crudeRunsChartGrid"></div></section>
-    <section id="outagesSheet" class="sheet" hidden><div class="sheetHead"><div><h2>Outages</h2><p>Saved outage entries are shared by Diesel and Jet crude runs. Select a real refinery and unit, then enter the offline capacity, dates, type, and note. Unplanned outages default to a one-week horizon from today, a 3-day linear ramp-down is added after each outage end date, and duplicate refinery/day entries are blocked into edit mode.</p></div><span class="pill" id="outageCount">0 entries</span></div><section class="outageForm panel pad" id="outageFormPanel"><div class="caption">Known outage entry</div><div class="outageGrid"><label><span class="small">Region</span><select id="outageRegion" class="select" aria-label="Outage region"></select></label><label><span class="small">Refinery</span><select id="outageRefinery" class="select" aria-label="Outage refinery"></select></label><label><span class="small">Unit</span><select id="outageUnit" class="select" aria-label="Outage unit"></select></label><label><span class="small">Capacity offline</span><input class="settingsInput" id="outageCapacity" type="number" min="0" step="0.1" placeholder="kbd"></label><label><span class="small">Start date</span><input class="settingsInput" id="outageStart" type="date"></label><label><span class="small">End date</span><input class="settingsInput" id="outageEnd" type="date"></label><label><span class="small">Type</span><select id="outageType" class="select" aria-label="Outage type"><option value="Planned">Planned</option><option value="Unplanned">Unplanned</option><option value="Other">Other</option></select></label><label class="wide"><span class="small">Note</span><input class="settingsInput" id="outageNote" type="text" placeholder="Optional note"></label></div><div class="outageActions"><button class="btn primary" id="addOutageBtn" type="button">Add outage</button><button class="btn" id="clearOutageFormBtn" type="button">Clear</button><span class="settingsStatus" id="outageFormStatus"></span></div></section><section class="panel pad"><div class="caption">Saved outages</div><div class="contextTableWrap"><table class="outageTable" id="outageTable"></table></div></section></section>
-    <section id="referenceSheet" class="sheet" hidden><div class="sheetHead"><div><h2>Reference</h2><p>External context, packaged input inventory, saved settings, and local refresh controls for this workbook.</p></div><span class="pill" id="sourceCount">0 sources</span></div><section class="settingsPanel panel pad" id="forecastSettingsPanel"><div class="caption">Saved workbook settings</div><div class="settingsGrid"><label><span class="small">Forecast end</span><input class="settingsInput" id="forecastEndInput" type="date" min="2026-01-01" max="2035-12-31"></label><button class="btn primary" id="saveForecastEndBtn" type="button">Save forecast end</button><div class="settingsStatus" id="forecastEndStatus"></div></div></section><section class="settingsPanel panel pad" id="assumptionLedger"></section><section class="settingsPanel panel pad" id="optimizationDiagnostics"></section><details class="settingsPanel panel disclosurePanel" id="capacityAdjustmentPanel"><summary class="disclosureSummary"><div><div class="caption">Crude capacity adjustments</div><p class="small">Minimized by default and shared by Diesel and Jet. PADD-level row overrides are entered directly in Crude runs cells; this panel remains for refinery-unit capacity changes that carry forward from the selected month.</p></div><span class="pill" id="capacityAdjustmentSummary">0 adjustments</span></summary><div class="pad disclosureBody"><div class="outageGrid"><label><span class="small">Region</span><select id="capacityAdjRegion" class="select" aria-label="Capacity adjustment region"></select></label><label><span class="small">Refinery</span><select id="capacityAdjRefinery" class="select" aria-label="Capacity adjustment refinery"></select></label><label><span class="small">Unit</span><select id="capacityAdjUnit" class="select" aria-label="Capacity adjustment unit"></select></label><label><span class="small">Effective from</span><input class="settingsInput" id="capacityAdjMonth" type="month" min="2025-01" max="2035-12"></label><label><span class="small">Value</span><input class="settingsInput" id="capacityAdjValue" type="number" min="0" step="0.1" placeholder="kbd"></label><label class="wide"><span class="small">Note</span><input class="settingsInput" id="capacityAdjNote" type="text" placeholder="Optional note"></label></div><div class="outageActions"><button class="btn primary" id="addCapacityAdjBtn" type="button">Add capacity adjustment</button><button class="btn" id="clearCapacityAdjBtn" type="button">Clear</button><span class="settingsStatus" id="capacityAdjStatus"></span></div><div class="contextTableWrap" style="margin-top:10px"><table class="outageTable" id="capacityAdjustmentTable"></table></div></div></details><section class="updatePanel panel pad" id="referenceUpdatePanel"><div class="updateHeader"><div><div class="caption">Dashboard updates</div><h3>Background refresh</h3></div><span class="pill updateStatus" id="updateStatusPill">Idle</span></div><div class="updateButtons"><button class="btn primary" data-update-group="weekly" type="button">Weekly</button><button class="btn primary" data-update-group="monthly" type="button">Monthly</button><button class="btn primary" data-update-group="other" type="button">Other</button><button class="btn" data-update-group="all" type="button">Complete</button></div><div class="updateSteps" id="updateSteps"></div><pre class="updateLog" id="updateLog">Local runner idle.</pre></section><section class="contextPulse" id="referencePulse"></section><div class="sourceGrid" id="sourceGrid"></div></section>
+    <section id="outagesSheet" class="sheet" hidden><div class="sheetHead"><div><h2>Outages</h2><p>Saved outage entries are shared by Diesel and Jet crude runs. Select a real refinery and unit, then enter the offline capacity, dates, type, and note. Unplanned outages default to a one-week horizon from today, a 3-day linear ramp-down is added after each outage end date, and duplicate refinery/day entries are blocked into edit mode.</p></div><span class="pill" id="outageCount">0 entries</span></div><section class="outageForm panel pad" id="outageFormPanel"><div class="caption">Known outage entry</div><div class="outageGrid"><label><span class="small">Region</span><select id="outageRegion" class="select" aria-label="Outage region"></select></label><label><span class="small">Refinery</span><select id="outageRefinery" class="select" aria-label="Outage refinery"></select></label><label><span class="small">Unit</span><select id="outageUnit" class="select" aria-label="Outage unit"></select></label><label><span class="small">Capacity offline</span><input class="settingsInput" id="outageCapacity" type="number" min="0" step="0.1" placeholder="kbd"></label><label><span class="small">Start date</span><input class="settingsInput" id="outageStart" type="date"></label><label><span class="small">End date</span><input class="settingsInput" id="outageEnd" type="date"></label><label><span class="small">Type</span><select id="outageType" class="select" aria-label="Outage type"><option value="Planned">Planned</option><option value="Unplanned">Unplanned</option><option value="Other">Other</option></select></label><label class="wide"><span class="small">Note</span><input class="settingsInput" id="outageNote" type="text" placeholder="Optional note"></label></div><div class="outageActions"><button class="btn primary" id="addOutageBtn" type="button">Add outage</button><button class="btn" id="clearOutageFormBtn" type="button">Clear</button><span class="settingsStatus" id="outageFormStatus"></span></div></section><section class="panel pad"><div class="caption">Saved outages</div><div class="contextTableWrap"><table class="outageTable" id="outageTable"></table></div></section><section class="panel pad"><div class="caption">Outage charts</div><div class="outageActions"><div class="seg"><button class="toggle active" data-frequency="monthly" type="button">Monthly</button><button class="toggle" data-frequency="weekly" type="button">Weekly</button></div><select id="outageChartRegion" class="select" aria-label="Outage chart region"></select><span class="pill" id="outageChartCount">0 charts</span></div></section><div class="chartGrid" id="outageChartGrid"></div></section>
+    <section id="referenceSheet" class="sheet" hidden><div class="sheetHead"><div><h2>Reference</h2><p>External context, packaged input inventory, saved settings, and local refresh controls for this workbook.</p></div><span class="pill" id="sourceCount">0 sources</span></div><section class="settingsPanel panel pad" id="forecastSettingsPanel"><div class="caption">Saved workbook settings</div><div class="settingsGrid"><label><span class="small">Forecast end</span><input class="settingsInput" id="forecastEndInput" type="date" min="2026-01-01" max="2035-12-31"></label><button class="btn primary" id="saveForecastEndBtn" type="button">Save forecast end</button><div class="settingsStatus" id="forecastEndStatus"></div></div></section><section class="settingsPanel panel pad" id="assumptionLedger"></section><section class="settingsPanel panel pad" id="optimizationDiagnostics"></section><details class="settingsPanel panel disclosurePanel" id="capacityAdjustmentPanel"><summary class="disclosureSummary"><div><div class="caption">Crude capacity adjustments</div><p class="small">Minimized by default and shared by Diesel and Jet. PADD-level row overrides are entered directly in Crude runs cells; this panel remains for refinery-unit capacity changes that carry forward from the selected month.</p></div><span class="pill" id="capacityAdjustmentSummary">0 adjustments</span></summary><div class="pad disclosureBody"><div class="outageGrid"><label><span class="small">Region</span><select id="capacityAdjRegion" class="select" aria-label="Capacity adjustment region"></select></label><label><span class="small">Refinery</span><select id="capacityAdjRefinery" class="select" aria-label="Capacity adjustment refinery"></select></label><label><span class="small">Unit</span><select id="capacityAdjUnit" class="select" aria-label="Capacity adjustment unit"></select></label><label><span class="small">Effective from</span><input class="settingsInput" id="capacityAdjMonth" type="month" min="2025-01" max="2035-12"></label><label><span class="small">Value</span><input class="settingsInput" id="capacityAdjValue" type="number" min="0" step="0.1" placeholder="kbd"></label><label class="wide"><span class="small">Note</span><input class="settingsInput" id="capacityAdjNote" type="text" placeholder="Optional note"></label></div><div class="outageActions"><button class="btn primary" id="addCapacityAdjBtn" type="button">Add capacity adjustment</button><button class="btn" id="clearCapacityAdjBtn" type="button">Clear</button><span class="settingsStatus" id="capacityAdjStatus"></span></div><div class="contextTableWrap" style="margin-top:10px"><table class="outageTable" id="capacityAdjustmentTable"></table></div></div></details><section class="updatePanel panel pad" id="referenceUpdatePanel"><div class="updateHeader"><div><div class="caption">Dashboard updates</div><h3>Background refresh</h3></div><span class="pill updateStatus" id="updateStatusPill">Idle</span></div><div class="updateButtons"><button class="btn primary" data-update-group="weekly" type="button">Weekly</button><button class="btn primary" data-update-group="monthly" type="button">Monthly</button><button class="btn primary" data-update-group="other" type="button">Other</button><button class="btn" data-update-group="power-dfo" type="button">Power DFO</button><button class="btn" data-update-group="all" type="button">Complete</button></div><div class="updateSteps" id="updateSteps"></div><pre class="updateLog" id="updateLog">Local runner idle.</pre></section><section class="contextPulse" id="referencePulse"></section><div class="sourceGrid" id="sourceGrid"></div></section>
   </main>
   <section class="chartScenarioWorkbench" id="outageCollisionModal" hidden></section>
   <section class="chartZoomModal" id="chartZoomModal" hidden></section>
@@ -3894,19 +4106,35 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       {key:'kplerExportsEuropeKbd',label:'Kpler Exports to Europe',unit:'kbd',digits:0},
       {key:'kplerExportsAfricaKbd',label:'Kpler Exports to Africa',unit:'kbd',digits:0},
       {key:'kplerExportsOtherKbd',label:'Kpler Exports to Other',unit:'kbd',digits:0},
-      {key:'stocksKb',label:'Stocks',unit:'kb',digits:0},
-      {key:'daysForwardCover',label:'Days of Forward Cover',unit:'days',digits:1},
-      {key:'catalyticCrackingUtilizationPct',label:'Catalytic Cracking Utilization',unit:'%',digits:1},
-      {key:'cokingUtilizationPct',label:'Coking Utilization',unit:'%',digits:1},
-      {key:'hydrocrackingUtilizationPct',label:'Hydrocracking Utilization',unit:'%',digits:1}
-    ];
-	    const CRUDE_METRICS = D.crudeRuns.metrics || [{key:'crudeRunsKbd',label:'Crude runs',unit:'kbd',digits:0},{key:'operableCapacityKbd',label:'Operable capacity',unit:'kbd',digits:0},{key:'idleCapacityKbd',label:'Idle capacity',unit:'kbd',digits:0},{key:'operatingCapacityKbd',label:'Operating capacity',unit:'kbd',digits:0},{key:'utilizationPct',label:'Operable utilization',unit:'%',digits:1},{key:'operatingUtilizationPct',label:'Operating utilization',unit:'%',digits:1},{key:'exPlannedUtilizationPct',label:'Operating (ex-planned) utilization',unit:'%',digits:1}];
-	    const CHART_METRICS = ['balanceKbd','periodBuildDrawKb','netLengthKbd','demandKbd','productionKbd','importsKbd','canadaImportsKbd','nonCanadaImportsKbd','kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','exportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd','receiptsKbd','netReceiptsKbd','padd3ShipmentsToPadd1Kbd','stocksKb','daysForwardCover','exPlannedUtilizationPct','catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct'];
-	    const KPLER_CHART_METRICS = new Set(['kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd']);
-	    const SECONDARY_UNIT_UTILIZATION_METRICS = new Set(['catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct']);
-	    const SECONDARY_UNIT_FIELD_SPECS = [{freshFeedField:'catalyticCrackingFreshFeedKbd',capacityField:'catalyticCrackingCapacityKbd',utilizationField:'catalyticCrackingUtilizationPct'},{freshFeedField:'cokingFreshFeedKbd',capacityField:'cokingCapacityKbd',utilizationField:'cokingUtilizationPct'},{freshFeedField:'hydrocrackingFreshFeedKbd',capacityField:'hydrocrackingCapacityKbd',utilizationField:'hydrocrackingUtilizationPct'}];
-	    const SECONDARY_UNIT_FIELDS = SECONDARY_UNIT_FIELD_SPECS.flatMap(spec => [spec.freshFeedField,spec.capacityField,spec.utilizationField]);
-	    const OPTIONAL_NONZERO_CHART_METRICS = new Set(['canadaImportsKbd','nonCanadaImportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','receiptsKbd','padd3ShipmentsToPadd1Kbd',...KPLER_CHART_METRICS,...SECONDARY_UNIT_UTILIZATION_METRICS]);
+	      {key:'stocksKb',label:'Stocks',unit:'kb',digits:0},
+	      {key:'daysForwardCover',label:'Days of Forward Cover',unit:'days',digits:1},
+	      {key:'knownProductionOfflinePlannedKbd',label:'Known '+(D.product?.shortTitle || D.product?.title || 'Product')+' Production Offline (Planned)',unit:'kbd',digits:0},
+	      {key:'knownProductionOfflineUnplannedKbd',label:'Known '+(D.product?.shortTitle || D.product?.title || 'Product')+' Production Offline (Unplanned)',unit:'kbd',digits:0},
+	      {key:'knownProductionOfflineTotalKbd',label:'Total Known '+(D.product?.shortTitle || D.product?.title || 'Product')+' Production Offline',unit:'kbd',digits:0},
+	      {key:'outageCduPlannedOfflineKbd',label:'CDU Planned Offline',unit:'kbd',digits:0},
+	      {key:'outageCduUnplannedOfflineKbd',label:'CDU Unplanned Offline',unit:'kbd',digits:0},
+	      {key:'outageCduTotalOfflineKbd',label:'Total CDU Offline',unit:'kbd',digits:0},
+	      {key:'outageFccPlannedOfflineKbd',label:'FCC Planned Offline',unit:'kbd',digits:0},
+	      {key:'outageFccUnplannedOfflineKbd',label:'FCC Unplanned Offline',unit:'kbd',digits:0},
+	      {key:'outageFccTotalOfflineKbd',label:'Total FCC Offline',unit:'kbd',digits:0},
+	      {key:'outageCokerPlannedOfflineKbd',label:'Coker Planned Offline',unit:'kbd',digits:0},
+	      {key:'outageCokerUnplannedOfflineKbd',label:'Coker Unplanned Offline',unit:'kbd',digits:0},
+	      {key:'outageCokerTotalOfflineKbd',label:'Total Coker Offline',unit:'kbd',digits:0},
+	      {key:'outageHydrocrackingPlannedOfflineKbd',label:'Hydrocracking Planned Offline',unit:'kbd',digits:0},
+	      {key:'outageHydrocrackingUnplannedOfflineKbd',label:'Hydrocracking Unplanned Offline',unit:'kbd',digits:0},
+	      {key:'outageHydrocrackingTotalOfflineKbd',label:'Total Hydrocracking Offline',unit:'kbd',digits:0},
+	      {key:'catalyticCrackingUtilizationPct',label:'Catalytic Cracking Utilization',unit:'%',digits:1},
+	      {key:'cokingUtilizationPct',label:'Coking Utilization',unit:'%',digits:1},
+	      {key:'hydrocrackingUtilizationPct',label:'Hydrocracking Utilization',unit:'%',digits:1}
+	    ];
+		    const CRUDE_METRICS = D.crudeRuns.metrics || [{key:'crudeRunsKbd',label:'Crude runs',unit:'kbd',digits:0},{key:'operableCapacityKbd',label:'Operable capacity',unit:'kbd',digits:0},{key:'idleCapacityKbd',label:'Idle capacity',unit:'kbd',digits:0},{key:'operatingCapacityKbd',label:'Operating capacity',unit:'kbd',digits:0},{key:'utilizationPct',label:'Operable utilization',unit:'%',digits:1},{key:'operatingUtilizationPct',label:'Operating utilization',unit:'%',digits:1},{key:'exPlannedUtilizationPct',label:'Operating (ex-planned) utilization',unit:'%',digits:1}];
+		    const OUTAGE_CHART_METRICS = new Set(['knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd','outageCduPlannedOfflineKbd','outageCduUnplannedOfflineKbd','outageCduTotalOfflineKbd','outageFccPlannedOfflineKbd','outageFccUnplannedOfflineKbd','outageFccTotalOfflineKbd','outageCokerPlannedOfflineKbd','outageCokerUnplannedOfflineKbd','outageCokerTotalOfflineKbd','outageHydrocrackingPlannedOfflineKbd','outageHydrocrackingUnplannedOfflineKbd','outageHydrocrackingTotalOfflineKbd']);
+		    const CHART_METRICS = ['balanceKbd','periodBuildDrawKb','netLengthKbd','demandKbd','productionKbd','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd','importsKbd','canadaImportsKbd','nonCanadaImportsKbd','kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','exportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd','receiptsKbd','netReceiptsKbd','padd3ShipmentsToPadd1Kbd','stocksKb','daysForwardCover','outageCduPlannedOfflineKbd','outageCduUnplannedOfflineKbd','outageCduTotalOfflineKbd','outageFccPlannedOfflineKbd','outageFccUnplannedOfflineKbd','outageFccTotalOfflineKbd','outageCokerPlannedOfflineKbd','outageCokerUnplannedOfflineKbd','outageCokerTotalOfflineKbd','outageHydrocrackingPlannedOfflineKbd','outageHydrocrackingUnplannedOfflineKbd','outageHydrocrackingTotalOfflineKbd','exPlannedUtilizationPct','catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct'];
+		    const KPLER_CHART_METRICS = new Set(['kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd']);
+		    const SECONDARY_UNIT_UTILIZATION_METRICS = new Set(['catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct']);
+		    const SECONDARY_UNIT_FIELD_SPECS = [{freshFeedField:'catalyticCrackingFreshFeedKbd',capacityField:'catalyticCrackingCapacityKbd',utilizationField:'catalyticCrackingUtilizationPct'},{freshFeedField:'cokingFreshFeedKbd',capacityField:'cokingCapacityKbd',utilizationField:'cokingUtilizationPct'},{freshFeedField:'hydrocrackingFreshFeedKbd',capacityField:'hydrocrackingCapacityKbd',utilizationField:'hydrocrackingUtilizationPct'}];
+		    const SECONDARY_UNIT_FIELDS = SECONDARY_UNIT_FIELD_SPECS.flatMap(spec => [spec.freshFeedField,spec.capacityField,spec.utilizationField]);
+		    const OPTIONAL_NONZERO_CHART_METRICS = new Set(['canadaImportsKbd','nonCanadaImportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','receiptsKbd','padd3ShipmentsToPadd1Kbd',...KPLER_CHART_METRICS,...OUTAGE_CHART_METRICS,...SECONDARY_UNIT_UTILIZATION_METRICS]);
     const CHART_SCENARIO_METRICS = [{key:'demand',label:'Demand',lineId:'demand',valueType:'pct'},{key:'yield',label:'Yield',lineId:'yieldAdjustmentPct',valueType:'pct'},{key:'imports',label:'Imports',lineId:'imports',valueType:'kbd_delta'},{key:'exports',label:'Exports',lineId:'exports',valueType:'kbd_delta'},{key:'receipts',label:'Inter-PADD receipts',lineId:'receipts',valueType:'kbd_delta'},{key:'exPlannedUtilization',label:'Operating Utilization (Ex-Planned)',lineId:'exPlannedUtilizationAdjustmentPct',valueType:'pct'}];
     const CHART_SCENARIO_LIMIT = 10;
     const CHART_SCENARIO_OVERLAY_PALETTE = ['#0f9488','#e11d48','#1d4ed8','#d97706','#7c3aed','#0891b2','#15803d','#b91c1c','#4f46e5','#a16207'];
@@ -3962,9 +4190,14 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       invalidateCalculationCaches();
       tableScrollSignatures = {};
     }
+    function applyPowerDfoChunk(payload){
+      D.powerDfoCharts = payload?.powerDfoCharts || {available:false,daily:[],weatherDaily:[],note:'Power DFO chart data unavailable.'};
+      tableScrollSignatures = {};
+    }
     function applyLazyChunk(name, payload){
       if (name === 'weekly') applyWeeklyChunk(payload);
       else if (name === 'crudeWeekly') applyCrudeWeeklyChunk(payload);
+      else if (name === 'powerDfo') applyPowerDfoChunk(payload);
       else if (name === 'reference') applyReferenceChunk(payload);
       loadedLazyChunks.add(name);
     }
@@ -3995,15 +4228,19 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function hasCrudeWeeklyData(){ return Array.isArray(D.crudeRuns?.weekly) && D.crudeRuns.weekly.length > 0; }
     function hasWeeklyGuideMonthlyData(){ return Array.isArray(D.regionalBalance?.weeklyGuideMonthly) && D.regionalBalance.weeklyGuideMonthly.length > 0; }
     function hasReferenceData(){ return Boolean(D.sourceHub) && typeof D.sourceHub === 'object' && Array.isArray(D.refineryCapacity?.rows); }
+    function hasPowerDfoData(){ return Boolean(D.powerDfoCharts) && Array.isArray(D.powerDfoCharts.daily) && Array.isArray(D.powerDfoCharts.weatherDaily); }
     async function ensureWeeklyData(){ if (hasWeeklyData()) return; await ensureLazyChunk('weekly'); }
     async function ensureCrudeWeeklyData(){ if (hasCrudeWeeklyData()) return; await ensureLazyChunk('crudeWeekly'); }
+    async function ensurePowerDfoData(){ if (hasPowerDfoData()) return; await ensureLazyChunk('powerDfo'); }
     async function ensureReferenceData(){ if (hasReferenceData()) return; await ensureLazyChunk('reference'); }
+    function needsPowerDfoCharts(nextState=state){ return D.product?.key === 'diesel' && (nextState.sheet || state.sheet) === 'charts' && (nextState.chartRegion || state.chartRegion) === 'padd1ab'; }
     async function ensureDataForState(nextState=state){
       const sheet = nextState.sheet || state.sheet;
       const frequency = nextState.frequency || state.frequency;
       const needsBalanceContext = sheet === 'balance' || sheet === 'charts';
-      if (frequency === 'weekly' && needsBalanceContext) await ensureWeeklyData();
+      if (frequency === 'weekly' && (needsBalanceContext || sheet === 'outages')) await ensureWeeklyData();
       if (frequency === 'weekly' && (needsBalanceContext || sheet === 'crude')) await ensureCrudeWeeklyData();
+      if (needsPowerDfoCharts(nextState)) await ensurePowerDfoData();
       if (needsBalanceContext || sheet === 'reference' || sheet === 'outages' || sheet === 'crude') await ensureReferenceData();
     }
     const BALANCE_COLLAPSED_STORAGE_KEY = STORAGE_KEY + ':collapsed';
@@ -4065,6 +4302,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     let updatePollTimer = 0;
     let crudeActiveHeaderRaf = 0;
     let weeklyGuideLoadQueued = false;
+    let powerDfoAnchorDate = '';
     let monthlyRawBucketsCache = null;
     let weeklyRawBucketsCache = null;
     let adjustedMonthlyActualRowsCache = null;
@@ -4161,7 +4399,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function withChartScenariosSuppressed(fn){ chartScenarioSuspendDepth += 1; try { return fn(); } finally { chartScenarioSuspendDepth = Math.max(0, chartScenarioSuspendDepth - 1); } }
     function calcCacheKey(...parts){ return [calculationRevision, workbookSettings?.forecastEnd || '', chartScenarioCacheMode(), ...parts].join('|'); }
     function invalidateCalculationCaches(){ calculationRevision += 1; monthlyRawBucketsCache = null; weeklyRawBucketsCache = null; adjustedMonthlyActualRowsCache = null; adjustedWeeklyActualRowsCache = null; adjustedMonthlyBucketsCache = {key:'',buckets:null}; adjustedMonthlyRowsCache = {key:'',rows:null}; adjustedWeeklyRowsCache = {key:'',rows:null}; chartScenarioDerivedAdjustmentsCache = {key:'',rows:null}; chartScenarioDerivedCapacityAdjustmentsCache = {key:'',rows:null}; chartScenarioOverlaySeriesCache.clear(); chartScenarioRowsByPeriodCache.clear(); chartRowsForMetricCache.clear(); chartSeriesCache.clear(); chartTableHtmlCache.clear(); chartYearContextCache.clear(); periodBucketsCache.clear(); rowsByRegionCache.clear(); rowsByRegionIndexCache.clear(); crudeRowsByRegionCache.clear(); crudePeriodBucketsCache.clear(); crudeInfoByPeriodCache.clear(); crudeAllPeriodsCache.clear(); crudeDisplayPeriodsCache.clear(); latestMonthlyCrudeBasisCache.clear(); historicalCrudeGapCache.clear(); latestCapacityAdjustmentCache.clear(); latestRegionalCapacityAdjustmentCache.clear(); capacityAdjustmentIndexCache = {key:'',index:null}; regionalCapacityRowValueCache.clear(); refineryCapacityForRegionCache.clear(); balanceAdjustmentValueCache.clear(); balanceAdjustmentIndexCache = {key:'',index:null}; balancePointTotalsCache.clear(); balanceLineValueCache.clear(); balancePeriodEntriesCache = {key:'',entries:null}; movementSummaryCache.clear(); movementFlowValueCache.clear(); movementRowMapCache.clear(); outageTotalsCache.clear(); outageDailyVectorCache = {key:'',days:null}; weeklyGuideMonthlyIndexCache = {key:'',index:null}; weeklyGuideVectorCache = {key:'',vectors:null}; weeklyGuideSeriesCache = {key:'',index:null}; kplerGuideIndexCache = {key:'',index:null}; actualCrudeSchedulePointCache.clear(); crudeSchedulePointCache.clear(); crudeScheduleEntriesCache.clear(); balanceRegionRowsHtmlCache.clear(); crudeRegionRowsHtmlCache.clear(); balanceLinesCache.clear(); }
-    const UPDATE_GROUPS = {weekly:{label:'Weekly',steps:['WPSR/latest weekly pull','Weekly export files','Clean public EIA outputs','Kpler PADD 1 EIA split','Weekly freshness check','Rebuild balances','Dashboard freshness check']},monthly:{label:'Monthly',steps:['Monthly EIA API pull','Monthly export files','Bulk series inventory','PADD 1 split','Clean outputs','Monthly freshness check','Rebuild balances','Dashboard freshness check']},other:{label:'Other',steps:['Parallel context refreshes','Kpler package and PADD 1 split','EIA PADD capacity refresh','Refinery unit capacity refresh','Power DFO daily and hourly','Validation checks','Data health check','Rebuild balances','Dashboard freshness check']},all:{label:'Complete',steps:['Weekly and monthly pulls','Weekly/monthly exports','Bulk series inventory','PADD 1 and clean outputs','Weekly/monthly freshness checks','Parallel context refreshes','Kpler context','EIA PADD capacity and refinery unit capacity','Power DFO refreshes','Validate and data health','Rebuild balances','Dashboard freshness check']}};
+    const UPDATE_GROUPS = {weekly:{label:'Weekly',steps:['WPSR/latest weekly pull','Weekly export files','Clean public EIA outputs','Kpler PADD 1 EIA split','Weekly freshness check','Rebuild balances','Dashboard freshness check']},monthly:{label:'Monthly',steps:['Monthly EIA API pull','Monthly export files','Bulk series inventory','PADD 1 split','Clean outputs','Monthly freshness check','Rebuild balances','Dashboard freshness check']},other:{label:'Other',steps:['Parallel context refreshes','Kpler package and PADD 1 split','EIA PADD capacity refresh','Refinery unit capacity refresh','Power DFO daily and hourly','Validation checks','Data health check','Rebuild balances','Dashboard freshness check']},'power-dfo':{label:'Power DFO',steps:['Power DFO daily refresh','Power DFO hourly weather/forecast refresh','Rebuild balances','Dashboard freshness check']},all:{label:'Complete',steps:['Weekly and monthly pulls','Weekly/monthly exports','Bulk series inventory','PADD 1 and clean outputs','Weekly/monthly freshness checks','Parallel context refreshes','Kpler context','EIA PADD capacity and refinery unit capacity','Power DFO refreshes','Validate and data health','Rebuild balances','Dashboard freshness check']}};
     const SETTINGS_STORAGE_KEY = STORAGE_KEY + ':workbook-settings';
     const SHARED_CRUDE_STORAGE_KEY = 'regional-balance-shared-crude:v1';
     const OUTAGE_STORAGE_KEY = SHARED_CRUDE_STORAGE_KEY + ':crude-outages';
@@ -4171,9 +4409,42 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     const LEGACY_OUTAGE_STORAGE_KEYS = ['diesel:regional-balance-v2:crude-outages','jet:regional-balance-v2:crude-outages'];
     const LEGACY_CAPACITY_ADJ_STORAGE_KEYS = ['diesel:regional-balance-v2:refinery-capacity-adjustments','jet:regional-balance-v2:refinery-capacity-adjustments'];
     const OUTAGE_TYPES = ['Planned','Unplanned','Other'];
-    const CRUDE_REGION_META = {padd1:['P1','East Coast'],padd2:['P2','Midwest'],padd3:['P3','Gulf Coast'],padd4:['P4','Rocky Mountain'],padd5:['P5','West Coast'],us:['U.S.',''],p123:['','PADD 1, 2, 3'],p13:['','PADD 1, 3']};
-    const BASE_CRUDE_REGION_KEYS = ['padd1','padd2','padd3','padd4','padd5'];
-    const CRUDE_AGGREGATES = {us:['padd1','padd2','padd3','padd4','padd5'],p123:['padd1','padd2','padd3'],p13:['padd1','padd3']};
+	    const CRUDE_REGION_META = {padd1:['P1','East Coast'],padd2:['P2','Midwest'],padd3:['P3','Gulf Coast'],padd4:['P4','Rocky Mountain'],padd5:['P5','West Coast'],us:['U.S.',''],p123:['','PADD 1, 2, 3'],p13:['','PADD 1, 3']};
+	    const BASE_CRUDE_REGION_KEYS = ['padd1','padd2','padd3','padd4','padd5'];
+	    const CRUDE_AGGREGATES = {us:['padd1','padd2','padd3','padd4','padd5'],p123:['padd1','padd2','padd3'],p13:['padd1','padd3']};
+	    const OUTAGE_UNIT_KEYS = ['atmos_distillation','fcc','coking','distillate_hydrocracking','gasoil_resid_hydrocracking'];
+	    const OUTAGE_UNIT_GROUPS = {cdu:['atmos_distillation'],fcc:['fcc'],coker:['coking'],hydrocracking:['distillate_hydrocracking','gasoil_resid_hydrocracking']};
+	    const OUTAGE_METRIC_SPECS = {
+	      knownProductionOfflinePlannedKbd:{kind:'product',bucket:'planned'},
+	      knownProductionOfflineUnplannedKbd:{kind:'product',bucket:'unplanned'},
+	      knownProductionOfflineTotalKbd:{kind:'product',bucket:'totalKnown'},
+	      outageCduPlannedOfflineKbd:{kind:'capacity',bucket:'planned',unitGroup:'cdu'},
+	      outageCduUnplannedOfflineKbd:{kind:'capacity',bucket:'unplanned',unitGroup:'cdu'},
+	      outageCduTotalOfflineKbd:{kind:'capacity',bucket:'totalKnown',unitGroup:'cdu'},
+	      outageFccPlannedOfflineKbd:{kind:'capacity',bucket:'planned',unitGroup:'fcc'},
+	      outageFccUnplannedOfflineKbd:{kind:'capacity',bucket:'unplanned',unitGroup:'fcc'},
+	      outageFccTotalOfflineKbd:{kind:'capacity',bucket:'totalKnown',unitGroup:'fcc'},
+	      outageCokerPlannedOfflineKbd:{kind:'capacity',bucket:'planned',unitGroup:'coker'},
+	      outageCokerUnplannedOfflineKbd:{kind:'capacity',bucket:'unplanned',unitGroup:'coker'},
+	      outageCokerTotalOfflineKbd:{kind:'capacity',bucket:'totalKnown',unitGroup:'coker'},
+	      outageHydrocrackingPlannedOfflineKbd:{kind:'capacity',bucket:'planned',unitGroup:'hydrocracking'},
+	      outageHydrocrackingUnplannedOfflineKbd:{kind:'capacity',bucket:'unplanned',unitGroup:'hydrocracking'},
+	      outageHydrocrackingTotalOfflineKbd:{kind:'capacity',bucket:'totalKnown',unitGroup:'hydrocracking'}
+	    };
+	    const DIESEL_OUTAGE_YIELDS = {
+	      padd1:{atmos_distillation:.22,fcc:.18,coking:.28,distillate_hydrocracking:.20,gasoil_resid_hydrocracking:.35},
+	      padd2:{atmos_distillation:.14,fcc:.16,coking:.28,distillate_hydrocracking:.20,gasoil_resid_hydrocracking:.35},
+	      padd3:{atmos_distillation:.19,fcc:.19,coking:.32,distillate_hydrocracking:.20,gasoil_resid_hydrocracking:.40},
+	      padd4:{atmos_distillation:.22,fcc:.18,coking:.28,distillate_hydrocracking:.20,gasoil_resid_hydrocracking:.35},
+	      padd5:{atmos_distillation:.10,fcc:.14,coking:.20,distillate_hydrocracking:.15,gasoil_resid_hydrocracking:.29}
+	    };
+	    const JET_OUTAGE_YIELDS = {
+	      padd1:{atmos_distillation:.10,distillate_hydrocracking:.20},
+	      padd2:{atmos_distillation:.07,distillate_hydrocracking:.18},
+	      padd3:{atmos_distillation:.10,distillate_hydrocracking:.22,gasoil_resid_hydrocracking:.22},
+	      padd4:{atmos_distillation:.10,distillate_hydrocracking:.20},
+	      padd5:{atmos_distillation:.15,distillate_hydrocracking:.22,gasoil_resid_hydrocracking:.22}
+	    };
     const crudeRegionDisplayLabel = key => displayMetaLabel(CRUDE_REGION_META[key]) || (D.crudeRuns.regions.find(region => region.key === key) || {}).label || key;
     function refineryUnits(){ return Array.isArray(D.refineryCapacity?.rows) ? D.refineryCapacity.rows : []; }
     const REFINERY_UNIT_ORDER = ['atmos_distillation','distillate_hydrocracking','gasoil_resid_hydrocracking','fcc','coking'];
@@ -4293,12 +4564,13 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function availableHistoryYears(frequency='monthly'){ const {currentYear} = chartYearContext(frequency); return availableBandYears(frequency).filter(year => year <= currentYear - 2).sort((a,b)=>b-a); }
     function historyLineDefs(frequency=state.frequency){ const {currentYear} = chartYearContext(frequency); return availableHistoryYears(frequency).map((year, index) => ({year,offset:currentYear - year,color:HISTORY_LINE_PALETTE[index % HISTORY_LINE_PALETTE.length]})); }
     function defaultHistoryYears(){ return []; }
-    function defaultBandYears(frequency='monthly'){ const defaults = BAND_YEARS.filter(year => availableBandYears(frequency).includes(year)); return defaults.length ? defaults : availableBandYears(frequency); }
-	    function parseYearList(values){ return Array.from(new Set((Array.isArray(values) ? values : []).map(value => Number(value)).filter(year => Number.isInteger(year) && year >= MIN_CHART_HISTORY_YEAR))).sort((a,b)=>b-a); }
-    function normalizeHistoryYears(selected, frequency='monthly', fallbackToDefault=false){ const allowed = new Set(availableHistoryYears(frequency)); const normalized = Array.from(new Set((Array.isArray(selected) ? selected : []).map(value => Number(value)).filter(year => Number.isInteger(year) && allowed.has(year)))).sort((a,b)=>b-a); return normalized.length || !fallbackToDefault ? normalized : defaultHistoryYears(); }
-    function normalizeBandYears(selected, frequency='monthly', fallbackToDefault=false){ const allowed = new Set(availableBandYears(frequency)); const normalized = Array.from(new Set((Array.isArray(selected) ? selected : []).map(value => Number(value)).filter(year => Number.isInteger(year) && allowed.has(year)))).sort((a,b)=>b-a); return normalized.length || !fallbackToDefault ? normalized : defaultBandYears(frequency); }
-    function effectiveBandYears(frequency=state?.frequency || 'monthly', selected=state?.bandYears){ return normalizeBandYears(selected, frequency, true); }
-    function compactYearLabel(year){ return "'" + String(year).slice(2); }
+	    function defaultBandYears(frequency='monthly'){ const defaults = BAND_YEARS.filter(year => availableBandYears(frequency).includes(year)); return defaults.length ? defaults : availableBandYears(frequency); }
+		    function parseYearList(values){ return Array.from(new Set((Array.isArray(values) ? values : []).map(value => Number(value)).filter(year => Number.isInteger(year) && year >= MIN_CHART_HISTORY_YEAR))).sort((a,b)=>b-a); }
+	    function normalizeHistoryYears(selected, frequency='monthly', fallbackToDefault=false){ const allowed = new Set(availableHistoryYears(frequency)); const normalized = Array.from(new Set((Array.isArray(selected) ? selected : []).map(value => Number(value)).filter(year => Number.isInteger(year) && allowed.has(year)))).sort((a,b)=>b-a); return normalized.length || !fallbackToDefault ? normalized : defaultHistoryYears(); }
+	    function normalizeBandYears(selected, frequency='monthly', fallbackToDefault=false){ const allowed = new Set(availableBandYears(frequency)); const normalized = Array.from(new Set((Array.isArray(selected) ? selected : []).map(value => Number(value)).filter(year => Number.isInteger(year) && allowed.has(year)))).sort((a,b)=>b-a); return normalized.length || !fallbackToDefault ? normalized : defaultBandYears(frequency); }
+	    function effectiveBandYears(frequency=state?.frequency || 'monthly', selected=state?.bandYears){ return normalizeBandYears(selected, frequency, true); }
+	    function outageBandYears(frequency=state?.frequency || 'monthly'){ return availableBandYears(frequency).slice(0,3); }
+	    function compactYearLabel(year){ return "'" + String(year).slice(2); }
     function compactYearList(years){ const ordered = Array.from(new Set((years || []).map(Number).filter(Number.isFinite))).sort((a,b)=>a-b); if (!ordered.length) return 'off'; const ranges = []; let start = ordered[0]; let end = ordered[0]; for (let index = 1; index < ordered.length; index += 1) { const year = ordered[index]; if (year === end + 1) { end = year; continue; } ranges.push([start, end]); start = year; end = year; } ranges.push([start, end]); return ranges.map(([from, to]) => from === to ? compactYearLabel(from) : compactYearLabel(from) + '-' + compactYearLabel(to)).join(', '); }
     function bandChipLabel(frequency=state?.frequency || 'monthly'){ return 'Band ' + compactYearList(effectiveBandYears(frequency)); }
     function chartRegionOptions(){ return [{key:CHART_ALL_REGION_KEY,label:'All regions'}, ...D.regionalBalance.regions.map(region => ({key:region.key,label:balanceRegionDisplayLabel(region.key)}))]; }
@@ -4786,24 +5058,28 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function adjustedWeeklyBalanceRows(){ const key = calcCacheKey('adjustedWeeklyBalanceRows'); if (adjustedWeeklyRowsCache.key === key && adjustedWeeklyRowsCache.rows) return adjustedWeeklyRowsCache.rows; const actualBaseline = adjustedWeeklyActualBaseline(); const rawBuckets = weeklyRawBuckets(); const monthlyBuckets = adjustedMonthlyBuckets(); const crudeInfoByPeriod = crudeInfoIndex('weekly'); const priorByRegion = new Map(actualBaseline.priorByRegion); const out = actualBaseline.rows.slice(); Array.from(rawBuckets.keys()).sort().forEach(period => { const rawBucket = rawBuckets.get(period) || {}; if (!Object.values(rawBucket).some(row => row?.status === 'forecast')) return; const monthlyBucket = monthlyBuckets.get(weeklyForecastMonth(period)) || {}; const crudeInfo = crudeInfoByPeriod.get(period) || {bucket:{},isActual:false}; const adjusted = new Map(); BASE_BALANCE_REGION_KEYS.forEach(regionKey => { const rawPoint = rawBucket[regionKey]; if (!rawPoint) return; const point = adjustedBaseWeeklyPoint(rawPoint, rawBucket, monthlyBucket, crudeInfo, priorByRegion.get(regionKey)); adjusted.set(regionKey, point); priorByRegion.set(regionKey, point); }); Object.entries(BALANCE_AGGREGATES).forEach(([regionKey, keys]) => { const parts = keys.map(key => adjusted.get(key)).filter(Boolean); if (parts.length === keys.length) adjusted.set(regionKey, aggregateAdjustedMonthlyPoint(period, regionKey, parts, 'weekly')); }); D.regionalBalance.regions.forEach(region => { const point = adjusted.get(region.key); if (point) out.push(point); }); }); applyDaysForwardCover(out, 'weekly'); adjustedWeeklyRowsCache = {key,rows:out}; return out; }
     function showToast(message){ const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove('show'), 1800); }
     function hideProductionBalanceLines(regionKey){ return D.product?.key === 'diesel' && regionKey === 'padd1c'; }
-    function productionBalanceLines(regionKey){
-      if (hideProductionBalanceLines(regionKey)) return [];
-      const lines = [
-        {id:'operatingCapacityKbd',label:'Operating Capacity',kind:'item muted'},
-        {id:'plannedMaintenanceKbd',label:'Planned Atmos Offline',kind:'item muted maintenance'},
-        {id:'unplannedMaintenanceKbd',label:'Unplanned Atmos Offline',kind:'item muted maintenance'},
+	    function productionBalanceLines(regionKey){
+	      if (hideProductionBalanceLines(regionKey)) return [];
+	      const productLabel = D.product?.shortTitle || D.product?.title || 'Product';
+	      const lines = [
+	        {id:'operatingCapacityKbd',label:'Operating Capacity',kind:'item muted'},
+	        {id:'plannedMaintenanceKbd',label:'Planned Atmos Offline',kind:'item muted maintenance'},
+	        {id:'unplannedMaintenanceKbd',label:'Unplanned Atmos Offline',kind:'item muted maintenance'},
 	        {id:'crudeRunsKbd',label:'Crude Runs',kind:'highlight'},
         weeklyGuideLine('crudeRunsKbd'),
         {id:'operatingUtilizationPct',label:'Operating Utilization',kind:'item muted percent'},
         {id:'exPlannedUtilizationPct',label:'Operating (ex-planned) Utilization',kind:'highlight percent'},
         {id:'yieldPct',label:'Yield',kind:'highlight percent'},
       ];
-      if (isBaseBalanceRegion(regionKey)) lines.push({id:'yieldAdjustmentPct',label:'Yield Adjustment',kind:'item muted adjustment percent'});
-      lines.push(weeklyGuideLine('yieldPct'));
-	      lines.push({id:'production',label:'Production',kind:'subtotal highlight'});
-      if (state.frequency === 'monthly') lines.push(weeklyGuideLine('production'));
-      return lines;
-    }
+	      if (isBaseBalanceRegion(regionKey)) lines.push({id:'yieldAdjustmentPct',label:'Yield Adjustment',kind:'item muted adjustment percent'});
+	      lines.push(weeklyGuideLine('yieldPct'));
+		      lines.push({id:'production',label:'Production',kind:'subtotal highlight'});
+	      lines.push({id:'knownProductionOfflinePlannedKbd',label:'Known '+productLabel+' Production Offline (Planned)',kind:'guide offlineProductionGuide'});
+	      lines.push({id:'knownProductionOfflineUnplannedKbd',label:'Known '+productLabel+' Production Offline (Unplanned)',kind:'guide offlineProductionGuide'});
+	      lines.push({id:'knownProductionOfflineTotalKbd',label:'Total Known '+productLabel+' Production Offline',kind:'guide offlineProductionTotalGuide'});
+	      if (state.frequency === 'monthly') lines.push(weeklyGuideLine('production'));
+	      return lines;
+	    }
 	    function movementLineLabel(flow, direction){ return (direction === 'in' ? 'from ' + balanceRegionDisplayLabel(flow.fromRegionKey) : 'to ' + balanceRegionDisplayLabel(flow.toRegionKey)) + ' - ' + flow.modeLabel; }
 	    function kplerReceiptMovementGuideTarget(flow){ if (!flow || flow.fromRegionKey !== 'padd3' || flow.modeKey !== 'tankerBarge') return ''; return {padd1:'padd3ToPadd1TankerBarge',padd1ab:'padd3ToPadd1abTankerBarge',padd1c:'padd3ToPadd1cTankerBarge',padd5:'padd3ToPadd5TankerBarge'}[flow.toRegionKey] || ''; }
 	    function kplerReceiptMovementGuideLine(flow){ const target = kplerReceiptMovementGuideTarget(flow); return target ? kplerGuideLine(target, 'Imports from P3') : null; }
@@ -4881,7 +5157,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       if (isWeeklyGuideLine(lineId)) value = weeklyGuideMonthlyValue(regionKey, lineId, point.period);
       else if (isKplerGuideLine(lineId)) value = kplerGuideValue(state.frequency, point.period, kplerGuideTargetLineId(lineId), point.status === 'actual');
       else if (isBalanceLineAdjustable(lineId)) value = point?.status === 'forecast' ? balanceAdjustmentValue(state.frequency, point.period, regionKey, adjustmentTargetLineId(lineId)) : null;
-      else if (lineId === 'production') value = point.productionKbd;
+	      else if (OUTAGE_CHART_METRICS.has(lineId)) value = outageMetricValue({...point,regionKey}, lineId, state.frequency);
+	      else if (lineId === 'production') value = point.productionKbd;
       else if (lineId === 'operatingCapacityKbd') value = point.operatingCapacityKbd;
       else if (lineId === 'plannedMaintenanceKbd') value = point.plannedMaintenanceKbd;
       else if (lineId === 'unplannedMaintenanceKbd') value = point.unplannedMaintenanceKbd;
@@ -4925,7 +5202,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function balanceManualAdjustmentValue(frequency, period, regionKey, lineId){ if (isBalanceLineAdjustable(lineId)) return balanceAdjustmentValue(frequency, period, regionKey, adjustmentTargetLineId(lineId)); if (isShipmentFlowLine(lineId)) { const flow = flowById(lineFlowId(lineId)); return flow ? balanceAdjustmentValue(frequency, period, flow.toRegionKey, receiptLineId(flow.id)) : null; } return null; }
 	    function signedBalanceValueClass(line, value){ if (!(line.kind.includes('draw') || line.id === 'weeklyGuide:buildTotal')) return ''; const numeric = Number(value); if (!Number.isFinite(numeric)) return ''; return numeric < 0 ? 'negativeValue' : numeric > 0 ? 'positiveValue' : 'neutralValue'; }
 	    function balanceCellHtml(regionKey, line, period, point, value){ const editable = isBalanceForecastAdjustableCell(regionKey, line.id, point); const adjustmentLine = isBalanceAdjustmentLine(line.id); const lockedOverride = Boolean(point && state.frequency === 'monthly' && adjustmentLine && point.status !== 'forecast'); const manual = point?.status === 'forecast' && balanceManualAdjustmentValue(state.frequency, period, regionKey, line.id) !== null; const classes = []; const signedClass = signedBalanceValueClass(line, value); if (point?.status === 'forecast') classes.push('forecastCell'); if (editable) classes.push('editableCell'); if (manual) classes.push('manualCell'); if (lockedOverride) classes.push('lockedOverrideCell'); if (adjustmentLine && !lockedOverride && value !== null && value !== undefined && value !== '') classes.push('activeValue'); if (signedClass) classes.push(signedClass); const attrs = classes.length ? ' class="'+classes.join(' ')+'"' : ''; const editAttrs = editable ? ' data-balance-adjust-region="'+esc(regionKey)+'" data-balance-adjust-line="'+esc(line.id)+'" data-balance-adjust-period="'+esc(period)+'" data-balance-adjust-status="forecast" title="Click to enter a manual PADD-level forecast value. Blank clears this period override."' : ''; return '<td'+attrs+editAttrs+'>'+balanceValueHtml(line.id, value)+'</td>'; }
-	    function rowClassForLine(line, values){ const parts = []; const isSubtotal = line.kind.includes('subtotal'); const inDemandZone = isDemandZoneLine(line.id); if (line.kind === 'section') parts.push('sectionRow'); if (isSubtotal) parts.push('subtotalRow'); if (line.kind.includes('divider')) parts.push('dividerRow'); if (line.kind.includes('supplySpacer')) parts.push('supplySpacerRow'); if (line.kind.includes('highlight')) parts.push('highlightRow'); if (line.kind.includes('muted')) parts.push('mutedRow'); if (line.kind.includes('adjustment')) parts.push('adjustmentRow'); if (line.kind.includes('balanceSummary')) parts.push('balanceSummaryRow'); if (line.id === 'buildDaily') parts.push('buildDailyRow'); if (line.id === 'production') parts.push('productionHighlightRow'); if (line.kind.includes('balanceGuide')) parts.push('balanceGuideRow'); if (line.kind === 'stock') parts.push('stockRow'); if (line.kind.includes('cover')) parts.push('coverRow'); if (line.kind.includes('anchor')) parts.push('anchorSubtotalRow'); if (line.kind.includes('receiptSubtotal')) parts.push('receiptSubtotalRow'); if (line.kind.includes('guide')) parts.push('guideRow'); if (line.kind.includes('kplerGuide')) parts.push('kplerGuideRow'); if (isKplerTotalImportGuideLine(line.id)) parts.push('kplerImportTotalGuideRow'); if (isKplerTotalExportGuideLine(line.id)) parts.push('kplerExportTotalGuideRow'); if (line.kind.includes('maintenance')) parts.push('maintenanceRow'); if (line.kind.includes('importSource')) parts.push('importSourceRow'); if (line.kind.includes('importOverride')) parts.push('importOverrideRow'); if (line.kind.includes('importTotal')) parts.push('importTotalRow'); if (line.kind.includes('exportDestinationOverride')) parts.push('exportDestinationOverrideRow'); if (line.id === 'totalSupply') parts.push('totalSupplyRow'); else if (line.id === 'totalDemand') parts.push('totalDemandRow'); else if (inDemandZone) parts.push(line.kind === 'section' ? 'demandSectionBand' : isSubtotal ? 'demandSubtotalBand' : 'demandZoneRow'); else if (isSubtotal) parts.push('supplySubtotalBand'); if (line.kind.includes('draw')) parts.push('drawRow', values.some(v => v < 0) ? 'negative' : 'positive'); return parts.join(' '); }
+	    function rowClassForLine(line, values){ const parts = []; const isSubtotal = line.kind.includes('subtotal'); const inDemandZone = isDemandZoneLine(line.id); if (line.kind === 'section') parts.push('sectionRow'); if (isSubtotal) parts.push('subtotalRow'); if (line.kind.includes('divider')) parts.push('dividerRow'); if (line.kind.includes('supplySpacer')) parts.push('supplySpacerRow'); if (line.kind.includes('highlight')) parts.push('highlightRow'); if (line.kind.includes('muted')) parts.push('mutedRow'); if (line.kind.includes('adjustment')) parts.push('adjustmentRow'); if (line.kind.includes('balanceSummary')) parts.push('balanceSummaryRow'); if (line.id === 'buildDaily') parts.push('buildDailyRow'); if (line.id === 'production') parts.push('productionHighlightRow'); if (line.kind.includes('balanceGuide')) parts.push('balanceGuideRow'); if (line.kind === 'stock') parts.push('stockRow'); if (line.kind.includes('cover')) parts.push('coverRow'); if (line.kind.includes('anchor')) parts.push('anchorSubtotalRow'); if (line.kind.includes('receiptSubtotal')) parts.push('receiptSubtotalRow'); if (line.kind.includes('guide')) parts.push('guideRow'); if (line.kind.includes('kplerGuide')) parts.push('kplerGuideRow'); if (line.kind.includes('offlineProductionGuide')) parts.push('offlineProductionGuideRow'); if (line.kind.includes('offlineProductionTotalGuide')) parts.push('offlineProductionTotalGuideRow'); if (isKplerTotalImportGuideLine(line.id)) parts.push('kplerImportTotalGuideRow'); if (isKplerTotalExportGuideLine(line.id)) parts.push('kplerExportTotalGuideRow'); if (line.kind.includes('maintenance')) parts.push('maintenanceRow'); if (line.kind.includes('importSource')) parts.push('importSourceRow'); if (line.kind.includes('importOverride')) parts.push('importOverrideRow'); if (line.kind.includes('importTotal')) parts.push('importTotalRow'); if (line.kind.includes('exportDestinationOverride')) parts.push('exportDestinationOverrideRow'); if (line.id === 'totalSupply') parts.push('totalSupplyRow'); else if (line.id === 'totalDemand') parts.push('totalDemandRow'); else if (inDemandZone) parts.push(line.kind === 'section' ? 'demandSectionBand' : isSubtotal ? 'demandSubtotalBand' : 'demandZoneRow'); else if (isSubtotal) parts.push('supplySubtotalBand'); if (line.kind.includes('draw')) parts.push('drawRow', values.some(v => v < 0) ? 'negative' : 'positive'); return parts.join(' '); }
     function applyTableLayout(){ const signature = state.labelWidth + '|' + state.labelSize; if (lastAppliedLayoutSignature === signature) return; lastAppliedLayoutSignature = signature; document.documentElement.style.setProperty('--label-col-width', state.labelWidth + 'px'); document.documentElement.style.setProperty('--row-label-size', state.labelSize + 'px'); const widthSlider = document.getElementById('labelWidthSlider'); const sizeSlider = document.getElementById('labelSizeSlider'); const widthValue = document.getElementById('labelWidthValue'); const sizeValue = document.getElementById('labelSizeValue'); if (widthSlider) widthSlider.value = String(state.labelWidth); if (sizeSlider) sizeSlider.value = String(state.labelSize); if (widthValue) widthValue.textContent = state.labelWidth + 'px'; if (sizeValue) sizeValue.textContent = state.labelSize + 'px'; }
     function updateTableLayout(key, value){ const next = clampLayoutValue(key, value); if (state[key] === next) return; state[key] = next; saveTableLayout(); applyTableLayout(); writeStateUrl(); }
     function renderControls(){
@@ -5168,6 +5445,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function clearPendingTableViewportRestore(tableId){ if (pendingTableViewportRestore && pendingTableViewportRestore.tableId === tableId) pendingTableViewportRestore = null; }
     function restorePendingTableViewport(tableId, signature=''){ const snapshot = pendingTableViewportRestore; if (!snapshot || snapshot.tableId !== tableId) return false; pendingTableViewportRestore = null; const table = document.getElementById(tableId); const wrap = table?.closest('.tablewrap'); if (!table || !wrap) return false; if (signature) tableScrollSignatures[tableId] = signature; const restore = () => { if (!table.isConnected || !wrap.getClientRects().length) return; if (snapshot.pageWide) { window.scrollTo({left:snapshot.left,top:snapshot.top,behavior:'instant'}); syncChartViewport(true); scheduleCrudeActiveHeader(); } else { wrap.scrollLeft = snapshot.left; wrap.scrollTop = snapshot.top; } }; requestAnimationFrame(() => { restore(); if (snapshot.pageWide) { setTimeout(restore, 120); setTimeout(restore, 360); } }); return true; }
     function scrollTableToPeriod(tableId, period, signature, force=false){ requestAnimationFrame(() => { const table = document.getElementById(tableId); const wrap = table?.closest('.tablewrap'); if (!table || !wrap || !period || !scrollTableStillActive(table, wrap, tableId, signature) || (!force && tableScrollSignatures[tableId] === signature)) return; const applyScroll = () => { if (!scrollTableStillActive(table, wrap, tableId, signature)) return false; const target = table.querySelector('th[data-period="'+CSS.escape(period)+'"]'); const sticky = table.querySelector('th:first-child'); if (!target) return false; const left = Math.max(0, target.offsetLeft - (sticky ? sticky.offsetWidth : 0) - 8); if (wrap.id === 'crudeRunsTableWrap') { window.scrollTo({left,top:window.scrollY,behavior:'instant'}); syncChartViewport(); scheduleCrudeActiveHeader(); } else wrap.scrollLeft = left; tableScrollSignatures[tableId] = signature; return true; }; applyScroll(); const retryDelays = wrap.id === 'crudeRunsTableWrap' ? [120,360] : [40,120,360]; retryDelays.forEach(delay => setTimeout(applyScroll, delay)); }); }
+    function requestDefaultBalancePeriodScroll(period=''){ clearPendingTableViewportRestore('balanceTable'); tableScrollSignatures.balanceTable = ''; pendingBalanceScrollPeriod = period || ''; forceBalancePeriodScroll = true; }
     function hideCrudeActiveHeader(){ const header = document.getElementById('crudeActiveRegionHeader'); if (header) header.classList.remove('visible'); }
     function renderCrudeActiveHeaderSource(){ const header = document.getElementById('crudeActiveRegionHeader'); const source = document.querySelector('#crudeRunsTable .groupRow.region-'+CSS.escape(state.crudeRegion)+' .groupInner'); if (!header || !source) return hideCrudeActiveHeader(); header.className = 'crudeActiveRegionHeader region-' + state.crudeRegion; header.innerHTML = source.outerHTML; }
     function viewportTrackingActive(){ return state.sheet === 'charts' || state.sheet === 'crude'; }
@@ -5345,11 +5623,11 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function weeklyAxisLabelEntries(_year=chartYearContext('weekly').currentYear || 2026, slots=53){ return MONTHS.map((label, index) => ({slot:1 + index * (slots - 1) / Math.max(MONTHS.length - 1, 1),label})); }
     function slotLabel(slot, frequency){ return frequency === 'monthly' ? (MONTHS[slot - 1] || '') : 'ISO W' + String(slot).padStart(2,'0'); }
     function chartPeriodLabel(period, frequency=state.frequency){ if (!period) return ''; return frequency === 'weekly' ? shortDateLabel(period) : periodHeaderLabel(period, 'monthly'); }
-	    function finiteNumberOrNull(value){ const n = Number(value); return Number.isFinite(n) ? n : null; }
+	    function finiteNumberOrNull(value){ if (value === null || value === undefined || value === '') return null; const n = Number(value); return Number.isFinite(n) ? n : null; }
 	    function chartRowPeriodYear(row){ const period = String(row?.period || ''); return chartPeriodYear(period, period.length === 10 ? 'weekly' : 'monthly'); }
 	    function sortedChartRows(rows){ return (Array.isArray(rows) ? rows : []).filter(row => row && row.period && chartRowPeriodYear(row) >= MIN_CHART_HISTORY_YEAR).slice().sort((a,b)=>String(a.period).localeCompare(String(b.period))); }
 	    function chartMetricMonthlyOnly(metricKey){ return SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }
-	    function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }
+		    function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }
 	    function completedKplerPeriod(period, frequency=state.frequency){ const today = localDateText(); const key = String(period || '').slice(0, frequency === 'weekly' ? 10 : 7); if (!key) return false; return frequency === 'weekly' ? key < today : key < today.slice(0,7); }
 	    function kplerFlowForChartMetric(regionKey, metricKey){
 	      const maps = {
@@ -5392,22 +5670,24 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	    function chartMetricValue(point, metricKey, frequency=state.frequency){
 	      if (!point) return null;
 	      if (metricKey === 'netLengthKbd') return Number(point.productionKbd || 0) - Number(point.demandKbd || 0);
-	      if (metricKey === 'periodBuildDrawKb') return periodBuildDrawValue(point, frequency);
-	      if (metricKey === 'receiptsKbd') return pointReceiptTotal(point);
-	      if (metricKey === 'padd3ShipmentsToPadd1Kbd') return point.regionKey === 'padd3' ? padd3ShipmentsToPadd1Value(frequency, point.period) : null;
-	      return finiteNumberOrNull(point[metricKey]);
-	    }
+		      if (metricKey === 'periodBuildDrawKb') return periodBuildDrawValue(point, frequency);
+		      if (metricKey === 'receiptsKbd') return pointReceiptTotal(point);
+		      if (metricKey === 'padd3ShipmentsToPadd1Kbd') return point.regionKey === 'padd3' ? padd3ShipmentsToPadd1Value(frequency, point.period) : null;
+		      if (OUTAGE_CHART_METRICS.has(metricKey)) return outageMetricValue(point, metricKey, frequency);
+		      return finiteNumberOrNull(point[metricKey]);
+		    }
 	    function chartRowsForMetric(regionKey, metricKey, frequency=state.frequency, baseRows=null){
 	      if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return [];
-	      const directKpler = KPLER_CHART_METRICS.has(metricKey);
-	      const sourceRows = directKpler ? null : (Array.isArray(baseRows) ? baseRows : rowsForRegion(regionKey, frequency));
-	      const sourceSig = directKpler ? 'kpler:' + (D.kplerGuides?.[frequency === 'weekly' ? 'weekly' : 'monthly']?.length || 0) + ':' + localDateText() : 'base:' + sourceRows.length + ':' + (sourceRows.at(-1)?.period || '');
+		      const directKpler = KPLER_CHART_METRICS.has(metricKey);
+		      const outageMetric = OUTAGE_CHART_METRICS.has(metricKey);
+		      const sourceRows = directKpler ? null : (Array.isArray(baseRows) ? baseRows : rowsForRegion(regionKey, frequency));
+		      const sourceSig = directKpler ? 'kpler:' + (D.kplerGuides?.[frequency === 'weekly' ? 'weekly' : 'monthly']?.length || 0) + ':' + localDateText() : 'base:' + sourceRows.length + ':' + (sourceRows.at(-1)?.period || '') + (outageMetric ? ':outage:' + stableSettingsRows(outageEntries) : '');
 	      const cacheKey = calcCacheKey('chartRowsForMetric', frequency, regionKey, metricKey, sourceSig);
 	      if (chartRowsForMetricCache.has(cacheKey)) return chartRowsForMetricCache.get(cacheKey);
 	      const rows = directKpler ? kplerChartRows(regionKey, metricKey, frequency) : sourceRows.map(row => {
 	        const value = chartMetricValue(row, metricKey, frequency);
-	        if (value === null || value === undefined || !Number.isFinite(Number(value))) return {...row,[metricKey]:null};
-	        return {...row,[metricKey]:round2(value)};
+		        if (value === null || value === undefined || !Number.isFinite(Number(value))) return {...row,[metricKey]:null};
+		        return {...row,[metricKey]:round2(value)};
 	      });
 	      chartRowsForMetricCache.set(cacheKey, rows);
 	      return rows;
@@ -5417,7 +5697,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	      if (KPLER_CHART_METRICS.has(metricKey) && !kplerFlowForChartMetric(regionKey, metricKey)) return false;
 	      if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return false;
 	      const rows = sortedChartRows(chartRowsForMetric(regionKey, metricKey, frequency));
-	      const values = rows.map(row => Number(row[metricKey])).filter(Number.isFinite);
+	      const values = rows.map(row => finiteNumberOrNull(row[metricKey])).filter(value => value !== null);
 	      if (!values.length) return false;
 	      if (OPTIONAL_NONZERO_CHART_METRICS.has(metricKey)) return values.some(value => Math.abs(value) > .0001);
 	      return true;
@@ -5471,7 +5751,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       return {values:out,valid:outValid};
     }
     function chartSeriesBundle(rows, metricKey, frequency, options={}){
-      const rolling = state.showFourWeekAverage && frequency === 'weekly';
+      const rolling = state.showFourWeekAverage && frequency === 'weekly' && !options.noRolling;
       const cacheKey = calcCacheKey('chartSeries', frequency, metricKey, rolling ? 'ma4' : 'raw', options.cacheScope || options.regionKey || '', Array.isArray(rows) ? rows.length : 0);
       if (chartSeriesCache.has(cacheKey)) return chartSeriesCache.get(cacheKey);
       const raw = rawChartVectorBundle(rows, metricKey, frequency);
@@ -5580,7 +5860,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       return html;
     }
     function niceStep(value){ const raw = Math.max(Math.abs(Number(value) || 0), .001); const exponent = Math.floor(Math.log10(raw)); const base = Math.pow(10, exponent); const fraction = raw / base; const niceFraction = fraction <= 1 ? 1 : fraction <= 1.5 ? 1.5 : fraction <= 2 ? 2 : fraction <= 2.5 ? 2.5 : fraction <= 5 ? 5 : 10; return niceFraction * base; }
-    function chartScale(values, targetTicks=5){ const valid = values.filter(value => Number.isFinite(value)); if (!valid.length) return {min:0,max:100,ticks:[0,20,40,60,80,100]}; let rawMin = Math.min(...valid); let rawMax = Math.max(...valid); if (rawMin === rawMax) { const cushion = Math.max(Math.abs(rawMin) * .025, 1); rawMin -= cushion; rawMax += cushion; } else { const span = rawMax - rawMin; const pad = Math.max(span * .035, Math.max(Math.abs(rawMin), Math.abs(rawMax)) * .003, .01); rawMin -= pad; rawMax += pad; } let step = niceStep((rawMax - rawMin) / Math.max(targetTicks - 1, 1)); let min = Math.floor(rawMin / step) * step; let max = Math.ceil(rawMax / step) * step; if (max <= min) max = min + step; let ticks = []; for (let value = min, guard = 0; value <= max + step / 2 && guard < 12; value += step, guard++) ticks.push(Math.abs(value) < step / 1000 ? 0 : Number(value.toFixed(6))); if (ticks.length > 7) { step = niceStep(step * 1.35); min = Math.floor(rawMin / step) * step; max = Math.ceil(rawMax / step) * step; ticks = []; for (let value = min, guard = 0; value <= max + step / 2 && guard < 12; value += step, guard++) ticks.push(Math.abs(value) < step / 1000 ? 0 : Number(value.toFixed(6))); } return {min,max,ticks,step}; }
+    function scaleTicks(min, max, step){ const ticks = []; for (let value = min, guard = 0; value <= max + step / 2 && guard < 12; value += step, guard++) ticks.push(Math.abs(value) < step / 1000 ? 0 : Number(value.toFixed(6))); return ticks; }
+    function chartScale(values, targetTicks=5, options={}){ const valid = values.filter(value => Number.isFinite(value)); if (!valid.length) return options.percent ? {min:0,max:100,ticks:[0,20,40,60,80,100]} : {min:0,max:100,ticks:[0,20,40,60,80,100]}; let rawMin = Math.min(...valid); let rawMax = Math.max(...valid); const tightPercent = Boolean(options.percent && options.tight); if (rawMin === rawMax) { const cushion = tightPercent ? Math.max(Math.abs(rawMin) * .01, .75) : Math.max(Math.abs(rawMin) * .025, 1); rawMin -= cushion; rawMax += cushion; } else { const span = rawMax - rawMin; const pad = tightPercent ? Math.max(span * .015, .35) : Math.max(span * .035, Math.max(Math.abs(rawMin), Math.abs(rawMax)) * .003, .01); rawMin -= pad; rawMax += pad; } if (options.percent) { rawMin = Math.max(0, rawMin); if (rawMax <= 100) rawMax = Math.min(100, rawMax); } let step = niceStep((rawMax - rawMin) / Math.max(targetTicks - 1, 1)); let min = Math.floor(rawMin / step) * step; let max = Math.ceil(rawMax / step) * step; if (options.percent) { min = Math.max(0, min); if (rawMax <= 100) max = Math.min(100, max); if (max < rawMax) max += step; } if (max <= min) max = min + step; let ticks = scaleTicks(min, max, step); if (ticks.length > 7) { step = niceStep(step * 1.35); min = Math.floor(rawMin / step) * step; max = Math.ceil(rawMax / step) * step; if (options.percent) { min = Math.max(0, min); if (rawMax <= 100) max = Math.min(100, max); if (max < rawMax) max += step; } ticks = scaleTicks(min, max, step); } return {min,max,ticks,step}; }
     function balanceRegionMemberKeys(regionKey){ return BALANCE_AGGREGATES[regionKey] || [regionKey]; }
     function chartScenarioTouchesPeriod(scenario, period, frequency=state.frequency){ const month = frequency === 'weekly' ? weeklyForecastMonth(period) : String(period || '').slice(0,7); return month >= scenario.startPeriod && month <= scenario.endPeriod; }
     function scenarioAffectsChartRegion(scenario, regionKey){ if (scenario.metricKey === 'yield') return scenario.regionKey === regionKey; if (scenario.metricKey === 'exPlannedUtilization') { const scenarioCrudeRegion = chartScenarioCrudeRegion(scenario.regionKey); return Boolean(scenarioCrudeRegion && balanceRegionMemberKeys(regionKey).map(chartScenarioCrudeRegion).includes(scenarioCrudeRegion)); } return balanceRegionMemberKeys(regionKey).includes(scenario.regionKey); }
@@ -5689,7 +5970,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function drawSeasonChart(svg, rows, metricKey, frequency, regionKey=''){
       const w = svg.clientWidth || 520, h = svg.clientHeight || 278, pad = {l:60,r:18,t:18,b:34};
       const slots = frequency === 'weekly' ? 53 : 12;
-      const chartOptions = {regionKey,cacheScope:(svg.classList.contains('crudeSeasonChart') ? 'crude:' : 'balance:') + regionKey + ':' + metricKey};
+	      const isOutageSeasonChart = svg.classList.contains('outageSeasonChart');
+	      const chartOptions = {regionKey,cacheScope:(isOutageSeasonChart ? 'outage:' : (svg.classList.contains('crudeSeasonChart') ? 'crude:' : 'balance:')) + regionKey + ':' + metricKey,noRolling:isOutageSeasonChart};
       const seriesBundle = chartSeriesBundle(rows, metricKey, frequency, chartOptions);
       const actualOnly = chartMetricActualOnly(metricKey);
       svg.setAttribute('viewBox','0 0 '+w+' '+h);
@@ -5702,7 +5984,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       const values = valueByYearSlot(rows, metricKey, frequency, chartOptions);
       const {currentYear, priorYear, nextYearForecast} = chartYearContext(frequency);
       const activeHistory = historyLineDefs(frequency).filter(def => (state.historyYears || []).includes(def.year));
-      const activeBandYears = effectiveBandYears(frequency);
+	      const activeBandYears = svg.classList.contains('outageSeasonChart') ? outageBandYears(frequency) : effectiveBandYears(frequency);
       const overlays = actualOnly || svg.classList.contains('crudeSeasonChart') ? [] : chartScenarioOverlaySeries(regionKey, metricKey, frequency);
       const slotList = Array.from({length:slots}, (_,i)=>i+1);
       const x = slot => pad.l + ((slot - 1) / Math.max(slots - 1, 1)) * (w - pad.l - pad.r);
@@ -5738,7 +6020,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       if (!actualOnly && state.showNextYearForecast && nextYearForecast) visibleYears.push(nextYearForecast);
       visibleYears.forEach(year => slotList.forEach(slot => { const value = values.get(year+':'+slot); if (Number.isFinite(value)) raw.push(value); }));
       overlays.forEach(series => [...series.currentBridge, ...series.nextForecast].forEach(point => { if (Number.isFinite(point.value)) raw.push(point.value); }));
-      const scale = chartScale(raw, 5);
+      const scale = chartScale(raw, 5, {percent:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey),tight:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey)});
       const min = scale.min, max = scale.max;
       const y = value => h - pad.b - ((value - min) / (max - min || 1)) * (h - pad.t - pad.b);
       const line = points => points.map((point, idx) => (idx ? 'L' : 'M') + x(point.slot).toFixed(1) + ' ' + y(point.value).toFixed(1)).join(' ');
@@ -5758,8 +6040,9 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       const nextYearPath = !actualOnly && state.showNextYearForecast && state.showForecast && nextYearForecast ? curve(chartBundleYearPoints(seriesBundle, nextYearForecast, 'forecast')) : '';
       const bandPoints = band.filter(point => Number.isFinite(point.min) && Number.isFinite(point.max));
       const bandPath = bandPoints.length ? bandPoints.map((point, idx) => (idx ? 'L' : 'M') + x(point.slot).toFixed(1) + ' ' + y(point.visibleMax).toFixed(1)).join(' ') + ' ' + bandPoints.slice().reverse().map(point => 'L' + x(point.slot).toFixed(1) + ' ' + y(point.visibleMin).toFixed(1)).join(' ') + ' Z' : '';
-      const grid = scale.ticks.map(value => { const gy = y(value); return '<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+gy.toFixed(1)+'" y2="'+gy.toFixed(1)+'" stroke="#cbd3df"/><text x="'+(pad.l-8)+'" y="'+(gy+4).toFixed(1)+'" font-size="10" text-anchor="end" fill="#4b5566">'+fmt(value)+'</text>'; }).join('');
       const metric = svg.classList.contains('crudeSeasonChart') ? crudeMetricByKey(metricKey) : metricByKey(metricKey);
+      const axisValueLabel = value => metric.unit === '%' ? fmt(value, metric.digits) + '%' : fmt(value);
+      const grid = scale.ticks.map(value => { const gy = y(value); return '<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+gy.toFixed(1)+'" y2="'+gy.toFixed(1)+'" stroke="#cbd3df"/><text x="'+(pad.l-8)+'" y="'+(gy+4).toFixed(1)+'" font-size="10" text-anchor="end" fill="#4b5566">'+axisValueLabel(value)+'</text>'; }).join('');
       const labelEntries = frequency === 'weekly' ? weeklyAxisLabelEntries(currentYear || new Date().getFullYear(), slots) : slotList.map(slot => ({slot,label:slotLabel(slot, frequency)}));
       const labels = labelEntries.map(row => '<text x="'+x(row.slot).toFixed(1)+'" y="'+(h-10)+'" font-size="10" text-anchor="middle" fill="#303a49">'+esc(row.label)+'</text>').join('');
       const avgPoints = band.filter(point => Number.isFinite(point.avg)).map(point => ({slot:point.slot,value:point.avg}));
@@ -5867,14 +6150,167 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       };
       svg.onmouseleave = hideHover;
     }
+    function powerDfoBundle(){ return D.powerDfoCharts || {available:false,daily:[],weatherDaily:[],note:'Power DFO chart data unavailable.',weatherBaselineNote:'Historical HDD baselines unavailable.'}; }
+    function shouldShowNortheastPowerSection(){ return D.product?.key === 'diesel' && state.chartRegion === 'padd1ab'; }
+    function powerDfoChartsSignature(){ const power = powerDfoBundle(); return shouldShowNortheastPowerSection() ? ['powerDfo', hasPowerDfoData() ? 'loaded' : 'pending', power.latestDailyDate || '', power.latestWeatherDate || '', Array.isArray(power.daily) ? power.daily.length : 0, Array.isArray(power.weatherDaily) ? power.weatherDaily.length : 0].join('|') : 'none'; }
+    function queuePowerDfoLoadForCharts(){ if (!shouldShowNortheastPowerSection() || hasPowerDfoData()) return; ensurePowerDfoData().then(() => queueRender()).catch(() => showToast('Unable to load Northeast power charts')); }
+    function powerDfoDailyRows(){ return (Array.isArray(powerDfoBundle().daily) ? powerDfoBundle().daily : []).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))); }
+    function powerDfoWeatherRows(){ return (Array.isArray(powerDfoBundle().weatherDaily) ? powerDfoBundle().weatherDaily : []).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))); }
+    function nearestPowerDfoDate(value, rows){ if (!rows.length) return ''; const requested = String(value || ''); if (rows.some(row => row.date === requested)) return requested; if (!requested) return rows.at(-1).date; const prior = rows.filter(row => row.date <= requested).at(-1); return prior?.date || rows[0].date; }
+    function powerDfoWindowRows(anchorDate='', days=10){ const rows = powerDfoDailyRows(); if (!rows.length) return []; const end = nearestPowerDfoDate(anchorDate || powerDfoAnchorDate, rows); const start = addDaysText(end, 1 - days); return rows.filter(row => row.date >= start && row.date <= end); }
+    function powerDfoWeatherWindowRows(days=14){ const rows = powerDfoWeatherRows(); const dates = Array.from(new Set(rows.map(row => row.date))).sort(); const selectedDates = new Set(dates.slice(Math.max(0, dates.length - days))); return rows.filter(row => selectedDates.has(row.date)); }
+    function weatherSourcePriority(source){ const text = String(source || ''); if (text === 'nws_hourly') return 0; if (text === 'extended_from_nws_hourly_profile') return 1; if (text.startsWith('nearest_')) return 3; return 2; }
+    function weatherSourceLabel(rowOrSource){ const source = typeof rowOrSource === 'string' ? rowOrSource : String(rowOrSource?.source || ''); const explicit = typeof rowOrSource === 'object' ? rowOrSource?.sourceLabel : ''; if (explicit) return explicit; if (source === 'nws_hourly') return 'NWS hourly'; if (source === 'extended_from_nws_hourly_profile') return 'Extended profile'; if (source.startsWith('nearest_')) return 'Nearest ' + source.slice(8).replaceAll('_',' '); return source ? source.replaceAll('_',' ') : 'Weather'; }
+    function weatherSourceColor(source, index=0){ const text = String(source || ''); if (text === 'nws_hourly') return '#315b99'; if (text === 'extended_from_nws_hourly_profile') return '#0f766e'; if (text.startsWith('nearest_')) return '#7c3aed'; return ['#b42318','#d97706','#475467','#0891b2'][index % 4]; }
+    function primaryWeatherRows(rows){ const byDate = new Map(); (rows || []).forEach(row => { if (!row?.date) return; const current = byDate.get(row.date); if (!current || weatherSourcePriority(row.source) < weatherSourcePriority(current.source)) byDate.set(row.date, row); }); return Array.from(byDate.values()).sort((a,b)=>String(a.date).localeCompare(String(b.date))); }
+    function hasFiniteValue(value){ return value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)); }
+    function finiteRowsSum(rows, field){ return rows.reduce((sum,row) => hasFiniteValue(row[field]) ? sum + Number(row[field]) : sum, 0); }
+    function nullableRowsSum(rows, field){ return rows.length && rows.every(row => hasFiniteValue(row[field])) ? finiteRowsSum(rows, field) : null; }
+    function opsStat(label, value, note, cls=''){ return '<div class="chartSummaryItem '+esc(cls)+'"><span>'+esc(label)+'</span><b>'+esc(value)+'</b><i>'+esc(note)+'</i></div>'; }
+    function burnCellColor(percentile){ const p = Number(percentile || 0); if (p <= 80) return {background:'#fff',color:'#1f2937',border:'#e2e8f0'}; const t = Math.max(0, Math.min(1, (p - 80) / 20)); const r = Math.round(255 + (180 - 255) * t); const g = Math.round(255 + (35 - 255) * t); const b = Math.round(255 + (24 - 255) * t); return {background:'rgb('+r+','+g+','+b+')',color:t > .56 ? '#fff' : '#1f2937',border:t > .2 ? '#bd4b42' : '#e2e8f0'}; }
+    function drawDistillateBurnBarChart(svg, rows, options={}){
+      if (!svg) return;
+      const valueKey = options.valueKey || 'estimatedDfoConsumptionKbd';
+      const unit = options.unit || 'kb/d';
+      const color = options.color || '#b42318';
+      const w = svg.clientWidth || 560, h = svg.clientHeight || 276, pad = {l:58,r:18,t:18,b:44};
+      svg.setAttribute('viewBox','0 0 '+w+' '+h);
+      const points = (rows || []).filter(row => Number.isFinite(Number(row[valueKey])));
+      if (!points.length) {
+        svg.innerHTML = '<text x="'+(w/2).toFixed(1)+'" y="'+(h/2).toFixed(1)+'" text-anchor="middle" fill="#667085" font-size="12">No distillate-burn data loaded.</text>';
+        return;
+      }
+      const maxValue = Math.max(1, ...points.map(row => Number(row[valueKey]))) * 1.12;
+      const chartW = w - pad.l - pad.r;
+      const barGap = Math.max(2, Math.min(7, chartW / points.length * .18));
+      const barW = Math.max(3, chartW / points.length - barGap);
+      const y = value => h - pad.b - (Number(value || 0) / maxValue) * (h - pad.t - pad.b);
+      const x = index => pad.l + index * (chartW / points.length) + barGap / 2;
+      const ticks = [0,.25,.5,.75,1].map(pct => maxValue * pct);
+      const grid = ticks.map(value => { const gy = y(value); return '<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+gy.toFixed(1)+'" y2="'+gy.toFixed(1)+'" stroke="#d7dee8"/><text x="'+(pad.l-8)+'" y="'+(gy+4).toFixed(1)+'" text-anchor="end" font-size="10" fill="#4b5566">'+fmt(value,0)+'</text>'; }).join('');
+      const bars = points.map((row,index) => { const value = Number(row[valueKey]); const bx = x(index); const by = y(value); const bh = Math.max(1, h - pad.b - by); return '<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="2" fill="'+color+'"><title>'+esc(row.date+' | '+fmt(value,1)+' '+unit)+'</title></rect>'; }).join('');
+      const labels = points.map((row,index) => index === 0 || index === points.length - 1 || points.length <= 12 ? '<text x="'+(x(index)+barW/2).toFixed(1)+'" y="'+(h-14)+'" text-anchor="middle" font-size="10" fill="#303a49">'+esc(row.date.slice(5))+'</text>' : '').join('');
+      svg.innerHTML = '<line x1="'+pad.l+'" x2="'+pad.l+'" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#9aa6b7"/><line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+(h-pad.b)+'" y2="'+(h-pad.b)+'" stroke="#9aa6b7"/>'+grid+bars+labels+'<text x="'+pad.l+'" y="11" font-size="10" fill="#667085">'+esc(unit)+'</text>';
+    }
+    function drawDistillateBurnCalendar(container, rows){
+      if (!container) return;
+      const points = rows || [];
+      if (!points.length) {
+        container.innerHTML = '<div class="chartNotice">No distillate-burn rows loaded.</div>';
+        return;
+      }
+      container.innerHTML = '<div class="burnCalendarGrid">'+points.map(row => { const color = burnCellColor(row.burnPercentile); const high = Number(row.burnPercentile || 0) >= 80; return '<button class="burnDay '+(high?'highBurn':'')+'" data-power-calendar-date="'+esc(row.date)+'" style="background:'+color.background+';color:'+color.color+';border-color:'+color.border+'" title="'+esc(row.date+' | '+fmt(row.estimatedDfoConsumptionKbd,1)+' kb/d | p'+fmt(row.burnPercentile,1))+'" type="button"><span>'+esc(row.date.slice(5))+'</span><b>'+fmt(row.estimatedDfoConsumptionKbd,1)+'</b><i>kb/d p'+fmt(row.burnPercentile,0)+'</i></button>'; }).join('')+'</div><div class="burnLegend"><span>White: less than 80th percentile</span><span class="legendRamp"></span><span>Deep red: 100th percentile</span></div>';
+    }
+    function hddCumulativeRows(rows, forecastOnly){ const primary = primaryWeatherRows(rows); const filtered = forecastOnly ? primary.filter(row => row.forecast) : primary; const actual = finiteRowsSum(filtered, 'hdd65'); const avg = nullableRowsSum(filtered, 'hddFiveYearAvg'); return {actual,avg,diff:avg === null ? null : actual - avg,count:filtered.length}; }
+    function drawPowerDfoHddChart(svg, rows){
+      if (!svg) return;
+      const w = svg.clientWidth || 560, h = svg.clientHeight || 276, pad = {l:54,r:18,t:18,b:44};
+      svg.setAttribute('viewBox','0 0 '+w+' '+h);
+      const points = (rows || []).filter(row => hasFiniteValue(row.hdd65));
+      const primary = primaryWeatherRows(points);
+      const dates = Array.from(new Set(points.map(row => row.date))).sort();
+      if (!points.length || !dates.length) {
+        svg.innerHTML = '<text x="'+(w/2).toFixed(1)+'" y="'+(h/2).toFixed(1)+'" text-anchor="middle" fill="#667085" font-size="12">No daily HDD rows loaded.</text>';
+        return;
+      }
+      const comparisonValues = points.flatMap(row => [row.hdd65].filter(hasFiniteValue).map(Number)).concat(primary.flatMap(row => [row.hddLastYear,row.hddFiveYearAvg].filter(hasFiniteValue).map(Number)));
+      const maxValue = Math.max(1, ...comparisonValues) * 1.2;
+      const chartW = w - pad.l - pad.r;
+      const slotW = chartW / Math.max(1, dates.length - 1);
+      const dateIndex = new Map(dates.map((date,index) => [date,index]));
+      const xForDate = date => dates.length === 1 ? pad.l + chartW / 2 : pad.l + (dateIndex.get(date) || 0) * slotW;
+      const y = value => h - pad.b - (Number(value || 0) / maxValue) * (h - pad.t - pad.b);
+      const ticks = [0,.25,.5,.75,1].map(pct => maxValue * pct);
+      const grid = ticks.map(value => { const gy = y(value); return '<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+gy.toFixed(1)+'" y2="'+gy.toFixed(1)+'" stroke="#d7dee8"/><text x="'+(pad.l-8)+'" y="'+(gy+4).toFixed(1)+'" text-anchor="end" font-size="10" fill="#4b5566">'+fmt(value,1)+'</text>'; }).join('');
+      const sources = Array.from(new Set(points.map(row => String(row.source || 'unknown')))).sort((a,b)=>weatherSourcePriority(a)-weatherSourcePriority(b) || a.localeCompare(b));
+      const sourceLines = sources.map((source, sourceIndex) => {
+        let sourcePoints = points.filter(row => String(row.source || 'unknown') === source).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+        const firstDate = sourcePoints[0]?.date || '';
+        const priorPrimary = primary.filter(row => firstDate && row.date < firstDate).at(-1);
+        if (priorPrimary && weatherSourcePriority(source) > 0) sourcePoints = [priorPrimary, ...sourcePoints];
+        const coords = sourcePoints.map(row => ({x:xForDate(row.date), y:y(row.hdd65), row}));
+        if (!coords.length) return '';
+        const color = weatherSourceColor(source, sourceIndex);
+        const path = coords.map((point,index) => (index ? 'L' : 'M') + point.x.toFixed(1) + ' ' + point.y.toFixed(1)).join(' ');
+        const circles = coords.map(point => '<circle cx="'+point.x.toFixed(1)+'" cy="'+point.y.toFixed(1)+'" r="3.1" fill="#fff" stroke="'+color+'" stroke-width="2"><title>'+esc(point.row.date+' | '+weatherSourceLabel(point.row)+' | HDD '+fmt(point.row.hdd65,2))+'</title></circle>').join('');
+        return '<path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>'+circles;
+      }).join('');
+      const markerWidth = Math.max(8, Math.min(24, (dates.length > 1 ? slotW : chartW) * .32));
+      const avgMarkers = primary.map(row => hasFiniteValue(row.hddFiveYearAvg) ? '<line x1="'+(xForDate(row.date)-markerWidth).toFixed(1)+'" x2="'+(xForDate(row.date)+markerWidth).toFixed(1)+'" y1="'+y(row.hddFiveYearAvg).toFixed(1)+'" y2="'+y(row.hddFiveYearAvg).toFixed(1)+'" stroke="#4b5563" stroke-width="2.2"/>' : '').join('');
+      const lastYearMarkers = primary.map(row => hasFiniteValue(row.hddLastYear) ? '<circle cx="'+xForDate(row.date).toFixed(1)+'" cy="'+y(row.hddLastYear).toFixed(1)+'" r="3.2" fill="#fff" stroke="#b42318" stroke-width="2"/>' : '').join('');
+      const labels = dates.map((date,index) => (index === 0 || index === dates.length - 1 || dates.length <= 10 || index % 2 === 0) ? '<text x="'+xForDate(date).toFixed(1)+'" y="'+(h-14)+'" text-anchor="middle" font-size="10" fill="#303a49">'+esc(date.slice(5))+'</text>' : '').join('');
+      svg.innerHTML = '<line x1="'+pad.l+'" x2="'+pad.l+'" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#9aa6b7"/><line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+(h-pad.b)+'" y2="'+(h-pad.b)+'" stroke="#9aa6b7"/>'+grid+sourceLines+avgMarkers+lastYearMarkers+labels+'<text x="'+pad.l+'" y="11" font-size="10" fill="#667085">HDD 65</text>';
+    }
+    function hddLegendHtml(rows){ const sources = Array.from(new Set((rows || []).map(row => String(row.source || 'unknown')))).sort((a,b)=>weatherSourcePriority(a)-weatherSourcePriority(b) || a.localeCompare(b)); const sourceLegend = sources.map((source,index) => '<span><i class="swatch" style="background:'+weatherSourceColor(source,index)+'"></i>'+esc(weatherSourceLabel(source))+'</span>').join(''); const primary = primaryWeatherRows(rows); const lastYear = primary.some(row => hasFiniteValue(row.hddLastYear)) ? '<span><i class="swatch" style="background:#b42318"></i>Last year</span>' : ''; const fiveYear = primary.some(row => hasFiniteValue(row.hddFiveYearAvg)) ? '<span><i class="swatch" style="background:#4b5563"></i>5-year avg</span>' : ''; return sourceLegend + lastYear + fiveYear; }
+    function northeastPowerSectionHtml(){
+      if (!shouldShowNortheastPowerSection()) return '';
+      queuePowerDfoLoadForCharts();
+      if (!hasPowerDfoData()) {
+        return '<section class="northeastPowerSection" data-northeast-power-section><div class="chartRegionHeading region-padd1ab"><div><span>Northeast operational charts</span><strong>Distillate burn and PADD 1 HDD</strong></div><i>lazy loading</i></div><article class="chartCard northeastOpsLoading"><div class="chartNotice">Loading Northeast power and weather chart data...</div></article></section>';
+      }
+      const power = powerDfoBundle();
+      const daily = powerDfoDailyRows();
+      const anchor = nearestPowerDfoDate(powerDfoAnchorDate || power.latestDailyDate, daily);
+      powerDfoAnchorDate = anchor;
+      const first = daily[0]?.date || '';
+      const latest = daily.at(-1)?.date || '';
+      return '<section class="northeastPowerSection" data-northeast-power-section><div class="chartRegionHeading region-padd1ab"><div><span>Northeast operational charts</span><strong>Distillate burn and PADD 1 HDD</strong></div><i>lazy payload</i></div><div class="powerDfoControls"><label><span>Calendar end date</span><input class="settingsInput" data-power-anchor type="date" min="'+esc(first)+'" max="'+esc(latest)+'" value="'+esc(anchor)+'"></label><div class="small">'+esc(power.note || '')+'</div></div><article class="chartCard northeastOpsCard distillateBurnChartCard"><div class="cardTools"><div class="toolGroup"><button class="toolBtn" data-power-zoom="burn" type="button">Zoom</button></div></div><h3 class="chartTitle">PADD 1 Northeast distillate burn</h3><div class="chartSummary" data-power-generation-stats></div><svg class="seasonChart powerDfoChart" data-power-generation-chart role="img" aria-label="Daily PADD 1 Northeast distillate burn"></svg></article><article class="chartCard northeastOpsCard burnCalendarCard"><h3 class="chartTitle">Distillate burn calendar</h3><div class="chartSummary" data-power-burn-stats></div><div class="burnCalendar" data-burn-calendar></div></article><article class="chartCard northeastOpsCard hddCard"><h3 class="chartTitle">PADD 1 daily HDDs</h3><div class="chartSummary" data-hdd-stats></div><svg class="seasonChart powerDfoChart" data-hdd-chart role="img" aria-label="Daily PADD 1 HDDs by weather source"></svg><div class="legend" data-hdd-legend></div><div class="powerDfoNote">'+esc(power.weatherBaselineNote || '')+'</div></article></section>';
+    }
+    function hydrateNortheastPowerSection(){
+      const root = document.querySelector('[data-northeast-power-section]');
+      if (!root || !hasPowerDfoData()) return;
+      const daily = powerDfoDailyRows();
+      const dailyWindow = powerDfoWindowRows(powerDfoAnchorDate, 10);
+      const weatherWindow = powerDfoWeatherWindowRows(14);
+      const weatherDates = Array.from(new Set(weatherWindow.map(row => row.date))).sort();
+      const generationStats = root.querySelector('[data-power-generation-stats]');
+      const burnStats = root.querySelector('[data-power-burn-stats]');
+      const hddStats = root.querySelector('[data-hdd-stats]');
+      const latest = dailyWindow.at(-1);
+      const totalBurn = finiteRowsSum(dailyWindow, 'estimatedDfoConsumptionKb');
+      const avgBurn = dailyWindow.length ? totalBurn / dailyWindow.length : 0;
+      if (generationStats) generationStats.innerHTML = opsStat('Window avg burn', fmt(avgBurn,1)+' kb/d', dailyWindow.length+' days') + opsStat('Latest burn', latest ? fmt(latest.estimatedDfoConsumptionKbd,1)+' kb/d' : 'n/a', latest?.date || '') + opsStat('History start', daily[0]?.date || 'n/a', 'full daily file');
+      if (burnStats) burnStats.innerHTML = opsStat('10-day burn', fmt(totalBurn,1)+' kb', 'selected window') + opsStat('80th percentile', fmt(powerDfoBundle().p80BurnKb || 0,1)+' kb/d', 'daily burn') + opsStat('Max daily burn', fmt(powerDfoBundle().p100BurnKb || 0,1)+' kb/d', 'full history');
+      const forecastStats = hddCumulativeRows(weatherWindow, true);
+      const horizonStats = hddCumulativeRows(weatherWindow, false);
+      if (hddStats) hddStats.innerHTML = opsStat('Forecast HDD', fmt(forecastStats.actual,2), forecastStats.avg === null ? 'avg unavailable' : ((forecastStats.diff >= 0 ? '+' : '') + fmt(forecastStats.diff,2)+' vs avg')) + opsStat('Horizon HDD', fmt(horizonStats.actual,2), horizonStats.avg === null ? 'avg unavailable' : ((horizonStats.diff >= 0 ? '+' : '') + fmt(horizonStats.diff,2)+' vs avg')) + opsStat('Weather days', fmt(weatherDates.length,0), powerDfoBundle().latestWeatherDate || '');
+      drawDistillateBurnBarChart(root.querySelector('[data-power-generation-chart]'), dailyWindow, {valueKey:'estimatedDfoConsumptionKbd',unit:'kb/d',color:'#b42318'});
+      drawDistillateBurnCalendar(root.querySelector('[data-burn-calendar]'), dailyWindow);
+      drawPowerDfoHddChart(root.querySelector('[data-hdd-chart]'), weatherWindow);
+      const hddLegend = root.querySelector('[data-hdd-legend]');
+      if (hddLegend) hddLegend.innerHTML = hddLegendHtml(weatherWindow);
+      const input = root.querySelector('[data-power-anchor]');
+      if (input) input.value = powerDfoAnchorDate;
+    }
+    function openPowerDfoGenerationZoom(){
+      ensurePowerDfoData().then(() => {
+        const rows = powerDfoDailyRows();
+        const latest = rows.at(-1)?.date || '';
+        const first = rows[0]?.date || '';
+        const start = addDaysText(latest, -29);
+        const modal = chartZoomModal();
+        if (!modal) return;
+        modal.hidden = false;
+        modal.innerHTML = '<div class="chartZoomPanel"><article class="chartCard chartZoomCard"><div class="cardTools"><div class="toolGroup"><label class="powerZoomField"><span>Start</span><input class="settingsInput" data-power-zoom-start type="date" min="'+esc(first)+'" max="'+esc(latest)+'" value="'+esc(start < first ? first : start)+'"></label><label class="powerZoomField"><span>End</span><input class="settingsInput" data-power-zoom-end type="date" min="'+esc(first)+'" max="'+esc(latest)+'" value="'+esc(latest)+'"></label></div><button class="chartZoomClose" data-close-chart-zoom type="button" aria-label="Close chart zoom">X</button></div><h3 class="chartTitle">PADD 1 Northeast daily distillate burn</h3><svg class="seasonChart powerDfoChart" data-power-zoom-chart role="img" aria-label="Zoomed daily PADD 1 Northeast distillate burn"></svg></article></div>';
+        drawPowerDfoZoomChart();
+      }).catch(() => showToast('Unable to load distillate-burn chart'));
+    }
+    function drawPowerDfoZoomChart(){
+      const modal = chartZoomModal();
+      if (!modal || modal.hidden) return;
+      const start = modal.querySelector('[data-power-zoom-start]')?.value || '';
+      const end = modal.querySelector('[data-power-zoom-end]')?.value || '';
+      const rows = powerDfoDailyRows().filter(row => (!start || row.date >= start) && (!end || row.date <= end));
+      drawDistillateBurnBarChart(modal.querySelector('[data-power-zoom-chart]'), rows, {valueKey:'estimatedDfoConsumptionKbd',unit:'kb/d',color:'#b42318'});
+    }
     function orderedChartMetrics(regionKey=state.chartRegion){ return CHART_METRICS.filter(metricKey => chartMetricHasVisibleData(regionKey, metricKey, state.frequency)); }
     function displayChartRegions(){ return state.chartRegion === CHART_ALL_REGION_KEY ? D.regionalBalance.regions.map(region => region.key) : [state.chartRegion]; }
     function chartMetricsByRegion(chartRegions=displayChartRegions()){ const map = new Map(); chartRegions.forEach(regionKey => map.set(regionKey, orderedChartMetrics(regionKey))); return map; }
     function chartMetricsSignature(chartRegions=displayChartRegions()){ return chartRegions.map(regionKey => regionKey + ':' + orderedChartMetrics(regionKey).join(',')).join('|'); }
     function chartRegionHeadingHtml(regionKey, chartCount){ const meta = REGION_META[regionKey] || null; const label = meta?.[0] && meta?.[1] ? meta[0] + ' | ' + meta[1] : balanceRegionDisplayLabel(regionKey).trim(); return '<div class="chartRegionHeading region-'+esc(regionKey)+'"><div><span>Chart region</span><strong>'+esc(label)+'</strong></div><i>'+fmt(chartCount)+' charts</i></div>'; }
-    function chartShellRenderSignature(){ const chartRegions = displayChartRegions(); return calcCacheKey('balanceChartShell', state.frequency, state.chartRegion, state.showRegionTitles ? 'titles' : 'no-titles', chartMetricsSignature(chartRegions), localDateText()); }
-    function chartRenderSignature(grid){ const chartRegions = displayChartRegions(); return calcCacheKey('balanceCharts', state.frequency, state.chartRegion, state.showForecast ? 'forecast' : 'actual-only', state.showFourWeekAverage ? 'ma4' : 'raw', state.showLegends ? 'legends' : 'no-legends', state.showRegionTitles ? 'titles' : 'no-titles', state.showPriorYear ? 'prior' : 'no-prior', state.showCurrentYear ? 'current' : 'no-current', state.showNextYearForecast ? 'next' : 'no-next', JSON.stringify(effectiveBandYears(state.frequency)), JSON.stringify(state.historyYears || []), chartScenarioOverlaySignature(), chartMetricsSignature(chartRegions), localDateText(), Math.round(grid?.clientWidth || window.innerWidth || 0)); }
-    function markBalanceChartCardsForHydration(grid){ grid?.querySelectorAll('.chartCard').forEach(card => { card.dataset.chartReady = '0'; card.setAttribute('aria-busy', 'true'); }); }
+    function chartShellRenderSignature(){ const chartRegions = displayChartRegions(); return calcCacheKey('balanceChartShell', state.frequency, state.chartRegion, state.showRegionTitles ? 'titles' : 'no-titles', chartMetricsSignature(chartRegions), powerDfoChartsSignature(), localDateText()); }
+    function chartRenderSignature(grid){ const chartRegions = displayChartRegions(); return calcCacheKey('balanceCharts', state.frequency, state.chartRegion, state.showForecast ? 'forecast' : 'actual-only', state.showFourWeekAverage ? 'ma4' : 'raw', state.showLegends ? 'legends' : 'no-legends', state.showRegionTitles ? 'titles' : 'no-titles', state.showPriorYear ? 'prior' : 'no-prior', state.showCurrentYear ? 'current' : 'no-current', state.showNextYearForecast ? 'next' : 'no-next', JSON.stringify(effectiveBandYears(state.frequency)), JSON.stringify(state.historyYears || []), chartScenarioOverlaySignature(), chartMetricsSignature(chartRegions), powerDfoChartsSignature(), localDateText(), Math.round(grid?.clientWidth || window.innerWidth || 0)); }
+    function markBalanceChartCardsForHydration(grid){ grid?.querySelectorAll('.chartCard[data-chart-metric][data-chart-region]').forEach(card => { card.dataset.chartReady = '0'; card.setAttribute('aria-busy', 'true'); }); }
     function cancelBalanceChartHydration(){ balanceChartHydrationToken += 1; if (balanceChartHydrationObserver) { balanceChartHydrationObserver.disconnect(); balanceChartHydrationObserver = null; } }
     function balanceChartShellHtml(regionKey, metricKey, options={}){ const metric = metricByKey(metricKey); const regionLabel = chartRegionLabel(regionKey); const zoomKey = options.allMode ? regionKey + ':' + metricKey : metricKey; const scenarioMetric = chartScenarioMetricFromChartMetric(metricKey); const canLaunchScenario = Boolean(!options.zoomCard && options.regionHasScenarioTarget && scenarioMetric); const cardClass = ['chartCard', options.zoomCard ? 'chartZoomCard' : '', canLaunchScenario ? 'scenarioAdjustable' : ''].filter(Boolean).join(' '); const title = (state.showRegionTitles || options.allMode ? regionLabel + ' | ' : '') + metric.label; const sliderLabel = canLaunchScenario ? 'Open ' + regionLabel + ' ' + metric.label + ' forecast workbench' : ''; const zoomControl = options.zoomCard ? '<button class="chartZoomClose" data-close-chart-zoom type="button" aria-label="Close chart zoom">X</button>' : '<button class="toolBtn" data-zoom="'+esc(zoomKey)+'" type="button">Zoom</button><button class="toolBtn" data-export-chart="'+esc(metricKey)+'" data-export-region="'+esc(regionKey)+'" type="button">Export XLSX</button>'; const forecastButton = canLaunchScenario ? '<button class="toolBtn scenarioTool" data-open-chart-scenario="'+esc(metricKey)+'" data-scenario-region="'+esc(regionKey)+'" type="button" aria-label="'+esc(sliderLabel)+'" title="'+esc(sliderLabel)+'">Forecast</button>' : ''; const secondaryTools = options.zoomCard ? '' : '<div class="toolGroup"><button class="toolBtn" data-copy-chart="'+esc(metricKey)+'" data-copy-region="'+esc(regionKey)+'" type="button">Copy</button><button class="toolBtn" data-save-chart="'+esc(metricKey)+'" data-save-region="'+esc(regionKey)+'" type="button">Save</button></div>'; return '<article class="'+esc(cardClass)+'" data-chart-metric="'+esc(metricKey)+'" data-chart-region="'+esc(regionKey)+'" data-chart-ready="0" aria-busy="true"><div class="cardTools"><div class="toolGroup">'+zoomControl+forecastButton+'</div>'+secondaryTools+'</div><h3 class="chartTitle">'+esc(title)+'</h3><svg class="seasonChart" role="img" aria-label="'+esc(title)+' chart"></svg><div class="chartLegendHost"><div class="legend" '+(state.showLegends?'':'hidden')+'><span>Rendering...</span></div></div><div class="miniWrap"><div class="chartNotice">Rendering chart details...</div></div><div class="chartTooltip"></div></article>'; }
     function chartLegendHtml(rows, regionKey, metricKey){ const {currentYear, priorYear, nextYearForecast} = chartYearContext(state.frequency); const actualOnly = chartMetricActualOnly(metricKey); const historyLegend = historyLineDefs(state.frequency).filter(def => (state.historyYears || []).includes(def.year)).map(def => '<span><i class="swatch" style="background:'+def.color+'"></i>'+def.year+'</span>').join(''); const priorLegend = state.showPriorYear && priorYear ? '<span><i class="swatch" style="background:#315b99"></i>'+priorYear+'</span>' : ''; const currentLegend = state.showCurrentYear && currentYear ? '<span><i class="swatch" style="background:#b42318"></i>'+currentYear+'</span>' : ''; const nextLegend = !actualOnly && state.showNextYearForecast && nextYearForecast && state.showForecast ? '<span><i class="swatch dashed" style="color:'+NEXT_YEAR_FORECAST_COLOR+'"></i>'+nextYearForecast+' fcst</span>' : ''; const rollingLegend = state.showFourWeekAverage && state.frequency === 'weekly' ? '<span><i class="swatch dashed" style="color:#111827"></i>4-week avg</span>' : ''; const bandYears = effectiveBandYears(state.frequency); const bandLabel = compactYearList(bandYears); const bandLegend = bandYears.length ? '<span><i class="swatch band"></i>'+esc(bandLabel)+' Range</span><span><i class="swatch dashed" style="color:#4b5563"></i>'+esc(bandLabel)+' Avg</span>' : ''; const overlayLegend = actualOnly ? '' : chartScenarioOverlaySeries(regionKey, metricKey, state.frequency).map(series => '<span><i class="swatch dashed" style="color:'+series.color+'"></i>'+esc(series.name)+'</span>').join(''); return '<div class="legend" '+(state.showLegends?'':'hidden')+'>'+priorLegend+currentLegend+nextLegend+rollingLegend+historyLegend+bandLegend+overlayLegend+'</div>'; }
@@ -5902,7 +6338,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function hydrateChartBatch(cards, token, valid, hydrate, done, batchSize=4){ let index = 0; const step = () => { if (!valid()) return; const startedAt = performance.now(); let rendered = 0; while (index < cards.length && rendered < batchSize && performance.now() - startedAt < 14) { hydrate(cards[index]); index += 1; rendered += 1; } if (index < cards.length) requestAnimationFrame(step); else done?.(); }; requestAnimationFrame(step); }
     function scheduleBalanceChartHydration(grid, signature, rowsByRegion){
       if (!grid) return;
-      const cards = Array.from(grid.querySelectorAll('.chartCard'));
+      const cards = Array.from(grid.querySelectorAll('.chartCard[data-chart-metric][data-chart-region]'));
       grid.dataset.pendingHydrationSignature = signature;
       if (!cards.length) { grid.dataset.hydratedSignature = signature; return; }
       const token = ++balanceChartHydrationToken;
@@ -5948,7 +6384,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       scheduleBalanceChartHydration(grid, signature, rowsByRegion);
       syncChartViewport(true);
     }
-    function renderCharts(){ const chartRegions = displayChartRegions(); const metricsByRegion = chartMetricsByRegion(chartRegions); const allMode = state.chartRegion === CHART_ALL_REGION_KEY; const grid = document.getElementById('chartGrid'); const shellSignature = chartShellRenderSignature(); const signature = chartRenderSignature(grid); const rowsByRegionForCharts = () => new Map(chartRegions.map(regionKey => [regionKey, rowsForRegion(regionKey, state.frequency)])); const chartCount = chartRegions.reduce((sum, regionKey) => sum + (metricsByRegion.get(regionKey)?.length || 0), 0); renderChartScenarioWorkbench(); document.getElementById('chartsTitle').textContent = (state.frequency === 'weekly' ? 'Weekly' : 'Monthly') + ' | ' + chartRegionDisplayLabel(state.chartRegion) + ' Charts'; document.getElementById('chartCount').textContent = chartCount + ' charts'; if (grid.dataset.renderSignature === shellSignature && grid.children.length) { if (grid.dataset.hydratedSignature !== signature) { cancelBalanceChartHydration(); markBalanceChartCardsForHydration(grid); scheduleBalanceChartHydration(grid, signature, rowsByRegionForCharts()); } syncChartViewport(); return; } cancelBalanceChartHydration(); grid.innerHTML = chartRegions.flatMap(regionKey => { const metrics = metricsByRegion.get(regionKey) || []; const regionHasScenarioTarget = chartScenarioRegionOptions().some(region => region.key === regionKey); const cards = metrics.map(metricKey => balanceChartShellHtml(regionKey, metricKey, {allMode, regionHasScenarioTarget})); return [chartRegionHeadingHtml(regionKey, metrics.length), ...cards]; }).join(''); grid.dataset.renderSignature = shellSignature; grid.dataset.hydratedSignature = ''; scheduleBalanceChartHydration(grid, signature, rowsByRegionForCharts()); syncChartViewport(); }
+    function renderCharts(){ const chartRegions = displayChartRegions(); const metricsByRegion = chartMetricsByRegion(chartRegions); const allMode = state.chartRegion === CHART_ALL_REGION_KEY; const grid = document.getElementById('chartGrid'); const shellSignature = chartShellRenderSignature(); const signature = chartRenderSignature(grid); const rowsByRegionForCharts = () => new Map(chartRegions.map(regionKey => [regionKey, rowsForRegion(regionKey, state.frequency)])); const chartCount = chartRegions.reduce((sum, regionKey) => sum + (metricsByRegion.get(regionKey)?.length || 0), 0) + (shouldShowNortheastPowerSection() ? 3 : 0); renderChartScenarioWorkbench(); document.getElementById('chartsTitle').textContent = (state.frequency === 'weekly' ? 'Weekly' : 'Monthly') + ' | ' + chartRegionDisplayLabel(state.chartRegion) + ' Charts'; document.getElementById('chartCount').textContent = chartCount + ' charts'; if (grid.dataset.renderSignature === shellSignature && grid.children.length) { if (grid.dataset.hydratedSignature !== signature) { cancelBalanceChartHydration(); markBalanceChartCardsForHydration(grid); scheduleBalanceChartHydration(grid, signature, rowsByRegionForCharts()); } hydrateNortheastPowerSection(); syncChartViewport(); return; } cancelBalanceChartHydration(); grid.innerHTML = chartRegions.flatMap(regionKey => { const metrics = metricsByRegion.get(regionKey) || []; const regionHasScenarioTarget = chartScenarioRegionOptions().some(region => region.key === regionKey); const cards = metrics.map(metricKey => balanceChartShellHtml(regionKey, metricKey, {allMode, regionHasScenarioTarget})); return [chartRegionHeadingHtml(regionKey, metrics.length), ...cards]; }).join('') + northeastPowerSectionHtml(); grid.dataset.renderSignature = shellSignature; grid.dataset.hydratedSignature = ''; scheduleBalanceChartHydration(grid, signature, rowsByRegionForCharts()); hydrateNortheastPowerSection(); syncChartViewport(); }
     function crudePeriodBuckets(frequency=state.frequency){ const key = frequency; if (crudePeriodBucketsCache.has(key)) return crudePeriodBucketsCache.get(key); const periods = new Map(); crudeRowsForFrequency(frequency).forEach(row => { const bucket = periods.get(row.period) || {}; bucket[row.regionKey] = row; periods.set(row.period, bucket); }); const entries = Array.from(periods.entries()).sort((a,b)=>a[0].localeCompare(b[0])); crudePeriodBucketsCache.set(key, entries); return entries; }
 	    function crudeAllPeriods(frequency=state.frequency){ const key = calcCacheKey('crudeAllPeriods', frequency, forecastEndForFrequency(frequency)); if (crudeAllPeriodsCache.has(key)) return crudeAllPeriodsCache.get(key); const buckets = new Map(crudePeriodBuckets(frequency)); const actualPeriods = Array.from(buckets.keys()).sort(); const latest = actualPeriods.at(-1); const end = forecastEndForFrequency(frequency); const future = []; if (latest) { let next = frequency === 'weekly' ? addDaysText(latest, 7) : addMonthsText(latest, 1); for (let guard = 0; next <= end && guard < 520; guard++) { if (!buckets.has(next)) future.push(next); next = frequency === 'weekly' ? addDaysText(next, 7) : addMonthsText(next, 1); } } const entries = [...actualPeriods.map(period => [period, buckets.get(period) || {}, true]), ...future.map(period => [period, {}, false])]; crudeAllPeriodsCache.set(key, entries); return entries; }
     function firstForecastMonth(){ return (crudeAllPeriods('monthly').find(([, , isActual]) => !isActual)?.[0] || workbookSettings.forecastEnd.slice(0,7)).slice(0,7); }
@@ -6124,12 +6560,30 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	      if (value === null || value === undefined || value === '') return kplerGuideMissingHistoricalZero(flow, isHistorical) ? 0 : null;
 	      return Number.isFinite(Number(value)) ? Number(value) : null;
 	    }
-    function emptyOutageTotals(includeUnits=false){ const totals = {planned:0,unplanned:0,other:0,total:0}; if (includeUnits) totals.units = {}; return totals; }
-    function outageBucket(type){ return type === 'Planned' ? 'planned' : type === 'Unplanned' ? 'unplanned' : 'other'; }
-    function addOutageDailyValue(target, type, value){ const bucket = outageBucket(type); target[bucket] += value; target.total += value; }
-    function roundedOutageTotals(totals, divisor=1){ const days = Math.max(Number(divisor || 1), 1); return {planned:round3(totals.planned / days),unplanned:round3(totals.unplanned / days),other:round3(totals.other / days),total:round3(totals.total / days)}; }
-    function outageDailyVector(){ const key = stableSettingsRows(outageEntries); if (outageDailyVectorCache.key === key && outageDailyVectorCache.days) return outageDailyVectorCache.days; const days = new Map(); const applyOutageValue = (regionKey, unitKey, type, dateMs, value) => { if (!value) return; const dateKey = dateKeyFromMs(dateMs); const byRegion = days.get(dateKey) || {}; const regionTotals = byRegion[regionKey] || emptyOutageTotals(true); addOutageDailyValue(regionTotals, type, value); const unitTotals = regionTotals.units[unitKey] || emptyOutageTotals(); addOutageDailyValue(unitTotals, type, value); regionTotals.units[unitKey] = unitTotals; byRegion[regionKey] = regionTotals; days.set(dateKey, byRegion); }; outageEntries.forEach(outage => { const regionKey = validBaseCrudeRegion(outage.regionKey) ? outage.regionKey : ''; const start = dateValue(outage.startDate); const end = dateValue(outage.endDate); const value = Number(outage.capacityOfflineKbd || 0); if (!regionKey || start === null || end === null || !value) return; const unitKey = [outage.refineryId || outage.refineryName || outage.refinery || 'refinery', outage.unitKey || outage.unitLabel || 'unit'].join('|'); for (let ms = start, guard = 0; ms <= end && guard < 10000; ms += DAY_MS, guard += 1) applyOutageValue(regionKey, unitKey, outage.type, ms, value); for (let dayOffset = 1; dayOffset <= OUTAGE_RAMP_DOWN_DAYS; dayOffset += 1) { const rampValue = roundCapacity1(value * outageRampFactor(dayOffset)); if (!rampValue) continue; applyOutageValue(regionKey, unitKey, outage.type, end + dayOffset * DAY_MS, rampValue); } }); outageDailyVectorCache = {key,days}; return days; }
-    function outageTotalsForRange(regionKey, range){ const days = outageDailyVector(); const totals = emptyOutageTotals(); for (let ms = range.start, guard = 0; ms <= range.end && guard < 10000; ms += DAY_MS, guard += 1) { const byRegion = days.get(dateKeyFromMs(ms)); if (!byRegion) continue; const sourceKeys = CRUDE_AGGREGATES[regionKey] || [regionKey]; sourceKeys.forEach(key => { const daily = byRegion[key]; if (!daily) return; totals.planned += Number(daily.planned || 0); totals.unplanned += Number(daily.unplanned || 0); totals.other += Number(daily.other || 0); totals.total += Number(daily.total || 0); }); } return roundedOutageTotals(totals, range.days); }
+    function productOutageYields(){ return D.product?.key === 'jet' ? JET_OUTAGE_YIELDS : DIESEL_OUTAGE_YIELDS; }
+    function canonicalOutageUnitKey(unitKey='', unitLabel=''){
+      const raw = (String(unitKey || '') + ' ' + String(unitLabel || '')).toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+      if (raw.includes('atmos') || raw.includes('crude distillation') || raw.includes('cdu')) return 'atmos_distillation';
+      if (raw.includes('fcc') || raw.includes('catalytic cracking')) return 'fcc';
+      if (raw.includes('cok')) return 'coking';
+      if (raw.includes('hydrocrack') && (raw.includes('gasoil') || raw.includes('gas oil') || raw.includes('resid'))) return 'gasoil_resid_hydrocracking';
+      if (raw.includes('hydrocrack')) return 'distillate_hydrocracking';
+      return String(unitKey || unitLabel || 'unknown').trim() || 'unknown';
+    }
+    function productOutageYield(regionKey, unitKey){ return Number(productOutageYields()?.[regionKey]?.[unitKey] || 0); }
+    function emptyOutageTotals(includeUnits=false){ const totals = {planned:0,unplanned:0,other:0,total:0,totalKnown:0}; if (includeUnits) { totals.units = {}; totals.productOffline = emptyOutageTotals(); } return totals; }
+	    function outageBucket(type){ return type === 'Planned' ? 'planned' : type === 'Unplanned' ? 'unplanned' : 'other'; }
+	    function addOutageDailyValue(target, type, value){ const bucket = outageBucket(type); target[bucket] += value; target.total += value; if (bucket !== 'other') target.totalKnown += value; }
+	    function addOutageTotals(target, source){ if (!source) return; ['planned','unplanned','other','total','totalKnown'].forEach(key => { target[key] += Number(source[key] || 0); }); }
+	    function roundedOutageTotals(totals, divisor=1){ const days = Math.max(Number(divisor || 1), 1); return {planned:round3(totals.planned / days),unplanned:round3(totals.unplanned / days),other:round3(totals.other / days),total:round3(totals.total / days),totalKnown:round3(totals.totalKnown / days)}; }
+	    function outageDailyVector(){ const key = stableSettingsRows(outageEntries) + '|' + D.product?.key; if (outageDailyVectorCache.key === key && outageDailyVectorCache.days) return outageDailyVectorCache.days; const days = new Map(); const applyOutageValue = (regionKey, unitKey, type, dateMs, value) => { if (!value) return; const dateKey = dateKeyFromMs(dateMs); const byRegion = days.get(dateKey) || {}; const canonicalUnitKey = canonicalOutageUnitKey(unitKey); const regionTotals = byRegion[regionKey] || emptyOutageTotals(true); addOutageDailyValue(regionTotals, type, value); const unitTotals = regionTotals.units[canonicalUnitKey] || emptyOutageTotals(); addOutageDailyValue(unitTotals, type, value); regionTotals.units[canonicalUnitKey] = unitTotals; const yieldedValue = value * productOutageYield(regionKey, canonicalUnitKey); if (yieldedValue) addOutageDailyValue(regionTotals.productOffline, type, yieldedValue); byRegion[regionKey] = regionTotals; days.set(dateKey, byRegion); }; outageEntries.forEach(outage => { const regionKey = validBaseCrudeRegion(outage.regionKey) ? outage.regionKey : ''; const start = dateValue(outage.startDate); const end = dateValue(outage.endDate); const value = Number(outage.capacityOfflineKbd || 0); if (!regionKey || start === null || end === null || !value) return; const unitKey = outage.unitKey || outage.unitLabel || 'unit'; for (let ms = start, guard = 0; ms <= end && guard < 10000; ms += DAY_MS, guard += 1) applyOutageValue(regionKey, unitKey, outage.type, ms, value); for (let dayOffset = 1; dayOffset <= OUTAGE_RAMP_DOWN_DAYS; dayOffset += 1) { const rampValue = roundCapacity1(value * outageRampFactor(dayOffset)); if (!rampValue) continue; applyOutageValue(regionKey, unitKey, outage.type, end + dayOffset * DAY_MS, rampValue); } }); outageDailyVectorCache = {key,days}; return days; }
+	    function outageSourceKeys(regionKey){ if (CRUDE_AGGREGATES[regionKey]) return CRUDE_AGGREGATES[regionKey]; const crudeRegion = crudeRegionForBalanceRegion(regionKey); return validBaseCrudeRegion(crudeRegion) ? [crudeRegion] : [regionKey]; }
+	    function outageTotalsForRange(regionKey, range){ const days = outageDailyVector(); const totals = emptyOutageTotals(); for (let ms = range.start, guard = 0; ms <= range.end && guard < 10000; ms += DAY_MS, guard += 1) { const byRegion = days.get(dateKeyFromMs(ms)); if (!byRegion) continue; outageSourceKeys(regionKey).forEach(key => addOutageTotals(totals, byRegion[key])); } return roundedOutageTotals(totals, range.days); }
+	    function outageMetricPeriodRange(period, frequency=state.frequency){ if (frequency === 'weekly') { const end = Date.parse(String(period || '') + 'T00:00:00Z'); if (!Number.isFinite(end)) return periodRange(period, frequency); return {start:end - 6 * DAY_MS,end,days:7}; } return periodRange(period, frequency); }
+	    function outageMetricShare(point, regionKey, frequency=state.frequency){ if (regionKey !== 'padd1ab' && regionKey !== 'padd1c') return 1; const rawBucket = (frequency === 'weekly' ? weeklyRawBuckets() : monthlyRawBuckets()).get(point?.period || '') || {}; return padd1SplitShare(regionKey, rawBucket); }
+	    function outageMetricTotalsForRange(regionKey, range, spec){ const days = outageDailyVector(); const totals = emptyOutageTotals(); for (let ms = range.start, guard = 0; ms <= range.end && guard < 10000; ms += DAY_MS, guard += 1) { const byRegion = days.get(dateKeyFromMs(ms)); if (!byRegion) continue; outageSourceKeys(regionKey).forEach(key => { const daily = byRegion[key]; if (!daily) return; if (spec.kind === 'product') addOutageTotals(totals, daily.productOffline); else (OUTAGE_UNIT_GROUPS[spec.unitGroup] || []).forEach(unitKey => addOutageTotals(totals, daily.units?.[unitKey])); }); } return roundedOutageTotals(totals, range.days); }
+	    function outageMetricTotalsForPeriod(regionKey, period, frequency, metricKey){ const spec = OUTAGE_METRIC_SPECS[metricKey]; if (!spec) return emptyOutageTotals(); const key = calcCacheKey('outageMetricTotalsForPeriod', regionKey, period, frequency, metricKey); if (outageTotalsCache.has(key)) return outageTotalsCache.get(key); const totals = outageMetricTotalsForRange(regionKey, outageMetricPeriodRange(period, frequency), spec); outageTotalsCache.set(key, totals); return totals; }
+	    function outageMetricValue(point, metricKey, frequency=state.frequency){ const spec = OUTAGE_METRIC_SPECS[metricKey]; if (!point || !spec) return null; const totals = outageMetricTotalsForPeriod(point.regionKey, point.period, frequency, metricKey); const raw = Number(totals[spec.bucket] || 0); return round2(raw * outageMetricShare(point, point.regionKey, frequency)); }
 	    function latestCapacityAdjustment(refineryId, unitKey, periodMonth){ const key = calcCacheKey('latestCapacityAdjustment', refineryId, unitKey, periodMonth); if (latestCapacityAdjustmentCache.has(key)) return latestCapacityAdjustmentCache.get(key); const index = capacityAdjustmentIndex(); const adjustment = latestCapacityAdjustmentIn(index.byRefinery.get(capacityAdjustmentGroupKey(refineryId, unitKey)), periodMonth); latestCapacityAdjustmentCache.set(key, adjustment); return adjustment; }
 	    function latestRegionalCapacityAdjustment(regionKey, lineId, periodMonth){ const key = calcCacheKey('latestRegionalCapacityAdjustment', regionKey, lineId, periodMonth); if (latestRegionalCapacityAdjustmentCache.has(key)) return latestRegionalCapacityAdjustmentCache.get(key); const index = capacityAdjustmentIndex(); const rows = index.byRegional.get(capacityAdjustmentGroupKey(regionKey, lineId)); const exact = regionalCapacityAdjustmentCarriesForward(lineId) ? latestCapacityAdjustmentIn(rows, periodMonth) : exactCapacityAdjustmentIn(rows, periodMonth); const fallback = lineId === 'operableCapacityKbd' ? latestCapacityAdjustmentIn(index.byRegional.get(capacityAdjustmentGroupKey(regionKey, 'operatingCapacityKbd')), periodMonth) : null; const adjustment = exact || fallback; latestRegionalCapacityAdjustmentCache.set(key, adjustment); return adjustment; }
     function effectiveUnitCapacityKbd(refineryId, unitKey, periodMonth){ const adjustment = latestCapacityAdjustment(refineryId, unitKey, periodMonth); if (adjustment) return Number(adjustment.capacityKbd || 0); const unit = refineryUnit(refineryId, unitKey); return Number(unit?.capacityKbd || 0); }
@@ -6417,12 +6871,25 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function renderCapacityAdjustmentRegionOptions(select, current){ if (!select) return ''; const regions = capacityAdjustmentRegions(); const fallback = validCapacityAdjustmentRegion(current) ? current : (validCapacityAdjustmentRegion(state.crudeRegion) ? state.crudeRegion : 'padd1'); const signature = 'capacity-regions:' + regions.map(region => region.key).join('|'); setSelectOptions(select, signature, regions.map(region => '<option value="'+esc(region.key)+'">'+esc(crudeRegionDisplayLabel(region.key))+'</option>').join('')); select.value = validCapacityAdjustmentRegion(fallback) ? fallback : 'padd1'; return select.value; }
     function renderRefineryOptions(select, regionKey, current){ if (!select) return ''; const cacheKey = regionKey || 'padd1'; const refineries = refineriesForRegion(cacheKey).filter(refinery => unitsForRefinery(refinery.refineryId).length); if (!refineries.length) { setSelectOptions(select, 'refineries:none', '<option value="">No refinery capacity rows</option>'); select.value = ''; return ''; } const signature = 'refineries:' + cacheKey; let html = refineryOptionsHtmlCache.get(signature); if (!html) { html = refineries.map(refinery => '<option value="'+esc(refinery.refineryId)+'">'+esc(refinery.refineryName)+' ('+esc(crudeRegionDisplayLabel(refinery.padd))+')</option>').join(''); refineryOptionsHtmlCache.set(signature, html); } setSelectOptions(select, signature, html); select.value = refineries.some(refinery => refinery.refineryId === current) ? current : refineries[0].refineryId; return select.value; }
     function renderUnitOptions(select, refineryId, current){ if (!select) return ''; const cacheKey = refineryId || ''; const units = unitsForRefinery(cacheKey); if (!units.length) { setSelectOptions(select, 'units:none', '<option value="">No units</option>'); select.value = ''; return ''; } const signature = 'units:' + cacheKey; let html = unitOptionsHtmlCache.get(signature); if (!html) { html = units.map(unit => '<option value="'+esc(unit.unitKey)+'">'+esc(unit.refineryId === REGIONAL_CAPACITY_REFINERY_ID ? unit.unitLabel : unit.unitLabel+' - '+fmt(Number(unit.capacityKbd || 0),OUTAGE_CAPACITY_DIGITS)+' kbd')+'</option>').join(''); unitOptionsHtmlCache.set(signature, html); } setSelectOptions(select, signature, html); select.value = units.some(unit => unit.unitKey === current) ? current : units[0].unitKey; return select.value; }
-    function renderOutageRegionOptions(){ const region = renderBaseCrudeRegionOptions(document.getElementById('outageRegion'), document.getElementById('outageRegion')?.value || state.crudeRegion || 'padd1'); renderOutageRefineryOptions(region); }
-    function renderOutageRefineryOptions(regionKey){ const select = document.getElementById('outageRefinery'); const refineryId = renderRefineryOptions(select, regionKey || document.getElementById('outageRegion')?.value || 'padd1', select?.value || ''); renderOutageUnitOptions(refineryId); }
-    function renderOutageUnitOptions(refineryId){ const select = document.getElementById('outageUnit'); renderUnitOptions(select, refineryId || document.getElementById('outageRefinery')?.value || '', select?.value || ''); updateOutageCapacityDefault(false); }
-    function updateOutageCapacityDefault(force=true){ const refineryId = document.getElementById('outageRefinery')?.value || ''; const unitKey = document.getElementById('outageUnit')?.value || ''; const input = document.getElementById('outageCapacity'); const status = document.getElementById('outageFormStatus'); const month = periodMonthValue(document.getElementById('outageStart')?.value || workbookSettings.forecastEnd); const capacity = effectiveUnitCapacityKbd(refineryId, unitKey, month); if (input && (force || !input.value) && Number.isFinite(capacity)) input.value = String(roundCapacity1(capacity)); if (status && refineryId && unitKey) status.textContent = 'Default capacity: ' + fmt(capacity,OUTAGE_CAPACITY_DIGITS) + ' kbd for ' + month + '. Override if only part of the unit is offline. A 3-day linear ramp-down is added after the end date.'; validateOutageForm(); }
-    function typePill(type){ return '<span class="typePill '+esc(String(type || 'Other').toLowerCase())+'">'+esc(type || 'Other')+'</span>'; }
-    function renderOutagesSheet(){ renderOutageRegionOptions(); document.getElementById('outageCount').textContent = outageEntries.length + ' entries'; const table = document.getElementById('outageTable'); if (!table) return; const signature = stableSettingsRows({rows:outageEntries,edit:outageEditId}); if (table.dataset.renderSignature === signature && table.tBodies.length && table.tBodies[0]?.rows.length) return validateOutageForm(); const header = '<thead><tr><th>Region</th><th>Refinery</th><th>Unit</th><th>Type</th><th>Capacity offline</th><th>Start</th><th>End</th><th>Note</th><th></th></tr></thead>'; const rows = outageEntries.length ? outageEntries.map(outage => { const invalid = outageCapacitySummary(outage, outage.id).invalid; const rowClass = invalid ? ' class="invalidOutage"' : ''; return '<tr'+rowClass+'><td>'+esc(crudeRegionDisplayLabel(outage.regionKey))+'</td><td>'+esc(outage.refinery)+'</td><td>'+esc(outage.unitLabel || '')+'</td><td>'+typePill(outage.type)+'</td><td class="num">'+fmt(outage.capacityOfflineKbd,OUTAGE_CAPACITY_DIGITS)+'</td><td>'+esc(outage.startDate)+'</td><td>'+esc(outage.endDate)+'</td><td class="outageNote">'+esc(outage.note || '')+'</td><td><button class="toolBtn" data-edit-outage="'+esc(outage.id)+'" type="button">Edit</button> <button class="toolBtn" data-delete-outage="'+esc(outage.id)+'" type="button">Delete</button></td></tr>'; }).join('') : '<tr class="emptyRow"><td colspan="9">No outages saved.</td></tr>'; table.innerHTML = header + '<tbody>' + rows + '</tbody>'; table.dataset.renderSignature = signature; validateOutageForm(); }
+	    function renderOutageRegionOptions(){ const region = renderBaseCrudeRegionOptions(document.getElementById('outageRegion'), document.getElementById('outageRegion')?.value || state.crudeRegion || 'padd1'); renderOutageRefineryOptions(region); }
+	    function renderOutageRefineryOptions(regionKey){ const select = document.getElementById('outageRefinery'); const refineryId = renderRefineryOptions(select, regionKey || document.getElementById('outageRegion')?.value || 'padd1', select?.value || ''); renderOutageUnitOptions(refineryId); }
+	    function renderOutageUnitOptions(refineryId){ const select = document.getElementById('outageUnit'); renderUnitOptions(select, refineryId || document.getElementById('outageRefinery')?.value || '', select?.value || ''); updateOutageCapacityDefault(false); }
+	    function updateOutageCapacityDefault(force=true){ const refineryId = document.getElementById('outageRefinery')?.value || ''; const unitKey = document.getElementById('outageUnit')?.value || ''; const input = document.getElementById('outageCapacity'); const status = document.getElementById('outageFormStatus'); const month = periodMonthValue(document.getElementById('outageStart')?.value || workbookSettings.forecastEnd); const capacity = effectiveUnitCapacityKbd(refineryId, unitKey, month); if (input && (force || !input.value) && Number.isFinite(capacity)) input.value = String(roundCapacity1(capacity)); if (status && refineryId && unitKey) status.textContent = 'Default capacity: ' + fmt(capacity,OUTAGE_CAPACITY_DIGITS) + ' kbd for ' + month + '. Override if only part of the unit is offline. A 3-day linear ramp-down is added after the end date.'; validateOutageForm(); }
+	    function typePill(type){ return '<span class="typePill '+esc(String(type || 'Other').toLowerCase())+'">'+esc(type || 'Other')+'</span>'; }
+	    function renderOutageChartRegionOptions(){ const select = document.getElementById('outageChartRegion'); if (!select) return activeCrudeRegionKey(); const regions = D.crudeRuns.regions.map(region => ({key:region.key,label:crudeRegionDisplayLabel(region.key)})); const signature = 'outage-chart-regions:' + regions.map(region => region.key).join('|'); setSelectOptions(select, signature, regions.map(region => '<option value="'+esc(region.key)+'">'+esc(region.label)+'</option>').join('')); const active = activeCrudeRegionKey(); select.value = active; return active; }
+	    function outageChartPeriods(frequency=state.frequency){ return Array.from(new Set(rawRowsForFrequency(frequency).map(row => String(row.period || '')).filter(Boolean))).sort(); }
+	    function outageChartStatusByPeriod(frequency=state.frequency){ const index = new Map(); rawRowsForFrequency(frequency).forEach(row => { if (row.period && !index.has(row.period)) index.set(row.period, row.status === 'forecast' ? 'forecast' : 'actual'); }); return index; }
+	    function outageChartBaseRows(regionKey, frequency=state.frequency){ const label = crudeRegionDisplayLabel(regionKey); const statusByPeriod = outageChartStatusByPeriod(frequency); return outageChartPeriods(frequency).map(period => ({period,status:statusByPeriod.get(period) || 'actual',regionKey,regionName:label})); }
+	    function outageChartRowsForMetric(regionKey, metricKey, frequency=state.frequency){ if (!validCrudeRegion(regionKey) || !OUTAGE_CHART_METRICS.has(metricKey)) return []; return outageChartBaseRows(regionKey, frequency).map(row => { const value = outageMetricValue(row, metricKey, frequency); return {...row,[metricKey]:Number.isFinite(Number(value)) ? round2(value) : null}; }); }
+	    function orderedOutageChartMetrics(){ return Array.from(OUTAGE_CHART_METRICS); }
+		    function outageChartRenderSignature(grid, regionKey=activeCrudeRegionKey()){ return calcCacheKey('outageCharts', state.frequency, regionKey, state.showForecast ? 'forecast' : 'actual-only', state.showLegends ? 'legends' : 'no-legends', state.showRegionTitles ? 'titles' : 'no-titles', state.showPriorYear ? 'prior' : 'no-prior', state.showCurrentYear ? 'current' : 'no-current', state.showNextYearForecast ? 'next' : 'no-next', JSON.stringify(outageBandYears(state.frequency)), JSON.stringify(state.historyYears || []), stableSettingsRows(outageEntries), Math.round(grid?.clientWidth || window.innerWidth || 0)); }
+	    function outageChartLegendHtml(rows, regionKey, metricKey){ const {currentYear, priorYear, nextYearForecast} = chartYearContext(state.frequency); const historyLegend = historyLineDefs(state.frequency).filter(def => (state.historyYears || []).includes(def.year)).map(def => '<span><i class="swatch" style="background:'+def.color+'"></i>'+def.year+'</span>').join(''); const priorLegend = state.showPriorYear && priorYear ? '<span><i class="swatch" style="background:#315b99"></i>'+priorYear+'</span>' : ''; const currentLegend = state.showCurrentYear && currentYear ? '<span><i class="swatch" style="background:#b42318"></i>'+currentYear+'</span>' : ''; const nextLegend = state.showNextYearForecast && nextYearForecast && state.showForecast ? '<span><i class="swatch dashed" style="color:'+NEXT_YEAR_FORECAST_COLOR+'"></i>'+nextYearForecast+' fcst</span>' : ''; const bandYears = outageBandYears(state.frequency); const bandLabel = compactYearList(bandYears); const bandLegend = bandYears.length ? '<span><i class="swatch band"></i>'+esc(bandLabel)+' Range</span><span><i class="swatch dashed" style="color:#4b5563"></i>'+esc(bandLabel)+' Avg</span>' : ''; return '<div class="legend" '+(state.showLegends?'':'hidden')+'>'+priorLegend+currentLegend+nextLegend+historyLegend+bandLegend+'</div>'; }
+	    function outageChartShellHtml(regionKey, metricKey, options={}){ const metric = metricByKey(metricKey); const regionLabel = crudeRegionDisplayLabel(regionKey); const title = (state.showRegionTitles || options.zoomCard ? regionLabel + ' | ' : '') + metric.label; const zoomControl = options.zoomCard ? '<button class="chartZoomClose" data-close-chart-zoom type="button" aria-label="Close chart zoom">X</button>' : '<button class="toolBtn" data-outage-zoom="'+esc(metricKey)+'" data-outage-region="'+esc(regionKey)+'" type="button">Zoom</button><button class="toolBtn" data-outage-export-chart="'+esc(metricKey)+'" data-outage-region="'+esc(regionKey)+'" type="button">Export XLSX</button>'; const secondaryTools = options.zoomCard ? '' : '<div class="toolGroup"><button class="toolBtn" data-outage-copy-chart="'+esc(metricKey)+'" data-outage-region="'+esc(regionKey)+'" type="button">Copy</button><button class="toolBtn" data-outage-save-chart="'+esc(metricKey)+'" data-outage-region="'+esc(regionKey)+'" type="button">Save</button></div>'; return '<article class="chartCard '+(options.zoomCard ? 'chartZoomCard' : '')+'" data-outage-chart-metric="'+esc(metricKey)+'" data-outage-chart-region="'+esc(regionKey)+'" data-chart-ready="0" aria-busy="true"><div class="cardTools"><div class="toolGroup">'+zoomControl+'</div>'+secondaryTools+'</div><h3 class="chartTitle">'+esc(title)+'</h3><svg class="seasonChart outageSeasonChart" role="img" aria-label="'+esc(title)+' chart"></svg><div class="chartLegendHost"><div class="legend" '+(state.showLegends?'':'hidden')+'><span>Rendering...</span></div></div><div class="miniWrap"><div class="chartNotice">Rendering chart details...</div></div><div class="chartTooltip"></div></article>'; }
+	    function hydrateOutageChartCard(card){ if (!card || card.dataset.chartReady === '1') return; const regionKey = card.dataset.outageChartRegion || activeCrudeRegionKey(); const metricKey = card.dataset.outageChartMetric || ''; const rows = outageChartRowsForMetric(regionKey, metricKey, state.frequency); const chartOptions = {regionKey,cacheScope:'outage:' + regionKey + ':' + metricKey,noRolling:true}; const legendHost = card.querySelector('.chartLegendHost'); if (legendHost) legendHost.outerHTML = outageChartLegendHtml(rows, regionKey, metricKey); const miniWrap = card.querySelector('.miniWrap'); if (miniWrap) miniWrap.innerHTML = card.classList.contains('chartZoomCard') ? chartTableHtml(rows, metricKey, chartOptions) : '<div class="chartNotice">Open zoom to show chart details.</div>'; const svg = liveChartSvg(card); if (svg) drawSeasonChart(svg, rows, metricKey, state.frequency, regionKey); card.dataset.chartReady = '1'; card.setAttribute('aria-busy', 'false'); }
+	    function renderOutageCharts(){ const grid = document.getElementById('outageChartGrid'); if (!grid) return; const regionKey = renderOutageChartRegionOptions(); const metrics = orderedOutageChartMetrics(); const count = document.getElementById('outageChartCount'); if (count) count.textContent = metrics.length + ' charts'; const signature = outageChartRenderSignature(grid, regionKey) + ':' + metrics.join(','); if (grid.dataset.renderSignature === signature && grid.children.length) { syncChartViewport(); return; } grid.innerHTML = metrics.length ? metrics.map(metricKey => outageChartShellHtml(regionKey, metricKey)).join('') : '<div class="chartNotice">No outage chart metrics are configured.</div>'; grid.dataset.renderSignature = signature; grid.dataset.hydratedSignature = signature; grid.querySelectorAll('.chartCard[data-outage-chart-metric]').forEach(card => hydrateOutageChartCard(card)); syncChartViewport(); }
+	    function openOutageChartZoom(card, metricKey, regionKey=activeCrudeRegionKey()){ if (!OUTAGE_CHART_METRICS.has(metricKey) || !validCrudeRegion(regionKey)) return false; const modal = chartZoomModal(); if (!modal) return false; modal.innerHTML = '<div class="chartZoomPanel">'+outageChartShellHtml(regionKey, metricKey, {zoomCard:true})+'</div>'; modal.hidden = false; const zoomCard = modal.querySelector('.chartCard'); hydrateOutageChartCard(zoomCard); modal.querySelector('[data-close-chart-zoom]')?.focus?.({preventScroll:true}); return true; }
+	    function outageExportChartRows(metricKey, regionKey=activeCrudeRegionKey()){ return outageChartRowsForMetric(regionKey, metricKey, state.frequency).map(row => { const value = Number(row[metricKey]); return {frequency:state.frequency, region:crudeRegionDisplayLabel(regionKey), metric:metricByKey(metricKey).label, period:row.period, status:row.status, value:Number.isFinite(value) ? round2(value) : NaN}; }); }
+	    function renderOutagesSheet(){ renderOutageRegionOptions(); renderOutageCharts(); document.getElementById('outageCount').textContent = outageEntries.length + ' entries'; const table = document.getElementById('outageTable'); if (!table) return; const signature = stableSettingsRows({rows:outageEntries,edit:outageEditId}); if (table.dataset.renderSignature === signature && table.tBodies.length && table.tBodies[0]?.rows.length) { validateOutageForm(); return; } const header = '<thead><tr><th>Region</th><th>Refinery</th><th>Unit</th><th>Type</th><th>Capacity offline</th><th>Start</th><th>End</th><th>Note</th><th></th></tr></thead>'; const rows = outageEntries.length ? outageEntries.map(outage => { const invalid = outageCapacitySummary(outage, outage.id).invalid; const rowClass = invalid ? ' class="invalidOutage"' : ''; return '<tr'+rowClass+'><td>'+esc(crudeRegionDisplayLabel(outage.regionKey))+'</td><td>'+esc(outage.refinery)+'</td><td>'+esc(outage.unitLabel || '')+'</td><td>'+typePill(outage.type)+'</td><td class="num">'+fmt(outage.capacityOfflineKbd,OUTAGE_CAPACITY_DIGITS)+'</td><td>'+esc(outage.startDate)+'</td><td>'+esc(outage.endDate)+'</td><td class="outageNote">'+esc(outage.note || '')+'</td><td><button class="toolBtn" data-edit-outage="'+esc(outage.id)+'" type="button">Edit</button> <button class="toolBtn" data-delete-outage="'+esc(outage.id)+'" type="button">Delete</button></td></tr>'; }).join('') : '<tr class="emptyRow"><td colspan="9">No outages saved.</td></tr>'; table.innerHTML = header + '<tbody>' + rows + '</tbody>'; table.dataset.renderSignature = signature; validateOutageForm(); }
     function clearOutageForm(){ ['outageCapacity','outageStart','outageEnd','outageNote'].forEach(id => { const input = document.getElementById(id); if (input) input.value = ''; }); const type = document.getElementById('outageType'); if (type) type.value = 'Planned'; setOutageFormMode(null); closeOutageCollisionModal(); updateOutageCapacityDefault(true); }
     function addOutageEntry(){ const validation = validateOutageForm(); if (!validation.entry) { document.getElementById('outageFormStatus').textContent = 'Add refinery, unit, capacity, start date, and end date.'; return; } if (validation.capacityInvalid) return; if (validation.collision) { openOutageCollisionModal(validation.collision); return; } const editing = Boolean(outageEditId); const entry = {...validation.entry,id:outageEditId || validation.entry.id,updatedAt:new Date().toISOString()}; outageEntries = normalizeOutageList([...(outageEntries || []).filter(outage => outage.id !== outageEditId), entry]); saveOutagesLocal(); clearOutageForm(); tableScrollSignatures = {}; queueRender(); showToast(editing ? 'Outage updated' : 'Outage added'); saveOutagesToServer(); }
     function deleteOutage(id){ outageEntries = normalizeOutageList(outageEntries.filter(outage => outage.id !== id)); if (outageEditId === id) clearOutageForm(); saveOutagesLocal(); tableScrollSignatures = {}; queueRender(); saveOutagesToServer(); }
@@ -6514,12 +6981,13 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function statusLabel(status){ return String(status || 'missing').replace('_',' '); }
     function sourceStatusDot(status){ return '<span class="sourceDot '+esc(status)+'"></span>'; }
     function updateBaseUrl(){ return /^https?:$/.test(location.protocol) ? location.origin : 'http://127.0.0.1:8787'; }
-    function updateStatusText(job){ if (!updateApiAvailable) return 'Runner offline'; if (!job) return 'Idle'; if (job.status === 'running') return 'Running '+UPDATE_GROUPS[job.group].label; if (job.status === 'succeeded') return 'Complete'; return 'Failed'; }
-    function updateLogText(job){ if (!updateApiAvailable) return 'Start npm run dashboard:server, then reopen this page from http://127.0.0.1:8787/ for background refreshes.'; if (!job) return 'Local runner idle.'; const elapsed = job.durationMs ? 'duration '+Math.round(job.durationMs/1000)+'s' : 'started '+new Date(job.startedAt).toLocaleString(); const lines = (job.lines || []).slice(-80).join('\\n'); return '['+job.status+'] '+UPDATE_GROUPS[job.group].label+' update | '+elapsed+'\\n'+(lines || 'Waiting for output...'); }
-    function renderReferenceUpdates(){ const job = lastUpdateJob; const group = job?.group || document.getElementById('referenceUpdatePanel')?.dataset.group || 'all'; const pill = document.getElementById('updateStatusPill'); if (!pill) return; pill.textContent = updateStatusText(job); pill.className = 'pill updateStatus '+(!updateApiAvailable ? 'unavailable' : (job?.status || 'idle')); document.querySelectorAll('[data-update-group]').forEach(btn => { btn.classList.toggle('active', btn.dataset.updateGroup === group); btn.disabled = Boolean(job && job.status === 'running'); }); document.getElementById('updateSteps').innerHTML = UPDATE_GROUPS[group].steps.map((step, idx) => '<div class="updateStep"><b>'+(idx+1)+'. '+esc(step)+'</b><span>'+esc(UPDATE_GROUPS[group].label)+' sequence</span></div>').join(''); document.getElementById('updateLog').textContent = updateLogText(job); }
+    function updateGroupMeta(group){ return UPDATE_GROUPS[group] || UPDATE_GROUPS.all; }
+    function updateStatusText(job){ if (!updateApiAvailable) return 'Runner offline'; if (!job) return 'Idle'; if (job.status === 'running') return 'Running '+updateGroupMeta(job.group).label; if (job.status === 'succeeded') return 'Complete'; return 'Failed'; }
+    function updateLogText(job){ if (!updateApiAvailable) return 'Start npm run dashboard:server, then reopen this page from http://127.0.0.1:8787/ for background refreshes.'; if (!job) return 'Local runner idle.'; const meta = updateGroupMeta(job.group); const elapsed = job.durationMs ? 'duration '+Math.round(job.durationMs/1000)+'s' : 'started '+new Date(job.startedAt).toLocaleString(); const lines = (job.lines || []).slice(-80).join('\\n'); return '['+job.status+'] '+meta.label+' update | '+elapsed+'\\n'+(lines || 'Waiting for output...'); }
+    function renderReferenceUpdates(){ const job = lastUpdateJob; const group = job?.group || document.getElementById('referenceUpdatePanel')?.dataset.group || 'all'; const meta = updateGroupMeta(group); const pill = document.getElementById('updateStatusPill'); if (!pill) return; pill.textContent = updateStatusText(job); pill.className = 'pill updateStatus '+(!updateApiAvailable ? 'unavailable' : (job?.status || 'idle')); document.querySelectorAll('[data-update-group]').forEach(btn => { btn.classList.toggle('active', btn.dataset.updateGroup === group); btn.disabled = Boolean(job && job.status === 'running'); }); document.getElementById('updateSteps').innerHTML = meta.steps.map((step, idx) => '<div class="updateStep"><b>'+(idx+1)+'. '+esc(step)+'</b><span>'+esc(meta.label)+' sequence</span></div>').join(''); document.getElementById('updateLog').textContent = updateLogText(job); }
     function scheduleUpdatePoll(delay=2000){ clearTimeout(updatePollTimer); updatePollTimer = setTimeout(pollUpdateStatus, delay); }
     async function pollUpdateStatus(){ try { const response = await fetch(updateBaseUrl() + '/api/update/status', {cache:'no-store'}); if (!response.ok) throw new Error('status '+response.status); const payload = await response.json(); updateApiAvailable = true; lastUpdateJob = payload.job || null; renderReferenceUpdates(); if (lastUpdateJob?.status === 'running') scheduleUpdatePoll(2000); else if (lastUpdateJob && activeUpdateStartedByTab === lastUpdateJob.id) { const succeeded = lastUpdateJob.status === 'succeeded'; activeUpdateStartedByTab = ''; showToast(succeeded ? 'Update complete; reloading dashboard' : 'Update failed'); if (succeeded) setTimeout(() => location.reload(), 900); } } catch { updateApiAvailable = false; renderReferenceUpdates(); } }
-    async function startDashboardUpdate(group){ document.getElementById('referenceUpdatePanel').dataset.group = group; renderReferenceUpdates(); try { const response = await fetch(updateBaseUrl() + '/api/update/start', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({group})}); const payload = await response.json(); if (!response.ok && response.status !== 409) throw new Error(payload.error || 'update failed to start'); updateApiAvailable = true; lastUpdateJob = payload.job || null; activeUpdateStartedByTab = response.status === 202 && lastUpdateJob ? lastUpdateJob.id : ''; renderReferenceUpdates(); scheduleUpdatePoll(1200); showToast(response.status === 409 ? 'Update already running' : UPDATE_GROUPS[group].label+' update started'); } catch (error) { updateApiAvailable = false; renderReferenceUpdates(); showToast(error instanceof Error ? error.message : 'Runner unavailable'); } }
+    async function startDashboardUpdate(group){ document.getElementById('referenceUpdatePanel').dataset.group = group; renderReferenceUpdates(); try { const response = await fetch(updateBaseUrl() + '/api/update/start', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({group})}); const payload = await response.json(); if (!response.ok && response.status !== 409) throw new Error(payload.error || 'update failed to start'); updateApiAvailable = true; lastUpdateJob = payload.job || null; activeUpdateStartedByTab = response.status === 202 && lastUpdateJob ? lastUpdateJob.id : ''; renderReferenceUpdates(); scheduleUpdatePoll(1200); showToast(response.status === 409 ? 'Update already running' : updateGroupMeta(group).label+' update started'); } catch (error) { updateApiAvailable = false; renderReferenceUpdates(); showToast(error instanceof Error ? error.message : 'Runner unavailable'); } }
     function optimizationCardHtml(label, value, note){ return '<div class="signalCard" data-optimization-card><span>'+esc(label)+'</span><b>'+esc(value)+'</b><i>'+esc(note)+'</i></div>'; }
     function renderOptimizationDiagnostics(){
       const panel = document.getElementById('optimizationDiagnostics');
@@ -6582,6 +7050,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
           balanceTable.innerHTML = '';
           delete balanceTable.dataset.renderSignature;
         }
+        tableScrollSignatures.balanceTable = '';
         const balanceMonitor = document.getElementById('balanceMonitor');
         if (balanceMonitor) balanceMonitor.innerHTML = '';
       }
@@ -6601,12 +7070,15 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
           delete crudeGrid.dataset.hydratedSignature;
         }
       }
-      if (state.sheet !== 'outages') {
-        closeOutageCollisionModal();
-        const outageTable = document.getElementById('outageTable');
-        outageTable.innerHTML = '';
-        delete outageTable.dataset.renderSignature;
-      }
+	      if (state.sheet !== 'outages') {
+	        closeOutageCollisionModal();
+	        const outageTable = document.getElementById('outageTable');
+	        outageTable.innerHTML = '';
+	        delete outageTable.dataset.renderSignature;
+	        const outageGrid = document.getElementById('outageChartGrid');
+	        outageGrid.innerHTML = '';
+	        delete outageGrid.dataset.renderSignature;
+	      }
       if (state.sheet !== 'reference') {
         document.getElementById('assumptionLedger').innerHTML = '';
         document.getElementById('optimizationDiagnostics').innerHTML = '';
@@ -6655,12 +7127,12 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     });
     document.getElementById('metricSelect').addEventListener('change', e => { state.metric = e.target.value; queueRender(); });
     document.getElementById('crudeRegionSelect').addEventListener('change', e => { state.crudeRegion = validCrudeRegion(e.target.value) ? e.target.value : defaultCrudeRegionKey(); if (state.crudeRegion) setCrudeGroupExpanded(state.crudeRegion, true, false); queueRender(); });
-    document.querySelectorAll('[data-frequency]').forEach(btn => btn.addEventListener('click', async () => { const nextFrequency = btn.dataset.frequency === 'weekly' ? 'weekly' : 'monthly'; const token = ++frequencySwitchToken; if (state.frequency === nextFrequency) return; try { await ensureDataForState({...state,frequency:nextFrequency}); } catch { if (token === frequencySwitchToken) showToast('Unable to load workbook data'); return; } if (token !== frequencySwitchToken) return; state.frequency = nextFrequency; state.bandYears = normalizeBandYears(state.bandYears, state.frequency, true); state.historyYears = normalizeHistoryYears(state.historyYears, state.frequency, state.historyYears == null); tableScrollSignatures = {}; if (state.sheet === 'balance') { clearPendingTableViewportRestore('balanceTable'); pendingBalanceScrollPeriod = ''; forceBalancePeriodScroll = true; } queueRender(); }));
-    document.getElementById('balanceSheetBtn').addEventListener('click', async () => { if (state.sheet === 'balance') return; const nextState = {...state,sheet:'balance'}; try { await ensureDataForState(nextState); } catch { showToast('Unable to load balance workbook data'); return; } state.sheet = 'balance'; queueRender(); });
+    document.querySelectorAll('[data-frequency]').forEach(btn => btn.addEventListener('click', async () => { const nextFrequency = btn.dataset.frequency === 'weekly' ? 'weekly' : 'monthly'; const token = ++frequencySwitchToken; if (state.frequency === nextFrequency) return; try { await ensureDataForState({...state,frequency:nextFrequency}); } catch { if (token === frequencySwitchToken) showToast('Unable to load workbook data'); return; } if (token !== frequencySwitchToken) return; state.frequency = nextFrequency; state.bandYears = normalizeBandYears(state.bandYears, state.frequency, true); state.historyYears = normalizeHistoryYears(state.historyYears, state.frequency, state.historyYears == null); tableScrollSignatures = {}; if (state.sheet === 'balance') requestDefaultBalancePeriodScroll(); queueRender(); }));
+    document.getElementById('balanceSheetBtn').addEventListener('click', async () => { if (state.sheet === 'balance') return; const nextState = {...state,sheet:'balance'}; try { await ensureDataForState(nextState); } catch { showToast('Unable to load balance workbook data'); return; } state.sheet = 'balance'; requestDefaultBalancePeriodScroll(); queueRender(); });
     document.getElementById('crudeRunsSheetBtn').addEventListener('click', async () => { const changed = state.sheet !== 'crude'; try { await ensureDataForState({...state,sheet:'crude'}); } catch { showToast('Unable to load crude workbook data'); return; } state.sheet = 'crude'; if (changed) { forceCrudeRunsPeriodScroll = true; queueRender(); } refreshWorkbookSettings(); });
-    document.getElementById('outagesSheetBtn').addEventListener('click', async () => { const changed = state.sheet !== 'outages'; try { await ensureReferenceData(); } catch { showToast('Unable to load outage workbook data'); return; } state.sheet = 'outages'; if (changed) queueRender(); refreshWorkbookSettings(); });
+	    document.getElementById('outagesSheetBtn').addEventListener('click', async () => { const changed = state.sheet !== 'outages'; try { await ensureDataForState({...state,sheet:'outages'}); } catch { showToast('Unable to load outage workbook data'); return; } state.sheet = 'outages'; if (changed) queueRender(); refreshWorkbookSettings(); });
     document.getElementById('referenceSheetBtn').addEventListener('click', async () => { const changed = state.sheet !== 'reference'; try { await ensureReferenceData(); } catch { showToast('Unable to load reference workbook data'); return; } state.sheet = 'reference'; if (changed) queueRender(); refreshWorkbookSettings(); pollUpdateStatus(); });
-    document.getElementById('openOutagesFromCrudeBtn').addEventListener('click', async () => { const nextRegion = validBaseCrudeRegion(state.crudeRegion) ? state.crudeRegion : 'padd1'; try { await ensureReferenceData(); } catch { showToast('Unable to load outage workbook data'); return; } const changed = state.sheet !== 'outages' || state.crudeRegion !== nextRegion; state.crudeRegion = nextRegion; state.sheet = 'outages'; if (changed) queueRender(); refreshWorkbookSettings(); });
+	    document.getElementById('openOutagesFromCrudeBtn').addEventListener('click', async () => { const nextRegion = validBaseCrudeRegion(state.crudeRegion) ? state.crudeRegion : 'padd1'; try { await ensureDataForState({...state,sheet:'outages',crudeRegion:nextRegion}); } catch { showToast('Unable to load outage workbook data'); return; } const changed = state.sheet !== 'outages' || state.crudeRegion !== nextRegion; state.crudeRegion = nextRegion; state.sheet = 'outages'; if (changed) queueRender(); refreshWorkbookSettings(); });
     document.getElementById('referenceUpdatePanel').addEventListener('click', e => { const button = e.target.closest('[data-update-group]'); if (button && !button.disabled) startDashboardUpdate(button.dataset.updateGroup); });
     document.getElementById('saveForecastEndBtn').addEventListener('click', saveForecastEnd);
     document.getElementById('addOutageBtn').addEventListener('click', addOutageEntry);
@@ -6668,11 +7140,12 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     document.getElementById('outageRegion').addEventListener('change', e => { renderOutageRefineryOptions(e.target.value); updateOutageCapacityDefault(true); });
     document.getElementById('outageRefinery').addEventListener('change', e => { renderOutageUnitOptions(e.target.value); updateOutageCapacityDefault(true); });
     document.getElementById('outageUnit').addEventListener('change', () => updateOutageCapacityDefault(true));
-    document.getElementById('outageStart').addEventListener('change', () => updateOutageCapacityDefault(true));
-    document.getElementById('outageEnd').addEventListener('change', () => validateOutageForm());
-    document.getElementById('outageCapacity').addEventListener('input', () => validateOutageForm());
-    document.getElementById('outageType').addEventListener('change', e => { if (e.target.value === 'Unplanned') applyUnplannedOutageDefault(); updateOutageCapacityDefault(true); });
-    document.getElementById('capacityAdjRegion').addEventListener('change', () => { renderCapacityAdjustmentControls(); });
+	    document.getElementById('outageStart').addEventListener('change', () => updateOutageCapacityDefault(true));
+	    document.getElementById('outageEnd').addEventListener('change', () => validateOutageForm());
+	    document.getElementById('outageCapacity').addEventListener('input', () => validateOutageForm());
+	    document.getElementById('outageType').addEventListener('change', e => { if (e.target.value === 'Unplanned') applyUnplannedOutageDefault(); updateOutageCapacityDefault(true); });
+	    document.getElementById('outageChartRegion').addEventListener('change', e => { state.crudeRegion = validCrudeRegion(e.target.value) ? e.target.value : defaultCrudeRegionKey(); queueRender(); });
+	    document.getElementById('capacityAdjRegion').addEventListener('change', () => { renderCapacityAdjustmentControls(); });
     document.getElementById('capacityAdjRefinery').addEventListener('change', e => { renderUnitOptions(document.getElementById('capacityAdjUnit'), e.target.value, ''); updateCapacityAdjustmentDefault(true); });
     document.getElementById('capacityAdjUnit').addEventListener('change', () => updateCapacityAdjustmentDefault(true));
     document.getElementById('capacityAdjMonth').addEventListener('change', () => updateCapacityAdjustmentDefault(true));
@@ -6708,20 +7181,23 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     document.getElementById('loadViewBtn').addEventListener('click', async () => { const views = savedViews(); const view = views[Number(document.getElementById('savedViewSelect').value)]; if (!view) return; if (await applyViewState(view.state)) showToast('View loaded'); });
     document.getElementById('deleteViewBtn').addEventListener('click', () => { const select = document.getElementById('savedViewSelect'); const index = Number(select.value); const views = savedViews().filter((_, idx) => idx !== index); localStorage.setItem(STORAGE_KEY, JSON.stringify(views)); renderSavedViews(); showToast('View deleted'); });
 	    document.getElementById('resetViewBtn').addEventListener('click', () => { localStorage.removeItem(LAYOUT_STORAGE_KEY); closeChartZoomModal(); state = defaultState(); collapsedGroups = new Set(balanceGroupKeys()); expandedCrudeGroups = new Set(defaultExpandedCrudeGroupKeys()); zoomedCharts.clear(); tableScrollSignatures = {}; saveCollapsedBalanceGroups(); saveExpandedCrudeGroups(); queueRender(); showToast('View reset'); });
-    document.getElementById('balanceTable').addEventListener('click', async e => { if (e.target.classList?.contains('cellEditor')) return; const editCell = e.target.closest('[data-balance-adjust-line]'); const toggle = e.target.closest('[data-toggle-group]'); const open = e.target.closest('[data-open-region]'); const outage = e.target.closest('[data-open-balance-outages]'); if (editCell) { startBalanceCellEdit(editCell); return; } if (toggle) { toggleBalanceGroup(toggle.dataset.toggleGroup); return; } if (open) openChartTab(open.dataset.openRegion); if (outage) { try { await ensureReferenceData(); } catch { showToast('Unable to load outage workbook data'); return; } state.crudeRegion = validBaseCrudeRegion(outage.dataset.openBalanceOutages) ? outage.dataset.openBalanceOutages : 'padd1'; state.sheet = 'outages'; queueRender(); refreshWorkbookSettings(); } });
-    document.getElementById('crudeRunsTable').addEventListener('click', async e => { if (e.target.classList?.contains('cellEditor')) return; const editCell = e.target.closest('[data-crude-adjust-line]'); const toggle = e.target.closest('[data-toggle-crude-region]'); const open = e.target.closest('[data-open-crude-outages]'); if (editCell) { startCrudeCellEdit(editCell); return; } if (toggle) { toggleCrudeGroup(toggle.dataset.toggleCrudeRegion); return; } if (open) { try { await ensureReferenceData(); } catch { showToast('Unable to load outage workbook data'); return; } state.crudeRegion = validBaseCrudeRegion(open.dataset.openCrudeOutages) ? open.dataset.openCrudeOutages : 'padd1'; state.sheet = 'outages'; queueRender(); } });
-    document.getElementById('crudeActiveRegionHeader').addEventListener('click', async e => { const toggle = e.target.closest('[data-toggle-crude-region]'); const open = e.target.closest('[data-open-crude-outages]'); if (toggle) { toggleCrudeGroup(toggle.dataset.toggleCrudeRegion); return; } if (open) { try { await ensureReferenceData(); } catch { showToast('Unable to load outage workbook data'); return; } state.crudeRegion = validBaseCrudeRegion(open.dataset.openCrudeOutages) ? open.dataset.openCrudeOutages : 'padd1'; state.sheet = 'outages'; queueRender(); } });
-    document.getElementById('outageTable').addEventListener('click', e => { const editButton = e.target.closest('[data-edit-outage]'); const deleteButton = e.target.closest('[data-delete-outage]'); if (editButton) loadOutageIntoForm(outageEntries.find(outage => outage.id === editButton.dataset.editOutage)); if (deleteButton) deleteOutage(deleteButton.dataset.deleteOutage); });
-    document.getElementById('capacityAdjustmentTable').addEventListener('click', e => { const button = e.target.closest('[data-delete-capacity-adjustment]'); if (button) deleteCapacityAdjustment(button.dataset.deleteCapacityAdjustment); });
+	    document.getElementById('balanceTable').addEventListener('click', async e => { if (e.target.classList?.contains('cellEditor')) return; const editCell = e.target.closest('[data-balance-adjust-line]'); const toggle = e.target.closest('[data-toggle-group]'); const open = e.target.closest('[data-open-region]'); const outage = e.target.closest('[data-open-balance-outages]'); if (editCell) { startBalanceCellEdit(editCell); return; } if (toggle) { toggleBalanceGroup(toggle.dataset.toggleGroup); return; } if (open) openChartTab(open.dataset.openRegion); if (outage) { const nextRegion = validBaseCrudeRegion(outage.dataset.openBalanceOutages) ? outage.dataset.openBalanceOutages : 'padd1'; try { await ensureDataForState({...state,sheet:'outages',crudeRegion:nextRegion}); } catch { showToast('Unable to load outage workbook data'); return; } state.crudeRegion = nextRegion; state.sheet = 'outages'; queueRender(); refreshWorkbookSettings(); } });
+	    document.getElementById('crudeRunsTable').addEventListener('click', async e => { if (e.target.classList?.contains('cellEditor')) return; const editCell = e.target.closest('[data-crude-adjust-line]'); const toggle = e.target.closest('[data-toggle-crude-region]'); const open = e.target.closest('[data-open-crude-outages]'); if (editCell) { startCrudeCellEdit(editCell); return; } if (toggle) { toggleCrudeGroup(toggle.dataset.toggleCrudeRegion); return; } if (open) { const nextRegion = validBaseCrudeRegion(open.dataset.openCrudeOutages) ? open.dataset.openCrudeOutages : 'padd1'; try { await ensureDataForState({...state,sheet:'outages',crudeRegion:nextRegion}); } catch { showToast('Unable to load outage workbook data'); return; } state.crudeRegion = nextRegion; state.sheet = 'outages'; queueRender(); } });
+	    document.getElementById('crudeActiveRegionHeader').addEventListener('click', async e => { const toggle = e.target.closest('[data-toggle-crude-region]'); const open = e.target.closest('[data-open-crude-outages]'); if (toggle) { toggleCrudeGroup(toggle.dataset.toggleCrudeRegion); return; } if (open) { const nextRegion = validBaseCrudeRegion(open.dataset.openCrudeOutages) ? open.dataset.openCrudeOutages : 'padd1'; try { await ensureDataForState({...state,sheet:'outages',crudeRegion:nextRegion}); } catch { showToast('Unable to load outage workbook data'); return; } state.crudeRegion = nextRegion; state.sheet = 'outages'; queueRender(); } });
+	    document.getElementById('outageTable').addEventListener('click', e => { const editButton = e.target.closest('[data-edit-outage]'); const deleteButton = e.target.closest('[data-delete-outage]'); if (editButton) loadOutageIntoForm(outageEntries.find(outage => outage.id === editButton.dataset.editOutage)); if (deleteButton) deleteOutage(deleteButton.dataset.deleteOutage); });
+	    document.getElementById('outageChartGrid').addEventListener('click', async e => { const zoomMetric = e.target.dataset.outageZoom; const exportMetric = e.target.dataset.outageExportChart; const copyMetric = e.target.dataset.outageCopyChart; const saveMetric = e.target.dataset.outageSaveChart; const regionKey = validCrudeRegion(e.target.dataset.outageRegion) ? e.target.dataset.outageRegion : activeCrudeRegionKey(); const card = e.target.closest('.chartCard'); if (zoomMetric) { if (!openOutageChartZoom(card, zoomMetric, regionKey)) queueRender(); return; } if (exportMetric) downloadBlob(D.product.key + '_' + state.frequency + '_' + regionKey + '_' + exportMetric + '.xls','application/vnd.ms-excel',toExcelTable(outageExportChartRows(exportMetric, regionKey))); if ((copyMetric || saveMetric) && card?.dataset?.chartReady !== '1') hydrateOutageChartCard(card); if (copyMetric) { try { await copyChartPng(card, copyMetric, regionKey); } catch { showToast('Outage chart PNG copy failed'); } } if (saveMetric) { try { await saveChartPng(card, saveMetric, regionKey); } catch { showToast('Outage chart PNG save failed'); } } });
+	    document.getElementById('capacityAdjustmentTable').addEventListener('click', e => { const button = e.target.closest('[data-delete-capacity-adjustment]'); if (button) deleteCapacityAdjustment(button.dataset.deleteCapacityAdjustment); });
     document.getElementById('chartScenarioWorkbench').addEventListener('input', e => { const target = e.target; if (!target?.id) return; if (target.id === 'chartScenarioName') updateChartScenarioDraft({name:target.value.slice(0,48)}, {render:false,queueRender:false}); if (target.id === 'chartScenarioDelta') { const metricKey = normalizedDraftForRender().metricKey; const deltaPct = clampScenarioDelta(target.value, metricKey); updateChartScenarioDraft({deltaPct}, {render:false}); const label = document.getElementById('chartScenarioDeltaLabel'); if (label) label.textContent = chartScenarioDeltaLabel(metricKey, deltaPct); } });
     document.getElementById('chartScenarioWorkbench').addEventListener('input', e => { if (e.target?.id === 'chartScenarioDelta') refreshChartScenarioDraftPreview(); });
     document.getElementById('chartScenarioWorkbench').addEventListener('change', e => { const target = e.target; if (target?.id === 'chartScenarioRegion') updateChartScenarioDraft({regionKey:target.value}); if (target?.id === 'chartScenarioMetric') { const metricKey = CHART_SCENARIO_METRICS.some(metric => metric.key === target.value) ? target.value : normalizedDraftForRender().metricKey; updateChartScenarioDraft({metricKey,deltaPct:clampScenarioDelta(normalizedDraftForRender().deltaPct, metricKey)}); } if (target?.id === 'chartScenarioEnd') updateChartScenarioDraft({endPeriod:normalizeScenarioMonth(target.value, normalizedDraftForRender().startPeriod)}); const toggle = target?.closest?.('[data-scenario-toggle]'); if (toggle) toggleChartScenario(toggle.dataset.scenarioToggle, toggle.checked); });
     document.getElementById('chartScenarioWorkbench').addEventListener('click', e => { if (e.target === e.currentTarget) { closeChartScenarioModal(); return; } const target = e.target.closest('button,[data-scenario-load],[data-scenario-delete],[data-scenario-adjustment-delete]'); if (!target) return; if (target.id === 'addChartScenarioAdjustmentBtn') addChartScenarioAdjustment(); else if (target.id === 'previewChartScenarioBtn') previewChartScenario(); else if (target.id === 'saveChartScenarioBtn') saveChartScenario(); else if (target.id === 'clearChartScenarioBtn') clearChartScenarioDraft(!normalizedDraftForRender().previewEnabled); else if (target.id === 'closeChartScenarioModalBtn') closeChartScenarioModal(); else if (target.id === 'chartScenarioEndPickerBtn') { const input = document.getElementById('chartScenarioEnd'); if (typeof input?.showPicker === 'function') input.showPicker(); else input?.focus(); } else if (target.dataset.scenarioAdjustmentDelete !== undefined) deleteChartScenarioAdjustment(target.dataset.scenarioAdjustmentDelete); else if (target.dataset.scenarioLoad) loadChartScenarioIntoDraft(target.dataset.scenarioLoad); else if (target.dataset.scenarioDelete) deleteChartScenario(target.dataset.scenarioDelete); });
     document.getElementById('chartScenarioWorkbench').addEventListener('click', e => { const preset = e.target.closest('[data-scenario-preset]'); if (!preset) return; e.preventDefault(); applyChartScenarioPreset(preset.dataset.scenarioPreset); });
-	    document.getElementById('chartGrid').addEventListener('click', async e => { const zoomMetric = e.target.dataset.zoom; const exportMetric = e.target.dataset.exportChart; const exportRegion = e.target.dataset.exportRegion; const copyMetric = e.target.dataset.copyChart; const copyRegion = e.target.dataset.copyRegion; const saveMetric = e.target.dataset.saveChart; const saveRegion = e.target.dataset.saveRegion; const scenarioMetric = e.target.dataset.openChartScenario; const scenarioRegion = e.target.dataset.scenarioRegion; const card = e.target.closest('.chartCard'); if (zoomMetric) { if (!toggleBalanceChartZoom(card, zoomMetric)) queueRender(); return; } if (scenarioMetric) { openChartScenarioModal(scenarioMetric, {regionKey:scenarioRegion}); return; } if (exportMetric) downloadBlob(D.product.key + '_' + state.frequency + '_' + (exportRegion || state.chartRegion) + '_' + exportMetric + '.xls','application/vnd.ms-excel',toExcelTable(chartRows(exportMetric, exportRegion || preferredChartScenarioRegion()))); if ((copyMetric || saveMetric) && card?.dataset?.chartReady !== '1') hydrateBalanceChartCard(card); if (copyMetric) { try { await copyChartPng(card, copyMetric, copyRegion || preferredChartScenarioRegion()); } catch { showToast('Chart PNG copy failed'); } } if (saveMetric) { try { await saveChartPng(card, saveMetric, saveRegion || state.chartRegion); } catch { showToast('Chart PNG save failed'); } } });
+	    document.getElementById('chartGrid').addEventListener('click', async e => { const powerZoom = e.target.dataset.powerZoom; const calendarDate = e.target.closest?.('[data-power-calendar-date]')?.dataset?.powerCalendarDate; if (powerZoom === 'burn') { openPowerDfoGenerationZoom(); return; } if (calendarDate) { powerDfoAnchorDate = calendarDate; hydrateNortheastPowerSection(); return; } const zoomMetric = e.target.dataset.zoom; const exportMetric = e.target.dataset.exportChart; const exportRegion = e.target.dataset.exportRegion; const copyMetric = e.target.dataset.copyChart; const copyRegion = e.target.dataset.copyRegion; const saveMetric = e.target.dataset.saveChart; const saveRegion = e.target.dataset.saveRegion; const scenarioMetric = e.target.dataset.openChartScenario; const scenarioRegion = e.target.dataset.scenarioRegion; const card = e.target.closest('.chartCard'); if (zoomMetric) { if (!toggleBalanceChartZoom(card, zoomMetric)) queueRender(); return; } if (scenarioMetric) { openChartScenarioModal(scenarioMetric, {regionKey:scenarioRegion}); return; } if (exportMetric) downloadBlob(D.product.key + '_' + state.frequency + '_' + (exportRegion || state.chartRegion) + '_' + exportMetric + '.xls','application/vnd.ms-excel',toExcelTable(chartRows(exportMetric, exportRegion || preferredChartScenarioRegion()))); if ((copyMetric || saveMetric) && card?.dataset?.chartReady !== '1') hydrateBalanceChartCard(card); if (copyMetric) { try { await copyChartPng(card, copyMetric, copyRegion || preferredChartScenarioRegion()); } catch { showToast('Chart PNG copy failed'); } } if (saveMetric) { try { await saveChartPng(card, saveMetric, saveRegion || state.chartRegion); } catch { showToast('Chart PNG save failed'); } } });
+	    document.getElementById('chartGrid').addEventListener('change', e => { if (e.target?.dataset?.powerAnchor === undefined) return; powerDfoAnchorDate = nearestPowerDfoDate(e.target.value, powerDfoDailyRows()); hydrateNortheastPowerSection(); });
 	    document.getElementById('crudeRunsChartGrid').addEventListener('click', async e => { const zoomMetric = e.target.dataset.crudeZoom; const exportMetric = e.target.dataset.crudeExportChart; const copyMetric = e.target.dataset.crudeCopyChart; const saveMetric = e.target.dataset.crudeSaveChart; const card = e.target.closest('.chartCard'); if (zoomMetric) { if (!toggleCrudeChartZoom(card, zoomMetric)) queueRender(); return; } if (exportMetric) downloadBlob(D.product.key + '_' + state.frequency + '_' + state.crudeRegion + '_' + exportMetric + '.xls','application/vnd.ms-excel',toExcelTable(crudeChartRows(exportMetric))); if ((copyMetric || saveMetric) && card?.dataset?.chartReady !== '1') hydrateCrudeChartCard(card, crudeForecastRowsForRegion(activeCrudeRegionKey()), activeCrudeRegionKey()); if (copyMetric) { try { await copyChartPng(card, copyMetric, state.crudeRegion); } catch { showToast('Crude chart PNG copy failed'); } } if (saveMetric) { try { await saveChartPng(card, saveMetric, state.crudeRegion); } catch { showToast('Crude chart PNG save failed'); } } });
 	    document.getElementById('outageCollisionModal').addEventListener('click', e => { if (e.target === e.currentTarget) { closeOutageCollisionModal(); return; } const button = e.target.closest('button'); if (!button) return; if (button.id === 'loadCollisionOutageBtn') loadOutageIntoForm(outageCollisionEntry()); else if (button.id === 'closeOutageCollisionModalBtn' || button.id === 'dismissOutageCollisionBtn') closeOutageCollisionModal(); });
 	    document.getElementById('chartZoomModal').addEventListener('click', e => { if (e.target === e.currentTarget || e.target.closest('[data-close-chart-zoom]')) closeChartZoomModal(); });
+	    document.getElementById('chartZoomModal').addEventListener('input', e => { if (e.target?.dataset?.powerZoomStart !== undefined || e.target?.dataset?.powerZoomEnd !== undefined) drawPowerDfoZoomChart(); });
 	    document.addEventListener('keydown', e => { const isF9 = e.key === 'F9' || e.keyCode === 120; if (isF9) { e.preventDefault(); e.stopPropagation(); refreshDashboardData('Dashboard recalculated'); return; } const tag = document.activeElement?.tagName || ''; const editing = ['INPUT','SELECT','TEXTAREA'].includes(tag); if (e.key === '/' && state.sheet === 'balance' && !editing) { e.preventDefault(); document.getElementById('balanceSearchInput')?.focus(); return; } if (e.key === 'Escape' && chartScenarioModalOpen) closeChartScenarioModal(); else if (e.key === 'Escape' && !document.getElementById('chartZoomModal')?.hidden) closeChartZoomModal(); else if (e.key === 'Escape' && !document.getElementById('outageCollisionModal')?.hidden) closeOutageCollisionModal(); else if (e.key === 'Escape' && state.sheet === 'balance' && balanceFilterActive() && !editing) clearBalanceFocus(); });
     document.querySelectorAll('.tablewrap').forEach(wrap => { wrap.addEventListener('mousedown', () => wrap.focus({preventScroll:true})); wrap.addEventListener('keydown', e => { const stepX = e.shiftKey ? 360 : 96; const stepY = e.shiftKey ? 240 : 54; const pageWide = wrap.id === 'crudeRunsTableWrap'; const movePageX = delta => window.scrollBy({left:delta,top:0,behavior:'instant'}); if (e.key === 'ArrowRight') { pageWide ? movePageX(stepX) : wrap.scrollLeft += stepX; e.preventDefault(); } else if (e.key === 'ArrowLeft') { pageWide ? movePageX(-stepX) : wrap.scrollLeft -= stepX; e.preventDefault(); } else if (e.key === 'ArrowDown') { wrap.scrollTop += stepY; e.preventDefault(); } else if (e.key === 'ArrowUp') { wrap.scrollTop -= stepY; e.preventDefault(); } else if (e.key === 'Home' && e.ctrlKey) { pageWide ? window.scrollTo({left:0,top:window.scrollY,behavior:'instant'}) : wrap.scrollLeft = 0; e.preventDefault(); } else if (e.key === 'End' && e.ctrlKey) { pageWide ? window.scrollTo({left:document.documentElement.scrollWidth,top:window.scrollY,behavior:'instant'}) : wrap.scrollLeft = wrap.scrollWidth; e.preventDefault(); } }); });
     document.getElementById('crudeRunsTableWrap').addEventListener('scroll', () => { if (state.sheet === 'crude') scheduleCrudeActiveHeader(); }, {passive:true});
@@ -6791,6 +7267,7 @@ function buildProduct(
   const kplerMovementGuidePaths = productKplerMovementGuidePaths(config, kplerManifest);
   const kplerPadd1ImportGuidePaths = productKplerPadd1ImportGuidePaths(config, kplerManifest);
   const kplerGuides = buildKplerGuides(config, kplerManifest);
+  const powerDfoCharts = buildPowerDfoCharts(config);
   const sourceFiles = [
     fileMeta("eia_monthly", config.monthlyCsv, monthlyRows.length, `eia_monthly/${basename(config.monthlyCsv)}`),
     fileMeta("eia_weekly", config.weeklyCsv, weeklyRows.length, `eia_weekly/${basename(config.weeklyCsv)}`),
@@ -6803,6 +7280,21 @@ function buildProduct(
   if (fileExists(kplerPadd1ImportGuidePaths.monthly)) sourceFiles.push(fileMeta("kpler_padd1_import_guide_monthly", kplerPadd1ImportGuidePaths.monthly, kplerGuides.monthly.length, `kpler/output/monthly/${basename(kplerPadd1ImportGuidePaths.monthly)}`));
   if (fileExists(kplerPadd1ImportGuidePaths.weekly)) sourceFiles.push(fileMeta("kpler_padd1_import_guide_weekly", kplerPadd1ImportGuidePaths.weekly, kplerGuides.weekly.length, `kpler/output/weekly/${basename(kplerPadd1ImportGuidePaths.weekly)}`));
   if (config.key === "diesel") sourceFiles.push(fileMeta("padd_1", "padd_1/padd_1_distillate_estimates.csv", undefined, "padd_1/padd_1_distillate_estimates.csv"));
+  if (config.key === "diesel" && fileExists("power_generation_dfo/estimated_daily_dfo.csv")) {
+    sourceFiles.push(fileMeta("power_dfo_daily", "power_generation_dfo/estimated_daily_dfo.csv", powerDfoCharts.daily.length, "power_generation_dfo/estimated_daily_dfo.csv"));
+  }
+  if (config.key === "diesel" && fileExists("power_generation_dfo/weather_14d_padd1_cities.csv")) {
+    sourceFiles.push(fileMeta("power_dfo_weather", "power_generation_dfo/weather_14d_padd1_cities.csv", powerDfoCharts.weatherDaily.length, "power_generation_dfo/weather_14d_padd1_cities.csv"));
+  }
+  if (config.key === "diesel" && fileExists("power_generation_dfo/dfo_generation_forecast_24h.csv")) {
+    sourceFiles.push(fileMeta("power_dfo_forecast_24h", "power_generation_dfo/dfo_generation_forecast_24h.csv", undefined, "power_generation_dfo/dfo_generation_forecast_24h.csv"));
+  }
+  if (config.key === "diesel" && fileExists("power_generation_dfo/manifest.json")) {
+    sourceFiles.push(fileMeta("power_dfo_manifest", "power_generation_dfo/manifest.json", undefined, "power_generation_dfo/manifest.json"));
+  }
+  if (config.key === "diesel" && fileExists("power_generation_dfo/hourly_forecast_manifest.json")) {
+    sourceFiles.push(fileMeta("power_dfo_hourly_manifest", "power_generation_dfo/hourly_forecast_manifest.json", undefined, "power_generation_dfo/hourly_forecast_manifest.json"));
+  }
   if (fileExists(REFINERY_CAPACITY_PATH)) sourceFiles.push(fileMeta("refinery_unit_capacity", REFINERY_CAPACITY_PATH, refineryCapacity.rows.length, `data/${basename(REFINERY_CAPACITY_PATH)}`));
   const freshness: DashboardBundle["freshness"] = {
     latestMonthly: monthlyRows.map((row) => row.Date).sort().at(-1) ?? "",
@@ -6846,6 +7338,7 @@ function buildProduct(
     padd1: buildPadd1Rows(config, monthly, weekly),
     kpler,
     kplerGuides,
+    powerDfoCharts,
     sourceHub: buildSourceHub(config, { freshness, crudeRuns, refineryCapacity, kpler, sourceFiles }),
     sourceFiles,
     settings: {

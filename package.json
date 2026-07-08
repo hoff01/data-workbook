@@ -35,6 +35,7 @@
     "update:weekly": "node --import tsx src/update_pipeline.ts weekly",
     "update:monthly": "node --import tsx src/update_pipeline.ts monthly",
     "update:other": "node --import tsx src/update_pipeline.ts other",
+    "update:power-dfo": "node --import tsx src/update_pipeline.ts power-dfo",
     "update:all": "node --import tsx src/update_pipeline.ts all",
     "dashboard:server": "node --import tsx src/dashboard_update_server.ts",
     "dashboard:open": "node --import tsx src/open_dashboard.ts",

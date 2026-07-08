@@ -2,7 +2,7 @@ import "./env.js";
 import { spawn } from "node:child_process";
 import { performance } from "node:perf_hooks";
 
-type UpdateGroup = "weekly" | "monthly" | "other" | "all";
+type UpdateGroup = "weekly" | "monthly" | "other" | "all" | "power-dfo";
 
 type Step = {
   label: string;
@@ -99,6 +99,12 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
     npmStep("rebuild balance dashboards", "build:balances"),
     npmStep("dashboard freshness check", "verify:dashboard"),
   ],
+  "power-dfo": [
+    npmStep("power DFO daily refresh", "power:dfo"),
+    npmStep("power DFO hourly forecast", "power:dfo:hourly"),
+    npmStep("rebuild balance dashboards", "build:balances"),
+    npmStep("dashboard freshness check", "verify:dashboard"),
+  ],
 };
 
 function formatDuration(ms: number): string {
@@ -192,8 +198,8 @@ export async function runUpdateGroup(group: UpdateGroup): Promise<void> {
 }
 
 function parseGroup(value: string | undefined): UpdateGroup {
-  if (value === "weekly" || value === "monthly" || value === "other" || value === "all") return value;
-  throw new Error(`Unknown update group ${value ?? ""}. Use weekly, monthly, other, or all.`);
+  if (value === "weekly" || value === "monthly" || value === "other" || value === "all" || value === "power-dfo") return value;
+  throw new Error(`Unknown update group ${value ?? ""}. Use weekly, monthly, other, all, or power-dfo.`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

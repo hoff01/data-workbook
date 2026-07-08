@@ -73,6 +73,16 @@ type RuntimeCrudeWeekly = {
   };
 };
 
+type RuntimePowerDfo = {
+  powerDfoCharts?: {
+    available?: boolean;
+    latestWeatherDate?: string;
+    daily?: Array<{ date?: string; estimatedDfoConsumptionKbd?: number }>;
+    weatherDaily?: Array<{ date?: string; source?: string; sourceLabel?: string }>;
+    weatherBaselineNote?: string;
+  };
+};
+
 type RuntimeReference = {
   sourceHub?: DashboardBundle["sourceHub"];
   sourceFiles?: DashboardBundle["sourceFiles"];
@@ -95,6 +105,7 @@ type ProductConfig = {
   runtimeBasePath: string;
   runtimeWeeklyPath: string;
   runtimeCrudeWeeklyPath: string;
+  runtimePowerDfoPath: string;
   runtimeReferencePath: string;
 };
 
@@ -109,6 +120,7 @@ const PRODUCTS: ProductConfig[] = [
     runtimeBasePath: "Diesel_Balance/data/diesel_balance_runtime_base.js",
     runtimeWeeklyPath: "Diesel_Balance/data/diesel_balance_runtime_weekly.js",
     runtimeCrudeWeeklyPath: "Diesel_Balance/data/diesel_balance_runtime_crude_weekly.js",
+    runtimePowerDfoPath: "Diesel_Balance/data/diesel_balance_runtime_power_dfo.js",
     runtimeReferencePath: "Diesel_Balance/data/diesel_balance_runtime_reference.js",
   },
   {
@@ -121,6 +133,7 @@ const PRODUCTS: ProductConfig[] = [
     runtimeBasePath: "Jet_Balance/data/jet_balance_runtime_base.js",
     runtimeWeeklyPath: "Jet_Balance/data/jet_balance_runtime_weekly.js",
     runtimeCrudeWeeklyPath: "Jet_Balance/data/jet_balance_runtime_crude_weekly.js",
+    runtimePowerDfoPath: "Jet_Balance/data/jet_balance_runtime_power_dfo.js",
     runtimeReferencePath: "Jet_Balance/data/jet_balance_runtime_reference.js",
   },
 ];
@@ -206,8 +219,14 @@ function verifyBalanceSubtotalFormatting(indexHtml: string, config: ProductConfi
   assertIncludes(`${config.key} highlighted rows keep PADD inset`, indexHtml, ".highlightRow td:first-child{background:#fff4a8!important;color:#1f2937!important;border-left:8px solid var(--group)}");
   assertIncludes(`${config.key} balance crude runs row uses yield highlight`, indexHtml, "{id:'crudeRunsKbd',label:'Crude Runs',kind:'highlight'}");
   assertIncludes(`${config.key} production row keeps subtotal and highlight`, indexHtml, "{id:'production',label:'Production',kind:'subtotal highlight'}");
+  assertIncludes(`${config.key} known production offline planned guide row`, indexHtml, "lines.push({id:'knownProductionOfflinePlannedKbd'");
+  assertIncludes(`${config.key} known production offline unplanned guide row`, indexHtml, "lines.push({id:'knownProductionOfflineUnplannedKbd'");
+  assertIncludes(`${config.key} total known production offline guide row`, indexHtml, "lines.push({id:'knownProductionOfflineTotalKbd'");
   assertIncludes(`${config.key} production row uses yellow highlight override`, indexHtml, ".productionHighlightRow td{background:#fff4a8!important;color:#1f2937!important;");
   assertIncludes(`${config.key} production row applies yellow override class`, indexHtml, "if (line.id === 'production') parts.push('productionHighlightRow');");
+  assertIncludes(`${config.key} known production offline red guide style`, indexHtml, ".offlineProductionGuideRow td{background:#fff7ed!important;color:#9a3412!important");
+  assertIncludes(`${config.key} known production offline gray total style`, indexHtml, ".offlineProductionTotalGuideRow td{background:#eef1f5!important;color:#475467!important");
+  assertIncludes(`${config.key} known production offline row classes`, indexHtml, "if (line.kind.includes('offlineProductionGuide')) parts.push('offlineProductionGuideRow');");
   assertIncludes(`${config.key} build draw rows use readable summary band`, indexHtml, ".balanceSummaryRow td{background:#e8eef6!important");
   assertIncludes(`${config.key} build draw per-day row uses grey band`, indexHtml, ".buildDailyRow td{background:#dde2ea!important");
   assertIncludes(`${config.key} build draw guide uses readable guide band`, indexHtml, ".balanceGuideRow td{background:#f5f8fc!important");
@@ -218,6 +237,17 @@ function verifyBalanceSubtotalFormatting(indexHtml: string, config: ProductConfi
   assertIncludes(`${config.key} build draw summary row class`, indexHtml, "{id:'buildDaily',label:'Build/(draw) per day',kind:'balanceSummary draw'}");
   assertIncludes(`${config.key} build draw per-day row class`, indexHtml, "if (line.id === 'buildDaily') parts.push('buildDailyRow');");
   assertIncludes(`${config.key} build draw guide row class`, indexHtml, "kind:lineId === 'buildTotal' ? 'guide balanceGuide' : 'guide'");
+  const productionIndex = indexHtml.indexOf("lines.push({id:'production',label:'Production',kind:'subtotal highlight'});");
+  const plannedOfflineIndex = indexHtml.indexOf("lines.push({id:'knownProductionOfflinePlannedKbd'");
+  const unplannedOfflineIndex = indexHtml.indexOf("lines.push({id:'knownProductionOfflineUnplannedKbd'");
+  const totalOfflineIndex = indexHtml.indexOf("lines.push({id:'knownProductionOfflineTotalKbd'");
+  const productionGuideIndex = indexHtml.indexOf("if (state.frequency === 'monthly') lines.push(weeklyGuideLine('production'));");
+  if ([productionIndex, plannedOfflineIndex, unplannedOfflineIndex, totalOfflineIndex, productionGuideIndex].some((index) => index < 0)) {
+    throw new Error(`${config.key} known production offline row order markers are missing`);
+  }
+  if (!(productionIndex < plannedOfflineIndex && plannedOfflineIndex < unplannedOfflineIndex && unplannedOfflineIndex < totalOfflineIndex && totalOfflineIndex < productionGuideIndex)) {
+    throw new Error(`${config.key} known production offline guide rows should render directly below Production`);
+  }
 }
 
 function verifyBalanceSupplySpacing(indexHtml: string, config: ProductConfig): void {
@@ -235,13 +265,19 @@ function verifyBalanceSupplySpacing(indexHtml: string, config: ProductConfig): v
 }
 
 function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig): void {
-  assertIncludes(`${config.key} balance frequency switch clears stale viewport restore`, indexHtml, "if (state.sheet === 'balance') { clearPendingTableViewportRestore('balanceTable'); pendingBalanceScrollPeriod = ''; forceBalancePeriodScroll = true; }");
+  assertIncludes(`${config.key} balance default scroll helper clears stale viewport restore`, indexHtml, "function requestDefaultBalancePeriodScroll(period=''){ clearPendingTableViewportRestore('balanceTable'); tableScrollSignatures.balanceTable = ''; pendingBalanceScrollPeriod = period || ''; forceBalancePeriodScroll = true; }");
+  assertIncludes(`${config.key} balance frequency switch requests default scroll`, indexHtml, "if (state.sheet === 'balance') requestDefaultBalancePeriodScroll();");
+  assertIncludes(`${config.key} balance tab switch requests default scroll`, indexHtml, "state.sheet = 'balance'; requestDefaultBalancePeriodScroll(); queueRender();");
+  assertIncludes(`${config.key} balance inactive DOM clears stale scroll signature`, indexHtml, "delete balanceTable.dataset.renderSignature;\n        }\n        tableScrollSignatures.balanceTable = '';");
   assertIncludes(`${config.key} balance force scroll bypasses viewport restore`, indexHtml, "else if (forceScroll) { clearPendingTableViewportRestore('balanceTable'); scrollTableToPeriod('balanceTable', targetPeriod, signature, true); }");
   assertIncludes(`${config.key} balance table scroll gets delayed layout retries`, indexHtml, "const retryDelays = wrap.id === 'crudeRunsTableWrap' ? [120,360] : [40,120,360];");
 }
 
 function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} balance sheets declare shared crude context`, indexHtml, "const needsBalanceContext = sheet === 'balance' || sheet === 'charts';");
+  assertIncludes(`${config.key} weekly outages load weekly balance scaffold`, indexHtml, "if (frequency === 'weekly' && (needsBalanceContext || sheet === 'outages')) await ensureWeeklyData();");
+  assertIncludes(`${config.key} outages tab uses shared data loader`, indexHtml, "outagesSheetBtn').addEventListener('click', async () => { const changed = state.sheet !== 'outages'; try { await ensureDataForState({...state,sheet:'outages'}); }");
+  assertIncludes(`${config.key} crude outage launcher uses shared data loader`, indexHtml, "openOutagesFromCrudeBtn').addEventListener('click', async () => { const nextRegion = validBaseCrudeRegion(state.crudeRegion) ? state.crudeRegion : 'padd1'; try { await ensureDataForState({...state,sheet:'outages',crudeRegion:nextRegion}); }");
   assertIncludes(`${config.key} weekly balance loads weekly crude runs`, indexHtml, "if (frequency === 'weekly' && (needsBalanceContext || sheet === 'crude')) await ensureCrudeWeeklyData();");
   assertIncludes(`${config.key} balance loads reference context before rendering crude-derived rows`, indexHtml, "if (needsBalanceContext || sheet === 'reference' || sheet === 'outages' || sheet === 'crude') await ensureReferenceData();");
   assertIncludes(`${config.key} frequency switches use shared data loader`, indexHtml, "try { await ensureDataForState({...state,frequency:nextFrequency}); }");
@@ -263,6 +299,9 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} secondary unit chart labels`, indexHtml, "label:'Catalytic Cracking Utilization'");
   assertIncludes(`${config.key} coking utilization chart label`, indexHtml, "label:'Coking Utilization'");
   assertIncludes(`${config.key} hydrocracking utilization chart label`, indexHtml, "label:'Hydrocracking Utilization'");
+  assertIncludes(`${config.key} chart missing values are not coerced to zero`, indexHtml, "function finiteNumberOrNull(value){ if (value === null || value === undefined || value === '') return null; const n = Number(value); return Number.isFinite(n) ? n : null; }");
+  assertIncludes(`${config.key} secondary unit utilization charts use tight percent scale`, indexHtml, "chartScale(raw, 5, {percent:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey),tight:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey)})");
+  assertIncludes(`${config.key} percent chart axis labels include percent sign`, indexHtml, "const axisValueLabel = value => metric.unit === '%' ? fmt(value, metric.digits) + '%' : fmt(value);");
   assertIncludes(`${config.key} Kpler periods are completed only`, indexHtml, "function completedKplerPeriod(period, frequency=state.frequency)");
   assertIncludes(`${config.key} actual-only chart metric registry`, indexHtml, "function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }");
   assertIncludes(`${config.key} secondary unit charts are monthly-only`, indexHtml, "if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return [];");
@@ -271,7 +310,7 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} optional all-zero charts are suppressed`, indexHtml, "if (OPTIONAL_NONZERO_CHART_METRICS.has(metricKey)) return values.some(value => Math.abs(value) > .0001);");
   assertIncludes(`${config.key} PADD3 shipment chart is PADD3-only`, indexHtml, "if (metricKey === 'padd3ShipmentsToPadd1Kbd' && regionKey !== 'padd3') return false;");
   assertIncludes(`${config.key} chart metric availability is region-specific`, indexHtml, "function orderedChartMetrics(regionKey=state.chartRegion){ return CHART_METRICS.filter(metricKey => chartMetricHasVisibleData(regionKey, metricKey, state.frequency)); }");
-  assertIncludes(`${config.key} chart shell signature includes metric availability`, indexHtml, "chartMetricsSignature(chartRegions), localDateText()");
+  assertIncludes(`${config.key} chart shell signature includes metric and power availability`, indexHtml, "chartMetricsSignature(chartRegions), powerDfoChartsSignature(), localDateText()");
   assertIncludes(`${config.key} chart hydration uses derived metric rows`, indexHtml, "const rows = chartRowsForMetric(regionKey, metricKey, state.frequency, baseRows);");
   assertIncludes(`${config.key} chart export uses derived metric rows`, indexHtml, "return chartRowsForMetric(regionKey, metricKey, state.frequency).map(row =>");
   assertIncludes(`${config.key} chart zoom modal container`, indexHtml, "id=\"chartZoomModal\"");
@@ -279,6 +318,83 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} chart zoom opens crude modal`, indexHtml, "function openCrudeChartZoom(card, metricKey)");
   assertIncludes(`${config.key} chart zoom closes with X`, indexHtml, "data-close-chart-zoom");
   assertIncludes(`${config.key} chart zoom close leaves grid state alone`, indexHtml, "function closeChartZoomModal(){ const modal = chartZoomModal(); if (!modal) return; modal.hidden = true; modal.innerHTML = ''; }");
+}
+
+function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} outage chart metric registry`, indexHtml, "const OUTAGE_CHART_METRICS = new Set(['knownProductionOfflinePlannedKbd'");
+  assertIncludes(`${config.key} outage product metrics follow production`, indexHtml, "'productionKbd','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd'");
+  assertIncludes(`${config.key} diesel PADD 1 outage yield vector`, indexHtml, "padd1:{atmos_distillation:.22,fcc:.18,coking:.28,distillate_hydrocracking:.20,gasoil_resid_hydrocracking:.35}");
+  assertIncludes(`${config.key} diesel PADD 5 outage yield vector`, indexHtml, "padd5:{atmos_distillation:.10,fcc:.14,coking:.20,distillate_hydrocracking:.15,gasoil_resid_hydrocracking:.29}");
+  assertIncludes(`${config.key} jet PADD 3 hydrocracking outage yield vector`, indexHtml, "padd3:{atmos_distillation:.10,distillate_hydrocracking:.22,gasoil_resid_hydrocracking:.22}");
+  assertIncludes(`${config.key} product outage yield selector`, indexHtml, "function productOutageYields(){ return D.product?.key === 'jet' ? JET_OUTAGE_YIELDS : DIESEL_OUTAGE_YIELDS; }");
+  assertIncludes(`${config.key} outage unit canonicalizer`, indexHtml, "function canonicalOutageUnitKey(unitKey='', unitLabel='')");
+  assertIncludes(`${config.key} manual outages drive product offline totals`, indexHtml, "outageEntries.forEach(outage =>");
+  assertIncludes(`${config.key} product offline excludes other outages from known total`, indexHtml, "if (bucket !== 'other') target.totalKnown += value;");
+  assertIncludes(`${config.key} outage product rows use yielded totals`, indexHtml, "if (spec.kind === 'product') addOutageTotals(totals, daily.productOffline);");
+  assertIncludes(`${config.key} outage capacity rows use unit capacity totals`, indexHtml, "else (OUTAGE_UNIT_GROUPS[spec.unitGroup] || []).forEach(unitKey => addOutageTotals(totals, daily.units?.[unitKey]));");
+  assertIncludes(`${config.key} weekly outage charts use Friday-ending 7-day window`, indexHtml, "return {start:end - 6 * DAY_MS,end,days:7};");
+  assertIncludes(`${config.key} known production offline balance values`, indexHtml, "else if (OUTAGE_CHART_METRICS.has(lineId)) value = outageMetricValue({...point,regionKey}, lineId, state.frequency);");
+  assertIncludes(`${config.key} outage charts render all outage metrics`, indexHtml, "function orderedOutageChartMetrics(){ return Array.from(OUTAGE_CHART_METRICS); }");
+  assertIncludes(`${config.key} outage charts use crude outage regions`, indexHtml, "function renderOutageChartRegionOptions()");
+  assertIncludes(`${config.key} outage charts preserve actual forecast status`, indexHtml, "function outageChartStatusByPeriod(frequency=state.frequency)");
+  assertIncludes(`${config.key} outage charts use custom rows`, indexHtml, "function outageChartRowsForMetric(regionKey, metricKey, frequency=state.frequency)");
+  assertIncludes(`${config.key} outage charts use 3-year band`, indexHtml, "function outageBandYears(frequency=state?.frequency || 'monthly'){ return availableBandYears(frequency).slice(0,3); }");
+  assertIncludes(`${config.key} outage chart render signature tracks forecast visibility`, indexHtml, "state.showForecast ? 'forecast' : 'actual-only'");
+  assertIncludes(`${config.key} outage chart render signature tracks next-year visibility`, indexHtml, "state.showNextYearForecast ? 'next' : 'no-next'");
+  assertIncludes(`${config.key} outage chart SVG class`, indexHtml, "outageSeasonChart");
+  assertIncludes(`${config.key} outage chart skips 4-week smoothing`, indexHtml, "noRolling:isOutageSeasonChart");
+  assertIncludes(`${config.key} outage chart export control`, indexHtml, "data-outage-export-chart");
+  assertIncludes(`${config.key} outage chart grid click handler`, indexHtml, "document.getElementById('outageChartGrid').addEventListener('click'");
+  assertIncludes(`${config.key} outage chart region change handler`, indexHtml, "document.getElementById('outageChartRegion').addEventListener('change'");
+}
+
+function verifyNortheastPowerCharts(indexHtml: string, config: ProductConfig, runtimePowerDfo: RuntimePowerDfo): void {
+  assertIncludes(`${config.key} power DFO lazy chunk loader`, indexHtml, "async function ensurePowerDfoData(){ if (hasPowerDfoData()) return; await ensureLazyChunk('powerDfo'); }");
+  assertIncludes(`${config.key} power DFO Northeast-only gate`, indexHtml, "function shouldShowNortheastPowerSection(){ return D.product?.key === 'diesel' && state.chartRegion === 'padd1ab'; }");
+  assertIncludes(`${config.key} power DFO section renderer`, indexHtml, "function northeastPowerSectionHtml()");
+  assertIncludes(`${config.key} distillate burn kb/d bar renderer`, indexHtml, "function drawDistillateBurnBarChart(svg, rows, options={})");
+  assertIncludes(`${config.key} distillate burn calendar renderer`, indexHtml, "function drawDistillateBurnCalendar(container, rows)");
+  assertIncludes(`${config.key} PADD 1 HDD renderer`, indexHtml, "function drawPowerDfoHddChart(svg, rows)");
+  assertIncludes(`${config.key} distillate burn zoom control`, indexHtml, "data-power-zoom=\"burn\"");
+  assertIncludes(`${config.key} distillate burn chart uses kb/d`, indexHtml, "valueKey:'estimatedDfoConsumptionKbd',unit:'kb/d'");
+  assertIncludes(`${config.key} weather chart uses 14-day horizon`, indexHtml, "powerDfoWeatherWindowRows(14)");
+  assertIncludes(`${config.key} weather source legend renderer`, indexHtml, "function hddLegendHtml(rows)");
+  assertIncludes(`${config.key} burn percentile calendar threshold`, indexHtml, "if (p <= 80) return {background:'#fff'");
+  if (config.key === "diesel") {
+    if (runtimePowerDfo.powerDfoCharts?.available !== true) throw new Error("diesel power DFO chart payload is unavailable");
+    const daily = runtimePowerDfo.powerDfoCharts?.daily ?? [];
+    const weatherDaily = runtimePowerDfo.powerDfoCharts?.weatherDaily ?? [];
+    if (daily.length === 0) throw new Error("diesel power DFO daily rows are empty");
+    if (weatherDaily.length === 0) throw new Error("diesel power DFO weather rows are empty");
+    if ((daily[0]?.date || "9999-99-99") > "2023-01-01") throw new Error("diesel power DFO daily history should start by 2023");
+    if (!daily.some((row) => typeof row.estimatedDfoConsumptionKbd === "number")) throw new Error("diesel power DFO daily rows are missing kb/d burn values");
+    const weatherDates = new Set(weatherDaily.map((row) => row.date).filter(Boolean));
+    if (weatherDates.size < 14) throw new Error("diesel power DFO weather rows should expose the available 14-day horizon");
+    if (!weatherDaily.some((row) => row.sourceLabel)) throw new Error("diesel power DFO weather rows are missing source labels");
+    if (!String(runtimePowerDfo.powerDfoCharts?.weatherBaselineNote || "").includes("Historical PADD 1 HDD baseline rows")) {
+      throw new Error("diesel power DFO weather baseline caveat is missing");
+    }
+  } else if (runtimePowerDfo.powerDfoCharts?.available !== false) {
+    throw new Error(`${config.key} power DFO payload should remain unavailable`);
+  }
+}
+
+function verifyPowerDfoSourceFiles(config: ProductConfig, runtimeReference: RuntimeReference): void {
+  const roles = new Set((runtimeReference.sourceFiles ?? []).map((file) => file.role));
+  const powerRoles = [
+    "power_dfo_daily",
+    "power_dfo_weather",
+    "power_dfo_forecast_24h",
+    "power_dfo_manifest",
+    "power_dfo_hourly_manifest",
+  ];
+  if (config.key === "diesel") {
+    const missing = powerRoles.filter((role) => !roles.has(role));
+    if (missing.length) throw new Error(`diesel Power DFO source metadata missing roles: ${missing.join(", ")}`);
+  } else {
+    const present = powerRoles.filter((role) => roles.has(role));
+    if (present.length) throw new Error(`${config.key} should not package Power DFO source roles: ${present.join(", ")}`);
+  }
 }
 
 function verifyYieldAdjustmentRowOrder(indexHtml: string, config: ProductConfig): void {
@@ -360,7 +476,7 @@ async function readAssignedJson<T>(path: string, marker: string): Promise<T> {
 }
 
 async function verifyProduct(config: ProductConfig): Promise<string> {
-  const [manifest, monthlyLatest, weeklyLatest, indexHtml, runtimeBase, runtimeWeekly, runtimeCrudeWeekly, runtimeReference] = await Promise.all([
+  const [manifest, monthlyLatest, weeklyLatest, indexHtml, runtimeBase, runtimeWeekly, runtimeCrudeWeekly, runtimePowerDfo, runtimeReference] = await Promise.all([
     readJson<BalanceManifest>(config.manifestPath),
     latestCsvDate(config.monthlyCsv),
     latestCsvDate(config.weeklyCsv),
@@ -368,6 +484,7 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
     readAssignedJson<RuntimeBase>(config.runtimeBasePath, "window.BALANCE_DATA = "),
     readAssignedJson<RuntimeWeekly>(config.runtimeWeeklyPath, ".weekly = "),
     readAssignedJson<RuntimeCrudeWeekly>(config.runtimeCrudeWeeklyPath, ".crudeWeekly = "),
+    readAssignedJson<RuntimePowerDfo>(config.runtimePowerDfoPath, ".powerDfo = "),
     readAssignedJson<RuntimeReference>(config.runtimeReferencePath, ".reference = "),
   ]);
 
@@ -381,11 +498,12 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
   assertEqual(`${config.key} runtime base weekly freshness`, runtimeBase.freshness?.latestWeekly ?? "", weeklyLatest);
   if ((runtimeBase.optimization?.runtimePlan?.baseRows ?? 0) <= 0) throw new Error(`${config.key} runtime optimization base rows are missing`);
   if ((runtimeBase.optimization?.runtimePlan?.lazyRows ?? 0) <= 0) throw new Error(`${config.key} runtime optimization lazy rows are missing`);
-  if ((runtimeBase.optimization?.lazyChunks?.length ?? 0) < 3) throw new Error(`${config.key} runtime optimization lazy chunk diagnostics are incomplete`);
+  if ((runtimeBase.optimization?.lazyChunks?.length ?? 0) < 4) throw new Error(`${config.key} runtime optimization lazy chunk diagnostics are incomplete`);
   if ((runtimeBase.optimization?.recommendations?.length ?? 0) === 0) throw new Error(`${config.key} runtime optimization recommendations are missing`);
   if ((runtimeWeekly.regionalBalance?.weekly?.length ?? 0) === 0) throw new Error(`${config.key} runtime weekly regional rows are empty`);
   if ((runtimeCrudeWeekly.crudeRuns?.weekly?.length ?? 0) === 0) throw new Error(`${config.key} runtime weekly crude rows are empty`);
   if ((runtimeReference.sourceFiles?.length ?? 0) === 0) throw new Error(`${config.key} runtime reference source files are empty`);
+  verifyPowerDfoSourceFiles(config, runtimeReference);
   const runtimeScriptPattern = new RegExp(`src="data/${config.key}_balance_runtime_base\\.js(?:\\?v=[^"]+)?"`);
   if (!runtimeScriptPattern.test(indexHtml)) {
     throw new Error(`${config.key} index.html does not reference expected runtime base script`);
@@ -396,6 +514,8 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
   verifyBalanceSmartWindowScroll(indexHtml, config);
   verifyBalanceCrudeContextLoading(indexHtml, config);
   verifyChartTabExpansion(indexHtml, config);
+  verifyOutageProductionOffline(indexHtml, config);
+  verifyNortheastPowerCharts(indexHtml, config, runtimePowerDfo);
   verifyYieldAdjustmentRowOrder(indexHtml, config);
   verifyYieldWeeklyGuideStopsAtLatestActual(indexHtml, config);
   verifyCrudeRunsDefaultActivation(indexHtml, config);

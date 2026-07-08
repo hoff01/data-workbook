@@ -1,7 +1,7 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-07-07T05:14:11.076Z",
+  "generatedAt": "2026-07-08T11:17:06.423Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-04-15",
@@ -74,7 +74,7 @@
     "refinery_unit_capacity": "45106a1e327bf4769a706679807fdaa2dd5fc4ab98a1168672268d4bcf58c5bf"
   },
   "optimization": {
-    "generatedAt": "2026-07-07T05:14:11.107Z",
+    "generatedAt": "2026-07-08T11:17:06.463Z",
     "runtimePlan": {
       "baseRows": 6232,
       "lazyRows": 22830,
@@ -82,6 +82,7 @@
       "basePayloadKb": 1724.6,
       "weeklyPayloadKb": 2324.2,
       "crudeWeeklyPayloadKb": 1116.4,
+      "powerDfoPayloadKb": 0.4,
       "referencePayloadKb": 150.2
     },
     "rowCounts": {
@@ -96,7 +97,9 @@
       "sourceFiles": 8,
       "sourceHubSources": 7,
       "refineryCapacityRows": 311,
-      "kplerRows": 0
+      "kplerRows": 0,
+      "powerDfoDailyRows": 0,
+      "powerDfoWeatherRows": 0
     },
     "lazyChunks": [
       {
@@ -114,6 +117,14 @@
         "estimatedKb": 1116.4,
         "status": "optimized",
         "reason": "Weekly crude-runs rows load when weekly balance, charts, or the Crude runs sheet needs shared crude context."
+      },
+      {
+        "name": "powerDfo",
+        "path": "data/jet_balance_runtime_power_dfo.js",
+        "rows": 0,
+        "estimatedKb": 0.4,
+        "status": "watch",
+        "reason": "Northeast power-generation, distillate-burn, and PADD 1 HDD chart data load only for the Diesel Northeast Charts section."
       },
       {
         "name": "reference",

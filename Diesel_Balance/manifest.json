@@ -1,7 +1,7 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-07-07T05:14:10.968Z",
+  "generatedAt": "2026-07-08T11:17:06.258Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-04-15",
@@ -62,6 +62,38 @@
       "modifiedAt": "2026-07-04T23:03:03.586Z"
     },
     {
+      "role": "power_dfo_daily",
+      "path": "power_generation_dfo/estimated_daily_dfo.csv",
+      "rows": 2695,
+      "checksum": "2083ec896b8152edbcf0693d4e5265c29c1749d0055afbf736260baa25e9d191",
+      "modifiedAt": "2026-07-04T23:04:02.414Z"
+    },
+    {
+      "role": "power_dfo_weather",
+      "path": "power_generation_dfo/weather_14d_padd1_cities.csv",
+      "rows": 16,
+      "checksum": "e52d2363873c0f582af6eda0c1245af97d84e23057eef86f9d41c074e01fc3b8",
+      "modifiedAt": "2026-07-04T23:03:54.099Z"
+    },
+    {
+      "role": "power_dfo_forecast_24h",
+      "path": "power_generation_dfo/dfo_generation_forecast_24h.csv",
+      "checksum": "af7c3c5ff7f794815a9b45cb916048c5d5b0815cac62e535a1047024bc908e94",
+      "modifiedAt": "2026-07-04T23:03:54.100Z"
+    },
+    {
+      "role": "power_dfo_manifest",
+      "path": "power_generation_dfo/manifest.json",
+      "checksum": "3bc3b57f5d26021d74f061cc40ecf4885e55bf658225e827f5ff5517c8b66b91",
+      "modifiedAt": "2026-07-04T23:04:02.416Z"
+    },
+    {
+      "role": "power_dfo_hourly_manifest",
+      "path": "power_generation_dfo/hourly_forecast_manifest.json",
+      "checksum": "12c386ce0ff9809e6ead8cc5ff80333d8bfa392435bb84f070d5924c250835e6",
+      "modifiedAt": "2026-07-04T23:03:54.508Z"
+    },
+    {
       "role": "refinery_unit_capacity",
       "path": "data/refinery_unit_capacities_2025.csv",
       "rows": 311,
@@ -78,18 +110,24 @@
     "kpler_padd_movement_guide_monthly": "173a935f94edf44eb2cc062e1213964063b7c73a9c5ac85d11c7410d88d20cf6",
     "kpler_padd_movement_guide_weekly": "92a2e1f3da1a54b4d5e9a0883e27bb1899b26daebd42a92803285d0449ee0b19",
     "padd_1": "a982154a5987af78c95b77a2ac3e6689aaa148bb9dc26af82f444bbc95ced422",
+    "power_dfo_daily": "2083ec896b8152edbcf0693d4e5265c29c1749d0055afbf736260baa25e9d191",
+    "power_dfo_weather": "e52d2363873c0f582af6eda0c1245af97d84e23057eef86f9d41c074e01fc3b8",
+    "power_dfo_forecast_24h": "af7c3c5ff7f794815a9b45cb916048c5d5b0815cac62e535a1047024bc908e94",
+    "power_dfo_manifest": "3bc3b57f5d26021d74f061cc40ecf4885e55bf658225e827f5ff5517c8b66b91",
+    "power_dfo_hourly_manifest": "12c386ce0ff9809e6ead8cc5ff80333d8bfa392435bb84f070d5924c250835e6",
     "refinery_unit_capacity": "45106a1e327bf4769a706679807fdaa2dd5fc4ab98a1168672268d4bcf58c5bf"
   },
   "optimization": {
-    "generatedAt": "2026-07-07T05:14:11.015Z",
+    "generatedAt": "2026-07-08T11:17:06.338Z",
     "runtimePlan": {
       "baseRows": 6755,
-      "lazyRows": 24532,
-      "lazyRowSharePct": 78.4,
+      "lazyRows": 27248,
+      "lazyRowSharePct": 80.1,
       "basePayloadKb": 1850.4,
       "weeklyPayloadKb": 2627.2,
       "crudeWeeklyPayloadKb": 1116.4,
-      "referencePayloadKb": 150.7
+      "powerDfoPayloadKb": 354.5,
+      "referencePayloadKb": 152.2
     },
     "rowCounts": {
       "monthlyRegional": 1188,
@@ -100,10 +138,12 @@
       "movementFlows": 26,
       "monthlyMovementFlowRows": 3432,
       "weeklyMovementFlowRows": 14742,
-      "sourceFiles": 9,
+      "sourceFiles": 14,
       "sourceHubSources": 7,
       "refineryCapacityRows": 311,
-      "kplerRows": 0
+      "kplerRows": 0,
+      "powerDfoDailyRows": 2695,
+      "powerDfoWeatherRows": 16
     },
     "lazyChunks": [
       {
@@ -123,10 +163,18 @@
         "reason": "Weekly crude-runs rows load when weekly balance, charts, or the Crude runs sheet needs shared crude context."
       },
       {
+        "name": "powerDfo",
+        "path": "data/diesel_balance_runtime_power_dfo.js",
+        "rows": 2711,
+        "estimatedKb": 354.5,
+        "status": "optimized",
+        "reason": "Northeast power-generation, distillate-burn, and PADD 1 HDD chart data load only for the Diesel Northeast Charts section."
+      },
+      {
         "name": "reference",
         "path": "data/diesel_balance_runtime_reference.js",
-        "rows": 327,
-        "estimatedKb": 150.7,
+        "rows": 332,
+        "estimatedKb": 152.2,
         "status": "optimized",
         "reason": "Source inventory, refinery capacity, Kpler metadata, and checksums load only for Balance, Charts, Reference, Outages, or Crude runs."
       }
@@ -136,7 +184,7 @@
         "key": "lazy-runtime",
         "label": "Lazy runtime split",
         "status": "optimized",
-        "detail": "78.4% of generated rows are deferred into lazy chunks."
+        "detail": "80.1% of generated rows are deferred into lazy chunks."
       },
       {
         "key": "shared-crude",
@@ -148,7 +196,7 @@
         "key": "reference-isolation",
         "label": "Reference isolation",
         "status": "optimized",
-        "detail": "150.7 KB of reference payload is isolated from initial load."
+        "detail": "152.2 KB of reference payload is isolated from initial load."
       }
     ],
     "recommendations": [
@@ -162,7 +210,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 150.7 KB versus 1850.4 KB estimated base payload."
+        "detail": "Reference payload is 152.2 KB versus 1850.4 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",

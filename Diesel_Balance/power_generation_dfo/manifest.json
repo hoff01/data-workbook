@@ -1,0 +1,221 @@
+{
+  "aggregation_note": "Facility-fuel raw rows include primeMover=ALL and individual prime movers. Monthly fuel consumption uses primeMover=ALL only to avoid double counting.",
+  "calibration": {
+    "correlation_window_months": 12,
+    "current_available_months": 100,
+    "current_dfo_consumption_per_oil_mwh": "1.150005404270",
+    "current_factor_target_error": "0.000005404270",
+    "current_selected_months": 20,
+    "current_selected_subset_correlation": "0.98814409",
+    "latest_factor_year": 2026,
+    "selected_top_correlated_months": 20,
+    "selection_basis": "local rolling Pearson correlation between monthly PADD 1 DFO consumption and same-month MIDA+NE oil MWh, optimized toward target DFO/MWh factor",
+    "target_dfo_consumption_per_oil_mwh": 1.15,
+    "target_factor_candidate_pool_months": 55,
+    "target_factor_min_correlation": 0.5
+  },
+  "generated_at": "2026-07-04T23:04:02.415404+00:00",
+  "inputs": {
+    "facility_fuel_url": "https://api.eia.gov/v2/electricity/facility-fuel/data/",
+    "facility_fuels": [
+      "DFO",
+      "RFO"
+    ],
+    "padd1_states": [
+      "CT",
+      "DC",
+      "DE",
+      "MA",
+      "MD",
+      "ME",
+      "NH",
+      "NJ",
+      "NY",
+      "PA",
+      "RI",
+      "VA",
+      "VT",
+      "WV"
+    ],
+    "rto_daily_url": "https://api.eia.gov/v2/electricity/rto/daily-fuel-type-data/data/",
+    "rto_respondents": [
+      "MIDA",
+      "NE"
+    ],
+    "timezone": "Central"
+  },
+  "method": "Monthly PADD 1 DFO facility-fuel consumption is pulled from 2018 forward. Daily MIDA+NE oil generation is used as the proportional indicator. Calibration is recalculated by year using all available months through that year, ignoring calendar month, and selecting 20 high-correlation months whose weighted DFO/MWh factor is closest to the configured target.",
+  "outputs": {
+    "annual_calibration_factors": "/Users/alexhoffmann/US_Balances/power_generation_dfo/annual_calibration_factors.csv",
+    "calibration_months": "/Users/alexhoffmann/US_Balances/power_generation_dfo/calibration_months.csv",
+    "daily_2026_chart": "/Users/alexhoffmann/US_Balances/power_generation_dfo/daily_distillate_burn_2026.jpg",
+    "daily_2026_estimates": "/Users/alexhoffmann/US_Balances/power_generation_dfo/estimated_daily_dfo_2026.csv",
+    "daily_estimates": "/Users/alexhoffmann/US_Balances/power_generation_dfo/estimated_daily_dfo.csv",
+    "daily_generation": "/Users/alexhoffmann/US_Balances/power_generation_dfo/daily_padd1_ne_oil_generation.csv",
+    "facility_raw": "/Users/alexhoffmann/US_Balances/power_generation_dfo/facility_fuel_raw.csv",
+    "monthly_estimates": "/Users/alexhoffmann/US_Balances/power_generation_dfo/estimated_monthly_dfo.csv",
+    "monthly_facility": "/Users/alexhoffmann/US_Balances/power_generation_dfo/monthly_padd1_facility_fuel.csv",
+    "rto_raw": "/Users/alexhoffmann/US_Balances/power_generation_dfo/rto_oil_daily_raw.csv"
+  },
+  "pipeline_name": "power_generation_dfo",
+  "row_counts": {
+    "annual_factors": 7,
+    "calibration_months": 100,
+    "daily_2026_estimates": 184,
+    "daily_estimates": 2695,
+    "daily_generation": 2695,
+    "facility_raw": 106459,
+    "monthly_estimates": 91,
+    "monthly_facility": 200,
+    "rto_raw": 5281
+  },
+  "run_end": "2026-07-04",
+  "run_start": "2018-01-01",
+  "sources": [
+    {
+      "offset": 0,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 5000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 10000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 15000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 20000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 25000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 30000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 35000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 40000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 45000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 50000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 55000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 60000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 65000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 70000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 75000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 80000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 85000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 90000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 95000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 100000,
+      "row_count": 5000,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 105000,
+      "row_count": 1459,
+      "total": "106459",
+      "url": "https://api.eia.gov/v2/electricity/facility-fuel/data/"
+    },
+    {
+      "offset": 0,
+      "row_count": 5000,
+      "total": "5281",
+      "url": "https://api.eia.gov/v2/electricity/rto/daily-fuel-type-data/data/"
+    },
+    {
+      "offset": 5000,
+      "row_count": 281,
+      "total": "5281",
+      "url": "https://api.eia.gov/v2/electricity/rto/daily-fuel-type-data/data/"
+    }
+  ],
+  "start_year": 2018
+}
