@@ -51,6 +51,9 @@ def load_env_files() -> None:
     protected_keys = set(os.environ)
     _load_env_file(REPO_DIR / ".env", protected_keys)
     _load_env_file(REPO_DIR / ".env.local", protected_keys, override=True)
+    runtime_root = os.environ.get("US_BALANCES_RUNTIME_ROOT")
+    if runtime_root:
+        _load_env_file(Path(runtime_root) / ".env.local", protected_keys, override=True)
     _load_env_file(CONFIG_DIR / "local.env", protected_keys, override=True)
     _load_env_file(CONFIG_DIR / ".env", protected_keys, override=True)
     _load_env_file(CONFIG_DIR / ".env.local", protected_keys, override=True)
@@ -142,7 +145,7 @@ def runtime_config() -> RuntimeConfig:
         granularity=str(defaults["granularity"]),
         concurrency=max(1, int(os.environ.get("KPLER_CONCURRENCY", "2"))),
         retry_count=max(1, int(os.environ.get("KPLER_RETRY_COUNT", "3"))),
-        retry_backoff_seconds=float(os.environ.get("KPLER_RETRY_BACKOFF_SECONDS", "10")),
+        retry_backoff_seconds=float(os.environ.get("KPLER_RETRY_BACKOFF_SECONDS", "2")),
         verify_tls=parse_bool(os.environ.get("KPLER_VERIFY_TLS"), True),
     )
 

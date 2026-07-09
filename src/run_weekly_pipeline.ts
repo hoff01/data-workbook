@@ -1,12 +1,18 @@
 import "./env.js";
 import { spawn } from "node:child_process";
+import { dirname, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
+import { fileURLToPath } from "node:url";
 
 type Step = {
   label: string;
   command: string;
   args: string[];
 };
+
+const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
+const pythonCommand = process.env.US_BALANCES_PYTHON || (process.platform === "win32" ? "python" : "python3");
 
 function formatDuration(ms: number): string {
   const seconds = ms / 1000;
@@ -24,7 +30,7 @@ async function runStep(step: Step, index: number, total: number): Promise<number
   console.log(`[weekly] step ${index}/${total} start: ${step.label} :: ${commandText(step)}`);
   await new Promise<void>((resolve, reject) => {
     const child = spawn(step.command, step.args, {
-      cwd: process.cwd(),
+      cwd: ROOT,
       env: { ...process.env, FORCE_COLOR: "0" },
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -47,14 +53,14 @@ async function runStep(step: Step, index: number, total: number): Promise<number
 async function main(): Promise<void> {
   const weeklyRawArgs = process.argv.slice(2);
   const steps: Step[] = [
-    { label: "weekly raw EIA pull", command: "python3", args: ["src/weekly_xls.py", ...weeklyRawArgs] },
+    { label: "weekly raw EIA pull", command: pythonCommand, args: ["src/weekly_xls.py", ...weeklyRawArgs] },
     {
       label: "weekly clean CSV export",
-      command: "python3",
+      command: pythonCommand,
       args: ["src/export_raw_headers.py", "weekly", "--skip-weekly-raw-archive"],
     },
-    { label: "clean public EIA outputs", command: "python3", args: ["src/clean_eia_outputs.py"] },
-    { label: "Kpler PADD 1 EIA split", command: "python3", args: ["src/kpler_padd1_eia_split.py"] },
+    { label: "clean public EIA outputs", command: pythonCommand, args: ["src/clean_eia_outputs.py"] },
+    { label: "Kpler PADD 1 EIA split", command: pythonCommand, args: ["src/kpler_padd1_eia_split.py"] },
   ];
   const started = performance.now();
   let workRuntime = 0;

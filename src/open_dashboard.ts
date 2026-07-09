@@ -5,12 +5,14 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { setTimeout as sleep } from "node:timers/promises";
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
 const HOST = process.env.DASHBOARD_UPDATE_HOST || "127.0.0.1";
 const DEFAULT_PORT = Number(process.env.DASHBOARD_UPDATE_PORT || 8787);
 const PORT_WINDOW = Number(process.env.DASHBOARD_UPDATE_PORT_WINDOW || 10);
 const SERVER_APP_ID = "balance-dashboard-update-server";
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
 
 function routeFromArgs(args: string[]): string {
   const requested = args.find((arg) => arg && !arg.startsWith("--")) || "/";
@@ -60,7 +62,9 @@ function startServer(port: number): void {
   mkdirSync(join(ROOT, "logs"), { recursive: true });
   const logPath = join(ROOT, "logs", `dashboard_server_${port}.log`);
   const logFd = openSync(logPath, "a");
-  const child = spawn(npmCommand, ["run", "dashboard:server"], {
+  const command = tsxCommand || npmCommand;
+  const args = tsxCommand ? [join(ROOT, "src", "dashboard_update_server.ts")] : ["run", "dashboard:server"];
+  const child = spawn(command, args, {
     cwd: ROOT,
     detached: true,
     env: { ...process.env, DASHBOARD_UPDATE_PORT: String(port), FORCE_COLOR: "0" },

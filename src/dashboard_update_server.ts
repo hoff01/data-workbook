@@ -1,7 +1,19 @@
-import { createReadStream, existsSync, readFileSync, statSync, writeFileSync, type Stats } from "node:fs";
+import {
+  closeSync,
+  createReadStream,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+  type Stats,
+} from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { extname, join, normalize, relative, resolve } from "node:path";
+import { dirname, extname, join, normalize, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { createGzip } from "node:zlib";
 
 type UpdateGroup = "weekly" | "monthly" | "other" | "all" | "power-dfo";
@@ -19,6 +31,11 @@ type Job = {
   exitCode: number | null;
   signal: NodeJS.Signals | null;
   lines: string[];
+};
+
+type RunnerLock = {
+  fd: number;
+  path: string;
 };
 
 type BalanceAdjustment = {
@@ -68,18 +85,23 @@ type DashboardSettings = {
   updatedAt: string;
 };
 
-const ROOT = process.cwd();
+const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
 const HOST = process.env.DASHBOARD_UPDATE_HOST || "127.0.0.1";
 const PORT = Number(process.env.DASHBOARD_UPDATE_PORT || 8787);
 const SERVER_APP_ID = "balance-dashboard-update-server";
 const SERVER_STARTED_AT = new Date().toISOString();
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
 const validGroups = new Set<UpdateGroup>(["weekly", "monthly", "other", "all", "power-dfo"]);
 const maxLines = 600;
 const settingsPath = join(ROOT, "balance_dashboard_settings.json");
+const runnerLockPath = join(ROOT, "logs", "update_runner.lock");
+const runnerLockStaleMs = 12 * 60 * 60 * 1000;
 
 let currentProcess: ReturnType<typeof spawn> | null = null;
 let currentJob: Job | null = null;
+let currentLock: RunnerLock | null = null;
 
 function mimeType(pathname: string): string {
   return {
@@ -180,8 +202,42 @@ function landingPage(): string {
   return `<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Balance Dashboards</title>
-<style>body{margin:0;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#eef2f6;color:#151c2c}.wrap{max-width:820px;margin:48px auto;padding:0 20px}h1{font-size:28px;margin:0 0 10px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}a{display:block;background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:18px;color:#1d4ed8;text-decoration:none;font-weight:800;box-shadow:0 12px 28px rgba(26,39,65,.08)}p{color:#667085;line-height:1.5}.note{background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:14px 16px;margin-top:18px;color:#475467;font-size:13px}@media(max-width:620px){.grid{grid-template-columns:1fr}}</style></head>
-<body><main class="wrap"><h1>Balance Dashboards</h1><p>The local update runner is active. Open a workbook and use the Reference tab for background refreshes.</p><div class="grid"><a href="/Diesel_Balance/index.html">Diesel Balance</a><a href="/Jet_Balance/index.html">Jet Balance</a><a href="/Diesel_Balance/index.html?sheet=reference">Diesel Reference</a><a href="/Jet_Balance/index.html?sheet=reference">Jet Reference</a></div><div class="note">For one-click launch from the file system, use <strong>Open_Balance_Dashboards.command</strong> on Mac or <strong>Open_Balance_Dashboards.bat</strong> on Windows from the repo folder.</div></main></body>
+<style>body{margin:0;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#eef2f6;color:#151c2c}.wrap{max-width:940px;margin:48px auto;padding:0 20px}h1{font-size:28px;margin:0 0 10px}h2{font-size:18px;margin:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}.runner{background:#fff;border:1px solid #cfd7e3;border-radius:8px;box-shadow:0 12px 28px rgba(26,39,65,.08);padding:18px;margin-top:20px}.runnerHead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.runnerButtons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.runnerStatus{display:inline-flex;border-radius:999px;background:#eef6ff;color:#294f88;padding:5px 9px;font-size:12px;font-weight:850}.runnerStatus.running{background:#fff6df;color:#976100}.runnerStatus.succeeded{background:#eaf8ef;color:#137047}.runnerStatus.failed{background:#fee4e2;color:#981b1b}.log{margin-top:12px;max-height:240px;overflow:auto;background:#101828;color:#e5edf8;border-radius:8px;padding:10px;font-size:11px;line-height:1.45;white-space:pre-wrap}a{display:block;background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:18px;color:#1d4ed8;text-decoration:none;font-weight:800;box-shadow:0 12px 28px rgba(26,39,65,.08)}button{border:1px solid #cbd5e1;background:#fff;color:#1f2937;border-radius:7px;padding:8px 11px;font-weight:850;cursor:pointer}button.primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff}button:disabled{opacity:.55;cursor:not-allowed}p{color:#667085;line-height:1.5}.note{background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:14px 16px;margin-top:18px;color:#475467;font-size:13px}@media(max-width:620px){.grid{grid-template-columns:1fr}.runnerHead{display:block}}</style></head>
+<body><main class="wrap"><h1>Balance Dashboards</h1><p>The local update runner is active. Open a workbook, or start a background refresh directly from this page.</p><div class="grid"><a href="/Diesel_Balance/index.html">Diesel Balance</a><a href="/Jet_Balance/index.html">Jet Balance</a><a href="/Diesel_Balance/index.html?sheet=reference">Diesel Reference</a><a href="/Jet_Balance/index.html?sheet=reference">Jet Reference</a></div><section class="runner"><div class="runnerHead"><div><h2>Update Runner</h2><p>Run the existing npm update groups from this checkout. The runner keeps working if the folder is moved because the server resolves the repo root dynamically.</p></div><span class="runnerStatus" id="runnerStatus">Idle</span></div><div class="runnerButtons"><button class="primary" data-run-group="weekly" type="button">Weekly</button><button data-run-group="monthly" type="button">Monthly</button><button data-run-group="other" type="button">Other</button><button data-run-group="power-dfo" type="button">Power DFO</button><button data-run-group="all" type="button">All</button></div><pre class="log" id="runnerLog">No runner job started.</pre></section><div class="note">For one-click launch from the file system, use <strong>Start_Balance_Runner.command</strong> on Mac or <strong>Start_Balance_Runner.bat</strong> on Windows from the repo folder.</div></main><script>
+const statusEl = document.getElementById('runnerStatus');
+const logEl = document.getElementById('runnerLog');
+const buttons = Array.from(document.querySelectorAll('[data-run-group]'));
+let pollTimer = 0;
+function setStatus(job){
+  const state = job?.status || 'idle';
+  statusEl.textContent = state === 'idle' ? 'Idle' : job.group + ' ' + state;
+  statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
+  buttons.forEach(button => button.disabled = state === 'running');
+  logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : 'No runner job started.';
+}
+async function refreshStatus(){
+  try {
+    const response = await fetch('/api/update/status', { cache:'no-store' });
+    const payload = await response.json();
+    setStatus(payload.job);
+    if (payload.job?.status === 'running') pollTimer = window.setTimeout(refreshStatus, 2000);
+  } catch (error) {
+    statusEl.textContent = 'Unavailable';
+    statusEl.className = 'runnerStatus failed';
+    logEl.textContent = error instanceof Error ? error.message : String(error);
+  }
+}
+buttons.forEach(button => button.addEventListener('click', async () => {
+  window.clearTimeout(pollTimer);
+  const group = button.dataset.runGroup;
+  setStatus({ group, status:'running', lines:['starting update:' + group] });
+  const response = await fetch('/api/update/start', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ group }) });
+  const payload = await response.json();
+  setStatus(payload.job);
+  pollTimer = window.setTimeout(refreshStatus, response.status === 409 ? 1000 : 2000);
+}));
+refreshStatus();
+</script></body>
 </html>`;
 }
 
@@ -201,15 +257,53 @@ function parseGroup(value: unknown): UpdateGroup | null {
   return typeof value === "string" && validGroups.has(value as UpdateGroup) ? (value as UpdateGroup) : null;
 }
 
+function acquireRunnerLock(group: UpdateGroup): RunnerLock {
+  mkdirSync(dirname(runnerLockPath), { recursive: true });
+  try {
+    const existing = statSync(runnerLockPath);
+    if (Date.now() - existing.mtimeMs > runnerLockStaleMs) unlinkSync(runnerLockPath);
+  } catch {
+    // Missing or inaccessible lock is handled by the exclusive open below.
+  }
+  try {
+    const fd = openSync(runnerLockPath, "wx");
+    writeFileSync(
+      fd,
+      JSON.stringify({ group, pid: process.pid, root: ROOT, startedAt: new Date().toISOString() }, null, 2) + "\n",
+    );
+    return { fd, path: runnerLockPath };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Another update runner appears to be active. Lock: ${runnerLockPath}. ${message}`);
+  }
+}
+
+function releaseRunnerLock(lock: RunnerLock | null): void {
+  if (!lock) return;
+  try {
+    closeSync(lock.fd);
+  } catch {
+    // Best effort cleanup.
+  }
+  try {
+    unlinkSync(lock.path);
+  } catch {
+    // Best effort cleanup.
+  }
+  if (currentLock === lock) currentLock = null;
+}
+
 function startJob(group: UpdateGroup): Job {
   if (currentProcess && currentJob?.status === "running") return currentJob;
-  const args = ["run", `update:${group}`];
+  const lock = acquireRunnerLock(group);
+  const command = tsxCommand || npmCommand;
+  const args = tsxCommand ? [join(ROOT, "src", "update_pipeline.ts"), group] : ["run", `update:${group}`];
   const started = Date.now();
   const job: Job = {
     id: `${group}-${started}`,
     group,
     status: "running",
-    command: npmCommand,
+    command,
     args,
     startedAt: new Date(started).toISOString(),
     endedAt: null,
@@ -219,13 +313,14 @@ function startJob(group: UpdateGroup): Job {
     lines: [],
   };
   currentJob = job;
-  const child = spawn(npmCommand, args, {
+  currentLock = lock;
+  const child = spawn(command, args, {
     cwd: ROOT,
     env: { ...process.env, FORCE_COLOR: "0" },
     stdio: ["ignore", "pipe", "pipe"],
   });
   currentProcess = child;
-  appendJobLine(job, "stdout", `started ${npmCommand} ${args.join(" ")}`);
+  appendJobLine(job, "stdout", `started ${command} ${args.join(" ")}`);
   child.stdout.on("data", (chunk: Buffer) => appendJobLine(job, "stdout", chunk.toString("utf8")));
   child.stderr.on("data", (chunk: Buffer) => appendJobLine(job, "stderr", chunk.toString("utf8")));
   child.on("error", (error) => {
@@ -234,6 +329,7 @@ function startJob(group: UpdateGroup): Job {
     job.durationMs = Date.now() - started;
     appendJobLine(job, "stderr", error.message);
     currentProcess = null;
+    releaseRunnerLock(lock);
   });
   child.on("close", (code, signal) => {
     job.status = code === 0 ? "succeeded" : "failed";
@@ -243,6 +339,7 @@ function startJob(group: UpdateGroup): Job {
     job.durationMs = Date.now() - started;
     appendJobLine(job, code === 0 ? "stdout" : "stderr", `finished status=${job.status} code=${code ?? "n/a"} signal=${signal ?? "n/a"}`);
     currentProcess = null;
+    releaseRunnerLock(lock);
   });
   return job;
 }
@@ -320,8 +417,12 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
       return;
     }
     const alreadyRunning = currentJob?.status === "running";
-    const job = startJob(group);
-    writeJson(response, alreadyRunning ? 409 : 202, { job: publicJob() ?? job });
+    try {
+      const job = startJob(group);
+      writeJson(response, alreadyRunning ? 409 : 202, { job: publicJob() ?? job });
+    } catch (error) {
+      writeJson(response, 409, { error: error instanceof Error ? error.message : String(error), job: publicJob() });
+    }
     return;
   }
   writeJson(response, 404, { error: "not found" });

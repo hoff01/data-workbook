@@ -344,9 +344,12 @@ def build_us_external_outputs(long_rows: pl.DataFrame, start_date: date, end_dat
     outputs: dict[str, dict[str, Any]] = {}
     schema = load_yaml(CONFIG_DIR / "output_schema.yml")["us_external_columns"]
     rows = long_rows.filter((pl.col("family") == "external") & (pl.col("geography") == "us"))
+    if rows.is_empty():
+        return outputs
     if rows.height:
         rows = add_us_balance_group(rows)
-    for commodity in ["diesel", "jet", "gasoline"]:
+    commodities = sorted(rows.select("commodity").unique().to_series().to_list())
+    for commodity in commodities:
         commodity_rows = rows.filter(pl.col("commodity") == commodity)
         daily = pl.DataFrame({"date": []}, schema={"date": pl.Utf8})
         for flow, direction in [("imports", "import"), ("exports", "export")]:
@@ -376,7 +379,10 @@ def build_europe_external_outputs(long_rows: pl.DataFrame, start_date: date, end
     outputs: dict[str, dict[str, Any]] = {}
     schema = load_yaml(CONFIG_DIR / "output_schema.yml")["europe_external_columns"]
     rows = long_rows.filter((pl.col("family") == "external") & (pl.col("geography") == "europe"))
-    for commodity in ["diesel", "jet", "gasoline"]:
+    if rows.is_empty():
+        return outputs
+    commodities = sorted(rows.select("commodity").unique().to_series().to_list())
+    for commodity in commodities:
         commodity_rows = rows.filter(pl.col("commodity") == commodity)
         daily = pl.DataFrame({"date": []}, schema={"date": pl.Utf8})
         for region in EUROPE_REGIONS:
@@ -414,10 +420,13 @@ def build_domestic_padd_outputs(long_rows: pl.DataFrame, start_date: date, end_d
     outputs: dict[str, dict[str, Any]] = {}
     schema = load_yaml(CONFIG_DIR / "output_schema.yml")["domestic_padd_columns"]
     rows = long_rows.filter(pl.col("family") == "domestic_padd")
+    if rows.is_empty():
+        return outputs
     if rows.height:
         rows = add_domestic_route(rows).filter(pl.col("route_group") != "")
     all_daily: list[pl.DataFrame] = []
-    for commodity in ["diesel", "jet", "gasoline"]:
+    commodities = sorted(rows.select("commodity").unique().to_series().to_list())
+    for commodity in commodities:
         commodity_rows = rows.filter(pl.col("commodity") == commodity)
         grouped = commodity_rows.group_by(["date", "route_group"]).agg(pl.col("value_kbd").sum()) if commodity_rows.height else pl.DataFrame({"date": [], "route_group": [], "value_kbd": []})
         daily = grouped.pivot(index="date", columns="route_group", values="value_kbd", aggregate_function="sum") if grouped.height else pl.DataFrame({"date": []}, schema={"date": pl.Utf8})

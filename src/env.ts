@@ -30,8 +30,10 @@ function loadEnvFile(path: string, protectedKeys: Set<string>, override = false)
 
 export function loadEnvFiles(repoDir = REPO_DIR): void {
   const protectedKeys = new Set(Object.keys(process.env));
+  const runtimeRoot = process.env.US_BALANCES_RUNTIME_ROOT;
   loadEnvFile(resolve(repoDir, ".env"), protectedKeys);
   loadEnvFile(resolve(repoDir, ".env.local"), protectedKeys, true);
+  if (runtimeRoot) loadEnvFile(resolve(runtimeRoot, ".env.local"), protectedKeys, true);
 }
 
 loadEnvFiles();

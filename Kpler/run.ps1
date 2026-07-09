@@ -7,8 +7,28 @@ param(
 
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Venv = Join-Path $Root ".venv"
+$RepoRoot = Split-Path -Parent $Root
+$RuntimeRoot = if ($env:US_BALANCES_RUNTIME_ROOT) { $env:US_BALANCES_RUNTIME_ROOT } else { Join-Path $env:USERPROFILE "US_Balances" }
+$PythonRoot = Join-Path $RuntimeRoot "python"
+$CacheRoot = Join-Path $RuntimeRoot "cache"
+$Venv = Join-Path $PythonRoot ".venv"
 $Python = Join-Path $Venv "Scripts\python.exe"
+
+function Set-RuntimeEnvironment {
+    if (!(Test-Path $CacheRoot)) {
+        New-Item -ItemType Directory -Force -Path $CacheRoot | Out-Null
+    }
+    foreach ($child in @("pip", "pycache")) {
+        $path = Join-Path $CacheRoot $child
+        if (!(Test-Path $path)) {
+            New-Item -ItemType Directory -Force -Path $path | Out-Null
+        }
+    }
+    $env:US_BALANCES_SHARED_ROOT = $RepoRoot
+    $env:US_BALANCES_RUNTIME_ROOT = $RuntimeRoot
+    $env:PIP_CACHE_DIR = Join-Path $CacheRoot "pip"
+    $env:PYTHONPYCACHEPREFIX = Join-Path $CacheRoot "pycache"
+}
 
 function Resolve-SystemPython {
     $pythonCmd = Get-Command py -ErrorAction SilentlyContinue
@@ -25,10 +45,18 @@ function Resolve-SystemPython {
 function Invoke-SystemPython {
     param([string[]]$Arguments)
     $cmd = Resolve-SystemPython
-    & $cmd[0] @($cmd[1..($cmd.Length - 1)] + $Arguments)
+    $cmdArgs = @()
+    if ($cmd.Length -gt 1) {
+        $cmdArgs += $cmd[1..($cmd.Length - 1)]
+    }
+    & $cmd[0] @($cmdArgs + $Arguments)
 }
 
 function Setup-Environment {
+    Set-RuntimeEnvironment
+    if (!(Test-Path $PythonRoot)) {
+        New-Item -ItemType Directory -Force -Path $PythonRoot | Out-Null
+    }
     if ($Force -and (Test-Path $Venv)) {
         Remove-Item -Recurse -Force $Venv
     }
@@ -55,11 +83,13 @@ if ($Setup) {
 }
 
 if ($Preflight) {
+    Set-RuntimeEnvironment
     Test-Environment
     & $Python (Join-Path $Root "src\kpler_pull.py") --preflight
 }
 
 if ($Run) {
+    Set-RuntimeEnvironment
     Test-Environment
     & $Python (Join-Path $Root "src\kpler_pull.py")
 }

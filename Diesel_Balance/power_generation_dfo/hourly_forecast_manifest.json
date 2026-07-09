@@ -4,7 +4,7 @@
   "dfo_factor_source": "2026",
   "fallback_model_note": "Fallback uses a larger recent hourly history window and blends toward higher historical oil-to-load ratios when forecast demand is elevated.",
   "forecast_hours": 24,
-  "generated_at": "2026-07-04T23:03:54.507932+00:00",
+  "generated_at": "2026-07-09T02:11:32.094073+00:00",
   "history_windows": {
     "max_oil_rows": 20000,
     "max_region_rows": 40000,
@@ -23,7 +23,7 @@
   "pipeline_name": "power_generation_dfo_hourly_forecast",
   "row_counts": {
     "forecast_rows": 24,
-    "model_input": 10787,
+    "model_input": 10811,
     "oil_raw": 20000,
     "region_raw": 40000,
     "weather_rows": 336
@@ -32,73 +32,73 @@
     {
       "offset": 0,
       "row_count": 5000,
-      "total": 525687,
+      "total": 526461,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 5000,
       "row_count": 5000,
-      "total": 525687,
+      "total": 526461,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 10000,
       "row_count": 5000,
-      "total": 525687,
+      "total": 526461,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 15000,
       "row_count": 5000,
-      "total": 525687,
+      "total": 526461,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 20000,
       "row_count": 5000,
-      "total": 525687,
+      "total": 526461,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 25000,
       "row_count": 5000,
-      "total": 525687,
+      "total": 526461,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 30000,
       "row_count": 5000,
-      "total": 525687,
+      "total": 526461,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 35000,
       "row_count": 5000,
-      "total": 525687,
+      "total": 526461,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 0,
       "row_count": 5000,
-      "total": 129713,
+      "total": 129858,
       "url": "https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/"
     },
     {
       "offset": 5000,
       "row_count": 5000,
-      "total": 129713,
+      "total": 129858,
       "url": "https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/"
     },
     {
       "offset": 10000,
       "row_count": 5000,
-      "total": 129713,
+      "total": 129858,
       "url": "https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/"
     },
     {
       "offset": 15000,
       "row_count": 5000,
-      "total": 129713,
+      "total": 129858,
       "url": "https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/"
     },
     {

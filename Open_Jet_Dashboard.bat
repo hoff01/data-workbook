@@ -1,5 +1,4 @@
 @echo off
 setlocal
-cd /d "%~dp0"
-npm run dashboard:open -- jet
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Start_Balance_Runner.ps1" -Route jet
 if errorlevel 1 pause

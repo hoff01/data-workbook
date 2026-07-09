@@ -1,11 +1,12 @@
 import "./env.js";
-import { readdir, rename, rm, writeFile } from "node:fs/promises";
+import { readdir, rm, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 import {
   dedupeRows,
   ensureDir,
-  fetchBufferWithRetry,
   fetchJsonWithRetry,
   fileBytes,
   nowIso,
@@ -63,22 +64,13 @@ type MonthlyRow = {
 };
 
 const OUT_DIR = "eia_monthly";
+const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
+const pythonCommand = process.env.US_BALANCES_PYTHON || (process.platform === "win32" ? "python" : "python3");
 const START_PERIOD = process.env.EIA_MONTHLY_START ?? "2016-01";
 const PAGE_LENGTH = 5000;
 const CONCURRENCY = Number(process.env.EIA_CONCURRENCY ?? 4);
 const PUBLIC_EIA_API_KEY_FALLBACK = "4ZooAQ2fowZXw2nzj8dhtscw8orLWsdpcEk0sbzM";
-const BULK_DOWNLOADS = [
-  {
-    label: "PET",
-    path: "PET.zip",
-    url: process.env.EIA_PET_BULK_URL ?? "https://api.eia.gov/bulk/PET.zip",
-  },
-  {
-    label: "TOTAL",
-    path: "TOTAL.zip",
-    url: process.env.EIA_TOTAL_BULK_URL ?? "https://api.eia.gov/bulk/TOTAL.zip",
-  },
-];
 
 const ENDPOINTS: EndpointConfig[] = [
   {
@@ -293,17 +285,6 @@ async function cleanOutputDir(dir: string): Promise<void> {
   }
 }
 
-async function refreshBulkZip(download: (typeof BULK_DOWNLOADS)[number]): Promise<number> {
-  const content = await fetchBufferWithRetry(download.url);
-  if (content.length < 1_000_000) {
-    throw new Error(`${download.label} bulk download from ${download.url} is unexpectedly small`);
-  }
-  const tmpPath = `${download.path}.tmp`;
-  await writeFile(tmpPath, content);
-  await rename(tmpPath, download.path);
-  return content.length;
-}
-
 async function writeCleanPlaceholder(path: string, payload: JsonValue): Promise<number> {
   const body = Buffer.from(JSON.stringify(payload), "utf8");
   await writeFile(path, Buffer.concat([Buffer.from("EIA_CLEAN_V1\0"), gzipSync(body, { level: 9 })]));
@@ -317,10 +298,10 @@ async function writeParquetZstd(
   metadata: Record<string, JsonValue>,
 ): Promise<number> {
   const child = spawnSync(
-    "python3",
+    pythonCommand,
     ["src/write_parquet_zstd.py", path],
     {
-      cwd: process.cwd(),
+      cwd: ROOT,
       input: JSON.stringify({ fields, rows, metadata }),
       encoding: "utf8",
       maxBuffer: 50 * 1024 * 1024,
@@ -366,9 +347,7 @@ async function main(): Promise<void> {
   };
   const cleanBytes = await writeCleanPlaceholder(`${OUT_DIR}/clean`, cleanPayload);
   const latestPeriod = rows.map((row) => row.period_month).sort().at(-1)?.slice(0, 7) ?? "";
-  const bulkResults = await Promise.all(BULK_DOWNLOADS.map(refreshBulkZip));
-  const bulkText = BULK_DOWNLOADS.map((download, index) => `${download.label}=${bulkResults[index]}`).join(" ");
-  console.log(`monthly rows=${rows.length} raw=${rawBytes} clean=${cleanBytes} latest=${latestPeriod} bulk=${bulkText}`);
+  console.log(`monthly rows=${rows.length} raw=${rawBytes} clean=${cleanBytes} latest=${latestPeriod}`);
 }
 
 main().catch((error) => {

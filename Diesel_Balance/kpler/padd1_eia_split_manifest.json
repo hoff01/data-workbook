@@ -17,7 +17,7 @@
     {
       "added_columns": 4,
       "date_column": "week_ending",
-      "latest": "2026-06-26",
+      "latest": "2026-07-03",
       "oldest": "2016-01-01",
       "path": "eia_weekly/diesel.csv",
       "rows": 545,
@@ -42,7 +42,7 @@
     {
       "added_columns": 4,
       "date_column": "week_ending",
-      "latest": "2026-06-26",
+      "latest": "2026-07-03",
       "oldest": "2016-01-01",
       "path": "eia_weekly/jet.csv",
       "rows": 545,
@@ -51,100 +51,138 @@
       ]
     },
     {
-      "added_columns": 8,
-      "date_column": "Date",
-      "latest": "2026-04-15",
-      "oldest": "2016-01-15",
+      "added_columns": 0,
       "path": "eia_monthly/gasoline.csv",
+      "removed_stale_kpler_split_columns": 0,
       "rows": 124,
-      "split_source_columns": [
-        "East Coast (PADD 1) Imports of Finished Motor Gasoline (Thousand Barrels per Day)",
-        "East Coast (PADD 1) Imports of Fuel Ethanol (Thousand Barrels per Day)",
-        "East Coast (PADD 1) Imports of Gasoline Blending Components (Thousand Barrels per Day)"
-      ]
+      "split_source_columns": []
     },
     {
-      "added_columns": 8,
-      "date_column": "week_ending",
-      "latest": "2026-06-26",
-      "oldest": "2016-01-01",
+      "added_columns": 0,
       "path": "eia_weekly/gasoline.csv",
+      "removed_stale_kpler_split_columns": 0,
       "rows": 545,
-      "split_source_columns": [
-        "weekly East Coast (PADD 1) Imports of Finished Motor Gasoline",
-        "weekly East Coast (PADD 1) Imports of Fuel Ethanol",
-        "weekly East Coast (PADD 1) Imports of Gasoline Blending Components"
-      ]
+      "split_source_columns": []
     }
   ],
-  "generated_at": "2026-07-07T01:53:27.861077+00:00",
-  "mode": "existing_raw",
+  "generated_at": "2026-07-09T02:15:54.294348+00:00",
+  "mode": "live",
   "normalized_long": {
-    "path": "Kpler/output/padd1_split/padd1_import_export_normalized_long.csv",
-    "rows": 2148
+    "path": "/Users/alexhoffmann/US_Balances/Kpler/output/padd1_split/padd1_import_export_normalized_long.csv",
+    "rows": 75732
   },
   "pipeline_name": "kpler_padd1_eia_split",
-  "pull_count": 6,
+  "pull_count": 4,
   "pull_status": {
     "padd1_split_diesel_exports": {
-      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
-      "raw": {
-        "path": "Kpler/raw/daily/normalized_long.csv",
-        "rows": 122655
+      "attempts": 1,
+      "params": {
+        "endDate": "2026-08-22",
+        "flowDirection": "export",
+        "fromZones": "United States",
+        "granularity": "daily",
+        "onlyRealized": "false",
+        "products": "Gasoil/Diesel",
+        "split": "Origin Padds",
+        "startDate": "2018-01-01",
+        "unit": "kbd",
+        "withForecast": "true",
+        "withFreightView": "false",
+        "withIntraCountry": "false",
+        "withIntraRegion": "true",
+        "withProductEstimation": "false"
       },
-      "rows": 453,
-      "status": "existing_balance_guide_raw"
+      "raw": {
+        "bytes": 130068,
+        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_diesel_exports.csv",
+        "rows": 3156
+      },
+      "status": "ok",
+      "url": "https://api.kpler.com/v1/flows?flowDirection=export&split=Origin+Padds&granularity=daily&startDate=2018-01-01&endDate=2026-08-22&fromZones=United+States&products=Gasoil%2FDiesel&onlyRealized=false&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withFreightView=false&withProductEstimation=false"
     },
     "padd1_split_diesel_imports": {
-      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
-      "raw": {
-        "path": "Kpler/raw/daily/normalized_long.csv",
-        "rows": 122655
+      "attempts": 1,
+      "params": {
+        "endDate": "2026-08-22",
+        "flowDirection": "import",
+        "granularity": "daily",
+        "onlyRealized": "false",
+        "products": "Gasoil/Diesel",
+        "split": "Destination Padds",
+        "startDate": "2018-01-01",
+        "toZones": "United States",
+        "unit": "kbd",
+        "withForecast": "true",
+        "withFreightView": "false",
+        "withIntraCountry": "false",
+        "withIntraRegion": "true",
+        "withProductEstimation": "false"
       },
-      "rows": 1695,
-      "status": "existing_balance_guide_raw"
-    },
-    "padd1_split_gasoline_exports": {
-      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
       "raw": {
-        "path": "Kpler/raw/daily/normalized_long.csv",
-        "rows": 122655
+        "bytes": 129429,
+        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_diesel_imports.csv",
+        "rows": 3156
       },
-      "rows": 0,
-      "status": "existing_balance_guide_raw"
-    },
-    "padd1_split_gasoline_imports": {
-      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
-      "raw": {
-        "path": "Kpler/raw/daily/normalized_long.csv",
-        "rows": 122655
-      },
-      "rows": 0,
-      "status": "existing_balance_guide_raw"
+      "status": "ok",
+      "url": "https://api.kpler.com/v1/flows?flowDirection=import&split=Destination+Padds&granularity=daily&startDate=2018-01-01&endDate=2026-08-22&toZones=United+States&products=Gasoil%2FDiesel&onlyRealized=false&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withFreightView=false&withProductEstimation=false"
     },
     "padd1_split_jet_exports": {
-      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
-      "raw": {
-        "path": "Kpler/raw/daily/normalized_long.csv",
-        "rows": 122655
+      "attempts": 1,
+      "params": {
+        "endDate": "2026-08-22",
+        "flowDirection": "export",
+        "fromZones": "United States",
+        "granularity": "daily",
+        "onlyRealized": "false",
+        "products": "Kero/Jet",
+        "split": "Origin Padds",
+        "startDate": "2018-01-01",
+        "unit": "kbd",
+        "withForecast": "true",
+        "withFreightView": "false",
+        "withIntraCountry": "false",
+        "withIntraRegion": "true",
+        "withProductEstimation": "false"
       },
-      "rows": 0,
-      "status": "existing_balance_guide_raw"
+      "raw": {
+        "bytes": 112939,
+        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_jet_exports.csv",
+        "rows": 3156
+      },
+      "status": "ok",
+      "url": "https://api.kpler.com/v1/flows?flowDirection=export&split=Origin+Padds&granularity=daily&startDate=2018-01-01&endDate=2026-08-22&fromZones=United+States&products=Kero%2FJet&onlyRealized=false&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withFreightView=false&withProductEstimation=false"
     },
     "padd1_split_jet_imports": {
-      "note": "Derived from stored balance-guide normalized raw; U.S.-origin import rows are excluded when with_intra_country=false.",
-      "raw": {
-        "path": "Kpler/raw/daily/normalized_long.csv",
-        "rows": 122655
+      "attempts": 1,
+      "params": {
+        "endDate": "2026-08-22",
+        "flowDirection": "import",
+        "granularity": "daily",
+        "onlyRealized": "false",
+        "products": "Kero/Jet",
+        "split": "Destination Padds",
+        "startDate": "2018-01-01",
+        "toZones": "United States",
+        "unit": "kbd",
+        "withForecast": "true",
+        "withFreightView": "false",
+        "withIntraCountry": "false",
+        "withIntraRegion": "true",
+        "withProductEstimation": "false"
       },
-      "rows": 0,
-      "status": "existing_balance_guide_raw"
+      "raw": {
+        "bytes": 117976,
+        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_jet_imports.csv",
+        "rows": 3156
+      },
+      "status": "ok",
+      "url": "https://api.kpler.com/v1/flows?flowDirection=import&split=Destination+Padds&granularity=daily&startDate=2018-01-01&endDate=2026-08-22&toZones=United+States&products=Kero%2FJet&onlyRealized=false&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withFreightView=false&withProductEstimation=false"
     }
   },
   "pulls": [
     {
       "commodity": "diesel",
-      "end_date": "2026-08-20",
+      "end_date": "2026-08-22",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -170,7 +208,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-08-20",
+      "end_date": "2026-08-22",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -196,7 +234,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-20",
+      "end_date": "2026-08-22",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -222,7 +260,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-20",
+      "end_date": "2026-08-22",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -245,66 +283,14 @@
       "with_forecast": true,
       "with_intra_country": false,
       "with_intra_region": true
-    },
-    {
-      "commodity": "gasoline",
-      "end_date": "2026-08-20",
-      "family": "padd1_split",
-      "flow_direction": "import",
-      "from_zones": null,
-      "geography": "us",
-      "granularity": "daily",
-      "kpler_product": "Light Ends",
-      "name": "padd1_split_gasoline_imports",
-      "only_realized": false,
-      "region_detail": "",
-      "route_group": "",
-      "split": [
-        "destination padds",
-        "products"
-      ],
-      "start_date": "2018-01-01",
-      "to_zones": [
-        "United States"
-      ],
-      "unit": "kbd",
-      "with_forecast": true,
-      "with_intra_country": false,
-      "with_intra_region": true
-    },
-    {
-      "commodity": "gasoline",
-      "end_date": "2026-08-20",
-      "family": "padd1_split",
-      "flow_direction": "export",
-      "from_zones": [
-        "United States"
-      ],
-      "geography": "us",
-      "granularity": "daily",
-      "kpler_product": "Light Ends",
-      "name": "padd1_split_gasoline_exports",
-      "only_realized": false,
-      "region_detail": "",
-      "route_group": "",
-      "split": [
-        "origin padds",
-        "products"
-      ],
-      "start_date": "2018-01-01",
-      "to_zones": null,
-      "unit": "kbd",
-      "with_forecast": true,
-      "with_intra_country": false,
-      "with_intra_region": true
     }
   ],
   "runtime_config": {
     "concurrency": 2,
-    "end_date": "2026-08-20",
+    "end_date": "2026-08-22",
     "granularity": "daily",
     "only_realized": false,
-    "retry_backoff_seconds": 10.0,
+    "retry_backoff_seconds": 2.0,
     "retry_count": 3,
     "snapshot_date": "",
     "start_date": "2018-01-01",
@@ -316,8 +302,8 @@
     "with_product_estimation": false
   },
   "share_outputs": {
-    "daily": "Kpler/output/padd1_split/padd1_import_export_shares_daily.csv",
-    "monthly": "Kpler/output/padd1_split/padd1_import_export_shares_monthly.csv",
-    "weekly": "Kpler/output/padd1_split/padd1_import_export_shares_weekly.csv"
+    "daily": "/Users/alexhoffmann/US_Balances/Kpler/output/padd1_split/padd1_import_export_shares_daily.csv",
+    "monthly": "/Users/alexhoffmann/US_Balances/Kpler/output/padd1_split/padd1_import_export_shares_monthly.csv",
+    "weekly": "/Users/alexhoffmann/US_Balances/Kpler/output/padd1_split/padd1_import_export_shares_weekly.csv"
   }
 }

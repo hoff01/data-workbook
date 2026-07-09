@@ -22,7 +22,7 @@ const CHECK_ENDPOINTS = [
     facets: { duoarea: ["NUS"] },
   },
 ];
-const PRODUCT_FILES = ["eia_monthly/diesel.csv", "eia_monthly/jet.csv", "eia_monthly/gasoline.csv"];
+const PRODUCT_FILES = ["eia_monthly/diesel.csv", "eia_monthly/jet.csv"];
 
 function resolveApiKey(): string {
   for (const key of ["EIA_API_KEY", "EIA_API_TOKEN", "EIA_KEY"]) {

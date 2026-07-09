@@ -26,24 +26,12 @@ PUBLIC_EIA_API_KEY = b"4ZooAQ2fowZXw2nzj8dhtscw8orLWsdpcEk0sbzM"
 SIZE_LIMITS = {
     "eia_weekly": {"diesel.csv": 5_000_000, "jet.csv": 5_000_000, "gasoline.csv": 10_000_000},
     "eia_monthly": {
-        "bulk_series.csv": 60_000_000,
+        "bulk_series.csv": 10_000_000,
         "diesel.csv": 5_000_000,
         "jet.csv": 5_000_000,
         "gasoline.csv": 50_000_000,
     },
 }
-BULK_SERIES_HEADER = [
-    "bulk_source",
-    "series_id",
-    "name",
-    "region",
-    "frequency",
-    "units",
-    "start",
-    "end",
-    "last_updated",
-    "v2_seriesid_route",
-]
 WEEKLY_DIESEL_OUTPUT = "diesel.csv"
 WEEKLY_JET_OUTPUT = "jet.csv"
 WEEKLY_GASOLINE_OUTPUT = "gasoline.csv"
@@ -657,24 +645,6 @@ def validate_monthly(path: Path, metadata: pq.FileMetaData) -> None:
     actual_lines = csv_line_count(path / "series.csv")
     if actual_lines != expected_lines:
         raise RuntimeError(f"monthly series.csv line count {actual_lines} != expected {expected_lines}")
-    bulk_path = path / "bulk_series.csv"
-    if csv_header(bulk_path) != BULK_SERIES_HEADER:
-        raise RuntimeError("eia_monthly/bulk_series.csv missing expected series_id/name/route columns")
-    counts: dict[str, int] = {}
-    with bulk_path.open(newline="", encoding="utf-8") as file:
-        for row in csv.DictReader(file):
-            if not row["series_id"] or not row["name"]:
-                raise RuntimeError("eia_monthly/bulk_series.csv contains a row without series_id or name")
-            if not row["region"]:
-                raise RuntimeError("eia_monthly/bulk_series.csv contains a row without region")
-            if row["frequency"] not in {"A", "M"}:
-                raise RuntimeError(f"eia_monthly/bulk_series.csv contains unsupported frequency {row['frequency']!r}")
-            if row["v2_seriesid_route"] != f"/v2/seriesid/{row['series_id']}":
-                raise RuntimeError(f"bad v2 route for {row['series_id']}")
-            counts[row["bulk_source"]] = counts.get(row["bulk_source"], 0) + 1
-    for source in ["PET", "TOTAL", "SEDS"]:
-        if counts.get(source, 0) <= 0:
-            raise RuntimeError(f"eia_monthly/bulk_series.csv missing {source} rows")
     validate_monthly_clean_csv(path, MONTHLY_DIESEL_OUTPUT, "Distillate Fuel Oil")
     validate_monthly_clean_csv(path, MONTHLY_JET_OUTPUT, "Kerosene-Type Jet Fuel")
     validate_gasoline_monthly_csv(path)
@@ -800,14 +770,37 @@ def validate_final_gasoline(path: Path, weekly: bool) -> None:
 
 def validate_bulk_series_reference(path: Path) -> None:
     bulk_path = path / "bulk_series.csv"
-    if csv_header(bulk_path) != BULK_SERIES_HEADER:
-        raise RuntimeError("eia_monthly/bulk_series.csv missing expected series_id/name/route columns")
+    expected_header = [
+        "bulk_source",
+        "series_id",
+        "name",
+        "region",
+        "frequency",
+        "units",
+        "start",
+        "end",
+        "last_updated",
+        "v2_seriesid_route",
+    ]
+    if csv_header(bulk_path) != expected_header:
+        raise RuntimeError("eia_monthly/bulk_series.csv missing expected filtered bulk-series columns")
     with bulk_path.open(newline="", encoding="utf-8") as file:
         rows = list(csv.DictReader(file))
     if not rows:
         raise RuntimeError("eia_monthly/bulk_series.csv is empty")
-    if any(not row["series_id"] or not row["name"] for row in rows):
-        raise RuntimeError("eia_monthly/bulk_series.csv contains blank series_id or name")
+    sources = {row["bulk_source"] for row in rows}
+    if sources != {"PET"}:
+        raise RuntimeError(f"eia_monthly/bulk_series.csv must only contain needed PET rows; found sources={sorted(sources)}")
+    gasoline_terms = ("gasoline", "fuel ethanol", "blending component")
+    for row in rows:
+        if not row["series_id"] or not row["name"] or not row["region"]:
+            raise RuntimeError("eia_monthly/bulk_series.csv contains a row without series_id, name, or region")
+        if row["frequency"] not in {"A", "M"}:
+            raise RuntimeError(f"eia_monthly/bulk_series.csv contains unsupported frequency {row['frequency']!r}")
+        if row["v2_seriesid_route"] != f"/v2/seriesid/{row['series_id']}":
+            raise RuntimeError(f"bad v2 route for {row['series_id']}")
+        if any(term in row["name"].lower() for term in gasoline_terms):
+            raise RuntimeError(f"eia_monthly/bulk_series.csv contains gasoline-related row {row['series_id']}")
 
 
 def validate_final_dir(name: str) -> None:
@@ -825,8 +818,7 @@ def validate_final_dir(name: str) -> None:
         print(f"{name}/{filename}: rows={rows} columns={columns} latest={latest} oldest={oldest}")
     if name == "eia_monthly":
         validate_bulk_series_reference(path)
-        print("eia_monthly/bulk_series.csv: reference ok")
-
+        print("eia_monthly/bulk_series.csv: filtered PET reference ok")
 
 def main() -> int:
     validate_final_dir("eia_weekly")

@@ -40,3 +40,6 @@ def load_env_files(repo_dir: Path = REPO_DIR) -> None:
     protected_keys = set(os.environ)
     _load_env_file(repo_dir / ".env", protected_keys)
     _load_env_file(repo_dir / ".env.local", protected_keys, override=True)
+    runtime_root = os.environ.get("US_BALANCES_RUNTIME_ROOT")
+    if runtime_root:
+        _load_env_file(Path(runtime_root) / ".env.local", protected_keys, override=True)

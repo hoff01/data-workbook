@@ -32,12 +32,11 @@ COMMODITIES = {
         "monthly": Path("eia_monthly/jet.csv"),
         "weekly": Path("eia_weekly/jet.csv"),
     },
-    "gasoline": {
-        "kpler_product": "Light Ends",
-        "monthly": Path("eia_monthly/gasoline.csv"),
-        "weekly": Path("eia_weekly/gasoline.csv"),
-    },
 }
+INACTIVE_KPLER_SPLIT_OUTPUTS = [
+    Path("eia_monthly/gasoline.csv"),
+    Path("eia_weekly/gasoline.csv"),
+]
 
 PADD1_SPLIT_DIR = BASE_DIR / "output" / "padd1_split"
 PADD1_RAW_DIR = RAW_DIR / "padd1_split"
@@ -629,6 +628,22 @@ def merge_eia_outputs(share_outputs: dict[str, str]) -> list[dict[str, Any]]:
     for commodity, meta in COMMODITIES.items():
         results.append(merge_one_eia_file(Path(meta["monthly"]), commodity, "monthly", monthly_shares))
         results.append(merge_one_eia_file(Path(meta["weekly"]), commodity, "weekly", weekly_shares))
+    for path in INACTIVE_KPLER_SPLIT_OUTPUTS:
+        fieldnames, rows = read_csv(path)
+        if not fieldnames:
+            continue
+        new_fieldnames = remove_old_kpler_columns(fieldnames, rows)
+        if new_fieldnames != fieldnames:
+            write_csv(path, new_fieldnames, rows)
+        results.append(
+            {
+                "path": str(path),
+                "rows": len(rows),
+                "added_columns": 0,
+                "split_source_columns": [],
+                "removed_stale_kpler_split_columns": len(fieldnames) - len(new_fieldnames),
+            }
+        )
     return results
 
 
@@ -685,10 +700,16 @@ def run(args: argparse.Namespace) -> int:
         },
     )
     for result in merge_results:
-        print(
-            f"{result['path']} rows={result['rows']} added_columns={result['added_columns']} "
-            f"latest={result['latest']} oldest={result['oldest']} split_sources={len(result['split_source_columns'])}"
-        )
+        if "latest" in result:
+            print(
+                f"{result['path']} rows={result['rows']} added_columns={result['added_columns']} "
+                f"latest={result['latest']} oldest={result['oldest']} split_sources={len(result['split_source_columns'])}"
+            )
+        else:
+            print(
+                f"{result['path']} rows={result['rows']} added_columns={result['added_columns']} "
+                f"removed_stale_kpler_split_columns={result.get('removed_stale_kpler_split_columns', 0)}"
+            )
     print(f"kpler padd1 eia split manifest={PADD1_MANIFEST}")
     return 0
 

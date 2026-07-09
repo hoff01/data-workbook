@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import date, datetime, timedelta, timezone
 import json
 import os
@@ -14,7 +14,7 @@ from typing import Any
 
 import polars as pl
 
-from kpler_config import BASE_DIR, RAW_DIR, PullSpec, build_pull_specs, credential_pair, ensure_directories, runtime_config
+from kpler_config import BASE_DIR, OUTPUT_DIR, RAW_DIR, PullSpec, build_pull_specs, credential_pair, ensure_directories, runtime_config
 from kpler_http import KplerHttpClient
 from kpler_transform import LONG_COLUMNS, build_outputs, kpler_content_to_long
 from kpler_validate import validate_outputs
@@ -39,7 +39,7 @@ def list_param(values: list[str] | None) -> str | None:
 def split_param(values: list[str] | None) -> str | None:
     if not values:
         return None
-    return ",".join(SPLIT_PARAM_VALUES.get(item.lower(), item) for item in values)
+    return SPLIT_PARAM_VALUES.get(values[0].lower(), values[0])
 
 
 def bool_param(value: bool | None) -> str | None:
@@ -328,10 +328,15 @@ def spec_to_kpler_params(spec: PullSpec, snapshot_date=None) -> dict[str, Any]:
     
 
 
-def write_raw_response(spec: PullSpec, content: bytes) -> dict[str, Any]:
+def safe_file_fragment(value: str) -> str:
+    return "".join(char.lower() if char.isalnum() else "_" for char in value).strip("_")
+
+
+def write_raw_response(spec: PullSpec, content: bytes, suffix: str | None = None) -> dict[str, Any]:
     raw_dir = RAW_DIR / spec.family
     raw_dir.mkdir(parents=True, exist_ok=True)
-    path = raw_dir / f"{spec.name}.csv"
+    stem = spec.name if not suffix else f"{spec.name}__{safe_file_fragment(suffix)}"
+    path = raw_dir / f"{stem}.csv"
     path.write_bytes(content)
     return {
         "path": str(path),
@@ -341,14 +346,22 @@ def write_raw_response(spec: PullSpec, content: bytes) -> dict[str, Any]:
     }
 
 
-def fetch_spec(spec: PullSpec, client: KplerHttpClient, snapshot_date, retry_count: int, retry_backoff_seconds: float) -> tuple[PullSpec, bytes, dict[str, Any]]:
+def fetch_single_split(
+    spec: PullSpec,
+    client: KplerHttpClient,
+    snapshot_date,
+    retry_count: int,
+    retry_backoff_seconds: float,
+    suffix: str | None = None,
+) -> tuple[pl.DataFrame, dict[str, Any]]:
     params = spec_to_kpler_params(spec, snapshot_date=snapshot_date)
     last_error: Exception | None = None
     for attempt in range(1, retry_count + 1):
         try:
             response = client.get("flows", params)
-            raw_info = write_raw_response(spec, response.content)
-            return spec, response.content, {
+            raw_info = write_raw_response(spec, response.content, suffix=suffix)
+            long_rows = kpler_content_to_long(response.content, spec)
+            return long_rows, {
                 "status": "ok",
                 "attempts": attempt,
                 "raw": raw_info,
@@ -362,11 +375,54 @@ def fetch_spec(spec: PullSpec, client: KplerHttpClient, snapshot_date, retry_cou
     raise RuntimeError(f"{spec.name} failed after {retry_count} attempts: {last_error}") from last_error
 
 
+def fetch_spec(spec: PullSpec, client: KplerHttpClient, snapshot_date, retry_count: int, retry_backoff_seconds: float) -> tuple[PullSpec, pl.DataFrame, dict[str, Any]]:
+    split_values = spec.split or [""]
+    frames: list[pl.DataFrame] = []
+    split_statuses: list[dict[str, Any]] = []
+    for split_value in split_values:
+        single_split_spec = replace(spec, split=[split_value] if split_value else [])
+        split_label = split_param(single_split_spec.split) or "total"
+        frame, status = fetch_single_split(
+            single_split_spec,
+            client,
+            snapshot_date,
+            retry_count,
+            retry_backoff_seconds,
+            suffix=split_label if len(split_values) > 1 else None,
+        )
+        frames.append(frame)
+        split_statuses.append({"split": split_label, **status})
+    long_frame = pl.concat(frames, how="diagonal_relaxed") if frames else pl.DataFrame({column: [] for column in LONG_COLUMNS})
+    return spec, long_frame, {
+        "status": "ok",
+        "splits": split_statuses,
+        "rows": int(long_frame.height),
+    }
+
+
 def write_manifest(payload: dict[str, Any]) -> None:
     path = BASE_DIR / "manifest.json"
     tmp_path = path.with_suffix(".json.tmp")
     tmp_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
     tmp_path.replace(path)
+
+
+def cleanup_inactive_output_files(outputs: dict[str, dict[str, Any]]) -> list[str]:
+    active_paths: set[Path] = set()
+    for output in outputs.values():
+        for key, value in output.items():
+            if key.endswith("_path") and value:
+                active_paths.add(Path(str(value)).resolve())
+    removed: list[str] = []
+    for folder in [OUTPUT_DIR / "daily", OUTPUT_DIR / "weekly", OUTPUT_DIR / "monthly"]:
+        if not folder.exists():
+            continue
+        for path in folder.glob("*.csv"):
+            if path.resolve() in active_paths:
+                continue
+            path.unlink()
+            removed.append(str(path))
+    return removed
 
 
 def dry_run_manifest(specs: list[PullSpec]) -> dict[str, Any]:
@@ -404,7 +460,6 @@ def run(args: argparse.Namespace) -> int:
     access_mode = "direct_http"
     if has_kpler_credentials():
         client = KplerHttpClient(config)
-        client.validate_auth()
         all_long: list[pl.DataFrame] = []
         pull_status: dict[str, Any] = {}
         with ThreadPoolExecutor(max_workers=config.concurrency) as executor:
@@ -413,9 +468,8 @@ def run(args: argparse.Namespace) -> int:
                 for spec in specs
             }
             for future in as_completed(futures):
-                spec, content, status = future.result()
+                spec, long_rows, status = future.result()
                 pull_status[spec.name] = status
-                long_rows = kpler_content_to_long(content, spec)
                 all_long.append(long_rows)
                 print(f"kpler pulled {spec.name} rows={long_rows.height}")
         long_frame = pl.concat(all_long, how="diagonal_relaxed") if all_long else pl.DataFrame({column: [] for column in LONG_COLUMNS})
@@ -428,6 +482,7 @@ def run(args: argparse.Namespace) -> int:
     normalized_path = BASE_DIR / "raw" / "daily" / "normalized_long.csv"
     long_frame.write_csv(normalized_path)
     outputs = build_outputs(long_frame, config.start_date, config.end_date)
+    removed_outputs = cleanup_inactive_output_files(outputs)
     validation = validate_outputs(outputs)
     manifest = {
         "pipeline_name": "kpler_flows",
@@ -445,6 +500,7 @@ def run(args: argparse.Namespace) -> int:
         "pull_status": pull_status,
         "normalized_long": {"path": str(normalized_path), "rows": int(long_frame.height)},
         "outputs": outputs,
+        "removed_outputs": removed_outputs,
         "validation": validation,
     }
     write_manifest(manifest)

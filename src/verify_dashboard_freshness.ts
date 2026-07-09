@@ -318,6 +318,11 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} chart zoom opens crude modal`, indexHtml, "function openCrudeChartZoom(card, metricKey)");
   assertIncludes(`${config.key} chart zoom closes with X`, indexHtml, "data-close-chart-zoom");
   assertIncludes(`${config.key} chart zoom close leaves grid state alone`, indexHtml, "function closeChartZoomModal(){ const modal = chartZoomModal(); if (!modal) return; modal.hidden = true; modal.innerHTML = ''; }");
+  assertIncludes(`${config.key} chart zoom custom title control`, indexHtml, "data-zoom-title");
+  assertIncludes(`${config.key} chart zoom preset size control`, indexHtml, "data-zoom-size-preset");
+  assertIncludes(`${config.key} chart zoom custom width control`, indexHtml, "data-zoom-width");
+  assertIncludes(`${config.key} chart zoom custom height control`, indexHtml, "data-zoom-height");
+  assertIncludes(`${config.key} chart zoom custom PNG save`, indexHtml, "function saveZoomChartPng(card)");
 }
 
 function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig): void {

@@ -24,6 +24,7 @@
     "export:weekly:clean": "python3 src/export_raw_headers.py weekly --skip-weekly-raw-archive",
     "export:monthly": "python3 src/export_raw_headers.py monthly",
     "export:bulk-series": "python3 src/export_bulk_series.py",
+    "Bulk_series_pull": "node --import tsx src/bulk_series_pull.ts",
     "export:headers:clean": "python3 src/export_raw_headers.py all --skip-weekly-raw-archive",
     "verify:weekly": "node --import tsx src/verify_weekly_freshness.ts",
     "verify:monthly": "node --import tsx src/verify_monthly_freshness.ts",

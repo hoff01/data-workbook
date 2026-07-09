@@ -1,6 +1,8 @@
 import "./env.js";
 import { spawn } from "node:child_process";
+import { dirname, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
+import { fileURLToPath } from "node:url";
 
 type UpdateGroup = "weekly" | "monthly" | "other" | "all" | "power-dfo";
 
@@ -27,10 +29,66 @@ type RunProgress = {
   totalSteps: number;
 };
 
-const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const pythonCommand = process.env.US_BALANCES_PYTHON || (process.platform === "win32" ? "python" : "python3");
+const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
+const nodeCommand = process.execPath;
+const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
 
-function npmStep(label: string, script: string): Step {
-  return { label, command: npmCommand, args: ["run", script] };
+function pythonStep(label: string, script: string, args: string[] = []): Step {
+  return { label, command: pythonCommand, args: [script, ...args] };
+}
+
+function tsStep(label: string, script: string, args: string[] = []): Step {
+  if (tsxCommand) return { label, command: tsxCommand, args: [script, ...args] };
+  return { label, command: nodeCommand, args: ["--import", "tsx", script, ...args] };
+}
+
+function scriptStep(label: string, script: string): Step {
+  switch (script) {
+    case "weekly:raw":
+      return pythonStep(label, "src/weekly_xls.py");
+    case "monthly":
+      return tsStep(label, "src/monthly.ts");
+    case "capacity":
+      return pythonStep(label, "src/eia_capacity.py");
+    case "capacity:refineries":
+      return pythonStep(label, "src/refinery_capacity_units.py");
+    case "power:dfo":
+      return pythonStep(label, "power_generation_dfo/pull_power_generation_dfo.py");
+    case "power:dfo:hourly":
+      return pythonStep(label, "power_generation_dfo/hourly_dfo_forecast.py");
+    case "kpler":
+      return pythonStep(label, "src/kpler_pull.py");
+    case "kpler:padd1:eia":
+      return pythonStep(label, "src/kpler_padd1_eia_split.py");
+    case "padd1":
+      return pythonStep(label, "src/padd_1_distillate.py");
+    case "clean:eia":
+      return pythonStep(label, "src/clean_eia_outputs.py");
+    case "export:weekly:clean":
+      return pythonStep(label, "src/export_raw_headers.py", ["weekly", "--skip-weekly-raw-archive"]);
+    case "export:monthly":
+      return pythonStep(label, "src/export_raw_headers.py", ["monthly"]);
+    case "export:bulk-series":
+      return pythonStep(label, "src/export_bulk_series.py");
+    case "export:headers:clean":
+      return pythonStep(label, "src/export_raw_headers.py", ["all", "--skip-weekly-raw-archive"]);
+    case "verify:weekly":
+      return tsStep(label, "src/verify_weekly_freshness.ts");
+    case "verify:monthly":
+      return tsStep(label, "src/verify_monthly_freshness.ts");
+    case "verify:dashboard":
+      return tsStep(label, "src/verify_dashboard_freshness.ts");
+    case "validate":
+      return pythonStep(label, "src/validate_outputs.py");
+    case "data:check":
+      return pythonStep(label, "src/data_health_check.py");
+    case "build:balances":
+      return tsStep(label, "src/build_balance_dashboards.ts");
+    default:
+      throw new Error(`No direct update command is configured for npm script ${script}`);
+  }
 }
 
 function branch(label: string, steps: Step[]): StepBranch {
@@ -47,63 +105,63 @@ function isParallelPhase(phase: Phase): phase is ParallelPhase {
 
 const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
   weekly: [
-    npmStep("weekly EIA pull", "weekly:raw"),
-    npmStep("weekly export files", "export:weekly:clean"),
-    npmStep("clean public EIA outputs", "clean:eia"),
-    npmStep("Kpler PADD 1 EIA split", "kpler:padd1:eia"),
-    npmStep("weekly freshness check", "verify:weekly"),
-    npmStep("rebuild balance dashboards", "build:balances"),
-    npmStep("dashboard freshness check", "verify:dashboard"),
+    scriptStep("weekly EIA pull", "weekly:raw"),
+    scriptStep("weekly export files", "export:weekly:clean"),
+    scriptStep("clean public EIA outputs", "clean:eia"),
+    scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia"),
+    scriptStep("weekly freshness check", "verify:weekly"),
+    scriptStep("rebuild balance dashboards", "build:balances"),
+    scriptStep("dashboard freshness check", "verify:dashboard"),
   ],
   monthly: [
-    npmStep("monthly EIA pull", "monthly"),
-    npmStep("monthly export files", "export:monthly"),
-    npmStep("monthly bulk series inventory", "export:bulk-series"),
-    npmStep("PADD 1 distillate split", "padd1"),
-    npmStep("clean public EIA outputs", "clean:eia"),
-    npmStep("monthly freshness check", "verify:monthly"),
-    npmStep("rebuild balance dashboards", "build:balances"),
-    npmStep("dashboard freshness check", "verify:dashboard"),
+    scriptStep("monthly EIA pull", "monthly"),
+    scriptStep("monthly export files", "export:monthly"),
+    scriptStep("monthly needed bulk series inventory", "export:bulk-series"),
+    scriptStep("PADD 1 distillate split", "padd1"),
+    scriptStep("clean public EIA outputs", "clean:eia"),
+    scriptStep("monthly freshness check", "verify:monthly"),
+    scriptStep("rebuild balance dashboards", "build:balances"),
+    scriptStep("dashboard freshness check", "verify:dashboard"),
   ],
   other: [
     parallelPhase("independent context refreshes", [
-      branch("Kpler package", [npmStep("Kpler flow package", "kpler"), npmStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")]),
-      branch("capacity", [npmStep("capacity refresh", "capacity"), npmStep("refinery unit capacity refresh", "capacity:refineries")]),
-      branch("power DFO", [npmStep("power DFO daily refresh", "power:dfo"), npmStep("power DFO hourly forecast", "power:dfo:hourly")]),
+      branch("Kpler package", [scriptStep("Kpler flow package", "kpler"), scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")]),
+      branch("capacity", [scriptStep("capacity refresh", "capacity"), scriptStep("refinery unit capacity refresh", "capacity:refineries")]),
+      branch("power DFO", [scriptStep("power DFO daily refresh", "power:dfo"), scriptStep("power DFO hourly forecast", "power:dfo:hourly")]),
     ]),
-    npmStep("validate clean outputs", "validate"),
-    npmStep("data health check", "data:check"),
-    npmStep("rebuild balance dashboards", "build:balances"),
-    npmStep("dashboard freshness check", "verify:dashboard"),
+    scriptStep("validate clean outputs", "validate"),
+    scriptStep("data health check", "data:check"),
+    scriptStep("rebuild balance dashboards", "build:balances"),
+    scriptStep("dashboard freshness check", "verify:dashboard"),
   ],
   all: [
     parallelPhase("EIA source refreshes", [
-      branch("weekly EIA", [npmStep("weekly EIA pull", "weekly:raw")]),
-      branch("monthly EIA", [npmStep("monthly EIA pull", "monthly")]),
+      branch("weekly EIA", [scriptStep("weekly EIA pull", "weekly:raw")]),
+      branch("monthly EIA", [scriptStep("monthly EIA pull", "monthly")]),
     ]),
-    npmStep("weekly/monthly export files", "export:headers:clean"),
-    npmStep("monthly bulk series inventory", "export:bulk-series"),
-    npmStep("PADD 1 distillate split", "padd1"),
-    npmStep("clean public EIA outputs", "clean:eia"),
+    scriptStep("weekly/monthly export files", "export:headers:clean"),
+    scriptStep("monthly needed bulk series inventory", "export:bulk-series"),
+    scriptStep("PADD 1 distillate split", "padd1"),
+    scriptStep("clean public EIA outputs", "clean:eia"),
     parallelPhase("EIA freshness checks", [
-      branch("weekly freshness", [npmStep("weekly freshness check", "verify:weekly")]),
-      branch("monthly freshness", [npmStep("monthly freshness check", "verify:monthly")]),
+      branch("weekly freshness", [scriptStep("weekly freshness check", "verify:weekly")]),
+      branch("monthly freshness", [scriptStep("monthly freshness check", "verify:monthly")]),
     ]),
     parallelPhase("independent context refreshes", [
-      branch("Kpler package", [npmStep("Kpler flow package", "kpler"), npmStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")]),
-      branch("capacity", [npmStep("capacity refresh", "capacity"), npmStep("refinery unit capacity refresh", "capacity:refineries")]),
-      branch("power DFO", [npmStep("power DFO daily refresh", "power:dfo"), npmStep("power DFO hourly forecast", "power:dfo:hourly")]),
+      branch("Kpler package", [scriptStep("Kpler flow package", "kpler"), scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")]),
+      branch("capacity", [scriptStep("capacity refresh", "capacity"), scriptStep("refinery unit capacity refresh", "capacity:refineries")]),
+      branch("power DFO", [scriptStep("power DFO daily refresh", "power:dfo"), scriptStep("power DFO hourly forecast", "power:dfo:hourly")]),
     ]),
-    npmStep("validate clean outputs", "validate"),
-    npmStep("data health check", "data:check"),
-    npmStep("rebuild balance dashboards", "build:balances"),
-    npmStep("dashboard freshness check", "verify:dashboard"),
+    scriptStep("validate clean outputs", "validate"),
+    scriptStep("data health check", "data:check"),
+    scriptStep("rebuild balance dashboards", "build:balances"),
+    scriptStep("dashboard freshness check", "verify:dashboard"),
   ],
   "power-dfo": [
-    npmStep("power DFO daily refresh", "power:dfo"),
-    npmStep("power DFO hourly forecast", "power:dfo:hourly"),
-    npmStep("rebuild balance dashboards", "build:balances"),
-    npmStep("dashboard freshness check", "verify:dashboard"),
+    scriptStep("power DFO daily refresh", "power:dfo"),
+    scriptStep("power DFO hourly forecast", "power:dfo:hourly"),
+    scriptStep("rebuild balance dashboards", "build:balances"),
+    scriptStep("dashboard freshness check", "verify:dashboard"),
   ],
 };
 
@@ -133,7 +191,7 @@ async function runStep(step: Step, progress: RunProgress, context?: string): Pro
   console.log(`[update] step ${index}/${progress.totalSteps} start: ${label} :: ${commandText(step)}`);
   await new Promise<void>((resolve, reject) => {
     const child = spawn(step.command, step.args, {
-      cwd: process.cwd(),
+      cwd: ROOT,
       env: { ...process.env, FORCE_COLOR: "0" },
       stdio: ["ignore", "pipe", "pipe"],
     });

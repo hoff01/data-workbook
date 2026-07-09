@@ -2,13 +2,18 @@ from __future__ import annotations
 
 from calendar import monthrange
 from contextlib import contextmanager
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import csv
 import json
 import os
 import sys
 import tarfile
 import tempfile
+import time
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 from zipfile import ZipFile
 
 os.environ.setdefault("ARROW_USER_SIMD_LEVEL", "NONE")
@@ -26,6 +31,15 @@ WEEKLY_RAW_EXCEL_OUTPUT = "raw.csv.tar.xz"
 MONTHLY_DIESEL_OUTPUT = "diesel.csv"
 MONTHLY_JET_OUTPUT = "jet.csv"
 MONTHLY_BULK_SOURCE = Path("PET.zip")
+EIA_SERIESID_BASE_URL = "https://api.eia.gov/v2/seriesid"
+PUBLIC_EIA_API_KEY_FALLBACK = "4ZooAQ2fowZXw2nzj8dhtscw8orLWsdpcEk0sbzM"
+EIA_SERIESID_RECENT_LENGTH = int(os.environ.get("EIA_SERIESID_RECENT_LENGTH", "24"))
+EIA_SERIESID_CONCURRENCY = int(os.environ.get("EIA_SERIESID_CONCURRENCY", "16"))
+EIA_SERIESID_TIMEOUT = float(os.environ.get("EIA_SERIESID_TIMEOUT", "12"))
+EIA_SERIESID_ATTEMPTS = int(os.environ.get("EIA_SERIESID_ATTEMPTS", "2"))
+EIA_SERIESID_BACKOFF_SECONDS = float(os.environ.get("EIA_SERIESID_BACKOFF_SECONDS", "2"))
+EIA_MONTHLY_EXPORT_SOURCE = os.environ.get("EIA_MONTHLY_EXPORT_SOURCE", "api").strip().lower()
+MONTHLY_API_ITEM_CACHE: dict[str, dict[str, object]] = {}
 MONTHLY_START = "201601"
 MONTHLY_REGION_PREFIXES = [
     "East Coast (PADD 1)",
@@ -1053,8 +1067,137 @@ def iter_monthly_bulk_items():
                     yield item
 
 
-def write_monthly_clean_csv_for_products(filename: str, products: list[str]) -> None:
-    path = Path("eia_monthly")
+def resolve_eia_api_key() -> str:
+    for key in ["EIA_API_KEY", "EIA_API_TOKEN", "EIA_KEY"]:
+        value = os.environ.get(key, "").strip()
+        if value:
+            return value
+    return PUBLIC_EIA_API_KEY_FALLBACK
+
+
+def eia_series_frequency(item: dict[str, object]) -> str:
+    return "annual" if str(item.get("f", "")).strip() == "A" else "monthly"
+
+
+def eia_seriesid_params(item: dict[str, object], offset: int) -> str:
+    return urlencode([
+        ("api_key", resolve_eia_api_key()),
+        ("frequency", eia_series_frequency(item)),
+        ("data[0]", "value"),
+        ("sort[0][column]", "period"),
+        ("sort[0][direction]", "desc"),
+        ("offset", offset),
+        ("length", EIA_SERIESID_RECENT_LENGTH),
+    ])
+
+
+def fetch_eia_seriesid_payload(item: dict[str, object], offset: int) -> dict[str, object]:
+    series_id = str(item.get("series_id", "")).strip()
+    if not series_id:
+        raise RuntimeError("selected monthly item has no series_id")
+    url = f"{EIA_SERIESID_BASE_URL}/{series_id}?{eia_seriesid_params(item, offset)}"
+    request = Request(url, headers={"User-Agent": "US_Balances monthly seriesid export"})
+    last_error: Exception | None = None
+    for attempt in range(1, EIA_SERIESID_ATTEMPTS + 1):
+        try:
+            with urlopen(request, timeout=EIA_SERIESID_TIMEOUT) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+            last_error = exc
+            if attempt < EIA_SERIESID_ATTEMPTS:
+                time.sleep(EIA_SERIESID_BACKOFF_SECONDS * attempt)
+    raise RuntimeError(f"EIA seriesid API failed for {series_id}: {last_error}")
+
+
+def api_period_to_bulk_period(item: dict[str, object], period: object) -> str | None:
+    frequency = str(item.get("f", "")).strip()
+    value = str(period).strip()
+    if frequency == "A":
+        return value[:4] if len(value) >= 4 and value[:4].isdigit() else None
+    if len(value) == 7 and value[4] == "-":
+        return value.replace("-", "")
+    if len(value) == 6 and value.isdigit():
+        return value
+    return None
+
+
+def api_value_to_bulk_value(value: object) -> float | int | None:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return value
+    text = str(value).replace(",", "").strip()
+    if not text or text in {".", "--"}:
+        return None
+    parsed = float(text)
+    return int(parsed) if parsed.is_integer() else parsed
+
+
+def fetch_eia_seriesid_item(item: dict[str, object]) -> dict[str, object]:
+    series_id = str(item.get("series_id", "")).strip()
+    cached = MONTHLY_API_ITEM_CACHE.get(series_id)
+    if cached is not None:
+        return cached
+
+    first = fetch_eia_seriesid_payload(item, 0)
+    response = first.get("response") if isinstance(first.get("response"), dict) else {}
+    data_rows = list(response.get("data") or [])
+
+    data_by_period: dict[str, object] = {
+        str(period): value
+        for period, value in item.get("data", [])
+    }
+    for row in data_rows:
+        if not isinstance(row, dict):
+            continue
+        period = api_period_to_bulk_period(item, row.get("period"))
+        if period is None:
+            continue
+        data_by_period[period] = api_value_to_bulk_value(row.get("value"))
+    if not data_rows and item.get("data"):
+        raise RuntimeError(f"EIA seriesid API returned no usable data for {item.get('series_id')}")
+
+    api_item = dict(item)
+    api_item["data"] = [[period, value] for period, value in sorted(data_by_period.items(), reverse=True)]
+    if data_by_period:
+        periods = list(data_by_period)
+        api_item["start"] = min(periods)
+        api_item["end"] = max(periods)
+    MONTHLY_API_ITEM_CACHE[series_id] = api_item
+    return api_item
+
+
+def maybe_fetch_monthly_items_from_api(selected: list[dict[str, object]]) -> tuple[list[dict[str, object]], str]:
+    if EIA_MONTHLY_EXPORT_SOURCE in {"pet", "bulk", "zip"}:
+        return selected, "PET.zip"
+    if EIA_MONTHLY_EXPORT_SOURCE not in {"", "api", "seriesid", "eia"}:
+        raise RuntimeError(f"Unknown EIA_MONTHLY_EXPORT_SOURCE={EIA_MONTHLY_EXPORT_SOURCE!r}; use api or pet")
+
+    fetched_by_series: dict[str, dict[str, object]] = {
+        str(item.get("series_id", "")): MONTHLY_API_ITEM_CACHE[str(item.get("series_id", ""))]
+        for item in selected
+        if str(item.get("series_id", "")) in MONTHLY_API_ITEM_CACHE
+    }
+    try:
+        with ThreadPoolExecutor(max_workers=max(1, EIA_SERIESID_CONCURRENCY)) as executor:
+            future_to_item = {
+                executor.submit(fetch_eia_seriesid_item, item): item
+                for item in selected
+                if str(item.get("series_id", "")) not in fetched_by_series
+            }
+            total = len(future_to_item)
+            for completed, future in enumerate(as_completed(future_to_item), start=1):
+                item = future_to_item[future]
+                fetched_by_series[str(item.get("series_id", ""))] = future.result()
+                if completed % 25 == 0 or completed == total:
+                    print(f"monthly EIA seriesid overlay progress {completed}/{total}", flush=True)
+    except Exception as exc:
+        print(f"warning: monthly EIA seriesid API export failed; falling back to PET.zip ({exc})", file=sys.stderr)
+        return selected, "PET.zip fallback"
+    return [fetched_by_series[str(item.get("series_id", ""))] for item in selected], "EIA API seriesid"
+
+
+def selected_monthly_items_for_products(products: list[str]) -> list[dict[str, object]]:
     selected_by_column: dict[str, dict[str, object]] = {}
     for item in iter_monthly_bulk_items():
         name = str(item.get("name", ""))
@@ -1071,9 +1214,18 @@ def write_monthly_clean_csv_for_products(filename: str, products: list[str]) -> 
         if existing is None or monthly_selection_priority(item) < monthly_selection_priority(existing):
             selected_by_column[column_name] = item
 
-    selected = sorted(selected_by_column.values(), key=monthly_export_sort_key)
+    return sorted(selected_by_column.values(), key=monthly_export_sort_key)
+
+
+def write_monthly_clean_csv_for_products(filename: str, products: list[str]) -> None:
+    path = Path("eia_monthly")
+    selected = selected_monthly_items_for_products(products)
     if not selected:
         raise RuntimeError(f"No monthly series matched {', '.join(products)}")
+    if products == GASOLINE_PRODUCTS:
+        source_label = "PET.zip"
+    else:
+        selected, source_label = maybe_fetch_monthly_items_from_api(selected)
 
     column_names = [monthly_column_name(item) for item in selected]
     if len(column_names) != len(set(column_names)):
@@ -1152,6 +1304,7 @@ def write_monthly_clean_csv_for_products(filename: str, products: list[str]) -> 
         for month in sorted(rows_by_month):
             row = rows_by_month[month]
             writer.writerow({column: format_monthly_cell(column, row[column]) for column in columns})
+    print(f"wrote eia_monthly/{filename} source={source_label} series={len(selected)} rows={len(rows_by_month)}")
 
 
 def write_monthly_clean_csv(filename: str, product: str) -> None:
