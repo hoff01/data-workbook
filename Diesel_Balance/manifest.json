@@ -1,7 +1,7 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-07-09T03:12:13.462Z",
+  "generatedAt": "2026-07-09T03:18:26.542Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-04-15",
@@ -12,14 +12,14 @@
       "path": "eia_monthly/diesel.csv",
       "rows": 124,
       "checksum": "65ab9242044cbe7958cefba88cd39655b60a825ab1f2b46d52562fffd6f5fa0b",
-      "modifiedAt": "2026-07-09T03:11:22.924Z"
+      "modifiedAt": "2026-07-09T03:18:15.552Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/diesel.csv",
       "rows": 545,
       "checksum": "b8c71fd11e88447d7f13f162687235d47db3f7b0d10208e0f6c2de8cd8b4c128",
-      "modifiedAt": "2026-07-09T03:11:23.921Z"
+      "modifiedAt": "2026-07-09T03:18:16.481Z"
     },
     {
       "role": "kpler_manifest",
@@ -44,8 +44,8 @@
     {
       "role": "padd_1",
       "path": "padd_1/padd_1_distillate_estimates.csv",
-      "checksum": "c68e32de9b9ac9b680fbdd825d592b699ea117acd66611a6c17559274901baa4",
-      "modifiedAt": "2026-07-09T03:11:07.077Z"
+      "checksum": "a910daab7295cad000c320f18f66218d8d4de8413dd02b6da1ad5db18f9f8cf5",
+      "modifiedAt": "2026-07-09T03:18:15.553Z"
     },
     {
       "role": "power_dfo_daily",
@@ -93,7 +93,7 @@
     "kpler_manifest": "785283220294c8b9932e55026f8134914101ff73e9eb4df70fee6988a3f276a7",
     "kpler_guide_monthly": "54e393f905588d0c2f0a988963bf337901a16a773c621fe0b1ad542b37c4e21a",
     "kpler_guide_weekly": "b0c274d598a0abb6cc61ef9d511e5aa219b6ce7060921d973918bfa1e884aa4b",
-    "padd_1": "c68e32de9b9ac9b680fbdd825d592b699ea117acd66611a6c17559274901baa4",
+    "padd_1": "a910daab7295cad000c320f18f66218d8d4de8413dd02b6da1ad5db18f9f8cf5",
     "power_dfo_daily": "92d12639905a24150c41ae6c3fec531ecab1eb32e5ee8d2a520faacf51c1dcbc",
     "power_dfo_weather": "77d3bd7e8786d6124ba6023bd43c411da1fe1657e71f5e98241fec3bad8a40b9",
     "power_dfo_forecast_24h": "8ca8e6470d9e0fd10112eafcbaee2db448072f550a06cdecfe36fd73b701b050",
@@ -102,7 +102,7 @@
     "refinery_unit_capacity": "e8053868c10fdcfdab240997025285337f065812b300d076e65acc45b74fb8bc"
   },
   "optimization": {
-    "generatedAt": "2026-07-09T03:12:13.525Z",
+    "generatedAt": "2026-07-09T03:18:26.606Z",
     "runtimePlan": {
       "baseRows": 6764,
       "lazyRows": 148812,
