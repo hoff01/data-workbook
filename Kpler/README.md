@@ -1,6 +1,6 @@
 # Kpler Pulls
 
-Balance-ready Kpler liquids flow pulls for U.S., Europe, and domestic U.S. PADD movements.
+Balance-ready Kpler liquids flow pulls for the U.S. diesel and jet balance dashboards.
 
 Windows PowerShell quick start:
 
@@ -32,6 +32,7 @@ The pipeline pulls Kpler `Flows` data from `2018-01-01` and includes forecast/pr
 
 Implementation notes:
 
+- The implementation lives in the repo-root `src/kpler_*.py` files. The `Kpler/` folder keeps Kpler config, launchers, requirements, manifests, raw pulls, and outputs.
 - Uses direct HTTPS requests to `https://api.kpler.com/v1/flows`; it does not instantiate the Kpler Python SDK client.
 - Sends a stable `User-Agent` from `KPLER_USER_AGENT` and keeps credentials in the HTTP Basic Auth header, not in URLs or manifests.
 - Uses Polars for CSV parsing, normalization, date completion, and weekly/monthly aggregation.

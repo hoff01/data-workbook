@@ -10,6 +10,9 @@ type Step = {
   label: string;
   command: string;
   args: string[];
+  continueOnFailure?: string;
+  skipIfEnv?: string;
+  skipReason?: string;
 };
 
 type StepBranch = {
@@ -95,6 +98,35 @@ function branch(label: string, steps: Step[]): StepBranch {
   return { label, steps };
 }
 
+function optionalStep(step: Step, continueOnFailure: string): Step {
+  return { ...step, continueOnFailure };
+}
+
+function skipIfEnv(step: Step, envName: string, skipReason: string): Step {
+  return { ...step, skipIfEnv: envName, skipReason };
+}
+
+function kplerContextSteps(): Step[] {
+  return [
+    skipIfEnv(
+      optionalStep(
+        scriptStep("Kpler flow package", "kpler"),
+        "using the existing local Kpler outputs; run Kpler again when account access is approved",
+      ),
+      "US_BALANCES_SKIP_KPLER_REFRESH",
+      "using the existing local Kpler outputs because US_BALANCES_SKIP_KPLER_REFRESH is set",
+    ),
+    skipIfEnv(
+      optionalStep(
+        scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia"),
+        "using the existing local Kpler PADD 1 split outputs; run Kpler again when account access is approved",
+      ),
+      "US_BALANCES_SKIP_KPLER_REFRESH",
+      "using the existing local Kpler PADD 1 split outputs because US_BALANCES_SKIP_KPLER_REFRESH is set",
+    ),
+  ];
+}
+
 function parallelPhase(label: string, parallel: StepBranch[]): ParallelPhase {
   return { label, parallel };
 }
@@ -125,7 +157,7 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
   ],
   other: [
     parallelPhase("independent context refreshes", [
-      branch("Kpler package", [scriptStep("Kpler flow package", "kpler"), scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")]),
+      branch("Kpler package", kplerContextSteps()),
       branch("capacity", [scriptStep("capacity refresh", "capacity"), scriptStep("refinery unit capacity refresh", "capacity:refineries")]),
       branch("power DFO", [scriptStep("power DFO daily refresh", "power:dfo"), scriptStep("power DFO hourly forecast", "power:dfo:hourly")]),
     ]),
@@ -148,7 +180,7 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
       branch("monthly freshness", [scriptStep("monthly freshness check", "verify:monthly")]),
     ]),
     parallelPhase("independent context refreshes", [
-      branch("Kpler package", [scriptStep("Kpler flow package", "kpler"), scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")]),
+      branch("Kpler package", kplerContextSteps()),
       branch("capacity", [scriptStep("capacity refresh", "capacity"), scriptStep("refinery unit capacity refresh", "capacity:refineries")]),
       branch("power DFO", [scriptStep("power DFO daily refresh", "power:dfo"), scriptStep("power DFO hourly forecast", "power:dfo:hourly")]),
     ]),
@@ -188,7 +220,12 @@ async function runStep(step: Step, progress: RunProgress, context?: string): Pro
   progress.nextStep += 1;
   const started = performance.now();
   const label = context ? `${context} / ${step.label}` : step.label;
+  if (step.skipIfEnv && process.env[step.skipIfEnv]) {
+    console.log(`[update] step ${index}/${progress.totalSteps} skipped: ${label} reason=${step.skipReason ?? step.skipIfEnv}`);
+    return 0;
+  }
   console.log(`[update] step ${index}/${progress.totalSteps} start: ${label} :: ${commandText(step)}`);
+  let continuedAfterFailure = false;
   await new Promise<void>((resolve, reject) => {
     const child = spawn(step.command, step.args, {
       cwd: ROOT,
@@ -203,11 +240,23 @@ async function runStep(step: Step, progress: RunProgress, context?: string): Pro
         resolve();
         return;
       }
+      if (step.continueOnFailure) {
+        continuedAfterFailure = true;
+        console.warn(
+          `[update] step ${index}/${progress.totalSteps} warning: ${label} failed with code ${code ?? "n/a"} signal ${
+            signal ?? "n/a"
+          }; ${step.continueOnFailure}`,
+        );
+        resolve();
+        return;
+      }
       reject(new Error(`${step.label} failed with code ${code ?? "n/a"} signal ${signal ?? "n/a"}`));
     });
   });
   const elapsed = performance.now() - started;
-  console.log(`[update] step ${index}/${progress.totalSteps} done: ${label} duration=${formatDuration(elapsed)}`);
+  console.log(
+    `[update] step ${index}/${progress.totalSteps} ${continuedAfterFailure ? "continued" : "done"}: ${label} duration=${formatDuration(elapsed)}`,
+  );
   return elapsed;
 }
 

@@ -4,7 +4,7 @@
   "dfo_factor_source": "2026",
   "fallback_model_note": "Fallback uses a larger recent hourly history window and blends toward higher historical oil-to-load ratios when forecast demand is elevated.",
   "forecast_hours": 24,
-  "generated_at": "2026-07-09T03:10:06.868157+00:00",
+  "generated_at": "2026-07-09T04:29:50.299482+00:00",
   "history_windows": {
     "max_oil_rows": 20000,
     "max_region_rows": 40000,
@@ -32,49 +32,49 @@
     {
       "offset": 0,
       "row_count": 5000,
-      "total": 526463,
+      "total": 526465,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 5000,
       "row_count": 5000,
-      "total": 526463,
+      "total": 526465,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 10000,
       "row_count": 5000,
-      "total": 526463,
+      "total": 526465,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 15000,
       "row_count": 5000,
-      "total": 526463,
+      "total": 526465,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 20000,
       "row_count": 5000,
-      "total": 526463,
+      "total": 526465,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 25000,
       "row_count": 5000,
-      "total": 526463,
+      "total": 526465,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 30000,
       "row_count": 5000,
-      "total": 526463,
+      "total": 526465,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 35000,
       "row_count": 5000,
-      "total": 526463,
+      "total": 526465,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {

@@ -85,11 +85,11 @@ if ($Setup) {
 if ($Preflight) {
     Set-RuntimeEnvironment
     Test-Environment
-    & $Python (Join-Path $Root "src\kpler_pull.py") --preflight
+    & $Python (Join-Path $RepoRoot "src\kpler_pull.py") --preflight
 }
 
 if ($Run) {
     Set-RuntimeEnvironment
     Test-Environment
-    & $Python (Join-Path $Root "src\kpler_pull.py")
+    & $Python (Join-Path $RepoRoot "src\kpler_pull.py")
 }

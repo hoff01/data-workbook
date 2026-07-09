@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV="$ROOT_DIR/.venv"
+KPLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "$KPLER_DIR/.." && pwd)"
+VENV="$KPLER_DIR/.venv"
 PYTHON="$VENV/bin/python"
-LOCAL_ENV="$ROOT_DIR/config/local.env"
+LOCAL_ENV="$KPLER_DIR/config/local.env"
 
 load_local_env() {
   if [[ -f "$LOCAL_ENV" ]]; then
@@ -20,7 +21,7 @@ setup() {
     python3 -m venv "$VENV"
   fi
   "$PYTHON" -m pip install --upgrade pip
-  "$PYTHON" -m pip install -r "$ROOT_DIR/requirements.txt"
+  "$PYTHON" -m pip install -r "$KPLER_DIR/requirements.txt"
 }
 
 case "${1:-setup-preflight}" in
@@ -32,19 +33,19 @@ case "${1:-setup-preflight}" in
       setup
     fi
     load_local_env
-    "$PYTHON" "$ROOT_DIR/src/kpler_pull.py" --preflight
+    "$PYTHON" "$REPO_DIR/src/kpler_pull.py" --preflight
     ;;
   run)
     if [[ ! -x "$PYTHON" ]]; then
       setup
     fi
     load_local_env
-    "$PYTHON" "$ROOT_DIR/src/kpler_pull.py"
+    "$PYTHON" "$REPO_DIR/src/kpler_pull.py"
     ;;
   setup-preflight)
     setup
     load_local_env
-    "$PYTHON" "$ROOT_DIR/src/kpler_pull.py" --preflight
+    "$PYTHON" "$REPO_DIR/src/kpler_pull.py" --preflight
     ;;
   *)
     echo "Usage: ./run.sh [setup|preflight|run|setup-preflight]" >&2
