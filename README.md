@@ -43,6 +43,7 @@ Local credentials and runtime caches are intentionally ignored:
 
 - `.env`
 - `Kpler/config/local.env`
+- `cache/eia/PET.zip`
 - `node_modules/`
 - `logs/`
 - generated Kpler raw request folders

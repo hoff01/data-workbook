@@ -6,6 +6,7 @@ __pycache__/
 venv/
 eia_weekly/cache/
 eia_monthly/cache/
+cache/
 eia_summary_dashboard/.venv/
 eia_summary_dashboard/cache/
 eia_summary_dashboard/logs/

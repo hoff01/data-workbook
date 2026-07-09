@@ -1,5 +1,5 @@
 import "./env.js";
-import { rename, writeFile } from "node:fs/promises";
+import { mkdir, rename, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fetchBufferWithRetry } from "./common.js";
@@ -17,7 +17,7 @@ const MIN_BULK_BYTES = 1_000_000;
 const BULK_DOWNLOADS: BulkDownload[] = [
   {
     label: "PET",
-    path: "PET.zip",
+    path: process.env.EIA_MONTHLY_BULK_SOURCE ?? "cache/eia/PET.zip",
     url: process.env.EIA_PET_BULK_URL ?? "https://api.eia.gov/bulk/PET.zip",
   },
 ];
@@ -29,6 +29,7 @@ async function refreshBulkZip(download: BulkDownload): Promise<number> {
   }
   const targetPath = join(ROOT, download.path);
   const tmpPath = `${targetPath}.tmp`;
+  await mkdir(dirname(targetPath), { recursive: true });
   await writeFile(tmpPath, content);
   await rename(tmpPath, targetPath);
   return content.length;
