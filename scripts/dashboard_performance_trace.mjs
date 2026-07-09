@@ -224,6 +224,7 @@ try {
     writeFileSync(summaryPath, JSON.stringify(summary, null, 2) + "\n");
     console.log(JSON.stringify(summary, null, 2));
     console.log(`Trace summary written to ${summaryPath}`);
+    if (products.length > 1 && product !== products.at(-1)) await resetTraceTarget();
   }
   const baseline = BASELINE_PATH ? readTraceBaseline(BASELINE_PATH) : null;
   const optimizationReport = buildOptimizationReport(summaries, baseline);
@@ -661,6 +662,7 @@ async function launchChrome() {
     "--disable-extensions",
     "--no-first-run",
     "--no-default-browser-check",
+    "--disable-features=BackForwardCache",
     "about:blank",
   ];
   if (HEADLESS) args.unshift("--headless=new");
@@ -721,6 +723,17 @@ async function tracePhase(cdp, product, name, outDir, action) {
   writeFileSync(tracePath, traceText);
   const metrics = await phaseSnapshot(cdp, name, tracePath, Date.now() - started, beforeMetrics);
   return metrics;
+}
+
+async function resetTraceTarget() {
+  const loadEvent = cdp.waitFor("Page.loadEventFired", TIMEOUT_MS).catch(() => null);
+  await cdp.send("Page.navigate", { url: "about:blank" });
+  await loadEvent;
+  await cdp.send("Page.resetNavigationHistory").catch(() => {});
+  await cdp.send("HeapProfiler.enable").catch(() => {});
+  await cdp.send("HeapProfiler.collectGarbage").catch(() => {});
+  await cdp.send("HeapProfiler.disable").catch(() => {});
+  await delay(100);
 }
 
 async function readStream(cdp, stream) {

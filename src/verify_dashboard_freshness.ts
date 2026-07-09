@@ -229,6 +229,8 @@ function verifyBalanceSubtotalFormatting(indexHtml: string, config: ProductConfi
   assertIncludes(`${config.key} known production offline row classes`, indexHtml, "if (line.kind.includes('offlineProductionGuide')) parts.push('offlineProductionGuideRow');");
   assertIncludes(`${config.key} build draw rows use readable summary band`, indexHtml, ".balanceSummaryRow td{background:#e8eef6!important");
   assertIncludes(`${config.key} build draw per-day row uses grey band`, indexHtml, ".buildDailyRow td{background:#dde2ea!important");
+  assertIncludes(`${config.key} total period build draw row uses dark grey band`, indexHtml, ".buildTotalRow td{background:#6b7280!important;color:#fff!important");
+  assertIncludes(`${config.key} total period build draw row keeps readable sign colors`, indexHtml, ".buildTotalRow.drawRow td.positiveValue{color:#bbf7d0!important}");
   assertIncludes(`${config.key} build draw guide uses readable guide band`, indexHtml, ".balanceGuideRow td{background:#f5f8fc!important");
   assertIncludes(`${config.key} build draw cells are sign colored`, indexHtml, ".drawRow td.positiveValue{color:#166534!important}");
   assertIncludes(`${config.key} build draw guide cells are sign colored`, indexHtml, ".balanceGuideRow td.positiveValue{color:#166534!important}");
@@ -236,6 +238,7 @@ function verifyBalanceSubtotalFormatting(indexHtml: string, config: ProductConfi
   assertIncludes(`${config.key} cover row uses stock context band`, indexHtml, ".coverRow td{background:#f8fbff!important");
   assertIncludes(`${config.key} build draw summary row class`, indexHtml, "{id:'buildDaily',label:'Build/(draw) per day',kind:'balanceSummary draw'}");
   assertIncludes(`${config.key} build draw per-day row class`, indexHtml, "if (line.id === 'buildDaily') parts.push('buildDailyRow');");
+  assertIncludes(`${config.key} total period build draw row class`, indexHtml, "if (line.id === 'buildTotal') parts.push('buildTotalRow');");
   assertIncludes(`${config.key} build draw guide row class`, indexHtml, "kind:lineId === 'buildTotal' ? 'guide balanceGuide' : 'guide'");
   const productionIndex = indexHtml.indexOf("lines.push({id:'production',label:'Production',kind:'subtotal highlight'});");
   const plannedOfflineIndex = indexHtml.indexOf("lines.push({id:'knownProductionOfflinePlannedKbd'");
@@ -274,6 +277,11 @@ function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig
 }
 
 function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConfig): void {
+  assertNotIncludes(`${config.key} row focus header panel removed`, indexHtml, "<div class=\"caption\">Row focus</div>");
+  assertNotIncludes(`${config.key} table layout header panel removed`, indexHtml, "<div class=\"caption\">Table layout</div>");
+  assertNotIncludes(`${config.key} experimental reconcile header panel removed`, indexHtml, "<span class=\"caption\">Experimental reconcile</span>");
+  assertIncludes(`${config.key} row focus state is forced off`, indexHtml, "state.balanceFocus = 'all'; state.balanceSearch = '';");
+  assertIncludes(`${config.key} table layout state uses production defaults`, indexHtml, "state.labelWidth = TABLE_LAYOUT_DEFAULTS.labelWidth; state.labelSize = TABLE_LAYOUT_DEFAULTS.labelSize;");
   assertIncludes(`${config.key} balance sheets declare shared crude context`, indexHtml, "const needsBalanceContext = sheet === 'balance' || sheet === 'charts';");
   assertIncludes(`${config.key} weekly outages load weekly balance scaffold`, indexHtml, "if (frequency === 'weekly' && (needsBalanceContext || sheet === 'outages')) await ensureWeeklyData();");
   assertIncludes(`${config.key} outages tab uses shared data loader`, indexHtml, "outagesSheetBtn').addEventListener('click', async () => { const changed = state.sheet !== 'outages'; try { await ensureDataForState({...state,sheet:'outages'}); }");
@@ -285,9 +293,14 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} F9 is routed through safe dashboard refresh`, indexHtml, "const isF9 = e.key === 'F9' || e.keyCode === 120;");
   assertIncludes(`${config.key} F9 recalculation loads dependencies first`, indexHtml, "refreshDashboardData('Dashboard recalculated');");
   assertIncludes(`${config.key} balance bootstrap refreshes server settings after data load`, indexHtml, "else if (state.sheet === 'balance' || state.sheet === 'charts' || state.sheet === 'outages' || state.sheet === 'crude') { refreshWorkbookSettings(); }");
+  assertIncludes(`${config.key} shared settings save sends base revision`, indexHtml, "baseRevision:workbookSettings.revision || ''");
+  assertIncludes(`${config.key} shared settings conflict is explicit`, indexHtml, "Shared settings changed; latest file loaded. Re-enter the edit and save again.");
+  assertIncludes(`${config.key} shared settings offline message is explicit`, indexHtml, "saved in this browser only; shared settings server offline");
 }
 
 function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} charts topbar switches in-place`, indexHtml, "<a class=\"btn\" id=\"chartsSheetBtn\" href=\"?sheet=charts\">Charts</a>");
+  assertIncludes(`${config.key} charts topbar has in-place click handler`, indexHtml, "document.getElementById('chartsSheetBtn').addEventListener('click', async e => { e.preventDefault();");
   assertIncludes(`${config.key} chart history minimum`, indexHtml, "const MIN_CHART_HISTORY_YEAR = 2017;");
   assertIncludes(`${config.key} chart band years exclude pre-2017`, indexHtml, "context.years.filter(year => year >= MIN_CHART_HISTORY_YEAR && year < context.currentYear)");
   assertIncludes(`${config.key} chart row filter excludes pre-2017`, indexHtml, "chartRowPeriodYear(row) >= MIN_CHART_HISTORY_YEAR");
@@ -315,6 +328,7 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} PADD3 shipment chart is PADD3-only`, indexHtml, "if (metricKey === 'padd3ShipmentsToPadd1Kbd' && regionKey !== 'padd3') return false;");
   assertIncludes(`${config.key} chart metric availability is region-specific`, indexHtml, "function orderedChartMetrics(regionKey=state.chartRegion){ return CHART_METRICS.filter(metricKey => chartMetricHasVisibleData(regionKey, metricKey, state.frequency)); }");
   assertIncludes(`${config.key} chart shell signature includes metric and power availability`, indexHtml, "chartMetricsSignature(chartRegions), powerDfoChartsSignature(), localDateText()");
+  assertIncludes(`${config.key} chart hydration signature includes active scenario preview`, indexHtml, "chartScenarioOverlaySignature(), chartScenarioCalculationSignature(), chartMetricsSignature(chartRegions)");
   assertIncludes(`${config.key} chart hydration uses derived metric rows`, indexHtml, "const rows = chartRowsForMetric(regionKey, metricKey, state.frequency, baseRows);");
   assertIncludes(`${config.key} chart export uses derived metric rows`, indexHtml, "return chartRowsForMetric(regionKey, metricKey, state.frequency).map(row =>");
   assertIncludes(`${config.key} chart zoom modal container`, indexHtml, "id=\"chartZoomModal\"");

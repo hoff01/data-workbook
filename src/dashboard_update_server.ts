@@ -5,6 +5,7 @@ import {
   mkdirSync,
   openSync,
   readFileSync,
+  renameSync,
   statSync,
   unlinkSync,
   writeFileSync,
@@ -15,6 +16,7 @@ import { dirname, extname, join, normalize, relative, resolve } from "node:path"
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createGzip } from "node:zlib";
+import { createHash } from "node:crypto";
 
 type UpdateGroup = "weekly" | "monthly" | "other" | "all" | "power-dfo";
 type JobStatus = "running" | "succeeded" | "failed";
@@ -85,6 +87,10 @@ type DashboardSettings = {
   updatedAt: string;
 };
 
+type DashboardSettingsResponse = DashboardSettings & {
+  revision: string;
+};
+
 const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
 const HOST = process.env.DASHBOARD_UPDATE_HOST || "127.0.0.1";
@@ -126,6 +132,14 @@ function writeJson(response: ServerResponse, statusCode: number, payload: unknow
     "access-control-allow-headers": "content-type",
   });
   response.end(JSON.stringify(payload));
+}
+
+function settingsRevision(settings: DashboardSettings): string {
+  return createHash("sha256").update(JSON.stringify(settings)).digest("hex").slice(0, 16);
+}
+
+function publicSettings(settings: DashboardSettings): DashboardSettingsResponse {
+  return { ...settings, revision: settingsRevision(settings) };
 }
 
 function normalizeForecastEnd(value: unknown): string {
@@ -195,7 +209,10 @@ function readSettings(): DashboardSettings {
 }
 
 function writeSettings(settings: DashboardSettings): void {
-  writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+  mkdirSync(dirname(settingsPath), { recursive: true });
+  const tempPath = join(dirname(settingsPath), `.balance_dashboard_settings.${process.pid}.${Date.now()}.tmp`);
+  writeFileSync(tempPath, JSON.stringify(settings, null, 2) + "\n");
+  renameSync(tempPath, settingsPath);
 }
 
 function landingPage(): string {
@@ -356,7 +373,7 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
     return;
   }
   if (pathname === "/api/settings" && request.method === "GET") {
-    writeJson(response, 200, { settings: readSettings() });
+    writeJson(response, 200, { settings: publicSettings(readSettings()) });
     return;
   }
   if (pathname === "/api/health" && request.method === "GET") {
@@ -380,8 +397,18 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
         adjustments?: unknown;
         crudeOutages?: unknown;
         refineryCapacityAdjustments?: unknown;
+        baseRevision?: unknown;
       };
       const settings = readSettings();
+      const currentRevision = settingsRevision(settings);
+      const baseRevision = typeof body.baseRevision === "string" ? body.baseRevision.trim() : "";
+      if (baseRevision && baseRevision !== currentRevision) {
+        writeJson(response, 409, {
+          error: "shared settings changed; refresh and retry",
+          settings: publicSettings(settings),
+        });
+        return;
+      }
       if (body.forecastEnd !== undefined) settings.forecastEnd = normalizeForecastEnd(body.forecastEnd);
       if (body.product === "diesel" || body.product === "jet") {
         settings.adjustments[body.product] = Array.isArray(body.adjustments) ? (body.adjustments as BalanceAdjustment[]) : settings.adjustments[body.product];
@@ -394,7 +421,7 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
       }
       settings.updatedAt = new Date().toISOString();
       writeSettings(settings);
-      writeJson(response, 200, { settings });
+      writeJson(response, 200, { settings: publicSettings(readSettings()) });
     } catch (error) {
       writeJson(response, 400, { error: error instanceof Error ? error.message : "invalid settings payload" });
     }
