@@ -3,7 +3,9 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2026-07-09T04,NE,New England,DF,Day-ahead demand forecast,14210,megawatthours
 2026-07-09T03,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,109223,megawatthours
 2026-07-09T03,NE,New England,DF,Day-ahead demand forecast,15690,megawatthours
+2026-07-09T02,MIDA,Mid-Atlantic,D,Demand,127206,megawatthours
 2026-07-09T02,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,117143,megawatthours
+2026-07-09T02,NE,New England,D,Demand,17358,megawatthours
 2026-07-09T02,NE,New England,DF,Day-ahead demand forecast,17100,megawatthours
 2026-07-09T01,MIDA,Mid-Atlantic,D,Demand,131801,megawatthours
 2026-07-09T01,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,124334,megawatthours
@@ -39997,5 +39999,3 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2025-12-11T18,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,109224,megawatthours
 2025-12-11T18,MIDA,Mid-Atlantic,NG,Net generation,114378,megawatthours
 2025-12-11T18,MIDA,Mid-Atlantic,TI,Total interchange,1615,megawatthours
-2025-12-11T18,NE,New England,D,Demand,13523,megawatthours
-2025-12-11T18,NE,New England,DF,Day-ahead demand forecast,12680,megawatthours

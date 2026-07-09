@@ -26,3 +26,6 @@ Kpler/config/local.env.ps1
 Kpler/config/.env
 .env.local
 Kpler/config/.env.local
+Kpler/raw/daily/domestic_padd/
+Kpler/raw/daily/external/
+Kpler/raw/daily/padd1_split/

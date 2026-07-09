@@ -1,7 +1,7 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-07-09T02:41:34.964Z",
+  "generatedAt": "2026-07-09T03:12:13.594Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-04-15",
@@ -12,14 +12,14 @@
       "path": "eia_monthly/jet.csv",
       "rows": 124,
       "checksum": "67c703e905a507ae410be9c4eff515b10d6c6b392d55f96a42ae2fd053dbbf28",
-      "modifiedAt": "2026-07-09T02:41:30.670Z"
+      "modifiedAt": "2026-07-09T03:11:22.930Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/jet.csv",
       "rows": 545,
-      "checksum": "f647f25ab42786410fd4418c1fed0adcbe269783ba68df55db80a884cebe4a6c",
-      "modifiedAt": "2026-07-09T02:41:31.598Z"
+      "checksum": "68c11fa767fe55287dc3a3f44506e761378388d64947238fea72d557d58d159c",
+      "modifiedAt": "2026-07-09T03:11:23.926Z"
     },
     {
       "role": "kpler_manifest",
@@ -45,20 +45,20 @@
       "role": "refinery_unit_capacity",
       "path": "data/refinery_unit_capacities_2025.csv",
       "rows": 311,
-      "checksum": "c5da113c20a018e788e6465e4d5e9756d44e90a3b2f3b4a047d2cc0f4063d83d",
-      "modifiedAt": "2026-07-09T02:12:11.222Z"
+      "checksum": "e8053868c10fdcfdab240997025285337f065812b300d076e65acc45b74fb8bc",
+      "modifiedAt": "2026-07-09T03:09:42.265Z"
     }
   ],
   "checksums": {
     "eia_monthly": "67c703e905a507ae410be9c4eff515b10d6c6b392d55f96a42ae2fd053dbbf28",
-    "eia_weekly": "f647f25ab42786410fd4418c1fed0adcbe269783ba68df55db80a884cebe4a6c",
+    "eia_weekly": "68c11fa767fe55287dc3a3f44506e761378388d64947238fea72d557d58d159c",
     "kpler_manifest": "785283220294c8b9932e55026f8134914101ff73e9eb4df70fee6988a3f276a7",
     "kpler_guide_monthly": "1411877b348176fa8fac8781a3b3bee1619e6b02e5ed1da898b4348f4f6e52ba",
     "kpler_guide_weekly": "241c4061b886697920f3d4b0927fee5a40c9705becf178b98aed6e49de408174",
-    "refinery_unit_capacity": "c5da113c20a018e788e6465e4d5e9756d44e90a3b2f3b4a047d2cc0f4063d83d"
+    "refinery_unit_capacity": "e8053868c10fdcfdab240997025285337f065812b300d076e65acc45b74fb8bc"
   },
   "optimization": {
-    "generatedAt": "2026-07-09T02:41:35.008Z",
+    "generatedAt": "2026-07-09T03:12:13.634Z",
     "runtimePlan": {
       "baseRows": 6240,
       "lazyRows": 144390,

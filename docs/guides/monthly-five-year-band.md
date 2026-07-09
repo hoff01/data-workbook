@@ -6,7 +6,7 @@ Use this document as the implementation contract for recreating the existing mon
 
 The intended request is:
 
-> Recreate the monthly five-year-band chart for this dataset using `5-year-band.md`. Use the existing `US Balances/Build dashboard.ts` chart as the read-only visual and behavioral source of truth. Make the metric title and region dynamic. Preserve the current-year, previous-year, five-year-average, and five-year-range styling and logic.
+> Recreate the monthly five-year-band chart for this dataset using `docs/guides/monthly-five-year-band.md`. Use the existing `US Balances/Build dashboard.ts` chart as the read-only visual and behavioral source of truth. Make the metric title and region dynamic. Preserve the current-year, previous-year, five-year-average, and five-year-range styling and logic.
 
 ---
 
@@ -1469,7 +1469,7 @@ Use the following wording in another project:
 
 ```text
 Recreate the Indicia monthly five-year-band chart for the supplied monthly data.
-Follow 5-year-band.md as the implementation contract.
+Follow `docs/guides/monthly-five-year-band.md` as the implementation contract.
 
 Before writing code, read US Balances/Build dashboard.ts as the canonical,
 read-only source. Do not edit, reformat, refactor, or update that file or any

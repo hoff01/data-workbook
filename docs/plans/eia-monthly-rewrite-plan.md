@@ -8,13 +8,13 @@ Completely replace the slow `monthly_eia_pull.py` workflow with a fast, determin
 - EIA facet/product/region codes.
 - Existing high-level merge intent.
 
-The new pipeline must produce development CSV outputs and browser-ready columnar assets that can be used by the static forecast HTML app described in `AGENTS_forecast_static_html.md`.
+The new pipeline must produce development CSV outputs and browser-ready columnar assets that can be used by the static forecast HTML app described in `../architecture/forecast-static-html-agents.md`.
 
 ## Relevant Local Files
 
 - Current script to replace: `monthly_eia_pull.py`
-- Forecast app architecture: `AGENTS_forecast_static_html.md`
-- Weekly retrieval plan: `agent.md`
+- Forecast app architecture: `../architecture/forecast-static-html-agents.md`
+- Weekly retrieval plan: `eia-weekly-retrieval-plan.md`
 
 ## Required Current Script Inputs To Preserve
 
@@ -223,7 +223,7 @@ Duplicate policy:
 
 ## Storage Plan For Forecast Static HTML
 
-Follow `AGENTS_forecast_static_html.md`:
+Follow `../architecture/forecast-static-html-agents.md`:
 
 - Do not use JSON for analytical runtime data.
 - Use Parquet for cold/reference storage.
