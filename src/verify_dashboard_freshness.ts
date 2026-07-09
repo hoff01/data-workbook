@@ -306,7 +306,11 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} actual-only chart metric registry`, indexHtml, "function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }");
   assertIncludes(`${config.key} secondary unit charts are monthly-only`, indexHtml, "if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return [];");
   assertIncludes(`${config.key} Kpler charts disable forecast path`, indexHtml, "const nextYearPath = !actualOnly && state.showNextYearForecast && state.showForecast");
-  assertIncludes(`${config.key} Kpler legend disables forecast`, indexHtml, "const nextLegend = !actualOnly && state.showNextYearForecast");
+  assertIncludes(`${config.key} Kpler legend disables forecast`, indexHtml, "if (!actualOnly && state.showNextYearForecast && nextYearForecast && state.showForecast && available.has(nextYearForecast))");
+  assertIncludes(`${config.key} chart legends filter unavailable years per card`, indexHtml, "function chartAvailableYearSet(bundle)");
+  assertIncludes(`${config.key} chart legend entries use newest-first year order`, indexHtml, "return entries.sort((a,b)=>b.year-a.year || a.order-b.order);");
+  assertIncludes(`${config.key} chart history chips use newest-first order`, indexHtml, "chips.sort((a,b)=>b.year-a.year || a.order-b.order).map(chip => chip.html).join('')");
+  assertIncludes(`${config.key} chart hydration preserves legend host`, indexHtml, "if (legendHost) legendHost.innerHTML = legendHtml; else { const legacyLegend = card.querySelector('.legend'); if (legacyLegend) legacyLegend.outerHTML = legendHtml; }");
   assertIncludes(`${config.key} optional all-zero charts are suppressed`, indexHtml, "if (OPTIONAL_NONZERO_CHART_METRICS.has(metricKey)) return values.some(value => Math.abs(value) > .0001);");
   assertIncludes(`${config.key} PADD3 shipment chart is PADD3-only`, indexHtml, "if (metricKey === 'padd3ShipmentsToPadd1Kbd' && regionKey !== 'padd3') return false;");
   assertIncludes(`${config.key} chart metric availability is region-specific`, indexHtml, "function orderedChartMetrics(regionKey=state.chartRegion){ return CHART_METRICS.filter(metricKey => chartMetricHasVisibleData(regionKey, metricKey, state.frequency)); }");
@@ -343,7 +347,10 @@ function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig)
   assertIncludes(`${config.key} outage charts use crude outage regions`, indexHtml, "function renderOutageChartRegionOptions()");
   assertIncludes(`${config.key} outage charts preserve actual forecast status`, indexHtml, "function outageChartStatusByPeriod(frequency=state.frequency)");
   assertIncludes(`${config.key} outage charts use custom rows`, indexHtml, "function outageChartRowsForMetric(regionKey, metricKey, frequency=state.frequency)");
-  assertIncludes(`${config.key} outage charts use 3-year band`, indexHtml, "function outageBandYears(frequency=state?.frequency || 'monthly'){ return availableBandYears(frequency).slice(0,3); }");
+  assertIncludes(`${config.key} outage charts use selected band years with default fallback`, indexHtml, "function outageBandYears(frequency=state?.frequency || 'monthly'){ const selected = normalizeBandYears(state?.bandYears, frequency, false); return selected.length ? selected : defaultOutageBandYears(frequency); }");
+  assertIncludes(`${config.key} outage charts expose shared chart options`, indexHtml, "document.getElementById('chartOptions').hidden = !(state.sheet === 'charts' || state.sheet === 'outages');");
+  assertIncludes(`${config.key} outage charts hide disabled smoothing control`, indexHtml, "document.getElementById('fourWeekAverageChip').hidden = state.sheet === 'outages';");
+  assertIncludes(`${config.key} outage chart legends filter unavailable years per card`, indexHtml, "const lineLegend = chartLineLegendEntries(bundle, metricKey, state.frequency).map(entry =>");
   assertIncludes(`${config.key} outage chart render signature tracks forecast visibility`, indexHtml, "state.showForecast ? 'forecast' : 'actual-only'");
   assertIncludes(`${config.key} outage chart render signature tracks next-year visibility`, indexHtml, "state.showNextYearForecast ? 'next' : 'no-next'");
   assertIncludes(`${config.key} outage chart SVG class`, indexHtml, "outageSeasonChart");
