@@ -437,7 +437,7 @@ def write_header_csv(directory: str) -> None:
     path = Path(directory)
     schema = pq.read_schema(path / "raw")
     with (path / "raw.csv").open("w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
+        writer = csv.writer(file, lineterminator="\n")
         writer.writerow(schema.names)
 
 
@@ -450,7 +450,7 @@ def write_weekly_raw_excel_archive() -> None:
     columns = raw.schema_arrow.names
     try:
         with tmp_csv_path.open("w", newline="", encoding="utf-8") as text_file:
-            writer = csv.writer(text_file)
+            writer = csv.writer(text_file, lineterminator="\n")
             writer.writerow(columns)
             for batch in raw.iter_batches(batch_size=65_536, columns=columns):
                 data = batch.to_pydict()
@@ -527,7 +527,7 @@ def write_weekly_series_csv() -> None:
         ))
     rows.sort()
     with (path / "series.csv").open("w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
+        writer = csv.writer(file, lineterminator="\n")
         writer.writerow(columns)
         writer.writerows(rows)
 
@@ -592,7 +592,7 @@ def write_monthly_series_csv() -> None:
         ))
     rows.sort()
     with (path / "series.csv").open("w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
+        writer = csv.writer(file, lineterminator="\n")
         writer.writerow(columns)
         writer.writerows(rows)
 
@@ -1303,7 +1303,7 @@ def write_monthly_clean_csv_for_products(filename: str, products: list[str]) -> 
             row.setdefault(column, 0)
 
     with (path / filename).open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=columns)
+        writer = csv.DictWriter(file, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
         for month in sorted(rows_by_month):
             row = rows_by_month[month]
@@ -1489,7 +1489,7 @@ def write_weekly_clean_csv_from_values(filename: str, mappings: list[dict[str, s
         row[series_name] = value
 
     with (path / filename).open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=columns)
+        writer = csv.DictWriter(file, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
         for week_ending in sorted(rows_by_week):
             writer.writerow(rows_by_week[week_ending])

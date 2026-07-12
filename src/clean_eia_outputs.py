@@ -75,7 +75,7 @@ def read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
     tmp_path = path.with_suffix(path.suffix + ".tmp")
     with tmp_path.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames, extrasaction="ignore")
+        writer = csv.DictWriter(file, fieldnames=fieldnames, extrasaction="ignore", lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     tmp_path.replace(path)

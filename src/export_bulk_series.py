@@ -106,7 +106,7 @@ def main() -> int:
     rows.sort(key=sort_key)
     tmp_path = OUTPUT.with_suffix(".csv.tmp")
     with tmp_path.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=COLUMNS)
+        writer = csv.DictWriter(file, fieldnames=COLUMNS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     tmp_path.replace(OUTPUT)

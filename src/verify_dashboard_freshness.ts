@@ -274,6 +274,14 @@ function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig
   assertIncludes(`${config.key} balance inactive DOM clears stale scroll signature`, indexHtml, "delete balanceTable.dataset.renderSignature;\n        }\n        tableScrollSignatures.balanceTable = '';");
   assertIncludes(`${config.key} balance force scroll bypasses viewport restore`, indexHtml, "else if (forceScroll) { clearPendingTableViewportRestore('balanceTable'); scrollTableToPeriod('balanceTable', targetPeriod, signature, true); }");
   assertIncludes(`${config.key} balance table scroll gets delayed layout retries`, indexHtml, "const retryDelays = wrap.id === 'crudeRunsTableWrap' ? [120,360] : [40,120,360];");
+  assertIncludes(`${config.key} mobile crude table stays inside its scroll container`, indexHtml, "@media(max-width:760px){#crudeRunsTableWrap{display:block;min-width:0;width:100%;max-width:100%;max-height:58vh;overflow:auto}");
+  assertIncludes(`${config.key} mobile crude period count wraps inside the viewport`, indexHtml, "#crudeRunsCount{white-space:normal;max-width:100%;line-height:1.35}");
+  assertIncludes(`${config.key} mobile workbook disables desktop compositor transforms`, indexHtml, ".topbar,.crudeViewportLock,.chartGrid{will-change:auto;transform:none!important}");
+  assertIncludes(`${config.key} mobile crude table uses container scrolling`, indexHtml, "function tableUsesPageWideScroll(wrap){ return Boolean(wrap?.id === 'crudeRunsTableWrap' && !matchMedia('(max-width: 760px)').matches); }");
+  assertIncludes(`${config.key} mobile workbook disables page-wide viewport tracking`, indexHtml, "function viewportTrackingActive(){ return (state.sheet === 'charts' || state.sheet === 'crude') && !matchMedia('(max-width: 760px)').matches; }");
+  assertIncludes(`${config.key} mobile crude table limits its rasterized period window`, indexHtml, "function crudeTableDisplayPeriods(allPeriods=crudeDisplayPeriods())");
+  assertIncludes(`${config.key} mobile crude window keeps twelve actual periods before forecast`, indexHtml, "firstForecast - 12");
+  assertIncludes(`${config.key} mobile crude window tells users exports keep full history`, indexHtml, "period columns; exports keep full history");
 }
 
 function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConfig): void {
@@ -341,6 +349,25 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} chart zoom custom width control`, indexHtml, "data-zoom-width");
   assertIncludes(`${config.key} chart zoom custom height control`, indexHtml, "data-zoom-height");
   assertIncludes(`${config.key} chart zoom custom PNG save`, indexHtml, "function saveZoomChartPng(card)");
+}
+
+function verifyChartScenarioPropagation(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} scenario From month is editable`, indexHtml, 'id="chartScenarioStart" type="month"');
+  assertIncludes(`${config.key} scenario From month keeps forecast lower bound`, indexHtml, 'id="chartScenarioStart" type="month" min="');
+  assertIncludes(`${config.key} scenario From month calendar control`, indexHtml, 'id="chartScenarioStartPickerBtn"');
+  assertIncludes(`${config.key} scenario From month updates the draft`, indexHtml, "if (target?.id === 'chartScenarioStart')");
+  assertIncludes(`${config.key} scenario From month preserves range ordering`, indexHtml, "endPeriod:draft.endPeriod < startPeriod ? startPeriod : draft.endPeriod");
+  assertIncludes(`${config.key} reopening a scenario preserves its active preview`, indexHtml, "activePreview?.previewEnabled && activePreview.regionKey === regionKey && activePreview.metricKey === metricKey");
+  assertIncludes(`${config.key} switching scenarios repaints after clearing an active preview`, indexHtml, "if (hadActivePreview) queueRender();");
+  assertIncludes(`${config.key} bundled scenarios check every affected region`, indexHtml, "function chartScenarioAffectsChartRegion(scenario, regionKey){ return chartScenarioAdjustmentScenarios(scenario).some(adjustment => scenarioAffectsChartRegion(adjustment, regionKey)); }");
+  assertIncludes(`${config.key} enabled scenarios are simulated per chart`, indexHtml, "const scenarioBundle = withChartScenarioSimulation([scenario], () => chartSeriesBundle(chartRowsForMetric(regionKey, metricKey, frequency), metricKey, frequency");
+  assertIncludes(`${config.key} dependent chart overlays use recalculated differences`, indexHtml, "const series = overlays.filter(scenario => chartScenarioAffectsChartRegion(scenario, regionKey)).map((scenario, index) =>");
+  assertIncludes(`${config.key} scenario simulation filters unchanged charts`, indexHtml, "if (!chartScenarioBundleHasVisibleDiff(baseBundle, scenarioBundle, visibleForecastYears)) return null;");
+  assertIncludes(`${config.key} demand feeds balance`, indexHtml, "productionKbd + importsKbd + netReceiptsKbd - exportsKbd - demandKbd");
+  assertIncludes(`${config.key} balance feeds forecast inventory`, indexHtml, "priorPoint?.stocksKb || rawPoint.stocksKb || 0) + balanceKbd * periodDays(rawPoint.period)");
+  assertIncludes(`${config.key} demand and inventory feed forward cover`, indexHtml, "Number(list[index].stocksKb || 0) / avgDemand");
+  assertIncludes(`${config.key} demand feeds net length`, indexHtml, "Number(point.productionKbd || 0) - Number(point.demandKbd || 0)");
+  assertIncludes(`${config.key} demand feeds total period build draw`, indexHtml, "Number(point.demandKbd || 0) - Number(point.exportsKbd || 0) - shipments");
 }
 
 function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig): void {
@@ -544,6 +571,7 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
   verifyBalanceSmartWindowScroll(indexHtml, config);
   verifyBalanceCrudeContextLoading(indexHtml, config);
   verifyChartTabExpansion(indexHtml, config);
+  verifyChartScenarioPropagation(indexHtml, config);
   verifyOutageProductionOffline(indexHtml, config);
   verifyNortheastPowerCharts(indexHtml, config, runtimePowerDfo);
   verifyYieldAdjustmentRowOrder(indexHtml, config);

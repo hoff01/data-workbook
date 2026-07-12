@@ -1,13 +1,13 @@
 {
   "balances": {
     "diesel": {
-      "generated_at": "2026-07-09T04:24:40.964Z",
+      "generated_at": "2026-07-12T03:23:26.779Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-07-03",
       "path": "Diesel_Balance/manifest.json"
     },
     "jet": {
-      "generated_at": "2026-07-09T04:24:41.094Z",
+      "generated_at": "2026-07-12T03:23:26.900Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-07-03",
       "path": "Jet_Balance/manifest.json"
@@ -15,7 +15,7 @@
   },
   "checks": [
     {
-      "columns": 49,
+      "columns": 53,
       "exists": true,
       "max_date": "2026-07-03",
       "min_date": "2016-01-01",
@@ -25,7 +25,7 @@
       "status": "pass"
     },
     {
-      "columns": 45,
+      "columns": 49,
       "exists": true,
       "max_date": "2026-07-03",
       "min_date": "2016-01-01",
@@ -58,10 +58,10 @@
       "max_allowed_age_days": 14,
       "name": "eia_weekly_freshness",
       "status": "pass",
-      "today": "2026-07-09"
+      "today": "2026-07-11"
     },
     {
-      "columns": 220,
+      "columns": 232,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -71,7 +71,7 @@
       "status": "pass"
     },
     {
-      "columns": 213,
+      "columns": 225,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -104,9 +104,11 @@
       "max_allowed_age_days": 150,
       "name": "eia_monthly_freshness",
       "status": "pass",
-      "today": "2026-07-09"
+      "today": "2026-07-11"
     },
     {
+      "fallback_active": false,
+      "fallback_reason": "",
       "mode": "live",
       "name": "kpler",
       "path": "Kpler/manifest.json",
@@ -114,11 +116,27 @@
       "status": "pass"
     },
     {
-      "mode": "live",
+      "generated_day": "2026-07-09",
+      "max_allowed_age_days": 7,
+      "name": "kpler_freshness",
+      "status": "pass",
+      "today": "2026-07-11"
+    },
+    {
+      "fallback_active": true,
+      "fallback_reason": "RuntimeError: Kpler authentication failed: HTTP 403",
+      "mode": "eia_error_fallback",
       "name": "kpler_padd1_eia_split",
       "path": "Kpler/padd1_eia_split_manifest.json",
-      "rows": 75732,
-      "status": "pass"
+      "rows": 12296,
+      "status": "warn"
+    },
+    {
+      "generated_day": "2026-07-10",
+      "max_allowed_age_days": 7,
+      "name": "kpler_padd1_eia_split_freshness",
+      "status": "pass",
+      "today": "2026-07-11"
     },
     {
       "current_month": "2026-07",
@@ -174,15 +192,21 @@
     },
     {
       "name": "power_generation_dfo",
-      "run_end": "2026-07-09",
+      "run_end": "2026-07-10",
       "status": "pass",
-      "today": "2026-07-09"
+      "today": "2026-07-11"
     },
     {
-      "generated_day": "2026-07-09",
+      "generated_day": "2026-07-10",
       "name": "power_generation_dfo_hourly",
       "status": "pass",
-      "today": "2026-07-09"
+      "today": "2026-07-11"
+    },
+    {
+      "crlf_files": [],
+      "name": "public_csv_line_endings",
+      "scanned": 33,
+      "status": "pass"
     }
   ],
   "eia_capacity": {
@@ -191,7 +215,7 @@
     "eia_monthly_rows": 199136,
     "end_month": "2026-07",
     "forward_fill": "Annual EIA downstream charge capacity values are assigned to every month in their source year and carried forward until a newer annual value exists.",
-    "generated_at": "2026-07-09T04:27:15.025276+00:00",
+    "generated_at": "2026-07-10T13:06:09.892642+00:00",
     "high_level_monthly_rows": 93345,
     "high_level_wide_rows": 127,
     "manual_forward_fill": "Rows in eia_capacity/manual_capacity.csv are forward-filled monthly from period_month or source_year and override EIA rows with the same period_month and series_id.",
@@ -224,7 +248,7 @@
   },
   "eia_monthly": {
     "diesel": {
-      "columns": 220,
+      "columns": 232,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -240,7 +264,7 @@
       "rows": 124
     },
     "jet": {
-      "columns": 213,
+      "columns": 225,
       "exists": true,
       "max_date": "2026-04-15",
       "min_date": "2016-01-15",
@@ -250,7 +274,7 @@
   },
   "eia_weekly": {
     "diesel": {
-      "columns": 49,
+      "columns": 53,
       "exists": true,
       "max_date": "2026-07-03",
       "min_date": "2016-01-01",
@@ -266,7 +290,7 @@
       "rows": 549
     },
     "jet": {
-      "columns": 45,
+      "columns": 49,
       "exists": true,
       "max_date": "2026-07-03",
       "min_date": "2016-01-01",
@@ -274,37 +298,44 @@
       "rows": 549
     }
   },
-  "generated_at": "2026-07-09T04:30:45.615096+00:00",
+  "generated_at": "2026-07-12T03:23:54.701884+00:00",
   "kpler": {
+    "fallback": {},
     "generated_at": "2026-07-09T02:08:57.505640+00:00",
     "mode": "live",
     "path": "Kpler/manifest.json",
     "rows": 121562
   },
   "kpler_padd1_eia_split": {
-    "generated_at": "2026-07-09T02:15:54.294348+00:00",
-    "mode": "live",
+    "fallback": {
+      "active": true,
+      "padd1ab_share": 1.0,
+      "padd1c_share": 0.0,
+      "reason": "RuntimeError: Kpler authentication failed: HTTP 403"
+    },
+    "generated_at": "2026-07-10T13:12:56.253099+00:00",
+    "mode": "eia_error_fallback",
     "path": "Kpler/padd1_eia_split_manifest.json",
-    "rows": 75732
+    "rows": 12296
   },
   "power_generation_dfo": {
-    "generated_at": "2026-07-09T04:28:53.208211+00:00",
+    "generated_at": "2026-07-10T13:07:10.975276+00:00",
     "path": "power_generation_dfo/manifest.json",
     "row_counts": {
       "annual_factors": 7,
       "calibration_months": 100,
-      "daily_2026_estimates": 188,
-      "daily_estimates": 2699,
-      "daily_generation": 2699,
+      "daily_2026_estimates": 190,
+      "daily_estimates": 2701,
+      "daily_generation": 2701,
       "facility_raw": 106459,
       "monthly_estimates": 91,
       "monthly_facility": 200,
-      "rto_raw": 5286
+      "rto_raw": 5290
     },
-    "run_end": "2026-07-09"
+    "run_end": "2026-07-10"
   },
   "power_generation_dfo_hourly": {
-    "generated_at": "2026-07-09T04:29:50.299482+00:00",
+    "generated_at": "2026-07-10T13:07:32.868427+00:00",
     "path": "power_generation_dfo/hourly_forecast_manifest.json",
     "row_counts": {
       "forecast_rows": 24,
@@ -314,9 +345,14 @@
       "weather_rows": 336
     }
   },
+  "public_csv_line_endings": {
+    "crlf_files": [],
+    "scanned": 33
+  },
   "status": "pass",
   "summary": {
-    "pass": 21
+    "pass": 23,
+    "warn": 1
   },
-  "today": "2026-07-09"
+  "today": "2026-07-11"
 }

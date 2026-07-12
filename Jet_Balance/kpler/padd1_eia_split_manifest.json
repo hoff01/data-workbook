@@ -20,7 +20,7 @@
       "latest": "2026-07-03",
       "oldest": "2016-01-01",
       "path": "eia_weekly/diesel.csv",
-      "rows": 545,
+      "rows": 549,
       "split_source_columns": [
         "weekly East Coast (PADD 1) Imports of Distillate Fuel Oil"
       ]
@@ -45,7 +45,7 @@
       "latest": "2026-07-03",
       "oldest": "2016-01-01",
       "path": "eia_weekly/jet.csv",
-      "rows": 545,
+      "rows": 549,
       "split_source_columns": [
         "weekly East Coast (PADD 1) Imports of Kerosene-Type Jet Fuel"
       ]
@@ -61,128 +61,59 @@
       "added_columns": 0,
       "path": "eia_weekly/gasoline.csv",
       "removed_stale_kpler_split_columns": 0,
-      "rows": 545,
+      "rows": 549,
       "split_source_columns": []
     }
   ],
-  "generated_at": "2026-07-09T02:15:54.294348+00:00",
-  "mode": "live",
+  "fallback": {
+    "active": true,
+    "padd1ab_share": 1.0,
+    "padd1c_share": 0.0,
+    "reason": "RuntimeError: Kpler authentication failed: HTTP 403"
+  },
+  "generated_at": "2026-07-10T13:12:56.253099+00:00",
+  "mode": "eia_error_fallback",
   "normalized_long": {
     "path": "/Users/alexhoffmann/US_Balances/Kpler/output/padd1_split/padd1_import_export_normalized_long.csv",
-    "rows": 75732
+    "rows": 12296
   },
   "pipeline_name": "kpler_padd1_eia_split",
   "pull_count": 4,
   "pull_status": {
+    "kpler_error": {
+      "assumption": "all available PADD 1 trade is assigned to PADD 1A/B Northeast",
+      "error": "RuntimeError: Kpler authentication failed: HTTP 403",
+      "status": "eia_error_fallback"
+    },
     "padd1_split_diesel_exports": {
-      "attempts": 1,
-      "params": {
-        "endDate": "2026-08-22",
-        "flowDirection": "export",
-        "fromZones": "United States",
-        "granularity": "daily",
-        "onlyRealized": "false",
-        "products": "Gasoil/Diesel",
-        "split": "Origin Padds",
-        "startDate": "2018-01-01",
-        "unit": "kbd",
-        "withForecast": "true",
-        "withFreightView": "false",
-        "withIntraCountry": "false",
-        "withIntraRegion": "true",
-        "withProductEstimation": "false"
-      },
-      "raw": {
-        "bytes": 130068,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_diesel_exports.csv",
-        "rows": 3156
-      },
-      "status": "ok",
-      "url": "https://api.kpler.com/v1/flows?flowDirection=export&split=Origin+Padds&granularity=daily&startDate=2018-01-01&endDate=2026-08-22&fromZones=United+States&products=Gasoil%2FDiesel&onlyRealized=false&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withFreightView=false&withProductEstimation=false"
+      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
+      "rows": 3042,
+      "source": "EIA PADD 1 aggregate import/export columns",
+      "status": "eia_fallback"
     },
     "padd1_split_diesel_imports": {
-      "attempts": 1,
-      "params": {
-        "endDate": "2026-08-22",
-        "flowDirection": "import",
-        "granularity": "daily",
-        "onlyRealized": "false",
-        "products": "Gasoil/Diesel",
-        "split": "Destination Padds",
-        "startDate": "2018-01-01",
-        "toZones": "United States",
-        "unit": "kbd",
-        "withForecast": "true",
-        "withFreightView": "false",
-        "withIntraCountry": "false",
-        "withIntraRegion": "true",
-        "withProductEstimation": "false"
-      },
-      "raw": {
-        "bytes": 129429,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_diesel_imports.csv",
-        "rows": 3156
-      },
-      "status": "ok",
-      "url": "https://api.kpler.com/v1/flows?flowDirection=import&split=Destination+Padds&granularity=daily&startDate=2018-01-01&endDate=2026-08-22&toZones=United+States&products=Gasoil%2FDiesel&onlyRealized=false&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withFreightView=false&withProductEstimation=false"
+      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
+      "rows": 3106,
+      "source": "EIA PADD 1 aggregate import/export columns",
+      "status": "eia_fallback"
     },
     "padd1_split_jet_exports": {
-      "attempts": 1,
-      "params": {
-        "endDate": "2026-08-22",
-        "flowDirection": "export",
-        "fromZones": "United States",
-        "granularity": "daily",
-        "onlyRealized": "false",
-        "products": "Kero/Jet",
-        "split": "Origin Padds",
-        "startDate": "2018-01-01",
-        "unit": "kbd",
-        "withForecast": "true",
-        "withFreightView": "false",
-        "withIntraCountry": "false",
-        "withIntraRegion": "true",
-        "withProductEstimation": "false"
-      },
-      "raw": {
-        "bytes": 112939,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_jet_exports.csv",
-        "rows": 3156
-      },
-      "status": "ok",
-      "url": "https://api.kpler.com/v1/flows?flowDirection=export&split=Origin+Padds&granularity=daily&startDate=2018-01-01&endDate=2026-08-22&fromZones=United+States&products=Kero%2FJet&onlyRealized=false&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withFreightView=false&withProductEstimation=false"
+      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
+      "rows": 3042,
+      "source": "EIA PADD 1 aggregate import/export columns",
+      "status": "eia_fallback"
     },
     "padd1_split_jet_imports": {
-      "attempts": 1,
-      "params": {
-        "endDate": "2026-08-22",
-        "flowDirection": "import",
-        "granularity": "daily",
-        "onlyRealized": "false",
-        "products": "Kero/Jet",
-        "split": "Destination Padds",
-        "startDate": "2018-01-01",
-        "toZones": "United States",
-        "unit": "kbd",
-        "withForecast": "true",
-        "withFreightView": "false",
-        "withIntraCountry": "false",
-        "withIntraRegion": "true",
-        "withProductEstimation": "false"
-      },
-      "raw": {
-        "bytes": 117976,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_jet_imports.csv",
-        "rows": 3156
-      },
-      "status": "ok",
-      "url": "https://api.kpler.com/v1/flows?flowDirection=import&split=Destination+Padds&granularity=daily&startDate=2018-01-01&endDate=2026-08-22&toZones=United+States&products=Kero%2FJet&onlyRealized=false&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withFreightView=false&withProductEstimation=false"
+      "assumption": "no Kpler credentials; all available PADD 1 trade is assigned to PADD 1A/B Northeast",
+      "rows": 3106,
+      "source": "EIA PADD 1 aggregate import/export columns",
+      "status": "eia_fallback"
     }
   },
   "pulls": [
     {
       "commodity": "diesel",
-      "end_date": "2026-08-22",
+      "end_date": "2026-08-24",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -208,7 +139,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-08-22",
+      "end_date": "2026-08-24",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -234,7 +165,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-22",
+      "end_date": "2026-08-24",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -260,7 +191,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-22",
+      "end_date": "2026-08-24",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -287,7 +218,7 @@
   ],
   "runtime_config": {
     "concurrency": 2,
-    "end_date": "2026-08-22",
+    "end_date": "2026-08-24",
     "granularity": "daily",
     "only_realized": false,
     "retry_backoff_seconds": 2.0,

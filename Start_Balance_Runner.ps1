@@ -72,10 +72,19 @@ function Invoke-SystemPython {
     if ($cmd.Length -gt 1) {
         $cmdArgs += $cmd[1..($cmd.Length - 1)]
     }
-    & $cmd[0] @($cmdArgs + $Arguments)
+    & $cmd[0] @($cmdArgs + $Arguments) | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        throw "Python command failed with exit code $LASTEXITCODE."
+    }
 }
 
 function Ensure-NodeRuntime {
+    $node = Get-Command node.exe -ErrorAction SilentlyContinue
+    $npm = Get-Command npm.cmd -ErrorAction SilentlyContinue
+    if (!$node -or !$npm) {
+        throw "Node.js LTS and npm were not found. Install Node.js LTS, reopen PowerShell, and rerun this launcher."
+    }
+
     New-Directory $NodeRoot
     Copy-Item (Join-Path $SharedRoot "package.json") (Join-Path $NodeRoot "package.json") -Force
     $sharedLock = Join-Path $SharedRoot "package-lock.json"
@@ -89,10 +98,13 @@ function Ensure-NodeRuntime {
         Push-Location $NodeRoot
         try {
             if (Test-Path (Join-Path $NodeRoot "package-lock.json")) {
-                npm ci
+                & $npm.Source ci | Out-Host
             }
             else {
-                npm install
+                & $npm.Source install | Out-Host
+            }
+            if ($LASTEXITCODE -ne 0) {
+                throw "npm dependency setup failed with exit code $LASTEXITCODE."
             }
         }
         finally {
@@ -120,8 +132,14 @@ function Ensure-PythonRuntime {
         Invoke-SystemPython @("-m", "venv", $venv)
     }
     if ($ForceSetup -or (Read-Stamp $PythonStamp) -ne $hash) {
-        & $python -m pip install --upgrade pip
-        & $python -m pip install -r $requirements
+        & $python -m pip install --upgrade pip | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            throw "pip upgrade failed with exit code $LASTEXITCODE."
+        }
+        & $python -m pip install -r $requirements | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            throw "Python dependency setup failed with exit code $LASTEXITCODE."
+        }
         Set-Content -Path $PythonStamp -Value $hash -Encoding UTF8
     }
     return $python
@@ -154,3 +172,6 @@ if ($NoOpen) {
     $openArgs += "--no-open"
 }
 & $env:US_BALANCES_TSX_COMMAND @openArgs
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}

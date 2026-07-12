@@ -179,7 +179,7 @@ def rto_params(start: date, end: date) -> list[tuple[str, str | int]]:
 def write_dicts(path: Path, rows: list[dict[str, object]], fieldnames: list[str]) -> None:
     tmp_path = path.with_suffix(path.suffix + ".tmp")
     with tmp_path.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames, extrasaction="ignore")
+        writer = csv.DictWriter(file, fieldnames=fieldnames, extrasaction="ignore", lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     tmp_path.replace(path)

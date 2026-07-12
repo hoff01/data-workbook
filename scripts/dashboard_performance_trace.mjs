@@ -306,6 +306,7 @@ async function traceProduct(product) {
   const productDir = product === "diesel" ? "Diesel_Balance" : "Jet_Balance";
   const startUrl = `http://${HOST}:${PORT}/${productDir}/index.html`;
   const runStartedAt = new Date().toISOString();
+  const diagnosticsStart = pageDiagnostics.length;
   const phases = [];
 
   phases.push(await tracePhase(cdp, product, "initial-load", OUT_DIR, async () => {
@@ -351,6 +352,7 @@ async function traceProduct(product) {
     await runInPage(cdp, finishMeasureScript("codex-reference", "codex-reference-click-to-render"));
   }));
 
+  const productDiagnostics = pageDiagnostics.slice(diagnosticsStart);
   return {
     runStartedAt,
     runEndedAt: new Date().toISOString(),
@@ -360,6 +362,15 @@ async function traceProduct(product) {
     headless: HEADLESS,
     outDir: OUT_DIR,
     phases,
+    pageDiagnostics: productDiagnostics,
+    diagnosticCounts: {
+      total: productDiagnostics.length,
+      exceptions: productDiagnostics.filter((row) => row.type === "exception").length,
+      consoleErrors: productDiagnostics.filter((row) => row.type === "console.error" || row.type === "console.assert").length,
+      consoleWarnings: productDiagnostics.filter((row) => row.type === "console.warning").length,
+      logErrors: productDiagnostics.filter((row) => row.type === "log.error").length,
+      logWarnings: productDiagnostics.filter((row) => row.type === "log.warning").length,
+    },
   };
 }
 

@@ -1,102 +1,456 @@
 period,respondent,respondent-name,type,type-name,value,value-units
+2026-07-11T04,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,103003,megawatthours
+2026-07-11T04,NE,New England,DF,Day-ahead demand forecast,16030,megawatthours
+2026-07-11T03,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,108266,megawatthours
+2026-07-11T03,NE,New England,DF,Day-ahead demand forecast,17510,megawatthours
+2026-07-11T02,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,115752,megawatthours
+2026-07-11T02,NE,New England,DF,Day-ahead demand forecast,18840,megawatthours
+2026-07-11T01,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,122308,megawatthours
+2026-07-11T01,NE,New England,DF,Day-ahead demand forecast,19740,megawatthours
+2026-07-11T00,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,126629,megawatthours
+2026-07-11T00,NE,New England,DF,Day-ahead demand forecast,20280,megawatthours
+2026-07-10T23,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,131275,megawatthours
+2026-07-10T23,NE,New England,DF,Day-ahead demand forecast,20500,megawatthours
+2026-07-10T22,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,135083,megawatthours
+2026-07-10T22,NE,New England,DF,Day-ahead demand forecast,20300,megawatthours
+2026-07-10T21,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,137652,megawatthours
+2026-07-10T21,NE,New England,DF,Day-ahead demand forecast,19620,megawatthours
+2026-07-10T20,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,137675,megawatthours
+2026-07-10T20,NE,New England,DF,Day-ahead demand forecast,18960,megawatthours
+2026-07-10T19,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,136605,megawatthours
+2026-07-10T19,NE,New England,DF,Day-ahead demand forecast,18260,megawatthours
+2026-07-10T18,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,134854,megawatthours
+2026-07-10T18,NE,New England,DF,Day-ahead demand forecast,17460,megawatthours
+2026-07-10T17,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,131983,megawatthours
+2026-07-10T17,NE,New England,DF,Day-ahead demand forecast,16610,megawatthours
+2026-07-10T16,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,127832,megawatthours
+2026-07-10T16,NE,New England,DF,Day-ahead demand forecast,16160,megawatthours
+2026-07-10T15,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,122983,megawatthours
+2026-07-10T15,NE,New England,DF,Day-ahead demand forecast,15810,megawatthours
+2026-07-10T14,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,117551,megawatthours
+2026-07-10T14,NE,New England,DF,Day-ahead demand forecast,15680,megawatthours
+2026-07-10T13,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,112195,megawatthours
+2026-07-10T13,NE,New England,DF,Day-ahead demand forecast,15930,megawatthours
+2026-07-10T12,MIDA,Mid-Atlantic,D,Demand,106641,megawatthours
+2026-07-10T12,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,107181,megawatthours
+2026-07-10T12,NE,New England,D,Demand,15951,megawatthours
+2026-07-10T12,NE,New England,DF,Day-ahead demand forecast,15930,megawatthours
+2026-07-10T11,MIDA,Mid-Atlantic,D,Demand,101495,megawatthours
+2026-07-10T11,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,102119,megawatthours
+2026-07-10T11,NE,New England,D,Demand,15966,megawatthours
+2026-07-10T11,NE,New England,DF,Day-ahead demand forecast,15350,megawatthours
+2026-07-10T10,MIDA,Mid-Atlantic,D,Demand,98377,megawatthours
+2026-07-10T10,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,97423,megawatthours
+2026-07-10T10,NE,New England,D,Demand,15483,megawatthours
+2026-07-10T10,NE,New England,DF,Day-ahead demand forecast,14090,megawatthours
+2026-07-10T09,MIDA,Mid-Atlantic,D,Demand,97048,megawatthours
+2026-07-10T09,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,94151,megawatthours
+2026-07-10T09,NE,New England,D,Demand,15356,megawatthours
+2026-07-10T09,NE,New England,DF,Day-ahead demand forecast,13860,megawatthours
+2026-07-10T08,MIDA,Mid-Atlantic,D,Demand,97702,megawatthours
+2026-07-10T08,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,92515,megawatthours
+2026-07-10T08,NE,New England,D,Demand,15419,megawatthours
+2026-07-10T08,NE,New England,DF,Day-ahead demand forecast,13760,megawatthours
+2026-07-10T07,MIDA,Mid-Atlantic,D,Demand,99949,megawatthours
+2026-07-10T07,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,93094,megawatthours
+2026-07-10T07,NE,New England,D,Demand,15746,megawatthours
+2026-07-10T07,NE,New England,DF,Day-ahead demand forecast,14030,megawatthours
+2026-07-10T06,MIDA,Mid-Atlantic,D,Demand,103831,megawatthours
+2026-07-10T06,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,95521,megawatthours
+2026-07-10T06,NE,New England,D,Demand,15999,megawatthours
+2026-07-10T06,NE,New England,DF,Day-ahead demand forecast,14590,megawatthours
+2026-07-10T05,MIDA,Mid-Atlantic,D,Demand,108226,megawatthours
+2026-07-10T05,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,99284,megawatthours
+2026-07-10T05,NE,New England,D,Demand,16480,megawatthours
+2026-07-10T05,NE,New England,DF,Day-ahead demand forecast,15440,megawatthours
+2026-07-10T04,MIDA,Mid-Atlantic,D,Demand,112455,megawatthours
+2026-07-10T04,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,105072,megawatthours
+2026-07-10T04,NE,New England,D,Demand,17349,megawatthours
+2026-07-10T04,NE,New England,DF,Day-ahead demand forecast,16430,megawatthours
+2026-07-10T03,MIDA,Mid-Atlantic,D,Demand,118969,megawatthours
+2026-07-10T03,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,110831,megawatthours
+2026-07-10T03,MIDA,Mid-Atlantic,NG,Net generation,127115,megawatthours
+2026-07-10T03,MIDA,Mid-Atlantic,TI,Total interchange,601,megawatthours
+2026-07-10T03,NE,New England,D,Demand,18657,megawatthours
+2026-07-10T03,NE,New England,DF,Day-ahead demand forecast,17880,megawatthours
+2026-07-10T03,NE,New England,NG,Net generation,16923,megawatthours
+2026-07-10T03,NE,New England,TI,Total interchange,-1734,megawatthours
+2026-07-10T02,MIDA,Mid-Atlantic,D,Demand,125374,megawatthours
+2026-07-10T02,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,118739,megawatthours
+2026-07-10T02,MIDA,Mid-Atlantic,NG,Net generation,133963,megawatthours
+2026-07-10T02,MIDA,Mid-Atlantic,TI,Total interchange,941,megawatthours
+2026-07-10T02,NE,New England,D,Demand,20149,megawatthours
+2026-07-10T02,NE,New England,DF,Day-ahead demand forecast,19270,megawatthours
+2026-07-10T02,NE,New England,NG,Net generation,18102,megawatthours
+2026-07-10T02,NE,New England,TI,Total interchange,-2047,megawatthours
+2026-07-10T01,MIDA,Mid-Atlantic,D,Demand,129211,megawatthours
+2026-07-10T01,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,126089,megawatthours
+2026-07-10T01,MIDA,Mid-Atlantic,NG,Net generation,137057,megawatthours
+2026-07-10T01,MIDA,Mid-Atlantic,TI,Total interchange,967,megawatthours
+2026-07-10T01,NE,New England,D,Demand,21073,megawatthours
+2026-07-10T01,NE,New England,DF,Day-ahead demand forecast,20240,megawatthours
+2026-07-10T01,NE,New England,NG,Net generation,18628,megawatthours
+2026-07-10T01,NE,New England,TI,Total interchange,-2445,megawatthours
+2026-07-10T00,MIDA,Mid-Atlantic,D,Demand,133060,megawatthours
+2026-07-10T00,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,130275,megawatthours
+2026-07-10T00,MIDA,Mid-Atlantic,NG,Net generation,139783,megawatthours
+2026-07-10T00,MIDA,Mid-Atlantic,TI,Total interchange,825,megawatthours
+2026-07-10T00,NE,New England,D,Demand,21483,megawatthours
+2026-07-10T00,NE,New England,DF,Day-ahead demand forecast,20730,megawatthours
+2026-07-10T00,NE,New England,NG,Net generation,19000,megawatthours
+2026-07-10T00,NE,New England,TI,Total interchange,-2483,megawatthours
+2026-07-09T23,MIDA,Mid-Atlantic,D,Demand,135634,megawatthours
+2026-07-09T23,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,134343,megawatthours
+2026-07-09T23,MIDA,Mid-Atlantic,NG,Net generation,142654,megawatthours
+2026-07-09T23,MIDA,Mid-Atlantic,TI,Total interchange,828,megawatthours
+2026-07-09T23,NE,New England,D,Demand,21682,megawatthours
+2026-07-09T23,NE,New England,DF,Day-ahead demand forecast,20800,megawatthours
+2026-07-09T23,NE,New England,NG,Net generation,19238,megawatthours
+2026-07-09T23,NE,New England,TI,Total interchange,-2444,megawatthours
+2026-07-09T22,MIDA,Mid-Atlantic,D,Demand,136804,megawatthours
+2026-07-09T22,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,137390,megawatthours
+2026-07-09T22,MIDA,Mid-Atlantic,NG,Net generation,143511,megawatthours
+2026-07-09T22,MIDA,Mid-Atlantic,TI,Total interchange,957,megawatthours
+2026-07-09T22,NE,New England,D,Demand,21253,megawatthours
+2026-07-09T22,NE,New England,DF,Day-ahead demand forecast,20460,megawatthours
+2026-07-09T22,NE,New England,NG,Net generation,18789,megawatthours
+2026-07-09T22,NE,New England,TI,Total interchange,-2464,megawatthours
+2026-07-09T21,MIDA,Mid-Atlantic,D,Demand,137222,megawatthours
+2026-07-09T21,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,138933,megawatthours
+2026-07-09T21,MIDA,Mid-Atlantic,NG,Net generation,143157,megawatthours
+2026-07-09T21,MIDA,Mid-Atlantic,TI,Total interchange,570,megawatthours
+2026-07-09T21,NE,New England,D,Demand,20273,megawatthours
+2026-07-09T21,NE,New England,DF,Day-ahead demand forecast,19610,megawatthours
+2026-07-09T21,NE,New England,NG,Net generation,18314,megawatthours
+2026-07-09T21,NE,New England,TI,Total interchange,-1959,megawatthours
+2026-07-09T20,MIDA,Mid-Atlantic,D,Demand,136411,megawatthours
+2026-07-09T20,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,138187,megawatthours
+2026-07-09T20,MIDA,Mid-Atlantic,NG,Net generation,141914,megawatthours
+2026-07-09T20,MIDA,Mid-Atlantic,TI,Total interchange,50,megawatthours
+2026-07-09T20,NE,New England,D,Demand,19150,megawatthours
+2026-07-09T20,NE,New England,DF,Day-ahead demand forecast,18700,megawatthours
+2026-07-09T20,NE,New England,NG,Net generation,17896,megawatthours
+2026-07-09T20,NE,New England,TI,Total interchange,-1254,megawatthours
+2026-07-09T19,MIDA,Mid-Atlantic,D,Demand,135071,megawatthours
+2026-07-09T19,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,136556,megawatthours
+2026-07-09T19,MIDA,Mid-Atlantic,NG,Net generation,141090,megawatthours
+2026-07-09T19,MIDA,Mid-Atlantic,TI,Total interchange,301,megawatthours
+2026-07-09T19,NE,New England,D,Demand,18145,megawatthours
+2026-07-09T19,NE,New England,DF,Day-ahead demand forecast,17720,megawatthours
+2026-07-09T19,NE,New England,NG,Net generation,17648,megawatthours
+2026-07-09T19,NE,New England,TI,Total interchange,-497,megawatthours
+2026-07-09T18,MIDA,Mid-Atlantic,D,Demand,132285,megawatthours
+2026-07-09T18,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,134432,megawatthours
+2026-07-09T18,MIDA,Mid-Atlantic,NG,Net generation,137559,megawatthours
+2026-07-09T18,MIDA,Mid-Atlantic,TI,Total interchange,428,megawatthours
+2026-07-09T18,NE,New England,D,Demand,17148,megawatthours
+2026-07-09T18,NE,New England,DF,Day-ahead demand forecast,16640,megawatthours
+2026-07-09T18,NE,New England,NG,Net generation,17342,megawatthours
+2026-07-09T18,NE,New England,TI,Total interchange,194,megawatthours
+2026-07-09T17,MIDA,Mid-Atlantic,D,Demand,128524,megawatthours
+2026-07-09T17,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,131800,megawatthours
+2026-07-09T17,MIDA,Mid-Atlantic,NG,Net generation,133766,megawatthours
+2026-07-09T17,MIDA,Mid-Atlantic,TI,Total interchange,998,megawatthours
+2026-07-09T17,NE,New England,D,Demand,16115,megawatthours
+2026-07-09T17,NE,New England,DF,Day-ahead demand forecast,15790,megawatthours
+2026-07-09T17,NE,New England,NG,Net generation,16714,megawatthours
+2026-07-09T17,NE,New England,TI,Total interchange,599,megawatthours
+2026-07-09T16,MIDA,Mid-Atlantic,D,Demand,124622,megawatthours
+2026-07-09T16,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,127689,megawatthours
+2026-07-09T16,MIDA,Mid-Atlantic,NG,Net generation,128906,megawatthours
+2026-07-09T16,MIDA,Mid-Atlantic,TI,Total interchange,1227,megawatthours
+2026-07-09T16,NE,New England,D,Demand,15066,megawatthours
+2026-07-09T16,NE,New England,DF,Day-ahead demand forecast,14920,megawatthours
+2026-07-09T16,NE,New England,NG,Net generation,15724,megawatthours
+2026-07-09T16,NE,New England,TI,Total interchange,658,megawatthours
+2026-07-09T15,MIDA,Mid-Atlantic,D,Demand,121236,megawatthours
+2026-07-09T15,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,123011,megawatthours
+2026-07-09T15,MIDA,Mid-Atlantic,NG,Net generation,125384,megawatthours
+2026-07-09T15,MIDA,Mid-Atlantic,TI,Total interchange,1076,megawatthours
+2026-07-09T15,NE,New England,D,Demand,14334,megawatthours
+2026-07-09T15,NE,New England,DF,Day-ahead demand forecast,14330,megawatthours
+2026-07-09T15,NE,New England,NG,Net generation,14755,megawatthours
+2026-07-09T15,NE,New England,TI,Total interchange,421,megawatthours
+2026-07-09T14,MIDA,Mid-Atlantic,D,Demand,116461,megawatthours
+2026-07-09T14,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,117725,megawatthours
+2026-07-09T14,MIDA,Mid-Atlantic,NG,Net generation,121340,megawatthours
+2026-07-09T14,MIDA,Mid-Atlantic,TI,Total interchange,1031,megawatthours
+2026-07-09T14,NE,New England,D,Demand,14057,megawatthours
+2026-07-09T14,NE,New England,DF,Day-ahead demand forecast,13980,megawatthours
+2026-07-09T14,NE,New England,NG,Net generation,14115,megawatthours
+2026-07-09T14,NE,New England,TI,Total interchange,58,megawatthours
+2026-07-09T13,MIDA,Mid-Atlantic,D,Demand,111671,megawatthours
+2026-07-09T13,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,112398,megawatthours
+2026-07-09T13,MIDA,Mid-Atlantic,NG,Net generation,117239,megawatthours
+2026-07-09T13,MIDA,Mid-Atlantic,TI,Total interchange,869,megawatthours
+2026-07-09T13,NE,New England,D,Demand,13981,megawatthours
+2026-07-09T13,NE,New England,DF,Day-ahead demand forecast,13970,megawatthours
+2026-07-09T13,NE,New England,NG,Net generation,13770,megawatthours
+2026-07-09T13,NE,New England,TI,Total interchange,-211,megawatthours
+2026-07-09T12,MIDA,Mid-Atlantic,D,Demand,107225,megawatthours
+2026-07-09T12,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,107517,megawatthours
+2026-07-09T12,MIDA,Mid-Atlantic,NG,Net generation,112331,megawatthours
+2026-07-09T12,MIDA,Mid-Atlantic,TI,Total interchange,876,megawatthours
+2026-07-09T12,NE,New England,D,Demand,14091,megawatthours
+2026-07-09T12,NE,New England,DF,Day-ahead demand forecast,13850,megawatthours
+2026-07-09T12,NE,New England,NG,Net generation,13510,megawatthours
+2026-07-09T12,NE,New England,TI,Total interchange,-581,megawatthours
+2026-07-09T11,MIDA,Mid-Atlantic,D,Demand,102035,megawatthours
+2026-07-09T11,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,102571,megawatthours
+2026-07-09T11,MIDA,Mid-Atlantic,NG,Net generation,108168,megawatthours
+2026-07-09T11,MIDA,Mid-Atlantic,TI,Total interchange,1073,megawatthours
+2026-07-09T11,NE,New England,D,Demand,14122,megawatthours
+2026-07-09T11,NE,New England,DF,Day-ahead demand forecast,13260,megawatthours
+2026-07-09T11,NE,New England,NG,Net generation,13327,megawatthours
+2026-07-09T11,NE,New England,TI,Total interchange,-795,megawatthours
+2026-07-09T10,MIDA,Mid-Atlantic,D,Demand,98414,megawatthours
+2026-07-09T10,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,97938,megawatthours
+2026-07-09T10,MIDA,Mid-Atlantic,NG,Net generation,104815,megawatthours
+2026-07-09T10,MIDA,Mid-Atlantic,TI,Total interchange,869,megawatthours
+2026-07-09T10,NE,New England,D,Demand,13712,megawatthours
+2026-07-09T10,NE,New England,DF,Day-ahead demand forecast,12370,megawatthours
+2026-07-09T10,NE,New England,NG,Net generation,12794,megawatthours
+2026-07-09T10,NE,New England,TI,Total interchange,-918,megawatthours
+2026-07-09T09,MIDA,Mid-Atlantic,D,Demand,96396,megawatthours
+2026-07-09T09,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,94474,megawatthours
+2026-07-09T09,MIDA,Mid-Atlantic,NG,Net generation,103075,megawatthours
+2026-07-09T09,MIDA,Mid-Atlantic,TI,Total interchange,791,megawatthours
+2026-07-09T09,NE,New England,D,Demand,13715,megawatthours
+2026-07-09T09,NE,New England,DF,Day-ahead demand forecast,11980,megawatthours
+2026-07-09T09,NE,New England,NG,Net generation,12863,megawatthours
+2026-07-09T09,NE,New England,TI,Total interchange,-852,megawatthours
+2026-07-09T08,MIDA,Mid-Atlantic,D,Demand,97126,megawatthours
+2026-07-09T08,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,92825,megawatthours
+2026-07-09T08,MIDA,Mid-Atlantic,NG,Net generation,104518,megawatthours
+2026-07-09T08,MIDA,Mid-Atlantic,TI,Total interchange,319,megawatthours
+2026-07-09T08,NE,New England,D,Demand,13670,megawatthours
+2026-07-09T08,NE,New England,DF,Day-ahead demand forecast,11970,megawatthours
+2026-07-09T08,NE,New England,NG,Net generation,12720,megawatthours
+2026-07-09T08,NE,New England,TI,Total interchange,-950,megawatthours
+2026-07-09T07,MIDA,Mid-Atlantic,D,Demand,99679,megawatthours
+2026-07-09T07,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,93472,megawatthours
+2026-07-09T07,MIDA,Mid-Atlantic,NG,Net generation,106409,megawatthours
+2026-07-09T07,MIDA,Mid-Atlantic,TI,Total interchange,4965,megawatthours
+2026-07-09T07,NE,New England,D,Demand,13677,megawatthours
+2026-07-09T07,NE,New England,DF,Day-ahead demand forecast,12190,megawatthours
+2026-07-09T07,NE,New England,NG,Net generation,13053,megawatthours
+2026-07-09T07,NE,New England,TI,Total interchange,-624,megawatthours
+2026-07-09T06,MIDA,Mid-Atlantic,D,Demand,103490,megawatthours
+2026-07-09T06,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,96075,megawatthours
+2026-07-09T06,MIDA,Mid-Atlantic,NG,Net generation,109135,megawatthours
+2026-07-09T06,MIDA,Mid-Atlantic,TI,Total interchange,5547,megawatthours
+2026-07-09T06,NE,New England,D,Demand,13953,megawatthours
+2026-07-09T06,NE,New England,DF,Day-ahead demand forecast,12640,megawatthours
+2026-07-09T06,NE,New England,NG,Net generation,13329,megawatthours
+2026-07-09T06,NE,New England,TI,Total interchange,-624,megawatthours
+2026-07-09T05,MIDA,Mid-Atlantic,D,Demand,107722,megawatthours
+2026-07-09T05,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,100026,megawatthours
+2026-07-09T05,MIDA,Mid-Atlantic,NG,Net generation,112413,megawatthours
+2026-07-09T05,MIDA,Mid-Atlantic,TI,Total interchange,6095,megawatthours
+2026-07-09T05,NE,New England,D,Demand,14194,megawatthours
+2026-07-09T05,NE,New England,DF,Day-ahead demand forecast,13280,megawatthours
+2026-07-09T05,NE,New England,NG,Net generation,13342,megawatthours
+2026-07-09T05,NE,New England,TI,Total interchange,-852,megawatthours
+2026-07-09T04,MIDA,Mid-Atlantic,D,Demand,112861,megawatthours
 2026-07-09T04,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,103053,megawatthours
+2026-07-09T04,MIDA,Mid-Atlantic,NG,Net generation,118307,megawatthours
+2026-07-09T04,MIDA,Mid-Atlantic,TI,Total interchange,1004,megawatthours
+2026-07-09T04,NE,New England,D,Demand,14582,megawatthours
 2026-07-09T04,NE,New England,DF,Day-ahead demand forecast,14210,megawatthours
+2026-07-09T04,NE,New England,NG,Net generation,13880,megawatthours
+2026-07-09T04,NE,New England,TI,Total interchange,-702,megawatthours
 2026-07-09T03,MIDA,Mid-Atlantic,D,Demand,120256,megawatthours
 2026-07-09T03,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,109223,megawatthours
+2026-07-09T03,MIDA,Mid-Atlantic,NG,Net generation,126288,megawatthours
+2026-07-09T03,MIDA,Mid-Atlantic,TI,Total interchange,937,megawatthours
 2026-07-09T03,NE,New England,D,Demand,16016,megawatthours
 2026-07-09T03,NE,New England,DF,Day-ahead demand forecast,15690,megawatthours
+2026-07-09T03,NE,New England,NG,Net generation,15053,megawatthours
+2026-07-09T03,NE,New England,TI,Total interchange,-963,megawatthours
 2026-07-09T02,MIDA,Mid-Atlantic,D,Demand,127206,megawatthours
 2026-07-09T02,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,117143,megawatthours
+2026-07-09T02,MIDA,Mid-Atlantic,NG,Net generation,133816,megawatthours
+2026-07-09T02,MIDA,Mid-Atlantic,TI,Total interchange,728,megawatthours
 2026-07-09T02,NE,New England,D,Demand,17358,megawatthours
 2026-07-09T02,NE,New England,DF,Day-ahead demand forecast,17100,megawatthours
+2026-07-09T02,NE,New England,NG,Net generation,16540,megawatthours
+2026-07-09T02,NE,New England,TI,Total interchange,-818,megawatthours
 2026-07-09T01,MIDA,Mid-Atlantic,D,Demand,131801,megawatthours
 2026-07-09T01,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,124334,megawatthours
+2026-07-09T01,MIDA,Mid-Atlantic,NG,Net generation,137820,megawatthours
+2026-07-09T01,MIDA,Mid-Atlantic,TI,Total interchange,902,megawatthours
 2026-07-09T01,NE,New England,D,Demand,18096,megawatthours
 2026-07-09T01,NE,New England,DF,Day-ahead demand forecast,17950,megawatthours
+2026-07-09T01,NE,New England,NG,Net generation,17150,megawatthours
+2026-07-09T01,NE,New England,TI,Total interchange,-946,megawatthours
 2026-07-09T00,MIDA,Mid-Atlantic,D,Demand,136344,megawatthours
 2026-07-09T00,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,128413,megawatthours
+2026-07-09T00,MIDA,Mid-Atlantic,NG,Net generation,142031,megawatthours
+2026-07-09T00,MIDA,Mid-Atlantic,TI,Total interchange,818,megawatthours
 2026-07-09T00,NE,New England,D,Demand,18436,megawatthours
 2026-07-09T00,NE,New England,DF,Day-ahead demand forecast,18420,megawatthours
+2026-07-09T00,NE,New England,NG,Net generation,17806,megawatthours
+2026-07-09T00,NE,New England,TI,Total interchange,-630,megawatthours
 2026-07-08T23,MIDA,Mid-Atlantic,D,Demand,139375,megawatthours
 2026-07-08T23,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,132177,megawatthours
+2026-07-08T23,MIDA,Mid-Atlantic,NG,Net generation,144462,megawatthours
+2026-07-08T23,MIDA,Mid-Atlantic,TI,Total interchange,679,megawatthours
 2026-07-08T23,NE,New England,D,Demand,18276,megawatthours
 2026-07-08T23,NE,New England,DF,Day-ahead demand forecast,18500,megawatthours
+2026-07-08T23,NE,New England,NG,Net generation,18239,megawatthours
+2026-07-08T23,NE,New England,TI,Total interchange,-37,megawatthours
 2026-07-08T22,MIDA,Mid-Atlantic,D,Demand,139702,megawatthours
 2026-07-08T22,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,134289,megawatthours
+2026-07-08T22,MIDA,Mid-Atlantic,NG,Net generation,144031,megawatthours
+2026-07-08T22,MIDA,Mid-Atlantic,TI,Total interchange,579,megawatthours
 2026-07-08T22,NE,New England,D,Demand,17087,megawatthours
 2026-07-08T22,NE,New England,DF,Day-ahead demand forecast,17420,megawatthours
+2026-07-08T22,NE,New England,NG,Net generation,17480,megawatthours
+2026-07-08T22,NE,New England,TI,Total interchange,393,megawatthours
 2026-07-08T21,MIDA,Mid-Atlantic,D,Demand,137456,megawatthours
 2026-07-08T21,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,134424,megawatthours
+2026-07-08T21,MIDA,Mid-Atlantic,NG,Net generation,141998,megawatthours
+2026-07-08T21,MIDA,Mid-Atlantic,TI,Total interchange,638,megawatthours
 2026-07-08T21,NE,New England,D,Demand,15534,megawatthours
 2026-07-08T21,NE,New England,DF,Day-ahead demand forecast,15950,megawatthours
+2026-07-08T21,NE,New England,NG,Net generation,16200,megawatthours
+2026-07-08T21,NE,New England,TI,Total interchange,666,megawatthours
 2026-07-08T20,MIDA,Mid-Atlantic,D,Demand,134221,megawatthours
 2026-07-08T20,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,132592,megawatthours
+2026-07-08T20,MIDA,Mid-Atlantic,NG,Net generation,138942,megawatthours
+2026-07-08T20,MIDA,Mid-Atlantic,TI,Total interchange,63,megawatthours
 2026-07-08T20,NE,New England,D,Demand,13953,megawatthours
 2026-07-08T20,NE,New England,DF,Day-ahead demand forecast,14240,megawatthours
+2026-07-08T20,NE,New England,NG,Net generation,14916,megawatthours
+2026-07-08T20,NE,New England,TI,Total interchange,963,megawatthours
 2026-07-08T19,MIDA,Mid-Atlantic,D,Demand,130124,megawatthours
 2026-07-08T19,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,130054,megawatthours
+2026-07-08T19,MIDA,Mid-Atlantic,NG,Net generation,135072,megawatthours
+2026-07-08T19,MIDA,Mid-Atlantic,TI,Total interchange,215,megawatthours
 2026-07-08T19,NE,New England,D,Demand,12728,megawatthours
 2026-07-08T19,NE,New England,DF,Day-ahead demand forecast,12960,megawatthours
+2026-07-08T19,NE,New England,NG,Net generation,13780,megawatthours
+2026-07-08T19,NE,New England,TI,Total interchange,1052,megawatthours
 2026-07-08T18,MIDA,Mid-Atlantic,D,Demand,126394,megawatthours
 2026-07-08T18,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,127376,megawatthours
+2026-07-08T18,MIDA,Mid-Atlantic,NG,Net generation,131359,megawatthours
+2026-07-08T18,MIDA,Mid-Atlantic,TI,Total interchange,657,megawatthours
 2026-07-08T18,NE,New England,D,Demand,11844,megawatthours
 2026-07-08T18,NE,New England,DF,Day-ahead demand forecast,11880,megawatthours
+2026-07-08T18,NE,New England,NG,Net generation,12535,megawatthours
+2026-07-08T18,NE,New England,TI,Total interchange,691,megawatthours
 2026-07-08T17,MIDA,Mid-Atlantic,D,Demand,122917,megawatthours
 2026-07-08T17,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,124482,megawatthours
+2026-07-08T17,MIDA,Mid-Atlantic,NG,Net generation,127290,megawatthours
+2026-07-08T17,MIDA,Mid-Atlantic,TI,Total interchange,852,megawatthours
 2026-07-08T17,NE,New England,D,Demand,11200,megawatthours
 2026-07-08T17,NE,New England,DF,Day-ahead demand forecast,11160,megawatthours
+2026-07-08T17,NE,New England,NG,Net generation,11689,megawatthours
+2026-07-08T17,NE,New England,TI,Total interchange,489,megawatthours
 2026-07-08T16,MIDA,Mid-Atlantic,D,Demand,118355,megawatthours
 2026-07-08T16,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,120687,megawatthours
+2026-07-08T16,MIDA,Mid-Atlantic,NG,Net generation,122679,megawatthours
+2026-07-08T16,MIDA,Mid-Atlantic,TI,Total interchange,1029,megawatthours
 2026-07-08T16,NE,New England,D,Demand,10856,megawatthours
 2026-07-08T16,NE,New England,DF,Day-ahead demand forecast,10770,megawatthours
+2026-07-08T16,NE,New England,NG,Net generation,11115,megawatthours
+2026-07-08T16,NE,New England,TI,Total interchange,259,megawatthours
 2026-07-08T15,MIDA,Mid-Atlantic,D,Demand,114438,megawatthours
 2026-07-08T15,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,116534,megawatthours
+2026-07-08T15,MIDA,Mid-Atlantic,NG,Net generation,119972,megawatthours
+2026-07-08T15,MIDA,Mid-Atlantic,TI,Total interchange,1003,megawatthours
 2026-07-08T15,NE,New England,D,Demand,10876,megawatthours
 2026-07-08T15,NE,New England,DF,Day-ahead demand forecast,10690,megawatthours
+2026-07-08T15,NE,New England,NG,Net generation,10812,megawatthours
+2026-07-08T15,NE,New England,TI,Total interchange,-64,megawatthours
 2026-07-08T14,MIDA,Mid-Atlantic,D,Demand,109703,megawatthours
 2026-07-08T14,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,111991,megawatthours
+2026-07-08T14,MIDA,Mid-Atlantic,NG,Net generation,114949,megawatthours
+2026-07-08T14,MIDA,Mid-Atlantic,TI,Total interchange,885,megawatthours
 2026-07-08T14,NE,New England,D,Demand,11147,megawatthours
 2026-07-08T14,NE,New England,DF,Day-ahead demand forecast,10970,megawatthours
+2026-07-08T14,NE,New England,NG,Net generation,10632,megawatthours
+2026-07-08T14,NE,New England,TI,Total interchange,-515,megawatthours
 2026-07-08T13,MIDA,Mid-Atlantic,D,Demand,105709,megawatthours
 2026-07-08T13,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,107308,megawatthours
+2026-07-08T13,MIDA,Mid-Atlantic,NG,Net generation,111026,megawatthours
+2026-07-08T13,MIDA,Mid-Atlantic,TI,Total interchange,1184,megawatthours
 2026-07-08T13,NE,New England,D,Demand,11595,megawatthours
 2026-07-08T13,NE,New England,DF,Day-ahead demand forecast,11580,megawatthours
+2026-07-08T13,NE,New England,NG,Net generation,10708,megawatthours
+2026-07-08T13,NE,New England,TI,Total interchange,-887,megawatthours
 2026-07-08T12,MIDA,Mid-Atlantic,D,Demand,101763,megawatthours
 2026-07-08T12,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,102818,megawatthours
+2026-07-08T12,MIDA,Mid-Atlantic,NG,Net generation,107372,megawatthours
+2026-07-08T12,MIDA,Mid-Atlantic,TI,Total interchange,1160,megawatthours
 2026-07-08T12,NE,New England,D,Demand,12031,megawatthours
 2026-07-08T12,NE,New England,DF,Day-ahead demand forecast,12040,megawatthours
+2026-07-08T12,NE,New England,NG,Net generation,10825,megawatthours
+2026-07-08T12,NE,New England,TI,Total interchange,-1206,megawatthours
 2026-07-08T11,MIDA,Mid-Atlantic,D,Demand,96971,megawatthours
 2026-07-08T11,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,98438,megawatthours
+2026-07-08T11,MIDA,Mid-Atlantic,NG,Net generation,102278,megawatthours
+2026-07-08T11,MIDA,Mid-Atlantic,TI,Total interchange,1137,megawatthours
 2026-07-08T11,NE,New England,D,Demand,11854,megawatthours
 2026-07-08T11,NE,New England,DF,Day-ahead demand forecast,11770,megawatthours
+2026-07-08T11,NE,New England,NG,Net generation,10566,megawatthours
+2026-07-08T11,NE,New England,TI,Total interchange,-1288,megawatthours
 2026-07-08T10,MIDA,Mid-Atlantic,D,Demand,94436,megawatthours
 2026-07-08T10,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,93808,megawatthours
+2026-07-08T10,MIDA,Mid-Atlantic,NG,Net generation,100284,megawatthours
+2026-07-08T10,MIDA,Mid-Atlantic,TI,Total interchange,968,megawatthours
 2026-07-08T10,NE,New England,D,Demand,11689,megawatthours
 2026-07-08T10,NE,New England,DF,Day-ahead demand forecast,11130,megawatthours
+2026-07-08T10,NE,New England,NG,Net generation,10304,megawatthours
+2026-07-08T10,NE,New England,TI,Total interchange,-1385,megawatthours
 2026-07-08T09,MIDA,Mid-Atlantic,D,Demand,92450,megawatthours
 2026-07-08T09,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,90072,megawatthours
+2026-07-08T09,MIDA,Mid-Atlantic,NG,Net generation,98488,megawatthours
+2026-07-08T09,MIDA,Mid-Atlantic,TI,Total interchange,939,megawatthours
 2026-07-08T09,NE,New England,D,Demand,11810,megawatthours
 2026-07-08T09,NE,New England,DF,Day-ahead demand forecast,10690,megawatthours
+2026-07-08T09,NE,New England,NG,Net generation,10628,megawatthours
+2026-07-08T09,NE,New England,TI,Total interchange,-1182,megawatthours
 2026-07-08T08,MIDA,Mid-Atlantic,D,Demand,92893,megawatthours
 2026-07-08T08,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,88197,megawatthours
+2026-07-08T08,MIDA,Mid-Atlantic,NG,Net generation,99124,megawatthours
+2026-07-08T08,MIDA,Mid-Atlantic,TI,Total interchange,757,megawatthours
 2026-07-08T08,NE,New England,D,Demand,11686,megawatthours
 2026-07-08T08,NE,New England,DF,Day-ahead demand forecast,10550,megawatthours
+2026-07-08T08,NE,New England,NG,Net generation,10619,megawatthours
+2026-07-08T08,NE,New England,TI,Total interchange,-1067,megawatthours
 2026-07-08T07,MIDA,Mid-Atlantic,D,Demand,95339,megawatthours
 2026-07-08T07,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,88663,megawatthours
+2026-07-08T07,MIDA,Mid-Atlantic,NG,Net generation,101691,megawatthours
+2026-07-08T07,MIDA,Mid-Atlantic,TI,Total interchange,5631,megawatthours
 2026-07-08T07,NE,New England,D,Demand,11834,megawatthours
 2026-07-08T07,NE,New England,DF,Day-ahead demand forecast,10730,megawatthours
+2026-07-08T07,NE,New England,NG,Net generation,10762,megawatthours
+2026-07-08T07,NE,New England,TI,Total interchange,-1072,megawatthours
 2026-07-08T06,MIDA,Mid-Atlantic,D,Demand,98816,megawatthours
 2026-07-08T06,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,90858,megawatthours
+2026-07-08T06,MIDA,Mid-Atlantic,NG,Net generation,105168,megawatthours
+2026-07-08T06,MIDA,Mid-Atlantic,TI,Total interchange,6287,megawatthours
 2026-07-08T06,NE,New England,D,Demand,12014,megawatthours
 2026-07-08T06,NE,New England,DF,Day-ahead demand forecast,11060,megawatthours
+2026-07-08T06,NE,New England,NG,Net generation,10938,megawatthours
+2026-07-08T06,NE,New England,TI,Total interchange,-1076,megawatthours
 2026-07-08T05,MIDA,Mid-Atlantic,D,Demand,103657,megawatthours
 2026-07-08T05,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,94589,megawatthours
+2026-07-08T05,MIDA,Mid-Atlantic,NG,Net generation,108550,megawatthours
+2026-07-08T05,MIDA,Mid-Atlantic,TI,Total interchange,6098,megawatthours
 2026-07-08T05,NE,New England,D,Demand,12194,megawatthours
 2026-07-08T05,NE,New England,DF,Day-ahead demand forecast,11550,megawatthours
+2026-07-08T05,NE,New England,NG,Net generation,11146,megawatthours
+2026-07-08T05,NE,New England,TI,Total interchange,-1048,megawatthours
 2026-07-08T04,MIDA,Mid-Atlantic,D,Demand,108297,megawatthours
 2026-07-08T04,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,98458,megawatthours
+2026-07-08T04,MIDA,Mid-Atlantic,NG,Net generation,114751,megawatthours
+2026-07-08T04,MIDA,Mid-Atlantic,TI,Total interchange,369,megawatthours
 2026-07-08T04,NE,New England,D,Demand,12400,megawatthours
 2026-07-08T04,NE,New England,DF,Day-ahead demand forecast,12670,megawatthours
+2026-07-08T04,NE,New England,NG,Net generation,11837,megawatthours
+2026-07-08T04,NE,New England,TI,Total interchange,-563,megawatthours
 2026-07-08T03,MIDA,Mid-Atlantic,D,Demand,114190,megawatthours
 2026-07-08T03,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,104667,megawatthours
 2026-07-08T03,MIDA,Mid-Atlantic,NG,Net generation,121028,megawatthours
@@ -286,7 +640,7 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2026-07-07T04,MIDA,Mid-Atlantic,NG,Net generation,114079,megawatthours
 2026-07-07T04,MIDA,Mid-Atlantic,TI,Total interchange,479,megawatthours
 2026-07-07T04,NE,New England,D,Demand,12830,megawatthours
-2026-07-07T04,NE,New England,DF,Day-ahead demand forecast,12820,megawatthours
+2026-07-07T04,NE,New England,DF,Day-ahead demand forecast,12620,megawatthours
 2026-07-07T04,NE,New England,NG,Net generation,12177,megawatthours
 2026-07-07T04,NE,New England,TI,Total interchange,-653,megawatthours
 2026-07-07T03,MIDA,Mid-Atlantic,D,Demand,112771,megawatthours
@@ -294,7 +648,7 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2026-07-07T03,MIDA,Mid-Atlantic,NG,Net generation,120079,megawatthours
 2026-07-07T03,MIDA,Mid-Atlantic,TI,Total interchange,342,megawatthours
 2026-07-07T03,NE,New England,D,Demand,13805,megawatthours
-2026-07-07T03,NE,New England,DF,Day-ahead demand forecast,13920,megawatthours
+2026-07-07T03,NE,New England,DF,Day-ahead demand forecast,13620,megawatthours
 2026-07-07T03,NE,New England,NG,Net generation,13344,megawatthours
 2026-07-07T03,NE,New England,TI,Total interchange,-461,megawatthours
 2026-07-07T02,MIDA,Mid-Atlantic,D,Demand,118900,megawatthours
@@ -302,7 +656,7 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2026-07-07T02,MIDA,Mid-Atlantic,NG,Net generation,126512,megawatthours
 2026-07-07T02,MIDA,Mid-Atlantic,TI,Total interchange,142,megawatthours
 2026-07-07T02,NE,New England,D,Demand,14766,megawatthours
-2026-07-07T02,NE,New England,DF,Day-ahead demand forecast,14960,megawatthours
+2026-07-07T02,NE,New England,DF,Day-ahead demand forecast,14660,megawatthours
 2026-07-07T02,NE,New England,NG,Net generation,14744,megawatthours
 2026-07-07T02,NE,New England,TI,Total interchange,-22,megawatthours
 2026-07-07T01,MIDA,Mid-Atlantic,D,Demand,123524,megawatthours
@@ -310,7 +664,7 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2026-07-07T01,MIDA,Mid-Atlantic,NG,Net generation,128615,megawatthours
 2026-07-07T01,MIDA,Mid-Atlantic,TI,Total interchange,388,megawatthours
 2026-07-07T01,NE,New England,D,Demand,15349,megawatthours
-2026-07-07T01,NE,New England,DF,Day-ahead demand forecast,15600,megawatthours
+2026-07-07T01,NE,New England,DF,Day-ahead demand forecast,15300,megawatthours
 2026-07-07T01,NE,New England,NG,Net generation,15332,megawatthours
 2026-07-07T01,NE,New England,TI,Total interchange,-17,megawatthours
 2026-07-07T00,MIDA,Mid-Atlantic,D,Demand,127830,megawatthours
@@ -318,7 +672,7 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2026-07-07T00,MIDA,Mid-Atlantic,NG,Net generation,132477,megawatthours
 2026-07-07T00,MIDA,Mid-Atlantic,TI,Total interchange,128,megawatthours
 2026-07-07T00,NE,New England,D,Demand,15561,megawatthours
-2026-07-07T00,NE,New England,DF,Day-ahead demand forecast,15830,megawatthours
+2026-07-07T00,NE,New England,DF,Day-ahead demand forecast,15530,megawatthours
 2026-07-07T00,NE,New England,NG,Net generation,15806,megawatthours
 2026-07-07T00,NE,New England,TI,Total interchange,245,megawatthours
 2026-07-06T23,MIDA,Mid-Atlantic,D,Demand,130765,megawatthours
@@ -350,7 +704,7 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2026-07-06T20,MIDA,Mid-Atlantic,NG,Net generation,136176,megawatthours
 2026-07-06T20,MIDA,Mid-Atlantic,TI,Total interchange,669,megawatthours
 2026-07-06T20,NE,New England,D,Demand,14382,megawatthours
-2026-07-06T20,NE,New England,DF,Day-ahead demand forecast,14420,megawatthours
+2026-07-06T20,NE,New England,DF,Day-ahead demand forecast,14410,megawatthours
 2026-07-06T20,NE,New England,NG,Net generation,15211,megawatthours
 2026-07-06T20,NE,New England,TI,Total interchange,829,megawatthours
 2026-07-06T19,MIDA,Mid-Atlantic,D,Demand,129449,megawatthours
@@ -39645,357 +39999,3 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2025-12-13T15,NE,New England,DF,Day-ahead demand forecast,15170,megawatthours
 2025-12-13T15,NE,New England,NG,Net generation,13692,megawatthours
 2025-12-13T15,NE,New England,TI,Total interchange,-1519,megawatthours
-2025-12-13T14,MIDA,Mid-Atlantic,D,Demand,110305,megawatthours
-2025-12-13T14,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,106440,megawatthours
-2025-12-13T14,MIDA,Mid-Atlantic,NG,Net generation,113712,megawatthours
-2025-12-13T14,MIDA,Mid-Atlantic,TI,Total interchange,1070,megawatthours
-2025-12-13T14,NE,New England,D,Demand,15272,megawatthours
-2025-12-13T14,NE,New England,DF,Day-ahead demand forecast,14690,megawatthours
-2025-12-13T14,NE,New England,NG,Net generation,13664,megawatthours
-2025-12-13T14,NE,New England,TI,Total interchange,-1608,megawatthours
-2025-12-13T13,MIDA,Mid-Atlantic,D,Demand,109407,megawatthours
-2025-12-13T13,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,107054,megawatthours
-2025-12-13T13,MIDA,Mid-Atlantic,NG,Net generation,112641,megawatthours
-2025-12-13T13,MIDA,Mid-Atlantic,TI,Total interchange,1201,megawatthours
-2025-12-13T13,NE,New England,D,Demand,14898,megawatthours
-2025-12-13T13,NE,New England,DF,Day-ahead demand forecast,14620,megawatthours
-2025-12-13T13,NE,New England,NG,Net generation,12992,megawatthours
-2025-12-13T13,NE,New England,TI,Total interchange,-1906,megawatthours
-2025-12-13T12,MIDA,Mid-Atlantic,D,Demand,106776,megawatthours
-2025-12-13T12,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,106312,megawatthours
-2025-12-13T12,MIDA,Mid-Atlantic,NG,Net generation,110808,megawatthours
-2025-12-13T12,MIDA,Mid-Atlantic,TI,Total interchange,1091,megawatthours
-2025-12-13T12,NE,New England,D,Demand,14212,megawatthours
-2025-12-13T12,NE,New England,DF,Day-ahead demand forecast,13990,megawatthours
-2025-12-13T12,NE,New England,NG,Net generation,12367,megawatthours
-2025-12-13T12,NE,New England,TI,Total interchange,-1845,megawatthours
-2025-12-13T11,MIDA,Mid-Atlantic,D,Demand,105178,megawatthours
-2025-12-13T11,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,103919,megawatthours
-2025-12-13T11,MIDA,Mid-Atlantic,NG,Net generation,109797,megawatthours
-2025-12-13T11,MIDA,Mid-Atlantic,TI,Total interchange,1192,megawatthours
-2025-12-13T11,NE,New England,D,Demand,13737,megawatthours
-2025-12-13T11,NE,New England,DF,Day-ahead demand forecast,13420,megawatthours
-2025-12-13T11,NE,New England,NG,Net generation,12256,megawatthours
-2025-12-13T11,NE,New England,TI,Total interchange,-1481,megawatthours
-2025-12-13T10,MIDA,Mid-Atlantic,D,Demand,104333,megawatthours
-2025-12-13T10,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,100799,megawatthours
-2025-12-13T10,MIDA,Mid-Atlantic,NG,Net generation,108748,megawatthours
-2025-12-13T10,MIDA,Mid-Atlantic,TI,Total interchange,1241,megawatthours
-2025-12-13T10,NE,New England,D,Demand,13774,megawatthours
-2025-12-13T10,NE,New England,DF,Day-ahead demand forecast,12950,megawatthours
-2025-12-13T10,NE,New England,NG,Net generation,12214,megawatthours
-2025-12-13T10,NE,New England,TI,Total interchange,-1560,megawatthours
-2025-12-13T09,MIDA,Mid-Atlantic,D,Demand,104071,megawatthours
-2025-12-13T09,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,98870,megawatthours
-2025-12-13T09,MIDA,Mid-Atlantic,NG,Net generation,108784,megawatthours
-2025-12-13T09,MIDA,Mid-Atlantic,TI,Total interchange,-1302,megawatthours
-2025-12-13T09,NE,New England,D,Demand,13822,megawatthours
-2025-12-13T09,NE,New England,DF,Day-ahead demand forecast,12800,megawatthours
-2025-12-13T09,NE,New England,NG,Net generation,12235,megawatthours
-2025-12-13T09,NE,New England,TI,Total interchange,-1587,megawatthours
-2025-12-13T08,MIDA,Mid-Atlantic,D,Demand,104256,megawatthours
-2025-12-13T08,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,98361,megawatthours
-2025-12-13T08,MIDA,Mid-Atlantic,NG,Net generation,108897,megawatthours
-2025-12-13T08,MIDA,Mid-Atlantic,TI,Total interchange,-1544,megawatthours
-2025-12-13T08,NE,New England,D,Demand,13767,megawatthours
-2025-12-13T08,NE,New England,DF,Day-ahead demand forecast,12870,megawatthours
-2025-12-13T08,NE,New England,NG,Net generation,12299,megawatthours
-2025-12-13T08,NE,New England,TI,Total interchange,-1468,megawatthours
-2025-12-13T07,MIDA,Mid-Atlantic,D,Demand,104992,megawatthours
-2025-12-13T07,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,98597,megawatthours
-2025-12-13T07,MIDA,Mid-Atlantic,NG,Net generation,109541,megawatthours
-2025-12-13T07,MIDA,Mid-Atlantic,TI,Total interchange,-1429,megawatthours
-2025-12-13T07,NE,New England,D,Demand,13834,megawatthours
-2025-12-13T07,NE,New England,DF,Day-ahead demand forecast,13090,megawatthours
-2025-12-13T07,NE,New England,NG,Net generation,12207,megawatthours
-2025-12-13T07,NE,New England,TI,Total interchange,-1627,megawatthours
-2025-12-13T06,MIDA,Mid-Atlantic,D,Demand,106492,megawatthours
-2025-12-13T06,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,99579,megawatthours
-2025-12-13T06,MIDA,Mid-Atlantic,NG,Net generation,109879,megawatthours
-2025-12-13T06,MIDA,Mid-Atlantic,TI,Total interchange,-1408,megawatthours
-2025-12-13T06,NE,New England,D,Demand,13899,megawatthours
-2025-12-13T06,NE,New England,DF,Day-ahead demand forecast,13490,megawatthours
-2025-12-13T06,NE,New England,NG,Net generation,12338,megawatthours
-2025-12-13T06,NE,New England,TI,Total interchange,-1561,megawatthours
-2025-12-13T05,MIDA,Mid-Atlantic,D,Demand,108961,megawatthours
-2025-12-13T05,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,100826,megawatthours
-2025-12-13T05,MIDA,Mid-Atlantic,NG,Net generation,110682,megawatthours
-2025-12-13T05,MIDA,Mid-Atlantic,TI,Total interchange,1091,megawatthours
-2025-12-13T05,NE,New England,D,Demand,14431,megawatthours
-2025-12-13T05,NE,New England,DF,Day-ahead demand forecast,14270,megawatthours
-2025-12-13T05,NE,New England,NG,Net generation,12972,megawatthours
-2025-12-13T05,NE,New England,TI,Total interchange,-1459,megawatthours
-2025-12-13T04,MIDA,Mid-Atlantic,D,Demand,111685,megawatthours
-2025-12-13T04,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,103750,megawatthours
-2025-12-13T04,MIDA,Mid-Atlantic,NG,Net generation,112867,megawatthours
-2025-12-13T04,MIDA,Mid-Atlantic,TI,Total interchange,1294,megawatthours
-2025-12-13T04,NE,New England,D,Demand,15210,megawatthours
-2025-12-13T04,NE,New England,DF,Day-ahead demand forecast,15200,megawatthours
-2025-12-13T04,NE,New England,NG,Net generation,13532,megawatthours
-2025-12-13T04,NE,New England,TI,Total interchange,-1678,megawatthours
-2025-12-13T03,MIDA,Mid-Atlantic,D,Demand,113803,megawatthours
-2025-12-13T03,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,107661,megawatthours
-2025-12-13T03,MIDA,Mid-Atlantic,NG,Net generation,114903,megawatthours
-2025-12-13T03,MIDA,Mid-Atlantic,TI,Total interchange,1425,megawatthours
-2025-12-13T03,NE,New England,D,Demand,16095,megawatthours
-2025-12-13T03,NE,New England,DF,Day-ahead demand forecast,16110,megawatthours
-2025-12-13T03,NE,New England,NG,Net generation,14516,megawatthours
-2025-12-13T03,NE,New England,TI,Total interchange,-1579,megawatthours
-2025-12-13T02,MIDA,Mid-Atlantic,D,Demand,115392,megawatthours
-2025-12-13T02,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,111163,megawatthours
-2025-12-13T02,MIDA,Mid-Atlantic,NG,Net generation,116216,megawatthours
-2025-12-13T02,MIDA,Mid-Atlantic,TI,Total interchange,1518,megawatthours
-2025-12-13T02,NE,New England,D,Demand,16762,megawatthours
-2025-12-13T02,NE,New England,DF,Day-ahead demand forecast,16800,megawatthours
-2025-12-13T02,NE,New England,NG,Net generation,14642,megawatthours
-2025-12-13T02,NE,New England,TI,Total interchange,-2120,megawatthours
-2025-12-13T01,MIDA,Mid-Atlantic,D,Demand,116163,megawatthours
-2025-12-13T01,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,113638,megawatthours
-2025-12-13T01,MIDA,Mid-Atlantic,NG,Net generation,117501,megawatthours
-2025-12-13T01,MIDA,Mid-Atlantic,TI,Total interchange,1629,megawatthours
-2025-12-13T01,NE,New England,D,Demand,17272,megawatthours
-2025-12-13T01,NE,New England,DF,Day-ahead demand forecast,17340,megawatthours
-2025-12-13T01,NE,New England,NG,Net generation,15138,megawatthours
-2025-12-13T01,NE,New England,TI,Total interchange,-2134,megawatthours
-2025-12-13T00,MIDA,Mid-Atlantic,D,Demand,116586,megawatthours
-2025-12-13T00,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,115123,megawatthours
-2025-12-13T00,MIDA,Mid-Atlantic,NG,Net generation,118117,megawatthours
-2025-12-13T00,MIDA,Mid-Atlantic,TI,Total interchange,1741,megawatthours
-2025-12-13T00,NE,New England,D,Demand,17693,megawatthours
-2025-12-13T00,NE,New England,DF,Day-ahead demand forecast,17770,megawatthours
-2025-12-13T00,NE,New England,NG,Net generation,15990,megawatthours
-2025-12-13T00,NE,New England,TI,Total interchange,-1703,megawatthours
-2025-12-12T23,MIDA,Mid-Atlantic,D,Demand,116147,megawatthours
-2025-12-12T23,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,116463,megawatthours
-2025-12-12T23,MIDA,Mid-Atlantic,NG,Net generation,118022,megawatthours
-2025-12-12T23,MIDA,Mid-Atlantic,TI,Total interchange,1719,megawatthours
-2025-12-12T23,NE,New England,D,Demand,17986,megawatthours
-2025-12-12T23,NE,New England,DF,Day-ahead demand forecast,18150,megawatthours
-2025-12-12T23,NE,New England,NG,Net generation,16780,megawatthours
-2025-12-12T23,NE,New England,TI,Total interchange,-1206,megawatthours
-2025-12-12T22,MIDA,Mid-Atlantic,D,Demand,111212,megawatthours
-2025-12-12T22,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,116000,megawatthours
-2025-12-12T22,MIDA,Mid-Atlantic,NG,Net generation,112646,megawatthours
-2025-12-12T22,MIDA,Mid-Atlantic,TI,Total interchange,1540,megawatthours
-2025-12-12T22,NE,New England,D,Demand,17499,megawatthours
-2025-12-12T22,NE,New England,DF,Day-ahead demand forecast,17640,megawatthours
-2025-12-12T22,NE,New England,NG,Net generation,15998,megawatthours
-2025-12-12T22,NE,New England,TI,Total interchange,-1501,megawatthours
-2025-12-12T21,MIDA,Mid-Atlantic,D,Demand,108349,megawatthours
-2025-12-12T21,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,111828,megawatthours
-2025-12-12T21,MIDA,Mid-Atlantic,NG,Net generation,109311,megawatthours
-2025-12-12T21,MIDA,Mid-Atlantic,TI,Total interchange,1459,megawatthours
-2025-12-12T21,NE,New England,D,Demand,16459,megawatthours
-2025-12-12T21,NE,New England,DF,Day-ahead demand forecast,15980,megawatthours
-2025-12-12T21,NE,New England,NG,Net generation,14735,megawatthours
-2025-12-12T21,NE,New England,TI,Total interchange,-1724,megawatthours
-2025-12-12T20,MIDA,Mid-Atlantic,D,Demand,108914,megawatthours
-2025-12-12T20,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,108855,megawatthours
-2025-12-12T20,MIDA,Mid-Atlantic,NG,Net generation,110058,megawatthours
-2025-12-12T20,MIDA,Mid-Atlantic,TI,Total interchange,1353,megawatthours
-2025-12-12T20,NE,New England,D,Demand,15598,megawatthours
-2025-12-12T20,NE,New England,DF,Day-ahead demand forecast,14890,megawatthours
-2025-12-12T20,NE,New England,NG,Net generation,13787,megawatthours
-2025-12-12T20,NE,New England,TI,Total interchange,-1811,megawatthours
-2025-12-12T19,MIDA,Mid-Atlantic,D,Demand,109227,megawatthours
-2025-12-12T19,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,107971,megawatthours
-2025-12-12T19,MIDA,Mid-Atlantic,NG,Net generation,111331,megawatthours
-2025-12-12T19,MIDA,Mid-Atlantic,TI,Total interchange,1363,megawatthours
-2025-12-12T19,NE,New England,D,Demand,14620,megawatthours
-2025-12-12T19,NE,New England,DF,Day-ahead demand forecast,13980,megawatthours
-2025-12-12T19,NE,New England,NG,Net generation,13724,megawatthours
-2025-12-12T19,NE,New England,TI,Total interchange,-896,megawatthours
-2025-12-12T18,MIDA,Mid-Atlantic,D,Demand,109733,megawatthours
-2025-12-12T18,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,108256,megawatthours
-2025-12-12T18,MIDA,Mid-Atlantic,NG,Net generation,111468,megawatthours
-2025-12-12T18,MIDA,Mid-Atlantic,TI,Total interchange,1351,megawatthours
-2025-12-12T18,NE,New England,D,Demand,14306,megawatthours
-2025-12-12T18,NE,New England,DF,Day-ahead demand forecast,13710,megawatthours
-2025-12-12T18,NE,New England,NG,Net generation,13419,megawatthours
-2025-12-12T18,NE,New England,TI,Total interchange,-887,megawatthours
-2025-12-12T17,MIDA,Mid-Atlantic,D,Demand,110840,megawatthours
-2025-12-12T17,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,109072,megawatthours
-2025-12-12T17,MIDA,Mid-Atlantic,NG,Net generation,112453,megawatthours
-2025-12-12T17,MIDA,Mid-Atlantic,TI,Total interchange,1155,megawatthours
-2025-12-12T17,NE,New England,D,Demand,14294,megawatthours
-2025-12-12T17,NE,New England,DF,Day-ahead demand forecast,13690,megawatthours
-2025-12-12T17,NE,New England,NG,Net generation,13243,megawatthours
-2025-12-12T17,NE,New England,TI,Total interchange,-1051,megawatthours
-2025-12-12T16,MIDA,Mid-Atlantic,D,Demand,112739,megawatthours
-2025-12-12T16,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,110594,megawatthours
-2025-12-12T16,MIDA,Mid-Atlantic,NG,Net generation,113823,megawatthours
-2025-12-12T16,MIDA,Mid-Atlantic,TI,Total interchange,1173,megawatthours
-2025-12-12T16,NE,New England,D,Demand,14494,megawatthours
-2025-12-12T16,NE,New England,DF,Day-ahead demand forecast,14170,megawatthours
-2025-12-12T16,NE,New England,NG,Net generation,13170,megawatthours
-2025-12-12T16,NE,New England,TI,Total interchange,-1324,megawatthours
-2025-12-12T15,MIDA,Mid-Atlantic,D,Demand,115340,megawatthours
-2025-12-12T15,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,112500,megawatthours
-2025-12-12T15,MIDA,Mid-Atlantic,NG,Net generation,116287,megawatthours
-2025-12-12T15,MIDA,Mid-Atlantic,TI,Total interchange,1238,megawatthours
-2025-12-12T15,NE,New England,D,Demand,15321,megawatthours
-2025-12-12T15,NE,New England,DF,Day-ahead demand forecast,15060,megawatthours
-2025-12-12T15,NE,New England,NG,Net generation,13713,megawatthours
-2025-12-12T15,NE,New England,TI,Total interchange,-1608,megawatthours
-2025-12-12T14,MIDA,Mid-Atlantic,D,Demand,117415,megawatthours
-2025-12-12T14,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,114603,megawatthours
-2025-12-12T14,MIDA,Mid-Atlantic,NG,Net generation,119251,megawatthours
-2025-12-12T14,MIDA,Mid-Atlantic,TI,Total interchange,1244,megawatthours
-2025-12-12T14,NE,New England,D,Demand,16438,megawatthours
-2025-12-12T14,NE,New England,DF,Day-ahead demand forecast,15950,megawatthours
-2025-12-12T14,NE,New England,NG,Net generation,15215,megawatthours
-2025-12-12T14,NE,New England,TI,Total interchange,-1223,megawatthours
-2025-12-12T13,MIDA,Mid-Atlantic,D,Demand,117261,megawatthours
-2025-12-12T13,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,116511,megawatthours
-2025-12-12T13,MIDA,Mid-Atlantic,NG,Net generation,118835,megawatthours
-2025-12-12T13,MIDA,Mid-Atlantic,TI,Total interchange,1317,megawatthours
-2025-12-12T13,NE,New England,D,Demand,17012,megawatthours
-2025-12-12T13,NE,New England,DF,Day-ahead demand forecast,16710,megawatthours
-2025-12-12T13,NE,New England,NG,Net generation,15454,megawatthours
-2025-12-12T13,NE,New England,TI,Total interchange,-1558,megawatthours
-2025-12-12T12,MIDA,Mid-Atlantic,D,Demand,112841,megawatthours
-2025-12-12T12,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,116559,megawatthours
-2025-12-12T12,MIDA,Mid-Atlantic,NG,Net generation,114535,megawatthours
-2025-12-12T12,MIDA,Mid-Atlantic,TI,Total interchange,1259,megawatthours
-2025-12-12T12,NE,New England,D,Demand,16178,megawatthours
-2025-12-12T12,NE,New England,DF,Day-ahead demand forecast,15990,megawatthours
-2025-12-12T12,NE,New England,NG,Net generation,14195,megawatthours
-2025-12-12T12,NE,New England,TI,Total interchange,-1983,megawatthours
-2025-12-12T11,MIDA,Mid-Atlantic,D,Demand,106323,megawatthours
-2025-12-12T11,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,112427,megawatthours
-2025-12-12T11,MIDA,Mid-Atlantic,NG,Net generation,109092,megawatthours
-2025-12-12T11,MIDA,Mid-Atlantic,TI,Total interchange,1335,megawatthours
-2025-12-12T11,NE,New England,D,Demand,15000,megawatthours
-2025-12-12T11,NE,New England,DF,Day-ahead demand forecast,14670,megawatthours
-2025-12-12T11,NE,New England,NG,Net generation,13445,megawatthours
-2025-12-12T11,NE,New England,TI,Total interchange,-1555,megawatthours
-2025-12-12T10,MIDA,Mid-Atlantic,D,Demand,103077,megawatthours
-2025-12-12T10,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,105897,megawatthours
-2025-12-12T10,MIDA,Mid-Atlantic,NG,Net generation,106783,megawatthours
-2025-12-12T10,MIDA,Mid-Atlantic,TI,Total interchange,1172,megawatthours
-2025-12-12T10,NE,New England,D,Demand,14508,megawatthours
-2025-12-12T10,NE,New England,DF,Day-ahead demand forecast,13840,megawatthours
-2025-12-12T10,NE,New England,NG,Net generation,12755,megawatthours
-2025-12-12T10,NE,New England,TI,Total interchange,-1753,megawatthours
-2025-12-12T09,MIDA,Mid-Atlantic,D,Demand,102109,megawatthours
-2025-12-12T09,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,101754,megawatthours
-2025-12-12T09,MIDA,Mid-Atlantic,NG,Net generation,106251,megawatthours
-2025-12-12T09,MIDA,Mid-Atlantic,TI,Total interchange,1963,megawatthours
-2025-12-12T09,NE,New England,D,Demand,14213,megawatthours
-2025-12-12T09,NE,New England,DF,Day-ahead demand forecast,13490,megawatthours
-2025-12-12T09,NE,New England,NG,Net generation,12400,megawatthours
-2025-12-12T09,NE,New England,TI,Total interchange,-1813,megawatthours
-2025-12-12T08,MIDA,Mid-Atlantic,D,Demand,102468,megawatthours
-2025-12-12T08,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,99943,megawatthours
-2025-12-12T08,MIDA,Mid-Atlantic,NG,Net generation,106904,megawatthours
-2025-12-12T08,MIDA,Mid-Atlantic,TI,Total interchange,2241,megawatthours
-2025-12-12T08,NE,New England,D,Demand,14150,megawatthours
-2025-12-12T08,NE,New England,DF,Day-ahead demand forecast,13510,megawatthours
-2025-12-12T08,NE,New England,NG,Net generation,12270,megawatthours
-2025-12-12T08,NE,New England,TI,Total interchange,-1880,megawatthours
-2025-12-12T07,MIDA,Mid-Atlantic,D,Demand,103308,megawatthours
-2025-12-12T07,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,99868,megawatthours
-2025-12-12T07,MIDA,Mid-Atlantic,NG,Net generation,107377,megawatthours
-2025-12-12T07,MIDA,Mid-Atlantic,TI,Total interchange,1645,megawatthours
-2025-12-12T07,NE,New England,D,Demand,14295,megawatthours
-2025-12-12T07,NE,New England,DF,Day-ahead demand forecast,13660,megawatthours
-2025-12-12T07,NE,New England,NG,Net generation,12397,megawatthours
-2025-12-12T07,NE,New England,TI,Total interchange,-1898,megawatthours
-2025-12-12T06,MIDA,Mid-Atlantic,D,Demand,104567,megawatthours
-2025-12-12T06,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,100403,megawatthours
-2025-12-12T06,MIDA,Mid-Atlantic,NG,Net generation,107625,megawatthours
-2025-12-12T06,MIDA,Mid-Atlantic,TI,Total interchange,2245,megawatthours
-2025-12-12T06,NE,New England,D,Demand,14682,megawatthours
-2025-12-12T06,NE,New England,DF,Day-ahead demand forecast,14070,megawatthours
-2025-12-12T06,NE,New England,NG,Net generation,12843,megawatthours
-2025-12-12T06,NE,New England,TI,Total interchange,-1839,megawatthours
-2025-12-12T05,MIDA,Mid-Atlantic,D,Demand,107578,megawatthours
-2025-12-12T05,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,102122,megawatthours
-2025-12-12T05,MIDA,Mid-Atlantic,NG,Net generation,110336,megawatthours
-2025-12-12T05,MIDA,Mid-Atlantic,TI,Total interchange,1372,megawatthours
-2025-12-12T05,NE,New England,D,Demand,14841,megawatthours
-2025-12-12T05,NE,New England,DF,Day-ahead demand forecast,14520,megawatthours
-2025-12-12T05,NE,New England,NG,Net generation,12944,megawatthours
-2025-12-12T05,NE,New England,TI,Total interchange,-1897,megawatthours
-2025-12-12T04,MIDA,Mid-Atlantic,D,Demand,110774,megawatthours
-2025-12-12T04,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,106018,megawatthours
-2025-12-12T04,MIDA,Mid-Atlantic,NG,Net generation,113761,megawatthours
-2025-12-12T04,MIDA,Mid-Atlantic,TI,Total interchange,1231,megawatthours
-2025-12-12T04,NE,New England,D,Demand,15683,megawatthours
-2025-12-12T04,NE,New England,DF,Day-ahead demand forecast,15480,megawatthours
-2025-12-12T04,NE,New England,NG,Net generation,13890,megawatthours
-2025-12-12T04,NE,New England,TI,Total interchange,-1793,megawatthours
-2025-12-12T03,MIDA,Mid-Atlantic,D,Demand,114714,megawatthours
-2025-12-12T03,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,109776,megawatthours
-2025-12-12T03,MIDA,Mid-Atlantic,NG,Net generation,117068,megawatthours
-2025-12-12T03,MIDA,Mid-Atlantic,TI,Total interchange,1096,megawatthours
-2025-12-12T03,NE,New England,D,Demand,16770,megawatthours
-2025-12-12T03,NE,New England,DF,Day-ahead demand forecast,16550,megawatthours
-2025-12-12T03,NE,New England,NG,Net generation,15091,megawatthours
-2025-12-12T03,NE,New England,TI,Total interchange,-1679,megawatthours
-2025-12-12T02,MIDA,Mid-Atlantic,D,Demand,117420,megawatthours
-2025-12-12T02,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,113994,megawatthours
-2025-12-12T02,MIDA,Mid-Atlantic,NG,Net generation,120320,megawatthours
-2025-12-12T02,MIDA,Mid-Atlantic,TI,Total interchange,1301,megawatthours
-2025-12-12T02,NE,New England,D,Demand,17489,megawatthours
-2025-12-12T02,NE,New England,DF,Day-ahead demand forecast,17340,megawatthours
-2025-12-12T02,NE,New England,NG,Net generation,16132,megawatthours
-2025-12-12T02,NE,New England,TI,Total interchange,-1357,megawatthours
-2025-12-12T01,MIDA,Mid-Atlantic,D,Demand,118695,megawatthours
-2025-12-12T01,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,116875,megawatthours
-2025-12-12T01,MIDA,Mid-Atlantic,NG,Net generation,120947,megawatthours
-2025-12-12T01,MIDA,Mid-Atlantic,TI,Total interchange,1436,megawatthours
-2025-12-12T01,NE,New England,D,Demand,17975,megawatthours
-2025-12-12T01,NE,New England,DF,Day-ahead demand forecast,17790,megawatthours
-2025-12-12T01,NE,New England,NG,Net generation,16907,megawatthours
-2025-12-12T01,NE,New England,TI,Total interchange,-1068,megawatthours
-2025-12-12T00,MIDA,Mid-Atlantic,D,Demand,119379,megawatthours
-2025-12-12T00,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,118273,megawatthours
-2025-12-12T00,MIDA,Mid-Atlantic,NG,Net generation,121332,megawatthours
-2025-12-12T00,MIDA,Mid-Atlantic,TI,Total interchange,1660,megawatthours
-2025-12-12T00,NE,New England,D,Demand,18207,megawatthours
-2025-12-12T00,NE,New England,DF,Day-ahead demand forecast,18080,megawatthours
-2025-12-12T00,NE,New England,NG,Net generation,17430,megawatthours
-2025-12-12T00,NE,New England,TI,Total interchange,-777,megawatthours
-2025-12-11T23,MIDA,Mid-Atlantic,D,Demand,118853,megawatthours
-2025-12-11T23,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,118983,megawatthours
-2025-12-11T23,MIDA,Mid-Atlantic,NG,Net generation,120123,megawatthours
-2025-12-11T23,MIDA,Mid-Atlantic,TI,Total interchange,1755,megawatthours
-2025-12-11T23,NE,New England,D,Demand,18260,megawatthours
-2025-12-11T23,NE,New England,DF,Day-ahead demand forecast,18150,megawatthours
-2025-12-11T23,NE,New England,NG,Net generation,17454,megawatthours
-2025-12-11T23,NE,New England,TI,Total interchange,-806,megawatthours
-2025-12-11T22,MIDA,Mid-Atlantic,D,Demand,113975,megawatthours
-2025-12-11T22,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,118326,megawatthours
-2025-12-11T22,MIDA,Mid-Atlantic,NG,Net generation,116149,megawatthours
-2025-12-11T22,MIDA,Mid-Atlantic,TI,Total interchange,1999,megawatthours
-2025-12-11T22,NE,New England,D,Demand,17523,megawatthours
-2025-12-11T22,NE,New England,DF,Day-ahead demand forecast,17430,megawatthours
-2025-12-11T22,NE,New England,NG,Net generation,16783,megawatthours
-2025-12-11T22,NE,New England,TI,Total interchange,-740,megawatthours
-2025-12-11T21,MIDA,Mid-Atlantic,D,Demand,110266,megawatthours
-2025-12-11T21,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,113757,megawatthours
-2025-12-11T21,MIDA,Mid-Atlantic,NG,Net generation,113063,megawatthours
-2025-12-11T21,MIDA,Mid-Atlantic,TI,Total interchange,1781,megawatthours
-2025-12-11T21,NE,New England,D,Demand,16191,megawatthours
-2025-12-11T21,NE,New England,DF,Day-ahead demand forecast,16040,megawatthours
-2025-12-11T21,NE,New England,NG,Net generation,15082,megawatthours
-2025-12-11T21,NE,New England,TI,Total interchange,-1109,megawatthours
-2025-12-11T20,MIDA,Mid-Atlantic,D,Demand,110626,megawatthours
-2025-12-11T20,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,110655,megawatthours
-2025-12-11T20,MIDA,Mid-Atlantic,NG,Net generation,113279,megawatthours
-2025-12-11T20,MIDA,Mid-Atlantic,TI,Total interchange,1623,megawatthours
-2025-12-11T20,NE,New England,D,Demand,14998,megawatthours
-2025-12-11T20,NE,New England,DF,Day-ahead demand forecast,14740,megawatthours
-2025-12-11T20,NE,New England,NG,Net generation,13482,megawatthours
-2025-12-11T20,NE,New England,TI,Total interchange,-1516,megawatthours
-2025-12-11T19,MIDA,Mid-Atlantic,D,Demand,111121,megawatthours
-2025-12-11T19,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,109261,megawatthours
-2025-12-11T19,MIDA,Mid-Atlantic,NG,Net generation,114286,megawatthours
-2025-12-11T19,MIDA,Mid-Atlantic,TI,Total interchange,1587,megawatthours
-2025-12-11T19,NE,New England,D,Demand,14312,megawatthours
-2025-12-11T19,NE,New England,DF,Day-ahead demand forecast,13480,megawatthours
-2025-12-11T19,NE,New England,NG,Net generation,12827,megawatthours
-2025-12-11T19,NE,New England,TI,Total interchange,-1485,megawatthours
-2025-12-11T18,MIDA,Mid-Atlantic,D,Demand,111179,megawatthours
-2025-12-11T18,MIDA,Mid-Atlantic,DF,Day-ahead demand forecast,109224,megawatthours

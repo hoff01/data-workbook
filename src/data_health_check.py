@@ -10,6 +10,7 @@ from typing import Any
 
 PRODUCTS = ["diesel", "jet", "gasoline"]
 REPORT_PATH = Path("data_health_report.json")
+PUBLIC_CSV_DIRS = [Path("eia_weekly"), Path("eia_monthly"), Path("padd_1"), Path("eia_capacity"), Path("power_generation_dfo")]
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -150,7 +151,7 @@ def check_eia_tables(checks: list[dict[str, Any]], report: dict[str, Any], today
         )
 
 
-def check_kpler(checks: list[dict[str, Any]], report: dict[str, Any]) -> None:
+def check_kpler(checks: list[dict[str, Any]], report: dict[str, Any], today: date) -> None:
     for label, path in {
         "kpler": Path("Kpler/manifest.json"),
         "kpler_padd1_eia_split": Path("Kpler/padd1_eia_split_manifest.json"),
@@ -161,20 +162,58 @@ def check_kpler(checks: list[dict[str, Any]], report: dict[str, Any]) -> None:
         manifest = read_json(path)
         rows = int((manifest.get("normalized_long") or {}).get("rows") or 0)
         mode = str(manifest.get("mode", ""))
+        fallback = manifest.get("fallback") or {}
+        fallback_active = bool(fallback.get("active")) or "fallback" in mode
+        generated_day = parse_timestamp_day(str(manifest.get("generated_at", "")))
         report[label] = {
             "path": str(path),
             "mode": mode,
             "rows": rows,
             "generated_at": manifest.get("generated_at", ""),
+            "fallback": fallback,
         }
+        valid_output = mode not in {"", "dry_run", "preflight"} and rows > 0
         add_check(
             checks,
             label,
-            "pass" if mode != "dry_run" and rows > 0 else "fail",
+            "fail" if not valid_output else "warn" if fallback_active else "pass",
             path=str(path),
             mode=mode,
             rows=rows,
+            fallback_active=fallback_active,
+            fallback_reason=str(fallback.get("reason", "")),
         )
+        add_check(
+            checks,
+            f"{label}_freshness",
+            "pass" if generated_day is not None and generated_day >= today - timedelta(days=7) else "warn",
+            generated_day=str(generated_day) if generated_day else "",
+            today=str(today),
+            max_allowed_age_days=7,
+        )
+
+
+def check_public_csv_line_endings(checks: list[dict[str, Any]], report: dict[str, Any]) -> None:
+    scanned: list[str] = []
+    crlf_files: list[str] = []
+    for directory in PUBLIC_CSV_DIRS:
+        if not directory.exists():
+            continue
+        for path in sorted(directory.rglob("*.csv")):
+            scanned.append(str(path))
+            with path.open("rb") as file:
+                while chunk := file.read(1024 * 1024):
+                    if b"\r\n" in chunk:
+                        crlf_files.append(str(path))
+                        break
+    report["public_csv_line_endings"] = {"scanned": len(scanned), "crlf_files": crlf_files}
+    add_check(
+        checks,
+        "public_csv_line_endings",
+        "pass" if scanned and not crlf_files else "fail",
+        scanned=len(scanned),
+        crlf_files=crlf_files,
+    )
 
 
 def check_capacity(checks: list[dict[str, Any]], report: dict[str, Any], today: date) -> None:
@@ -316,10 +355,11 @@ def main() -> int:
     }
     checks: list[dict[str, Any]] = []
     check_eia_tables(checks, report, today)
-    check_kpler(checks, report)
+    check_kpler(checks, report, today)
     check_capacity(checks, report, today)
     check_balances(checks, report)
     check_context_feeds(checks, report, today)
+    check_public_csv_line_endings(checks, report)
 
     counts = Counter(check["status"] for check in checks)
     report["checks"] = checks

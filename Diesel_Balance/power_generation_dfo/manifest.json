@@ -14,7 +14,7 @@
     "target_factor_candidate_pool_months": 55,
     "target_factor_min_correlation": 0.5
   },
-  "generated_at": "2026-07-09T04:28:53.208211+00:00",
+  "generated_at": "2026-07-10T13:07:10.975276+00:00",
   "inputs": {
     "facility_fuel_url": "https://api.eia.gov/v2/electricity/facility-fuel/data/",
     "facility_fuels": [
@@ -61,15 +61,15 @@
   "row_counts": {
     "annual_factors": 7,
     "calibration_months": 100,
-    "daily_2026_estimates": 188,
-    "daily_estimates": 2699,
-    "daily_generation": 2699,
+    "daily_2026_estimates": 190,
+    "daily_estimates": 2701,
+    "daily_generation": 2701,
     "facility_raw": 106459,
     "monthly_estimates": 91,
     "monthly_facility": 200,
-    "rto_raw": 5286
+    "rto_raw": 5290
   },
-  "run_end": "2026-07-09",
+  "run_end": "2026-07-10",
   "run_start": "2018-01-01",
   "sources": [
     {
@@ -207,13 +207,13 @@
     {
       "offset": 0,
       "row_count": 5000,
-      "total": "5286",
+      "total": "5290",
       "url": "https://api.eia.gov/v2/electricity/rto/daily-fuel-type-data/data/"
     },
     {
       "offset": 5000,
-      "row_count": 286,
-      "total": "5286",
+      "row_count": 290,
+      "total": "5290",
       "url": "https://api.eia.gov/v2/electricity/rto/daily-fuel-type-data/data/"
     }
   ],

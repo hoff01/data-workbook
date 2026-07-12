@@ -1,7 +1,7 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-07-09T06:15:48.566Z",
+  "generatedAt": "2026-07-12T03:23:26.779Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
   "latestMonthly": "2026-04-15",
@@ -11,15 +11,15 @@
       "role": "eia_monthly",
       "path": "eia_monthly/diesel.csv",
       "rows": 124,
-      "checksum": "65ab9242044cbe7958cefba88cd39655b60a825ab1f2b46d52562fffd6f5fa0b",
-      "modifiedAt": "2026-07-09T04:27:12.397Z"
+      "checksum": "a1156e1a430e64051ce11ada338676a1c3bccdf66418a914b8181444ebc01e4b",
+      "modifiedAt": "2026-07-10T13:12:56.214Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/diesel.csv",
       "rows": 549,
-      "checksum": "291b2344860f695e8d8c336d1e8e74861b05b32d3f9d99cba7ed7272d0c71d23",
-      "modifiedAt": "2026-07-09T04:27:13.373Z"
+      "checksum": "1c8f0c000c71fea4d73c84cb08c8b775a7dae6669da3487db9c8e7496042dcf9",
+      "modifiedAt": "2026-07-10T13:12:56.223Z"
     },
     {
       "role": "kpler_manifest",
@@ -44,73 +44,73 @@
     {
       "role": "padd_1",
       "path": "padd_1/padd_1_distillate_estimates.csv",
-      "checksum": "c68e32de9b9ac9b680fbdd825d592b699ea117acd66611a6c17559274901baa4",
-      "modifiedAt": "2026-07-09T04:27:12.361Z"
+      "checksum": "befec683578526b8c13128d9be7dafb264c0864131cc5c498a2a9026994e500e",
+      "modifiedAt": "2026-07-10T13:12:00.616Z"
     },
     {
       "role": "power_dfo_daily",
       "path": "power_generation_dfo/estimated_daily_dfo.csv",
-      "rows": 2699,
-      "checksum": "92d12639905a24150c41ae6c3fec531ecab1eb32e5ee8d2a520faacf51c1dcbc",
-      "modifiedAt": "2026-07-09T04:28:53.207Z"
+      "rows": 2701,
+      "checksum": "b8b3a314d4dc5e8c5e88eba044f8fde638ae9a4c1424864f1cb76a53a34d9791",
+      "modifiedAt": "2026-07-10T13:11:36.456Z"
     },
     {
       "role": "power_dfo_weather",
       "path": "power_generation_dfo/weather_14d_padd1_cities.csv",
       "rows": 16,
-      "checksum": "7b4dbf67772b44023b937d991334fb3d6f8caf2b79cd9d92a5578babf9558e78",
-      "modifiedAt": "2026-07-09T04:29:49.984Z"
+      "checksum": "539a399a0db07abbb5530ee2ebd196fd9e6b45bb944935433e728040ec692928",
+      "modifiedAt": "2026-07-10T13:11:36.456Z"
     },
     {
       "role": "power_dfo_forecast_24h",
       "path": "power_generation_dfo/dfo_generation_forecast_24h.csv",
-      "checksum": "f93081ccdbb598dfabdcd1db6e370bfbc13b9ce5f11d5a21f731125b96a3f4df",
-      "modifiedAt": "2026-07-09T04:29:49.985Z"
+      "checksum": "150e7801b00ef360622cac9240e38214dd157293a722c7fa3cca8ac7f02c7e52",
+      "modifiedAt": "2026-07-10T13:11:36.455Z"
     },
     {
       "role": "power_dfo_manifest",
       "path": "power_generation_dfo/manifest.json",
-      "checksum": "3fb708be414036eae4e481efce3eb64048b14f176f54365531e6f822960b5072",
-      "modifiedAt": "2026-07-09T04:28:53.209Z"
+      "checksum": "7db00b384a7733e480b46b1cbc533e5e64155217e5c64ed9b4af108e8852fd7a",
+      "modifiedAt": "2026-07-10T13:07:10.976Z"
     },
     {
       "role": "power_dfo_hourly_manifest",
       "path": "power_generation_dfo/hourly_forecast_manifest.json",
-      "checksum": "3feab0b79bdbc3cd6a58dc5dc28d54cb178925c196c891d72cc3ce780f307338",
-      "modifiedAt": "2026-07-09T04:29:50.300Z"
+      "checksum": "99db99f324d4a5b1b6a34b15d223636adfb1ff9631954c23173d1843e734288c",
+      "modifiedAt": "2026-07-10T13:07:32.869Z"
     },
     {
       "role": "refinery_unit_capacity",
       "path": "data/refinery_unit_capacities_2025.csv",
       "rows": 311,
-      "checksum": "bc68b86acb106016d91feeef98e93ce057ac36ce0077c774ae3532532a634457",
-      "modifiedAt": "2026-07-09T04:30:45.255Z"
+      "checksum": "8434ccdf7e466b2786b52f8c840877d116551f1dff15640ae2e4a0ee4e707d2f",
+      "modifiedAt": "2026-07-10T13:12:09.069Z"
     }
   ],
   "checksums": {
-    "eia_monthly": "65ab9242044cbe7958cefba88cd39655b60a825ab1f2b46d52562fffd6f5fa0b",
-    "eia_weekly": "291b2344860f695e8d8c336d1e8e74861b05b32d3f9d99cba7ed7272d0c71d23",
+    "eia_monthly": "a1156e1a430e64051ce11ada338676a1c3bccdf66418a914b8181444ebc01e4b",
+    "eia_weekly": "1c8f0c000c71fea4d73c84cb08c8b775a7dae6669da3487db9c8e7496042dcf9",
     "kpler_manifest": "785283220294c8b9932e55026f8134914101ff73e9eb4df70fee6988a3f276a7",
     "kpler_guide_monthly": "54e393f905588d0c2f0a988963bf337901a16a773c621fe0b1ad542b37c4e21a",
     "kpler_guide_weekly": "b0c274d598a0abb6cc61ef9d511e5aa219b6ce7060921d973918bfa1e884aa4b",
-    "padd_1": "c68e32de9b9ac9b680fbdd825d592b699ea117acd66611a6c17559274901baa4",
-    "power_dfo_daily": "92d12639905a24150c41ae6c3fec531ecab1eb32e5ee8d2a520faacf51c1dcbc",
-    "power_dfo_weather": "7b4dbf67772b44023b937d991334fb3d6f8caf2b79cd9d92a5578babf9558e78",
-    "power_dfo_forecast_24h": "f93081ccdbb598dfabdcd1db6e370bfbc13b9ce5f11d5a21f731125b96a3f4df",
-    "power_dfo_manifest": "3fb708be414036eae4e481efce3eb64048b14f176f54365531e6f822960b5072",
-    "power_dfo_hourly_manifest": "3feab0b79bdbc3cd6a58dc5dc28d54cb178925c196c891d72cc3ce780f307338",
-    "refinery_unit_capacity": "bc68b86acb106016d91feeef98e93ce057ac36ce0077c774ae3532532a634457"
+    "padd_1": "befec683578526b8c13128d9be7dafb264c0864131cc5c498a2a9026994e500e",
+    "power_dfo_daily": "b8b3a314d4dc5e8c5e88eba044f8fde638ae9a4c1424864f1cb76a53a34d9791",
+    "power_dfo_weather": "539a399a0db07abbb5530ee2ebd196fd9e6b45bb944935433e728040ec692928",
+    "power_dfo_forecast_24h": "150e7801b00ef360622cac9240e38214dd157293a722c7fa3cca8ac7f02c7e52",
+    "power_dfo_manifest": "7db00b384a7733e480b46b1cbc533e5e64155217e5c64ed9b4af108e8852fd7a",
+    "power_dfo_hourly_manifest": "99db99f324d4a5b1b6a34b15d223636adfb1ff9631954c23173d1843e734288c",
+    "refinery_unit_capacity": "8434ccdf7e466b2786b52f8c840877d116551f1dff15640ae2e4a0ee4e707d2f"
   },
   "optimization": {
-    "generatedAt": "2026-07-09T06:15:48.621Z",
+    "generatedAt": "2026-07-12T03:23:26.836Z",
     "runtimePlan": {
       "baseRows": 6764,
-      "lazyRows": 148984,
+      "lazyRows": 148986,
       "lazyRowSharePct": 95.7,
-      "basePayloadKb": 1853.5,
-      "weeklyPayloadKb": 2646.9,
+      "basePayloadKb": 1852.3,
+      "weeklyPayloadKb": 2639.9,
       "crudeWeeklyPayloadKb": 1124.6,
-      "powerDfoPayloadKb": 355,
+      "powerDfoPayloadKb": 355.2,
       "referencePayloadKb": 151.4
     },
     "rowCounts": {
@@ -126,7 +126,7 @@
       "sourceHubSources": 7,
       "refineryCapacityRows": 311,
       "kplerRows": 121562,
-      "powerDfoDailyRows": 2699,
+      "powerDfoDailyRows": 2701,
       "powerDfoWeatherRows": 16
     },
     "lazyChunks": [
@@ -134,7 +134,7 @@
         "name": "weekly",
         "path": "data/diesel_balance_runtime_weekly.js",
         "rows": 19985,
-        "estimatedKb": 2646.9,
+        "estimatedKb": 2639.9,
         "status": "optimized",
         "reason": "Weekly regional balances and movement flows stay out of the initial workbook payload."
       },
@@ -149,8 +149,8 @@
       {
         "name": "powerDfo",
         "path": "data/diesel_balance_runtime_power_dfo.js",
-        "rows": 2715,
-        "estimatedKb": 355,
+        "rows": 2717,
+        "estimatedKb": 355.2,
         "status": "optimized",
         "reason": "Northeast power-generation, distillate-burn, and PADD 1 HDD chart data load only for the Diesel Northeast Charts section."
       },
@@ -194,7 +194,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 151.4 KB versus 1853.5 KB estimated base payload."
+        "detail": "Reference payload is 151.4 KB versus 1852.3 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",

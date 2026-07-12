@@ -364,7 +364,7 @@ def iter_rows(downloads: list[DownloadResult]) -> list[dict[str, str]]:
 def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
     tmp_path = path.with_suffix(".csv.tmp")
     with tmp_path.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=OUTPUT_FIELDS)
+        writer = csv.DictWriter(file, fieldnames=OUTPUT_FIELDS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     tmp_path.replace(path)

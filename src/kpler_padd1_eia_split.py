@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
 import json
+import math
 import re
 import sys
 import tempfile
@@ -52,6 +53,8 @@ SHARE_COLUMNS = {
         "Kpler PADD 1C Share of PADD 1 Exports",
     ],
 }
+
+DEFAULT_PADD1_SHARES = (1.0, 0.0)
 
 
 def bool_label(value: bool) -> str:
@@ -376,7 +379,7 @@ def monthly_expr(column: str) -> pl.Expr:
     return pl.col(column).cast(pl.Date).dt.truncate("1mo").cast(pl.Utf8)
 
 
-def share_frame_for_period(daily: pl.DataFrame, period_column: str, assume_padd1ab: bool = False) -> pl.DataFrame:
+def share_frame_for_period(daily: pl.DataFrame, period_column: str) -> pl.DataFrame:
     grouped = daily.group_by(["commodity", "flow_direction", period_column]).agg(
         [
             pl.col("padd1ab_kbd").sum().alias("padd1ab_kbd"),
@@ -384,24 +387,33 @@ def share_frame_for_period(daily: pl.DataFrame, period_column: str, assume_padd1
             pl.col("padd1_other_kbd").sum().alias("padd1_other_kbd"),
         ]
     )
-    return add_shares(grouped, period_column, assume_padd1ab=assume_padd1ab)
+    return add_shares(grouped, period_column)
 
 
-def add_shares(frame: pl.DataFrame, date_column: str, assume_padd1ab: bool = False) -> pl.DataFrame:
-    zero_total_padd1ab_share = 1.0 if assume_padd1ab else 0.0
+def add_shares(frame: pl.DataFrame, date_column: str) -> pl.DataFrame:
+    valid_total = (
+        pl.col("padd1_total_kbd").is_finite()
+        & (pl.col("padd1_total_kbd") > 0)
+        & pl.col("padd1ab_kbd").is_finite()
+        & (pl.col("padd1ab_kbd") >= 0)
+        & pl.col("padd1c_kbd").is_finite()
+        & (pl.col("padd1c_kbd") >= 0)
+        & pl.col("padd1_other_kbd").is_finite()
+        & (pl.col("padd1_other_kbd") == 0)
+    )
     return (
         frame.with_columns(
             (pl.col("padd1ab_kbd") + pl.col("padd1c_kbd") + pl.col("padd1_other_kbd")).alias("padd1_total_kbd")
         )
         .with_columns(
             [
-                pl.when(pl.col("padd1_total_kbd") > 0)
+                pl.when(valid_total)
                 .then(pl.col("padd1ab_kbd") / pl.col("padd1_total_kbd"))
-                .otherwise(zero_total_padd1ab_share)
+                .otherwise(DEFAULT_PADD1_SHARES[0])
                 .alias("padd1ab_share"),
-                pl.when(pl.col("padd1_total_kbd") > 0)
+                pl.when(valid_total)
                 .then(pl.col("padd1c_kbd") / pl.col("padd1_total_kbd"))
-                .otherwise(0.0)
+                .otherwise(DEFAULT_PADD1_SHARES[1])
                 .alias("padd1c_share"),
             ]
         )
@@ -409,7 +421,7 @@ def add_shares(frame: pl.DataFrame, date_column: str, assume_padd1ab: bool = Fal
     )
 
 
-def build_share_outputs(long_rows: pl.DataFrame, assume_padd1ab: bool = False) -> dict[str, str]:
+def build_share_outputs(long_rows: pl.DataFrame) -> dict[str, str]:
     config = runtime_config()
     PADD1_SPLIT_DIR.mkdir(parents=True, exist_ok=True)
     rows = long_rows.filter(pl.col("family") == "padd1_split")
@@ -445,7 +457,7 @@ def build_share_outputs(long_rows: pl.DataFrame, assume_padd1ab: bool = False) -
                 {"padd1ab": "padd1ab_kbd", "padd1c": "padd1c_kbd", "padd1_other": "padd1_other_kbd"}
             ).select(["date", "padd1ab_kbd", "padd1c_kbd", "padd1_other_kbd"])
             daily = complete_daily(daily, config.start_date, config.end_date, {"commodity": commodity, "flow_direction": direction})
-            daily = add_shares(daily, "date", assume_padd1ab=assume_padd1ab).select(
+            daily = add_shares(daily, "date").select(
                 [
                     "date",
                     "commodity",
@@ -468,11 +480,11 @@ def build_share_outputs(long_rows: pl.DataFrame, assume_padd1ab: bool = False) -
         .filter(pl.col("_days") == 7)
         .drop("_days")
     )
-    weekly = share_frame_for_period(weekly, "week_ending", assume_padd1ab=assume_padd1ab).select(
+    weekly = share_frame_for_period(weekly, "week_ending").select(
         ["week_ending", "commodity", "flow_direction", "padd1ab_kbd", "padd1c_kbd", "padd1_other_kbd", "padd1_total_kbd", "padd1ab_share", "padd1c_share"]
     )
     monthly = daily.with_columns(monthly_expr("date").alias("month"))
-    monthly = share_frame_for_period(monthly, "month", assume_padd1ab=assume_padd1ab).select(
+    monthly = share_frame_for_period(monthly, "month").select(
         ["month", "commodity", "flow_direction", "padd1ab_kbd", "padd1c_kbd", "padd1_other_kbd", "padd1_total_kbd", "padd1ab_share", "padd1c_share"]
     )
 
@@ -492,7 +504,7 @@ def read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
     def writer(tmp_path: Path) -> None:
         with tmp_path.open("w", newline="", encoding="utf-8") as file:
-            csv_writer = csv.DictWriter(file, fieldnames=fieldnames, extrasaction="ignore")
+            csv_writer = csv.DictWriter(file, fieldnames=fieldnames, extrasaction="ignore", lineterminator="\n")
             csv_writer.writeheader()
             csv_writer.writerows(rows)
 
@@ -510,6 +522,18 @@ def as_float(value: Any) -> float:
         return float(str(value).replace(",", ""))
     except ValueError:
         return 0.0
+
+
+def valid_share_pair(padd1ab_share: Any, padd1c_share: Any) -> tuple[float, float]:
+    ab_share = as_float(padd1ab_share)
+    c_share = as_float(padd1c_share)
+    if not math.isfinite(ab_share) or not math.isfinite(c_share):
+        return DEFAULT_PADD1_SHARES
+    if ab_share < 0 or c_share < 0 or ab_share > 1 or c_share > 1:
+        return DEFAULT_PADD1_SHARES
+    if not math.isclose(ab_share + c_share, 1.0, abs_tol=0.00000001):
+        return DEFAULT_PADD1_SHARES
+    return ab_share, c_share
 
 
 def clean_suffix(column: str) -> str:
@@ -540,9 +564,9 @@ def load_share_lookup(path: Path, date_column: str) -> dict[tuple[str, str, str]
     lookup: dict[tuple[str, str, str], tuple[float, float]] = {}
     with path.open(newline="", encoding="utf-8") as file:
         for row in csv.DictReader(file):
-            lookup[(row[date_column], row["commodity"], row["flow_direction"])] = (
-                as_float(row["padd1ab_share"]),
-                as_float(row["padd1c_share"]),
+            lookup[(row[date_column], row["commodity"], row["flow_direction"])] = valid_share_pair(
+                row.get("padd1ab_share"),
+                row.get("padd1c_share"),
             )
     return lookup
 
@@ -600,12 +624,12 @@ def merge_one_eia_file(path: Path, commodity: str, frequency: str, shares: dict[
         period = row.get(date_col, "")
         key_period = month_start(period) if frequency == "monthly" else period
         for flow in ["import", "export"]:
-            ab_share, c_share = shares.get((key_period, commodity, flow), (0.0, 0.0))
+            ab_share, c_share = valid_share_pair(*shares.get((key_period, commodity, flow), DEFAULT_PADD1_SHARES))
             if any(source_flow == flow for _, source_flow in source_columns):
                 row[SHARE_COLUMNS[flow][0]] = f"{ab_share:.8f}"
                 row[SHARE_COLUMNS[flow][1]] = f"{c_share:.8f}"
         for column, (source, flow, region) in estimate_columns.items():
-            ab_share, c_share = shares.get((key_period, commodity, flow), (0.0, 0.0))
+            ab_share, c_share = valid_share_pair(*shares.get((key_period, commodity, flow), DEFAULT_PADD1_SHARES))
             share = ab_share if region == "padd1ab" else c_share
             row[column] = f"{as_float(row.get(source, 0.0)) * share:.6f}"
     rows.sort(key=lambda item: item.get(date_col, ""), reverse=True)
@@ -674,10 +698,24 @@ def run(args: argparse.Namespace) -> int:
         return 0
 
     mode = "existing_raw" if args.use_existing_raw else "live" if has_kpler_credentials() else "eia_fallback"
-    long_rows, pull_status = pull_kpler_long(specs, use_existing_raw=args.use_existing_raw)
+    fallback_reason = ""
+    try:
+        long_rows, pull_status = pull_kpler_long(specs, use_existing_raw=args.use_existing_raw)
+        share_outputs = build_share_outputs(long_rows)
+    except Exception as exc:
+        if mode == "eia_fallback":
+            raise
+        fallback_reason = f"{type(exc).__name__}: {exc}"
+        mode = "eia_error_fallback"
+        long_rows, pull_status = build_eia_padd1_fallback_long(specs)
+        pull_status["kpler_error"] = {
+            "status": "eia_error_fallback",
+            "error": fallback_reason,
+            "assumption": "all available PADD 1 trade is assigned to PADD 1A/B Northeast",
+        }
+        share_outputs = build_share_outputs(long_rows)
     normalized_path = PADD1_SPLIT_DIR / "padd1_import_export_normalized_long.csv"
     write_polars_csv(normalized_path, long_rows)
-    share_outputs = build_share_outputs(long_rows, assume_padd1ab=mode == "eia_fallback")
     merge_results = merge_eia_outputs(share_outputs)
     write_json(
         PADD1_MANIFEST,
@@ -694,6 +732,12 @@ def run(args: argparse.Namespace) -> int:
             "pull_count": len(specs),
             "pulls": [spec.manifest_dict() for spec in specs],
             "pull_status": pull_status,
+            "fallback": {
+                "active": mode in {"eia_fallback", "eia_error_fallback"},
+                "reason": fallback_reason or ("Kpler credentials unavailable" if mode == "eia_fallback" else ""),
+                "padd1ab_share": DEFAULT_PADD1_SHARES[0],
+                "padd1c_share": DEFAULT_PADD1_SHARES[1],
+            },
             "normalized_long": {"path": str(normalized_path), "rows": int(long_rows.height)},
             "share_outputs": share_outputs,
             "eia_merge_results": merge_results,
