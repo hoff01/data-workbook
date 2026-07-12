@@ -24,7 +24,11 @@ The runner serves the dashboard over plain local HTTP at `http://127.0.0.1:8787`
    ```powershell
    py -3 --version
    ```
-4. Clone or pull the repo from GitHub.
+4. Clone the canonical GitHub repo, or pull it if it already exists:
+   ```powershell
+   git clone https://github.com/hoff01/balances_us.git US_Balances
+   cd US_Balances
+   ```
 5. Double-click `Open_Balance_Dashboards.bat` from the repo folder.
 
 Keep Git certificate verification enabled. GitHub uses a publicly trusted
@@ -43,6 +47,15 @@ Do not work around a certificate error with
 for every HTTPS Git connection. If `git ls-remote origin` still fails, the
 company certificate authority must be installed by IT in the Windows trust
 store.
+
+Older checkouts may still point at the repository's previous GitHub name. Update
+them once, then verify the canonical remote:
+
+```powershell
+git remote set-url origin https://github.com/hoff01/balances_us.git
+git remote -v
+git ls-remote origin
+```
 
 On first run, `Start_Balance_Runner.ps1` creates local runtime folders under:
 
