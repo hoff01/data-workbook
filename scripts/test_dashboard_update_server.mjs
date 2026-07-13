@@ -107,23 +107,34 @@ try {
   assert.equal(job.dataChanged, false);
   assert.match(job.lines.join("\n"), /upstream source data was already current/);
 
-  const weeklyOutputsStarted = await fetchJson(`${baseUrl}/api/update/start`, {
+  const missingWeeklyOutputProduct = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ group: "weekly-call-outputs" }),
   });
+  assert.equal(missingWeeklyOutputProduct.response.status, 400);
+  assert.match(missingWeeklyOutputProduct.body.error, /requires product=diesel or product=jet/);
+
+  const weeklyOutputsStarted = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "weekly-call-outputs", product: "jet" }),
+  });
   assert.equal(weeklyOutputsStarted.response.status, 202);
   assert.equal(weeklyOutputsStarted.body.job.group, "weekly-call-outputs");
+  assert.equal(weeklyOutputsStarted.body.job.product, "jet");
+  assert.deepEqual(weeklyOutputsStarted.body.job.args.slice(-2), ["--product", "jet"]);
   assert.equal(weeklyOutputsStarted.body.job.status, "running");
 
   const weeklyOutputsJob = await waitForTerminalJob(baseUrl);
   assert.equal(weeklyOutputsJob.group, "weekly-call-outputs");
+  assert.equal(weeklyOutputsJob.product, "jet");
   assert.equal(weeklyOutputsJob.status, "succeeded");
   assert.equal(weeklyOutputsJob.exitCode, 0);
   assert.equal(weeklyOutputsJob.signal, null);
   assert.equal(weeklyOutputsJob.result, "saved");
   assert.equal(weeklyOutputsJob.dataChanged, true);
-  assert.match(weeklyOutputsJob.lines.join("\n"), /Weekly call outputs were saved/);
+  assert.match(weeklyOutputsJob.lines.join("\n"), /Jet weekly call outputs were saved/);
   console.log(`dashboard update server contract ok build=${initialHealth.buildId}`);
 } catch (error) {
   console.error(output.join(""));

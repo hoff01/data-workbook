@@ -23,10 +23,12 @@ import { updateDataFingerprint, type UpdateGroup } from "./update_data_fingerpri
 type JobStatus = "running" | "succeeded" | "partial" | "failed";
 type DashboardJobGroup = UpdateGroup | "weekly-call-outputs";
 type UpdateResult = "updated" | "current" | "saved";
+type ProductKey = "diesel" | "jet";
 
 type Job = {
   id: string;
   group: DashboardJobGroup;
+  product: ProductKey | null;
   status: JobStatus;
   command: string;
   args: string[];
@@ -256,7 +258,8 @@ let refreshReady = true;
 function setStatus(job){
   const state = job?.status || 'idle';
   const result = job?.result;
-  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? 'Weekly call outputs saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' checked — already current' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' current with warnings' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving weekly call outputs' : job.group + ' refresh running';
+  const productLabel = job?.product === 'jet' ? 'Jet' : job?.product === 'diesel' ? 'Diesel' : '';
+  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly call outputs saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' checked — already current' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' current with warnings' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly call outputs' : job.group + ' refresh running';
   statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
   buttons.forEach(button => button.disabled = state === 'running' || !refreshReady);
   logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : refreshReady ? 'Refresh tools are ready. The one-click launcher starts an All refresh automatically.' : 'First-run setup is installing the local refresh tools. The launcher will start an All refresh automatically when setup finishes.';
@@ -321,6 +324,10 @@ function parseGroup(value: unknown): DashboardJobGroup | null {
   return typeof value === "string" && validGroups.has(value as DashboardJobGroup) ? (value as DashboardJobGroup) : null;
 }
 
+function parseProduct(value: unknown): ProductKey | null {
+  return value === "diesel" || value === "jet" ? value : null;
+}
+
 function acquireRunnerLock(group: DashboardJobGroup): RunnerLock {
   mkdirSync(dirname(runnerLockPath), { recursive: true });
   try {
@@ -357,15 +364,19 @@ function releaseRunnerLock(lock: RunnerLock | null): void {
   if (currentLock === lock) currentLock = null;
 }
 
-function startJob(group: DashboardJobGroup): Job {
+function startJob(group: DashboardJobGroup, product: ProductKey | null = null): Job {
   if (currentProcess && currentJob?.status === "running") return currentJob;
   const savesWeeklyCallOutputs = group === "weekly-call-outputs";
+  const outputProduct = savesWeeklyCallOutputs ? product : null;
+  if (savesWeeklyCallOutputs && !outputProduct) {
+    throw new Error("Weekly call outputs require product=diesel or product=jet.");
+  }
   const updateGroup: UpdateGroup | null = group === "weekly-call-outputs" ? null : group;
   const dataFingerprintBefore = updateGroup ? updateDataFingerprint(ROOT, updateGroup) : null;
   const lock = acquireRunnerLock(group);
   const updateScript = join(ROOT, "src", "update_pipeline.ts");
   const invocation = savesWeeklyCallOutputs
-    ? { command: pythonCommand, args: [weeklyCallOutputScript] }
+    ? { command: pythonCommand, args: [weeklyCallOutputScript, "--product", outputProduct as ProductKey] }
     : tsxCli
       ? { command: nodeCommand, args: [tsxCli, updateScript, group] }
       : tsxCommand && !(process.platform === "win32" && /\.(?:cmd|bat)$/i.test(tsxCommand))
@@ -374,8 +385,9 @@ function startJob(group: DashboardJobGroup): Job {
   const { command, args } = invocation;
   const started = Date.now();
   const job: Job = {
-    id: `${group}-${started}`,
+    id: `${group}${outputProduct ? `-${outputProduct}` : ""}-${started}`,
     group,
+    product: outputProduct,
     status: "running",
     command,
     args,
@@ -429,7 +441,7 @@ function startJob(group: DashboardJobGroup): Job {
     }
     const completionMessage = code === 0
       ? job.result === "saved"
-        ? "Weekly call outputs were saved to weekly_call_ouputs/outputs with the latest actual-week archive, individual images, and PowerPoint-ready slide."
+        ? `${outputProduct === "jet" ? "Jet" : "Diesel"} weekly call outputs were saved to weekly_call_ouputs/outputs with the latest actual-week archive, individual images, and PowerPoint-ready slide.`
         : job.result === null
           ? "Refresh completed and the workbooks were rebuilt, but the source change comparison was unavailable."
           : hasWarnings
@@ -526,11 +538,14 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
       return;
     }
     let group: DashboardJobGroup | null = null;
+    let product: ProductKey | null = null;
     try {
-      const body = await readBody(request);
-      group = parseGroup(JSON.parse(body || "{}").group);
+      const body = JSON.parse(await readBody(request) || "{}") as { group?: unknown; product?: unknown };
+      group = parseGroup(body.group);
+      product = parseProduct(body.product);
     } catch {
       group = null;
+      product = null;
     }
     if (!group) {
       writeJson(response, 400, {
@@ -538,9 +553,13 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
       });
       return;
     }
+    if (group === "weekly-call-outputs" && !product) {
+      writeJson(response, 400, { error: "weekly-call-outputs requires product=diesel or product=jet" });
+      return;
+    }
     const alreadyRunning = currentJob?.status === "running";
     try {
-      const job = startJob(group);
+      const job = startJob(group, product);
       writeJson(response, alreadyRunning ? 409 : 202, { job: publicJob() ?? job });
     } catch (error) {
       writeJson(response, 409, { error: error instanceof Error ? error.message : String(error), job: publicJob() });

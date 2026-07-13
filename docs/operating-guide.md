@@ -92,10 +92,11 @@ If a browser shows a certificate warning, the URL is wrong for this local runner
    - `Power DFO` for Northeast diesel power-generation context
    - `Other` for supporting exports/context
    - `All` for another full pipeline run
-4. To create the PowerPoint-ready weekly call archive, open either workbook's
-   `Reference` tab and select `Save weekly call outputs`. Wait for `Saved —
-   weekly call outputs ready`; the dated files are written under
-   `weekly_call_ouputs\outputs`.
+4. To create the PowerPoint-ready weekly call archives, open each workbook's
+   `Reference` tab and select its product-specific save button. Wait for `Saved
+   — Diesel weekly call outputs ready` and `Saved — Jet weekly call outputs
+   ready`; both dated product packages are written under
+   `weekly_call_ouputs\outputs` without overwriting each other.
 5. Review `Diesel Balance` and `Jet Balance`.
 6. Commit and push refreshed outputs when the checks pass:
    ```powershell
@@ -275,8 +276,9 @@ Use this before tomorrow-morning or shared-drive use:
 4. Switch Balance, Charts, Crude Runs, Outages, and Reference.
 5. Toggle Monthly/Weekly.
 6. Confirm shared saves do not show the offline/local-only message.
-7. In Reference, select `Save weekly call outputs` and confirm the saved status,
-   current actual-week folder, individual PNGs, and 2400 x 1350 slide.
+7. In each Reference tab, save the product's weekly call outputs and confirm the
+   product-specific status, current actual-week folder, individual PNGs,
+   manifest, and 2400 x 1350 slide for both Diesel and Jet.
 8. Run:
    ```bash
    npm run typecheck

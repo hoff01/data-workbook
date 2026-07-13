@@ -11,10 +11,11 @@ JSON.
 Double-click `run_weekly_images.bat`.
 
 When the main dashboard is opened with its one-click launcher, the same workflow
-is available in either workbook's **Reference** tab through **Save weekly call
-outputs**. The button runs in the background, uses the launcher's user-local
-Python and Node runtimes, and reports the saved or failed status in the Reference
-panel.
+is available in either workbook's **Reference** tab. **Save Diesel weekly call
+outputs** creates Diesel files from the Diesel workbook, while **Save Jet weekly
+call outputs** creates Jet files from the Jet workbook. Both buttons run in the
+background, use the launcher's user-local Python and Node runtimes, and report
+the product-specific saved or failed status in the Reference panel.
 
 The launcher:
 
@@ -40,18 +41,27 @@ outputs/
   2026-07-03/
     diesel_weekly_stats.json
     diesel_weekly_stats_slide.png
-    manifest.json
+    diesel_manifest.json
+    jet_weekly_stats.json
+    jet_weekly_stats_slide.png
+    jet_manifest.json
     individual_outputs/
       diesel_weekly_balance_table.png
       diesel_eia_actuals.png
       diesel_forecast_week_1.png
       diesel_forecast_week_2.png
+      jet_weekly_balance_table.png
+      jet_eia_actuals.png
+      jet_forecast_week_1.png
+      jet_forecast_week_2.png
 ```
 
 The date folder is always the latest actual EIA week in the generated balance
 JSON. Re-running during the same EIA week refreshes that folder. The next actual
-week automatically creates a new folder, preserving prior weeks. `index.json`
-is the catalog of every archived week.
+week automatically creates a new folder, preserving prior weeks. Diesel and Jet
+use product-prefixed JSON, manifest, slide, and individual-image names, so
+running one side never overwrites the other. `index.json` is the catalog of
+every archived product/week pair.
 
 The first table column is the latest actual. The yellow column is the first
 forecast and the remaining four columns are forecast weeks two through five.

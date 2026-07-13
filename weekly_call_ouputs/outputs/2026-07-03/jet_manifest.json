@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-13T18:11:53-04:00",
+  "generated_at": "2026-07-13T18:55:39-04:00",
   "actual_week_ending": "2026-07-03",
-  "product": "diesel",
-  "weekly_json": "diesel_weekly_stats.json",
+  "product": "jet",
+  "weekly_json": "jet_weekly_stats.json",
   "dpi": 180,
   "format": {
     "font_scale": 1.0,
@@ -94,27 +94,27 @@
   },
   "images": [
     {
-      "file": "individual_outputs/diesel_weekly_balance_table.png",
+      "file": "individual_outputs/jet_weekly_balance_table.png",
       "width_px": 1323,
       "height_px": 1269
     },
     {
-      "file": "individual_outputs/diesel_eia_actuals.png",
+      "file": "individual_outputs/jet_eia_actuals.png",
       "width_px": 765,
       "height_px": 458
     },
     {
-      "file": "individual_outputs/diesel_forecast_week_1.png",
+      "file": "individual_outputs/jet_forecast_week_1.png",
       "width_px": 765,
       "height_px": 458
     },
     {
-      "file": "individual_outputs/diesel_forecast_week_2.png",
+      "file": "individual_outputs/jet_forecast_week_2.png",
       "width_px": 765,
       "height_px": 458
     },
     {
-      "file": "diesel_weekly_stats_slide.png",
+      "file": "jet_weekly_stats_slide.png",
       "width_px": 2400,
       "height_px": 1350
     }

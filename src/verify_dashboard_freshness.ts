@@ -95,6 +95,28 @@ type BalanceManifest = {
   latestWeekly: string;
 };
 
+type WeeklyCallCatalogEntry = {
+  actual_week_ending: string;
+  product: ProductKey;
+  folder: string;
+  weekly_json: string;
+  manifest: string;
+  slide: string;
+  generated_at: string;
+};
+
+type WeeklyCallCatalog = {
+  schema_version: number;
+  weeks: WeeklyCallCatalogEntry[];
+};
+
+type WeeklyCallManifest = {
+  actual_week_ending: string;
+  product: ProductKey;
+  weekly_json: string;
+  images: Array<{ file: string; width_px: number; height_px: number }>;
+};
+
 type ProductConfig = {
   key: ProductKey;
   folder: string;
@@ -303,10 +325,12 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} refresh button reloads dashboard data before rerender`, indexHtml, "document.getElementById('refreshBtn').addEventListener('click', () => { refreshDashboardData('Dashboard refreshed'); });");
   assertIncludes(`${config.key} changed-data update status is explicit`, indexHtml, "Updated — new data loaded");
   assertIncludes(`${config.key} already-current update status is explicit`, indexHtml, "Checked — already current");
-  assertIncludes(`${config.key} Reference has weekly call output save button`, indexHtml, 'data-update-group="weekly-call-outputs"');
-  assertIncludes(`${config.key} weekly call output save status is explicit`, indexHtml, "Saved — weekly call outputs ready");
+  const productLabel = config.key === "jet" ? "Jet" : "Diesel";
+  assertIncludes(`${config.key} Reference has product-specific weekly call output save button`, indexHtml, `Save ${productLabel} weekly call outputs`);
+  assertIncludes(`${config.key} weekly call output request sends active workbook product`, indexHtml, "product:D.product?.key");
+  assertIncludes(`${config.key} weekly call output save status is product-specific`, indexHtml, "Saved — '+productLabel+' weekly call outputs ready");
   assertIncludes(`${config.key} weekly call output path is explicit`, indexHtml, "weekly_call_ouputs/outputs");
-  assertIncludes(`${config.key} weekly call output save does not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast('Weekly call outputs saved in weekly_call_ouputs/outputs');");
+  assertIncludes(`${config.key} weekly call output save does not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(workbookProductLabel(lastUpdateJob.product)+' weekly call outputs saved in weekly_call_ouputs/outputs');");
   assertIncludes(`${config.key} changed-data update log is explicit`, indexHtml, "UPDATED — NEW DATA");
   assertIncludes(`${config.key} already-current update log is explicit`, indexHtml, "CHECKED — ALREADY CURRENT");
   assertIncludes(`${config.key} partial update status is explicit`, indexHtml, "Updated with warnings");
@@ -633,6 +657,42 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
   return `${config.key}:weekly=${weeklyLatest}:monthly=${monthlyLatest}`;
 }
 
+async function verifyWeeklyCallArchives(): Promise<string[]> {
+  const outputRoot = join("weekly_call_ouputs", "outputs");
+  const catalog = await readJson<WeeklyCallCatalog>(join(outputRoot, "index.json"));
+  if (catalog.schema_version !== 2) throw new Error(`weekly call catalog schema must be 2, received ${catalog.schema_version}`);
+  const results: string[] = [];
+  for (const config of PRODUCTS) {
+    const latestWeekly = await latestCsvDate(config.weeklyCsv);
+    const entry = catalog.weeks
+      .filter((row) => row.product === config.key)
+      .sort((left, right) => left.actual_week_ending.localeCompare(right.actual_week_ending))
+      .at(-1);
+    if (!entry) throw new Error(`${config.key} weekly call archive is missing from index.json`);
+    assertEqual(`${config.key} weekly call archive latest week`, entry.actual_week_ending, latestWeekly);
+    assertEqual(`${config.key} weekly call archive manifest name`, entry.manifest, `${config.key}_manifest.json`);
+    assertEqual(`${config.key} weekly call archive slide name`, entry.slide, `${config.key}_weekly_stats_slide.png`);
+    const archiveDir = join(outputRoot, entry.folder);
+    const manifest = await readJson<WeeklyCallManifest>(join(archiveDir, entry.manifest));
+    assertEqual(`${config.key} weekly call manifest product`, manifest.product, config.key);
+    assertEqual(`${config.key} weekly call manifest latest week`, manifest.actual_week_ending, latestWeekly);
+    assertEqual(`${config.key} weekly call manifest JSON`, manifest.weekly_json, entry.weekly_json);
+    if (manifest.images.length !== 5) throw new Error(`${config.key} weekly call manifest expected 5 images, received ${manifest.images.length}`);
+    const slide = manifest.images.find((image) => image.file === entry.slide);
+    if (!slide || slide.width_px !== 2400 || slide.height_px !== 1350) {
+      throw new Error(`${config.key} weekly call slide must be 2400 x 1350`);
+    }
+    const payload = await readJson<{ product?: { key?: string } }>(join(archiveDir, entry.weekly_json));
+    assertEqual(`${config.key} weekly call JSON product`, payload.product?.key ?? "", config.key);
+    for (const image of manifest.images) {
+      const content = await readFile(join(archiveDir, image.file));
+      if (content.byteLength < 1_000) throw new Error(`${config.key} weekly call image ${image.file} is unexpectedly small`);
+    }
+    results.push(`${config.key}:weekly-call=${latestWeekly}`);
+  }
+  return results;
+}
+
 const updatePipelineSource = await readFile("src/update_pipeline.ts", "utf8");
 assertNotIncludes("Kpler failures are not optional", updatePipelineSource, "continueOnFailure");
 assertNotIncludes("Kpler steps do not use the removed optional wrapper", updatePipelineSource, "optionalStep(");
@@ -643,9 +703,14 @@ const updateServerSource = await readFile("src/dashboard_update_server.ts", "utf
 assertIncludes("runner distinguishes partial completion", updateServerSource, 'type JobStatus = "running" | "succeeded" | "partial" | "failed";');
 assertIncludes("runner promotes skipped steps to warnings", updateServerSource, 'hasWarnings ? "partial" : "succeeded"');
 assertIncludes("runner accepts the weekly call output job", updateServerSource, '"weekly-call-outputs"');
-assertIncludes("runner saves weekly call outputs with the configured Python runtime", updateServerSource, "args: [weeklyCallOutputScript]");
+assertIncludes("runner saves weekly call outputs with the configured Python runtime", updateServerSource, "args: [weeklyCallOutputScript");
 assertIncludes("runner reports weekly call outputs as saved", updateServerSource, 'job.result = "saved";');
+assertIncludes("runner requires a weekly call output product", updateServerSource, 'weekly-call-outputs requires product=diesel or product=jet');
+assertIncludes("runner forwards the selected product to the generator", updateServerSource, '"--product", outputProduct');
 assertNotIncludes("runner no longer emits misleading raw child status", updateServerSource, "finished status=");
 
-const results = await Promise.all(PRODUCTS.map((config) => verifyProduct(config)));
-console.log(`dashboard freshness ok ${results.join(" ")}`);
+const [results, weeklyCallResults] = await Promise.all([
+  Promise.all(PRODUCTS.map((config) => verifyProduct(config))),
+  verifyWeeklyCallArchives(),
+]);
+console.log(`dashboard freshness ok ${[...results, ...weeklyCallResults].join(" ")}`);

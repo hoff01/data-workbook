@@ -1367,12 +1367,14 @@ def update_output_catalog(output_root: Path) -> Path:
                     "product": payload["product"]["key"],
                     "folder": archive_dir.name,
                     "weekly_json": payload_path.name,
+                    "manifest": f"{payload['product']['key']}_manifest.json",
+                    "slide": f"{payload['product']['key']}_weekly_stats_slide.png",
                     "generated_at": payload.get("generated_at"),
                 }
             )
     catalog_path = output_root / "index.json"
     catalog = {
-        "schema_version": 1,
+        "schema_version": 2,
         "updated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "weeks": entries,
     }
@@ -1462,8 +1464,16 @@ def main() -> int:
         output_dir, payload_path = find_archive_payload(output_root, product, args.week)
 
     images = render_outputs(payload_path, output_dir, dpi, format_config)
-    manifest_path = output_dir / "manifest.json"
+    manifest_path = output_dir / f"{product}_manifest.json"
     write_manifest(payload_path, images, manifest_path, dpi, format_config)
+    legacy_manifest_path = output_dir / "manifest.json"
+    if legacy_manifest_path.is_file():
+        try:
+            legacy_manifest = load_json(legacy_manifest_path)
+        except ExportError:
+            legacy_manifest = {}
+        if legacy_manifest.get("product") == product:
+            legacy_manifest_path.unlink()
     catalog_path = update_output_catalog(output_root)
     print("Created images:")
     for image in images:
