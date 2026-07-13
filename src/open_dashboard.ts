@@ -13,6 +13,17 @@ const PORT_WINDOW = Number(process.env.DASHBOARD_UPDATE_PORT_WINDOW || 10);
 const SERVER_APP_ID = "balance-dashboard-update-server";
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
+const nodeCommand = process.env.US_BALANCES_NODE_COMMAND || process.execPath;
+const tsxCli = process.env.US_BALANCES_TSX_CLI;
+
+function dashboardServerInvocation(): { command: string; args: string[] } {
+  const serverScript = join(ROOT, "src", "dashboard_update_server.ts");
+  if (tsxCli) return { command: nodeCommand, args: [tsxCli, serverScript] };
+  if (tsxCommand && !(process.platform === "win32" && /\.(?:cmd|bat)$/i.test(tsxCommand))) {
+    return { command: tsxCommand, args: [serverScript] };
+  }
+  return { command: npmCommand, args: ["run", "dashboard:server"] };
+}
 
 function routeFromArgs(args: string[]): string {
   const requested = args.find((arg) => arg && !arg.startsWith("--")) || "/";
@@ -62,8 +73,7 @@ function startServer(port: number): void {
   mkdirSync(join(ROOT, "logs"), { recursive: true });
   const logPath = join(ROOT, "logs", `dashboard_server_${port}.log`);
   const logFd = openSync(logPath, "a");
-  const command = tsxCommand || npmCommand;
-  const args = tsxCommand ? [join(ROOT, "src", "dashboard_update_server.ts")] : ["run", "dashboard:server"];
+  const { command, args } = dashboardServerInvocation();
   const child = spawn(command, args, {
     cwd: ROOT,
     detached: true,

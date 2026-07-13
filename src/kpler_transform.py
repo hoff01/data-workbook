@@ -102,10 +102,23 @@ def split_to_column(split_name: str) -> str:
     }.get(split_name, snake(split_name))
 
 
+SPLIT_RESPONSE_COLUMNS = {
+    "origin countries": ["originCountry", "originCountries", "Origin Country", "Origin Countries"],
+    "destination countries": ["destinationCountry", "destinationCountries", "Destination Country", "Destination Countries"],
+    "origin trading regions": ["originTradingRegion", "originTradingRegions", "Origin Trading Region", "Origin Trading Regions"],
+    "destination trading regions": ["destinationTradingRegion", "destinationTradingRegions", "Destination Trading Region", "Destination Trading Regions"],
+    "origin padds": ["originPadd", "originPadds", "Origin Padd", "Origin Padds"],
+    "destination padds": ["destinationPadd", "destinationPadds", "Destination Padd", "Destination Padds"],
+    "products": ["product", "products", "Product", "Products"],
+}
+
+
 def raw_csv_to_frame(content: bytes) -> pl.DataFrame:
     if not content:
         return pl.DataFrame()
-    return pl.read_csv(BytesIO(content), separator=";", infer_schema_length=2000, ignore_errors=True)
+    header = content.splitlines()[0].decode("utf-8", errors="replace") if content.splitlines() else ""
+    separator = ";" if header.count(";") >= header.count(",") else ","
+    return pl.read_csv(BytesIO(content), separator=separator, infer_schema_length=2000, ignore_errors=True)
 
 
 def date_column(frame: pl.DataFrame) -> str | None:
@@ -117,7 +130,7 @@ def date_column(frame: pl.DataFrame) -> str | None:
 
 def value_column(frame: pl.DataFrame) -> str | None:
     for column in frame.columns:
-        if column.lower() in {"value", "value_kbd", "kbd", "flow", "flows"}:
+        if column.lower() in {"value", "value_kbd", "kbd", "flow", "flows", "quantity"}:
             return column
     return None
 
@@ -178,7 +191,7 @@ def long_like_to_long(frame: pl.DataFrame, spec: PullSpec, source_hash: str, dco
     out = frame.select(expressions)
     for split_name in spec.split:
         target = split_to_column(split_name)
-        candidates = [target, split_name, split_name.replace(" ", "_"), split_name.title(), split_name.upper()]
+        candidates = [target, *SPLIT_RESPONSE_COLUMNS.get(split_name.lower(), []), split_name, split_name.replace(" ", "_"), split_name.title(), split_name.upper()]
         for candidate in candidates:
             if candidate in frame.columns:
                 out = out.with_columns(pl.Series(target, frame[candidate].cast(pl.Utf8).fill_null("")))

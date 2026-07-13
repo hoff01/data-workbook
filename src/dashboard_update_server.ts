@@ -69,6 +69,9 @@ type CrudeOutage = {
 type RefineryCapacityAdjustment = {
   id: string;
   periodMonth: string;
+  scope?: "crude_cell";
+  frequency?: "monthly" | "weekly";
+  period?: string;
   regionKey?: string;
   refineryId: string;
   refineryName?: string;
@@ -99,6 +102,8 @@ const SERVER_APP_ID = "balance-dashboard-update-server";
 const SERVER_STARTED_AT = new Date().toISOString();
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
+const nodeCommand = process.env.US_BALANCES_NODE_COMMAND || process.execPath;
+const tsxCli = process.env.US_BALANCES_TSX_CLI;
 const validGroups = new Set<UpdateGroup>(["weekly", "monthly", "other", "all", "power-dfo"]);
 const maxLines = 600;
 const settingsPath = join(ROOT, "balance_dashboard_settings.json");
@@ -313,8 +318,13 @@ function releaseRunnerLock(lock: RunnerLock | null): void {
 function startJob(group: UpdateGroup): Job {
   if (currentProcess && currentJob?.status === "running") return currentJob;
   const lock = acquireRunnerLock(group);
-  const command = tsxCommand || npmCommand;
-  const args = tsxCommand ? [join(ROOT, "src", "update_pipeline.ts"), group] : ["run", `update:${group}`];
+  const updateScript = join(ROOT, "src", "update_pipeline.ts");
+  const invocation = tsxCli
+    ? { command: nodeCommand, args: [tsxCli, updateScript, group] }
+    : tsxCommand && !(process.platform === "win32" && /\.(?:cmd|bat)$/i.test(tsxCommand))
+      ? { command: tsxCommand, args: [updateScript, group] }
+      : { command: npmCommand, args: ["run", `update:${group}`] };
+  const { command, args } = invocation;
   const started = Date.now();
   const job: Job = {
     id: `${group}-${started}`,

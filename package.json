@@ -44,6 +44,7 @@
     "dashboard:open:jet": "node --import tsx src/open_dashboard.ts jet",
     "trace:dashboard:performance": "node scripts/dashboard_performance_trace.mjs",
     "trace:dashboard:optimize": "node scripts/dashboard_performance_trace.mjs --product=all",
+    "verify:windows": "node scripts/verify_windows_portability.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {},

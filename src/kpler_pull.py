@@ -14,19 +14,19 @@ from typing import Any
 
 import polars as pl
 
-from kpler_config import BASE_DIR, OUTPUT_DIR, RAW_DIR, PullSpec, build_pull_specs, credential_pair, ensure_directories, runtime_config
-from kpler_http import KplerHttpClient
+from kpler_config import BASE_DIR, OUTPUT_DIR, RAW_DIR, PullSpec, build_pull_specs, ensure_directories, has_kpler_api_key, runtime_config
+from kpler_http import KplerHttpClient, api_base_url
 from kpler_transform import LONG_COLUMNS, build_outputs, kpler_content_to_long
 from kpler_validate import validate_outputs
 
 
 SPLIT_PARAM_VALUES = {
-    "destination countries": "Destination Countries",
-    "destination padds": "Destination Padds",
-    "destination trading regions": "Destination Trading Regions",
-    "origin countries": "Origin Countries",
-    "origin padds": "Origin Padds",
-    "origin trading regions": "Origin Trading Regions",
+    "destination countries": "destinationCountries",
+    "destination padds": "destinationPadds",
+    "destination trading regions": "destinationTradingRegions",
+    "origin countries": "originCountries",
+    "origin padds": "originPadds",
+    "origin trading regions": "originTradingRegions",
     "products": "Products",
     "total": "Total",
 }
@@ -66,8 +66,7 @@ EIA_SOURCE_DIRS = {
 
 
 def has_kpler_credentials() -> bool:
-    username = os.environ.get("KPLER_EMAIL") or os.environ.get("KPLER_USERNAME")
-    return bool(username and os.environ.get("KPLER_PASSWORD"))
+    return has_kpler_api_key()
 
 
 def parse_eia_date(value: str) -> date | None:
@@ -307,8 +306,10 @@ def filter_pull_specs(specs: list[PullSpec]) -> list[PullSpec]:
 
 
 def spec_to_kpler_params(spec: PullSpec, snapshot_date=None) -> dict[str, Any]:
+    if snapshot_date is not None:
+        raise RuntimeError("KPLER_SNAPSHOT_DATE is not supported by the Kpler Cargo API v2 Flows endpoint.")
     return {
-        "flowDirection": spec.flow_direction,
+        "flowDirection": spec.flow_direction.title(),
         "split": split_param(spec.split),
         "granularity": spec.granularity,
         "startDate": spec.start_date.isoformat(),
@@ -316,14 +317,12 @@ def spec_to_kpler_params(spec: PullSpec, snapshot_date=None) -> dict[str, Any]:
         "fromZones": list_param(spec.from_zones),
         "toZones": list_param(spec.to_zones),
         "products": spec.kpler_product,
-        "onlyRealized": bool_param(spec.only_realized),
+        "tradeStatus": "delivered" if spec.only_realized else None,
         "unit": spec.unit,
         "withIntraCountry": bool_param(spec.with_intra_country),
         "withIntraRegion": bool_param(spec.with_intra_region),
         "withForecast": bool_param(spec.with_forecast),
-        "withFreightView": "false",
         "withProductEstimation": "false",
-        "snapshotDate": snapshot_date.isoformat() if snapshot_date else None,
     }
     
 
@@ -338,10 +337,13 @@ def write_raw_response(spec: PullSpec, content: bytes, suffix: str | None = None
     stem = spec.name if not suffix else f"{spec.name}__{safe_file_fragment(suffix)}"
     path = raw_dir / f"{stem}.csv"
     path.write_bytes(content)
+    header = content.splitlines()[0].decode("utf-8", errors="replace") if content else ""
+    delimiter = ";" if header.count(";") >= header.count(",") else ","
+    columns = next(csv.reader([header], delimiter=delimiter), []) if header else []
     return {
         "path": str(path),
         "rows": max(0, content.count(b"\n") - 1),
-        "columns": content.splitlines()[0].decode("utf-8", errors="replace").split(";") if content else [],
+        "columns": columns,
         "bytes": path.stat().st_size,
     }
 
@@ -430,7 +432,8 @@ def dry_run_manifest(specs: list[PullSpec]) -> dict[str, Any]:
         "pipeline_name": "kpler_flows",
         "mode": "dry_run",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "kpler_access_mode": "direct_http",
+        "kpler_access_mode": "direct_http_v2",
+        "kpler_api": {"version": "v2", "base_url": api_base_url(), "auth_configured": has_kpler_credentials()},
         "pull_count": len(specs),
         "pulls": [spec.manifest_dict() for spec in specs],
     }
@@ -452,14 +455,15 @@ def run(args: argparse.Namespace) -> int:
         mode = "preflight" if args.preflight else "dry-run"
         print(
             f"kpler {mode} pull_specs={len(specs)} start={config.start_date} end={config.end_date} "
-            f"manifest={BASE_DIR / 'manifest.json'}"
+            f"api=v2 auth_configured={str(has_kpler_credentials()).lower()} manifest={BASE_DIR / 'manifest.json'}"
         )
         return 0
 
     mode = "live"
-    access_mode = "direct_http"
+    access_mode = "direct_http_v2"
     if has_kpler_credentials():
         client = KplerHttpClient(config)
+        client.validate_auth(spec_to_kpler_params(specs[0], config.snapshot_date))
         all_long: list[pl.DataFrame] = []
         pull_status: dict[str, Any] = {}
         with ThreadPoolExecutor(max_workers=config.concurrency) as executor:
@@ -489,6 +493,7 @@ def run(args: argparse.Namespace) -> int:
         "mode": mode,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "kpler_access_mode": access_mode,
+        "kpler_api": {"version": "v2", "base_url": api_base_url(), "auth_configured": has_kpler_credentials()},
         "runtime_config": {
             **asdict(config),
             "start_date": config.start_date.isoformat(),

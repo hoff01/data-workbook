@@ -10,10 +10,10 @@ cd Kpler
 .\run.ps1 -Setup -Preflight
 ```
 
-Required credentials:
+Required Kpler API v2 key:
 
 ```powershell
-# Create a repo-root .env or .env.local with KPLER_USERNAME and KPLER_PASSWORD.
+# Create a repo-root .env/.env.local or Kpler/config/local.env with KPLER_API_KEY.
 .\run.ps1 -Run
 ```
 
@@ -26,15 +26,15 @@ notepad .\config\local.env.ps1
 .\run.ps1 -Run
 ```
 
-`KPLER_EMAIL` is also accepted if that is the login name on your Kpler account. Do not paste credentials into Python source files; `Kpler/config/local.env.ps1`, `Kpler/config/local.env`, and `Kpler/config/.env` are ignored by git for local secret storage.
+Set `KPLER_API_KEY` to the value after `Basic `, or set `KPLER_API_V2_BASIC_AUTH` to the complete `Basic ...` header value. Do not paste credentials into Python source files; `Kpler/config/local.env.ps1`, `Kpler/config/local.env`, and `Kpler/config/.env` are ignored by git for local secret storage.
 
 The pipeline pulls Kpler `Flows` data from `2018-01-01` and includes forecast/predictive flows. Standard context outputs still pull daily data and write daily, Friday-ending weekly averages, and monthly averages. Balance guide pulls use direct Kpler `eia-weekly` and `monthly` granularities so the guide rows line up with EIA week-ending and monthly balance periods.
 
 Implementation notes:
 
 - The implementation lives in the repo-root `src/kpler_*.py` files. The `Kpler/` folder keeps Kpler config, launchers, requirements, manifests, raw pulls, and outputs.
-- Uses direct HTTPS requests to `https://api.kpler.com/v1/flows`; it does not instantiate the Kpler Python SDK client.
-- Sends a stable `User-Agent` from `KPLER_USER_AGENT` and keeps credentials in the HTTP Basic Auth header, not in URLs or manifests.
+- Uses the Kpler API v2 Cargo Flows endpoint at `https://api.kpler.com/v2/cargo/flows`; it does not instantiate the Kpler Python SDK client.
+- Sends a stable `User-Agent` from `KPLER_USER_AGENT` and keeps the API key in the HTTP Basic Authorization header, not in URLs or manifests.
 - Uses Polars for CSV parsing, normalization, date completion, and weekly/monthly aggregation.
 - Default end date is today plus 45 days. Override with `KPLER_END_DATE=YYYY-MM-DD`.
 Check dynamic settings without calling Kpler:
@@ -59,9 +59,7 @@ macOS/Linux:
 ```bash
 chmod +x ./run.sh
 ./run.sh setup-preflight
-export KPLER_EMAIL="..."
-# or: export KPLER_USERNAME="..."
-export KPLER_PASSWORD="..."
+export KPLER_API_KEY="..."
 ./run.sh run
 ```
 

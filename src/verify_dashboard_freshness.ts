@@ -260,6 +260,8 @@ function verifyBalanceSupplySpacing(indexHtml: string, config: ProductConfig): v
   assertIncludes(`${config.key} weekly imports adjustment uses override label`, indexHtml, "label:'Imports Override',kind:'item muted adjustment importOverride'");
   assertIncludes(`${config.key} adjustment rows render generic adjustment label`, indexHtml, "function balanceLineDisplayLabel(line){ return isBalanceAdjustmentLine(line.id) ? 'Adjustment' : line.label; }");
   assertIncludes(`${config.key} Lower Atlantic monthly imports get override`, indexHtml, "const monthlyLowerAtlanticImportGuide = state.frequency === 'monthly' && D.product?.key === 'diesel' && regionKey === 'padd1c';");
+  assertIncludes(`${config.key} PADD 5 imports get monthly and weekly adjustment`, indexHtml, "const padd5ImportAdjustment = regionKey === 'padd5';");
+  assertIncludes(`${config.key} PADD 5 import adjustment shares period-scoped import row`, indexHtml, "state.frequency === 'weekly' || monthlyLowerAtlanticImportGuide || padd5ImportAdjustment ? [importsOverrideLine()] : []");
   assertIncludes(`${config.key} Northeast Kpler import total is only grey import guide`, indexHtml, "function isKplerTotalImportGuideLine(lineId){ return isKplerGuideLine(lineId) && kplerGuideTargetLineId(lineId) === 'padd1abImports'; }");
   assertIncludes(`${config.key} Northeast Kpler export total is grey`, indexHtml, "function isKplerTotalExportGuideLine(lineId){ return isKplerGuideLine(lineId) && kplerGuideTargetLineId(lineId) === 'padd1abExportsTotal'; }");
   assertIncludes(`${config.key} Kpler total imports use grey guide class`, indexHtml, "kplerImportTotalGuideRow");
@@ -280,7 +282,8 @@ function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig
   assertIncludes(`${config.key} mobile crude table uses container scrolling`, indexHtml, "function tableUsesPageWideScroll(wrap){ return Boolean(wrap?.id === 'crudeRunsTableWrap' && !matchMedia('(max-width: 760px)').matches); }");
   assertIncludes(`${config.key} mobile workbook disables page-wide viewport tracking`, indexHtml, "function viewportTrackingActive(){ return (state.sheet === 'charts' || state.sheet === 'crude') && !matchMedia('(max-width: 760px)').matches; }");
   assertIncludes(`${config.key} mobile crude table limits its rasterized period window`, indexHtml, "function crudeTableDisplayPeriods(allPeriods=crudeDisplayPeriods())");
-  assertIncludes(`${config.key} mobile crude window keeps twelve actual periods before forecast`, indexHtml, "firstForecast - 12");
+  assertIncludes(`${config.key} crude table distinguishes mobile and desktop windows`, indexHtml, "const actualLookback = mobile ? 12 : 104;");
+  assertIncludes(`${config.key} desktop weekly crude window keeps full forecast horizon`, indexHtml, "return mobile ? allPeriods.slice(start, Math.min(allPeriods.length, start + 64)) : allPeriods.slice(start);");
   assertIncludes(`${config.key} mobile crude window tells users exports keep full history`, indexHtml, "period columns; exports keep full history");
 }
 
@@ -294,7 +297,7 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} weekly outages load weekly balance scaffold`, indexHtml, "if (frequency === 'weekly' && (needsBalanceContext || sheet === 'outages')) await ensureWeeklyData();");
   assertIncludes(`${config.key} outages tab uses shared data loader`, indexHtml, "outagesSheetBtn').addEventListener('click', async () => { const changed = state.sheet !== 'outages'; try { await ensureDataForState({...state,sheet:'outages'}); }");
   assertIncludes(`${config.key} crude outage launcher uses shared data loader`, indexHtml, "openOutagesFromCrudeBtn').addEventListener('click', async () => { const nextRegion = validBaseCrudeRegion(state.crudeRegion) ? state.crudeRegion : 'padd1'; try { await ensureDataForState({...state,sheet:'outages',crudeRegion:nextRegion}); }");
-  assertIncludes(`${config.key} weekly balance loads weekly crude runs`, indexHtml, "if (frequency === 'weekly' && (needsBalanceContext || sheet === 'crude')) await ensureCrudeWeeklyData();");
+  assertIncludes(`${config.key} weekly crude payload stays deferred until crude runs opens`, indexHtml, "if (frequency === 'weekly' && sheet === 'crude') await ensureCrudeWeeklyData();");
   assertIncludes(`${config.key} balance loads reference context before rendering crude-derived rows`, indexHtml, "if (needsBalanceContext || sheet === 'reference' || sheet === 'outages' || sheet === 'crude') await ensureReferenceData();");
   assertIncludes(`${config.key} frequency switches use shared data loader`, indexHtml, "try { await ensureDataForState({...state,frequency:nextFrequency}); }");
   assertIncludes(`${config.key} refresh button reloads dashboard data before rerender`, indexHtml, "document.getElementById('refreshBtn').addEventListener('click', () => { refreshDashboardData('Dashboard refreshed'); });");
@@ -373,6 +376,16 @@ function verifyChartScenarioPropagation(indexHtml: string, config: ProductConfig
 function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} outage chart metric registry`, indexHtml, "const OUTAGE_CHART_METRICS = new Set(['knownProductionOfflinePlannedKbd'");
   assertIncludes(`${config.key} outage product metrics follow production`, indexHtml, "'productionKbd','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd'");
+  assertIncludes(`${config.key} crude runs outage unit is atmospheric distillation only`, indexHtml, "const CRUDE_RUN_OUTAGE_UNIT_KEY = 'atmos_distillation';");
+  assertIncludes(`${config.key} crude runs reads only atmospheric distillation outage totals`, indexHtml, "addOutageTotals(totals, byRegion[key]?.units?.[CRUDE_RUN_OUTAGE_UNIT_KEY])");
+  assertNotIncludes(`${config.key} crude runs does not read broad all-unit outage totals`, indexHtml, "outageSourceKeys(regionKey).forEach(key => addOutageTotals(totals, byRegion[key]));");
+  assertIncludes(`${config.key} concurrent different-unit outages are documented`, indexHtml, "different units may be offline at the same time");
+  assertIncludes(`${config.key} outage collisions are scoped to canonical unit`, indexHtml, "outageUnitCollisionKey(outage) === entryUnitKey && outageRangesOverlap");
+  assertIncludes(`${config.key} overlapping capacity validation is scoped to canonical unit`, indexHtml, "outageUnitCollisionKey(outage) === entryUnitKey).map(outage");
+  assertIncludes(`${config.key} new outages receive generated unique ids`, indexHtml, "const id = sourceId && sourceId !== 'draft-outage' ? sourceId : 'outage-' + Date.now()");
+  assertIncludes(`${config.key} outage drafts do not persist a shared placeholder id`, indexHtml, "return normalizeOutage({id:outageEditId || '',regionKey:");
+  assertIncludes(`${config.key} legacy placeholder ids are migrated before shared merge`, indexHtml, "const key = sourceId && sourceId !== 'draft-outage' ? sourceId : JSON.stringify(row);");
+  assertIncludes(`${config.key} assumption ledger distinguishes crude-run outages`, indexHtml, "unitKey === CRUDE_RUN_OUTAGE_UNIT_KEY ? 'crude-run capacity input' : 'unit outage only'");
   assertIncludes(`${config.key} diesel PADD 1 outage yield vector`, indexHtml, "padd1:{atmos_distillation:.22,fcc:.18,coking:.28,distillate_hydrocracking:.20,gasoil_resid_hydrocracking:.35}");
   assertIncludes(`${config.key} diesel PADD 5 outage yield vector`, indexHtml, "padd5:{atmos_distillation:.10,fcc:.14,coking:.20,distillate_hydrocracking:.15,gasoil_resid_hydrocracking:.29}");
   assertIncludes(`${config.key} jet PADD 3 hydrocracking outage yield vector`, indexHtml, "padd3:{atmos_distillation:.10,distillate_hydrocracking:.22,gasoil_resid_hydrocracking:.22}");
@@ -494,6 +507,15 @@ function verifyCrudeRunsSectionCleanup(indexHtml: string, config: ProductConfig)
 function verifyCrudeRunsRowFormatting(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} crude runs row uses operating capacity band`, indexHtml, "{id:'crudeRunsKbd',label:'Crude Runs',kind:'subtotal'}");
   assertIncludes(`${config.key} crude runs row keeps operating row class`, indexHtml, "['operatingCapacityKbd','crudeRunsKbd'].includes(line.id) ? ' operatingRow' : ''");
+  assertIncludes(`${config.key} crude runs exposes a direct override row`, indexHtml, "{id:'crudeRunsAdjustmentKbd',label:'Crude Runs Override',kind:'item muted adjustment'}");
+  assertIncludes(`${config.key} crude runs override targets the calculated row`, indexHtml, "if (lineId === 'crudeRunsAdjustmentKbd') return 'crudeRunsKbd';");
+  assertIncludes(`${config.key} weekly crude overrides use exact period keys`, indexHtml, "function crudeCellAdjustmentIndexKey(frequency, period, regionKey, unitKey)");
+  assertIncludes(`${config.key} crude cell overrides are stored with their frequency and period`, indexHtml, "normalizeCapacityAdjustment({scope:'crude_cell',frequency,period:scopedPeriod");
+  assertIncludes(`${config.key} crude cell override replacement is exact-period scoped`, indexHtml, "filter(adj => !crudeCellAdjustmentMatches(adj, frequency, period, regionKey, targetLineId))");
+  assertIncludes(`${config.key} crude run calculation applies the exact manual value`, indexHtml, "manualCrudeRuns !== null ? manualCrudeRuns : Math.max(0, runCeiling - unplanned)");
+  assertIncludes(`${config.key} weekly crude override labels its single-week scope`, indexHtml, "state.frequency === 'weekly' ? 'week' : 'month'");
+  assertIncludes(`${config.key} capacity ledger shows exact crude override period`, indexHtml, "if (isCrudeCellAdjustment(adj)) return (adj.frequency === 'weekly' ? 'Week ending ' : 'Month ') + adj.period + ' only';");
+  assertNotIncludes(`${config.key} crude cell lookup is not month-wide`, indexHtml, "latestRegionalCapacityAdjustment(point.regionKey, crudeAdjustmentTargetLineId(lineId), periodMonthValue(point.period))");
   assertIncludes(`${config.key} historical crude outage estimate starts in 2022`, indexHtml, "function useHistoricalCrudeOutageEstimate(period){ return periodMonthValue(period) >= '2022-01'; }");
   assertIncludes(`${config.key} historical unplanned outage formula`, indexHtml, "function historicalUnplannedMaintenanceKbd(operableCapacityKbd, plannedMaintenanceKbd, crudeRunsKbd){ return Math.max(0, Number(operableCapacityKbd || 0) - Number(plannedMaintenanceKbd || 0) - Number(crudeRunsKbd || 0)); }");
   assertIncludes(`${config.key} pre-2022 planned/unplanned outages stay blank`, indexHtml, "plannedMaintenanceKbd:planned === null ? null : round2(planned),unplannedMaintenanceKbd:unplanned === null ? null : round2(unplanned)");

@@ -12,6 +12,7 @@ eia_summary_dashboard/cache/
 eia_summary_dashboard/logs/
 tmp/
 test-results/
+.playwright-cli/
 logs/
 /.env
 _not_pushed_junk/

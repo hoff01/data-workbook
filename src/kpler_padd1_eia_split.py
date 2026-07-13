@@ -16,7 +16,7 @@ from typing import Any
 
 import polars as pl
 
-from kpler_config import BASE_DIR, RAW_DIR, PullSpec, credential_pair, ensure_directories, runtime_config
+from kpler_config import BASE_DIR, RAW_DIR, PullSpec, ensure_directories, kpler_authorization_header, runtime_config
 from kpler_http import KplerHttpClient
 from kpler_pull import fallback_long_row, has_kpler_credentials, iter_days, month_end_exclusive, parse_eia_date, spec_to_kpler_params
 from kpler_transform import LONG_COLUMNS, complete_daily, kpler_content_to_long
@@ -329,9 +329,9 @@ def pull_kpler_long(specs: list[PullSpec], use_existing_raw: bool = False) -> tu
     elif not has_kpler_credentials():
         return build_eia_padd1_fallback_long(specs)
     else:
-        credential_pair()
+        kpler_authorization_header()
         client = KplerHttpClient(config)
-        client.validate_auth()
+        client.validate_auth(spec_to_kpler_params(specs[0], config.snapshot_date))
         frames = []
         status = {}
         with ThreadPoolExecutor(max_workers=config.concurrency) as executor:

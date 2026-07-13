@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+from datetime import date
 import math
 from pathlib import Path
 import sys
@@ -17,11 +18,41 @@ from kpler_padd1_eia_split import (  # noqa: E402
     add_shares,
     load_share_lookup,
     merge_one_eia_file,
+    padd1_group,
     valid_share_pair,
 )
+from kpler_config import PullSpec  # noqa: E402
+from kpler_transform import kpler_content_to_long  # noqa: E402
 
 
 class KplerPadd1EiaSplitTests(unittest.TestCase):
+    def test_v2_plural_padd_columns_map_to_padd1_groups(self) -> None:
+        spec = PullSpec(
+            name="padd1_split_jet_imports",
+            family="padd1_split",
+            geography="us",
+            commodity="jet",
+            kpler_product="Kero/Jet",
+            flow_direction="import",
+            split=["destination padds"],
+            from_zones=None,
+            to_zones=["United States"],
+            with_intra_country=False,
+            with_intra_region=True,
+            with_forecast=True,
+            only_realized=False,
+            unit="kbd",
+            granularity="daily",
+            start_date=date(2026, 7, 1),
+            end_date=date(2026, 7, 2),
+        )
+        content = b"period;destinationPadds;quantity\n2026-07-01;PADD 1 - A;10\n2026-07-01;PADD 1 - B;20\n2026-07-01;PADD 1 - C;30\n"
+
+        rows = kpler_content_to_long(content, spec).rows(named=True)
+
+        self.assertEqual([row["destination_padd"] for row in rows], ["PADD 1 - A", "PADD 1 - B", "PADD 1 - C"])
+        self.assertEqual([padd1_group(row["destination_padd"]) for row in rows], ["padd1ab", "padd1ab", "padd1c"])
+
     def test_weekly_share_uses_kpler_region_over_total_padd1(self) -> None:
         frame = pl.DataFrame(
             {

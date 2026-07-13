@@ -26,7 +26,7 @@ The runner serves the dashboard over plain local HTTP at `http://127.0.0.1:8787`
    ```
 4. Clone the canonical GitHub repo, or pull it if it already exists:
    ```powershell
-   git clone https://github.com/hoff01/balances_us.git US_Balances
+   git clone https://github.com/hoff01/data-workbook.git US_Balances
    cd US_Balances
    ```
 5. Double-click `Open_Balance_Dashboards.bat` from the repo folder.
@@ -52,7 +52,7 @@ Older checkouts may still point at the repository's previous GitHub name. Update
 them once, then verify the canonical remote:
 
 ```powershell
-git remote set-url origin https://github.com/hoff01/balances_us.git
+git remote set-url origin https://github.com/hoff01/data-workbook.git
 git remote -v
 git ls-remote origin
 ```

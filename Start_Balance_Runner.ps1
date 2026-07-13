@@ -93,6 +93,7 @@ function Ensure-NodeRuntime {
     }
 
     $tsx = Join-Path $NodeRoot "node_modules\.bin\tsx.cmd"
+    $tsxCli = Join-Path $NodeRoot "node_modules\tsx\dist\cli.mjs"
     $hash = Get-CombinedHash @((Join-Path $SharedRoot "package.json"), $sharedLock)
     if ($ForceSetup -or !(Test-Path $tsx) -or (Read-Stamp $NodeStamp) -ne $hash) {
         Push-Location $NodeRoot
@@ -112,8 +113,8 @@ function Ensure-NodeRuntime {
         }
         Set-Content -Path $NodeStamp -Value $hash -Encoding UTF8
     }
-    if (!(Test-Path $tsx)) {
-        throw "Local tsx runtime was not created at $tsx"
+    if (!(Test-Path $tsx) -or !(Test-Path $tsxCli)) {
+        throw "Local tsx runtime was not created under $NodeRoot\node_modules"
     }
     return $tsx
 }
@@ -159,8 +160,14 @@ $env:MPLCONFIGDIR = Join-Path $CacheRoot "matplotlib"
 $env:US_BALANCES_SHARED_ROOT = $SharedRoot
 $env:US_BALANCES_RUNTIME_ROOT = $LocalRoot
 $env:US_BALANCES_TSX_COMMAND = Ensure-NodeRuntime
+$env:US_BALANCES_NODE_COMMAND = (Get-Command node.exe -ErrorAction Stop).Source
+$env:US_BALANCES_TSX_CLI = Join-Path $NodeRoot "node_modules\tsx\dist\cli.mjs"
 if (!$SkipPythonSetup) {
     $env:US_BALANCES_PYTHON = Ensure-PythonRuntime
+}
+$KplerLocalEnvScript = Join-Path $SharedRoot "Kpler\config\local.env.ps1"
+if (Test-Path $KplerLocalEnvScript) {
+    . $KplerLocalEnvScript
 }
 if ($Port -gt 0) {
     $env:DASHBOARD_UPDATE_PORT = [string]$Port
@@ -171,7 +178,7 @@ $openArgs = @((Join-Path $SharedRoot "src\open_dashboard.ts"), $Route)
 if ($NoOpen) {
     $openArgs += "--no-open"
 }
-& $env:US_BALANCES_TSX_COMMAND @openArgs
+& $env:US_BALANCES_NODE_COMMAND $env:US_BALANCES_TSX_CLI @openArgs
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }

@@ -2,13 +2,16 @@
 import { spawn } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
+import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 
 const ROOT = resolve(new URL("..", import.meta.url).pathname);
 const HOST = process.env.DASHBOARD_UPDATE_HOST || "127.0.0.1";
-const PORT = Number(process.env.DASHBOARD_UPDATE_PORT || 8787);
+let PORT = Number(process.env.DASHBOARD_UPDATE_PORT || 8787);
+const PORT_WINDOW = Number(process.env.DASHBOARD_UPDATE_PORT_WINDOW || 10);
+const SERVER_APP_ID = "balance-dashboard-update-server";
 const PRODUCT_ARG = argValue("product") || process.env.DASHBOARD_TRACE_PRODUCT || "diesel";
 const OUT_DIR = resolve(argValue("out-dir") || process.env.DASHBOARD_TRACE_OUT_DIR || join(tmpdir(), "balance-dashboard-traces"));
 const HEADLESS = !hasArg("headed") && process.env.DASHBOARD_TRACE_HEADED !== "1";
@@ -625,40 +628,80 @@ function mdCell(value) {
 }
 
 async function ensureDashboardServer() {
-  const healthUrl = `http://${HOST}:${PORT}/api/health`;
-  if (await healthOk(healthUrl)) return { started: false, process: null };
-
-  const child = spawn("npm", ["run", "dashboard:server"], {
-    cwd: ROOT,
-    env: { ...process.env, DASHBOARD_UPDATE_HOST: HOST, DASHBOARD_UPDATE_PORT: String(PORT), FORCE_COLOR: "0" },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  let output = "";
-  child.stdout.on("data", (chunk) => {
-    output += chunk.toString("utf8");
-  });
-  child.stderr.on("data", (chunk) => {
-    output += chunk.toString("utf8");
-  });
-
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < TIMEOUT_MS) {
-    if (await healthOk(healthUrl)) return { started: true, process: child };
-    if (child.exitCode !== null) break;
-    await delay(150);
+  const ports = candidatePorts();
+  for (const port of ports) {
+    if (await healthOk(port)) {
+      PORT = port;
+      return { started: false, process: null };
+    }
   }
 
-  child.kill("SIGTERM");
-  throw new Error(`Dashboard server did not become available at ${healthUrl}.\n${output.trim()}`);
+  const failures = [];
+  for (const port of ports) {
+    if (!(await portAvailable(port))) {
+      failures.push(`${port}: occupied by another service`);
+      continue;
+    }
+    const child = spawn("npm", ["run", "dashboard:server"], {
+      cwd: ROOT,
+      env: { ...process.env, DASHBOARD_UPDATE_HOST: HOST, DASHBOARD_UPDATE_PORT: String(port), FORCE_COLOR: "0" },
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let output = "";
+    child.stdout.on("data", (chunk) => {
+      output += chunk.toString("utf8");
+    });
+    child.stderr.on("data", (chunk) => {
+      output += chunk.toString("utf8");
+    });
+
+    const startedAt = Date.now();
+    while (Date.now() - startedAt < TIMEOUT_MS) {
+      if (await healthOk(port)) {
+        PORT = port;
+        return { started: true, process: child };
+      }
+      if (child.exitCode !== null) break;
+      await delay(150);
+    }
+    child.kill("SIGTERM");
+    failures.push(`${port}: ${output.trim() || "server did not become healthy"}`);
+  }
+  throw new Error(`US Balances dashboard server did not become available on ${HOST} ports ${ports.join(", ")}.\n${failures.join("\n")}`);
 }
 
-async function healthOk(url) {
+function candidatePorts() {
+  const ports = [];
+  for (let offset = 0; offset <= Math.max(0, PORT_WINDOW); offset += 1) {
+    const port = PORT + offset;
+    if (Number.isInteger(port) && port > 0 && port <= 65535) ports.push(port);
+  }
+  return [...new Set(ports)];
+}
+
+async function healthOk(port) {
   try {
-    const response = await fetch(url, { cache: "no-store" });
-    return response.ok;
+    const response = await fetch(`http://${HOST}:${port}/api/health`, { cache: "no-store" });
+    if (!response.ok) return false;
+    const health = await response.json();
+    return health?.app === SERVER_APP_ID && typeof health?.root === "string" && resolve(health.root) === ROOT;
   } catch {
     return false;
   }
+}
+
+async function portAvailable(port) {
+  return await new Promise((resolveProbe) => {
+    const server = createServer();
+    let settled = false;
+    const finish = (available) => {
+      if (settled) return;
+      settled = true;
+      resolveProbe(available);
+    };
+    server.once("error", () => finish(false));
+    server.listen(port, HOST, () => server.close(() => finish(true)));
+  });
 }
 
 async function launchChrome() {
@@ -762,6 +805,11 @@ async function phaseSnapshot(cdp, phase, tracePath, wallMs, beforeMetrics = { me
   const metrics = await cdp.send("Performance.getMetrics");
   const metricMap = Object.fromEntries((metrics.metrics || []).map((metric) => [metric.name, metric.value]));
   const beforeMetricMap = Object.fromEntries((beforeMetrics.metrics || []).map((metric) => [metric.name, metric.value]));
+  await cdp.send("HeapProfiler.enable").catch(() => {});
+  await cdp.send("HeapProfiler.collectGarbage").catch(() => {});
+  await cdp.send("HeapProfiler.disable").catch(() => {});
+  const liveMetrics = await cdp.send("Performance.getMetrics");
+  const liveMetricMap = Object.fromEntries((liveMetrics.metrics || []).map((metric) => [metric.name, metric.value]));
   const page = await runInPage(cdp, `(() => {
     const measures = Object.fromEntries(performance.getEntriesByType('measure').map(entry => [entry.name, Number(entry.duration.toFixed(2))]));
     const resources = performance.getEntriesByType('resource')
@@ -803,9 +851,9 @@ async function phaseSnapshot(cdp, phase, tracePath, wallMs, beforeMetrics = { me
       scriptDurationMs: secondsDeltaToMs(metricMap.ScriptDuration, beforeMetricMap.ScriptDuration),
       layoutDurationMs: secondsDeltaToMs(metricMap.LayoutDuration, beforeMetricMap.LayoutDuration),
       recalcStyleDurationMs: secondsDeltaToMs(metricMap.RecalcStyleDuration, beforeMetricMap.RecalcStyleDuration),
-      jsHeapUsedBytes: Math.round(metricMap.JSHeapUsedSize || 0),
-      nodes: Math.round(metricMap.Nodes || 0),
-      documents: Math.round(metricMap.Documents || 0),
+      jsHeapUsedBytes: Math.round(liveMetricMap.JSHeapUsedSize || 0),
+      nodes: Math.round(liveMetricMap.Nodes || 0),
+      documents: Math.round(liveMetricMap.Documents || 0),
     },
   };
 }

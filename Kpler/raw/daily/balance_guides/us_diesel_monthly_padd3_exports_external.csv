@@ -1,105 +1,601 @@
-Date;Latin America;North West Europe Zone;MED Zone (MED Sea+Black Sea);Other North Africa;Unknown;Western Africa;East Coast Canada;Southern Africa;Oceania;South-Central Asia;South-East Asia;Eastern Asia;Eastern Africa;Other Southern Europe;Other Middle East;West Coast Canada;Mideast Gulf;Period End Date
-2018-01;622.94;56.51;60.65;22.16;5.54;0;10.51;8.03;0;0;0;0.71;0;0;0;0;0;2018-01-31
-2018-02;620.65;36.58;30.74;0;16.60;0;0;0;0;0;0;0;0;0;0;0;0;2018-02-28
-2018-03;767.32;50.07;26.59;14.13;11.22;0;0;6.74;0;0;0;2.76;0;0;1.56;0;0;2018-03-31
-2018-04;900.20;62.20;73.75;8.07;14.02;46.63;28.97;0;0;0;0;0;0;0;0;0;0;2018-04-30
-2018-05;885.13;20.78;129.92;0;18.78;10.15;17.76;0;0;0;0;0;0;0;0;0;0;2018-05-31
-2018-06;716.78;232.57;145.11;20.63;13.36;0;1.06;0;16.41;0;0;0;0;0;0;0;0;2018-06-30
-2018-07;733.10;89.08;124.16;37.41;4.15;9.31;7.42;0;0;0;0;0;0;0;0;0;0;2018-07-31
-2018-08;800.57;75.73;112.18;45.62;9.91;0;7.06;0;0;0;0;0;0;0;0;0;0;2018-08-31
-2018-09;807.56;55.65;90.04;48.01;1.08;0;0;4.76;0;0;0;0;0;9.90;0;0;0;2018-09-30
-2018-10;924.44;36.18;67.37;9.85;6.44;0;1.77;0;0;0;0;0;0;0;0;0;0;2018-10-31
-2018-11;771.46;103.16;122.06;20.96;18.90;43.03;16.52;0;0;0;0;0;0;0;0;0;0;2018-11-30
-2018-12;749.67;181.00;48.38;10.16;20.06;21.03;24.32;0;0;0;0;0;0;0;0;0;0;2018-12-31
-2019-01;842.61;67.96;62.48;0;4.07;9.15;7.19;0;0;0;0;0.30;0;0;0;0;0;2019-01-31
-2019-02;579.27;59.66;53.82;0;3.73;0;18.64;0;0;0;0;0;0;0;0;0;0;2019-02-28
-2019-03;685.36;88.34;39.74;10.50;12.62;0;0;0;0;0;0;0;0;0;0;0;0;2019-03-31
-2019-04;829.46;73.46;8.87;11.02;21.90;0;8.90;0;0;0;0;0.30;0;0;0;0;0;2019-04-30
-2019-05;661.60;143.42;44.79;37.11;25.40;31.76;8.85;0;0;0;0;0;0;0;0;0;0;2019-05-31
-2019-06;782.50;175.06;60.28;52.60;30.06;9.95;0;0;0;0;0;0;0;0;0;0;0;2019-06-30
-2019-07;710.01;83.90;100.66;19.28;20.73;10.22;16.74;0;0;0;0;0;0;0;0;0;0;2019-07-31
-2019-08;854.34;141.33;139.44;67.42;11.67;0;0;0;0;0;0;0;0;0;0;0;0;2019-08-31
-2019-09;959.53;49.56;9.95;21.37;17.92;0;10.61;0;0;0;0;0;0;0;0;0;0;2019-09-30
-2019-10;787.06;11.07;16.97;0.02;13.20;0;18.61;0;0;0;0;0;0;0;0;0;0;2019-10-31
-2019-11;802.09;43.62;32.57;10.94;7.51;0;4.75;0;0;0;0;0;0;0;0;0;0;2019-11-30
-2019-12;723.03;41.32;66.72;10.37;8.33;0;1.97;0;0;0;0;0;0;0;0;0;0;2019-12-31
-2020-01;736.32;61.04;14.44;25.98;19.43;14.31;0;0;0;0;2.06;0;0;0;0;0;0;2020-01-31
-2020-02;717.53;86.36;90.86;49.67;13.43;37.38;0;0;0;0;0;0;0;0;0;0;0;2020-02-29
-2020-03;888.49;13.11;0;0;10.87;0;0;0;0;0;0;0.10;0;0;0;0;0;2020-03-31
-2020-04;445.31;45.29;29.89;0;32.02;21.01;0.03;0;0;0;0;0;0;0;0;0;0;2020-04-30
-2020-05;427.80;33.81;53.63;0;0;10.11;1.56;0;0;0;0;2.32;0;0;0;0;0;2020-05-31
-2020-06;619.02;38.21;84.57;16.77;12.75;30.30;2.25;0;0;0;3.37;10.63;0;0;0;0;0;2020-06-30
-2020-07;722.62;113.32;62.09;20.41;16.21;38.94;1.75;0;0;0;11.45;0;0;0;0;0;0;2020-07-31
-2020-08;683.40;190.05;19.75;35.92;30.22;0;1.60;0;0;0;0.96;0;0;0;0;0;0;2020-08-31
-2020-09;607.87;94.02;49.14;8.09;28.94;10.46;1.05;0;0;2.32;2.98;0;0;0;0;0;0;2020-09-30
-2020-10;645.89;26.07;27.09;0;12.52;9.53;10.98;0;0;0;1.12;0;0;0;0;0;0;2020-10-31
-2020-11;699.70;13.17;0;0;12.09;0;0;0;0;0.90;0;0;0;0;0;0;0;2020-11-30
-2020-12;678.26;12.32;10.31;9.58;9.92;10.11;9.32;0;0;0;3.09;0;0;0;0;0;0;2020-12-31
-2021-01;625.10;0;10.34;0;31.31;0;5.25;0;0;0;0;0;0;0;0;0;0;2021-01-31
-2021-02;497.63;16.51;0;0;23.25;0;6.61;0;0;0;6.84;0;0;0;0;0;0;2021-02-28
-2021-03;494.77;0;0;0;10.37;0;0;0;0;0;0;0;0;0;0;0;0;2021-03-31
-2021-04;735.78;10.40;3.57;0;15.07;0;9.18;0;0;0;4.78;0;0;0;0;0;0;2021-04-30
-2021-05;725.66;31.65;0;0;20.11;0;15.84;0;0;0;0;0;0;0;0;0;0;2021-05-31
-2021-06;724.28;102.97;0;22.21;15.17;0;8.67;0;0;0;0;0;0;0;0;0;0;2021-06-30
-2021-07;719.06;66.75;19.75;0;32.08;0;0;0;0;0;0;0;0;0;0;0;0;2021-07-31
-2021-08;849.38;11.50;16.78;0;11.75;0;15.71;0;0;0;0;0;0;0;0;0;0;2021-08-31
-2021-09;586.37;12.73;0;0;24.54;0;4.84;0;0;0;0;0;0;0;0;0;0;2021-09-30
-2021-10;615.72;24.05;0;0;11.66;0;0;0;0;0;0;0;0;0;0;0;0;2021-10-31
-2021-11;759.32;13.93;0;0;16.09;0;5.05;0;0;0;0;0;0;0;0;0;0;2021-11-30
-2021-12;796.79;25.02;0;0;3.48;0;18.60;0;0;0;0;0;0;2.34;0;0;0;2021-12-31
-2022-01;676.21;22.33;0;0;0;0;8.15;0;0;0;0;10.29;0;0;0;0;0;2022-01-31
-2022-02;618.92;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2022-02-28
-2022-03;886.44;52.28;0;0;13.85;0;14.82;0;0;0;0;0;0;0;0;3.51;0;2022-03-31
-2022-04;993.44;37.73;9.29;0;10.82;0;9.86;0;0;0;0;0;0;0;0;0;0;2022-04-30
-2022-05;834.87;19.70;10.22;0;7.76;3.55;9.28;0;0;0;0;0;0;0;5.57;0;0;2022-05-31
-2022-06;911.75;38.52;0;0;6.73;21.85;4.80;0;0;0;0;0;0;0;0;0;0;2022-06-30
-2022-07;1120.92;74.30;0;0;0;10.04;21.80;0;0;0;0.67;0;0;0;0;0;0;2022-07-31
-2022-08;1009.68;50.18;0;0;12.76;0;12.17;0;0;0;0;0;0;0;0;0;0;2022-08-31
-2022-09;809.13;137.30;0;3.58;2.83;0;7.46;0;0;0;0;0;0;0;0;0;0;2022-09-30
-2022-10;785.50;75.50;11.14;0;7.07;9.79;0;0;0;0;0;0;0;0;0;0;0;2022-10-31
-2022-11;788.95;91.91;0;0;5.53;29.58;0;0;0;0;0;0;0;0;0;0;0;2022-11-30
-2022-12;746.75;193.34;0;0;0;9.63;0.65;0;0;0;0;0;0;0;0;0;0;2022-12-31
-2023-01;671.37;81.76;0;0;0;0;16.65;0;0;0;0;0;0;0;0;0;0;2023-01-31
-2023-02;616.34;37.85;0.23;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2023-02-28
-2023-03;822.91;58.49;10.52;9.63;0;0;0.00;0;0;0;0;0;0;0;0;0;0;2023-03-31
-2023-04;638.30;97.82;21.36;0;12.50;0;0;0;0;0;0;0;0;0;0;0;0;2023-04-30
-2023-05;629.64;266.54;9.94;0;23.86;0;8.83;0;0;0;0;0;0;0;0;0;0;2023-05-31
-2023-06;707.86;201.64;9.95;9.96;6.22;0;8.51;0;0;0;0;0;0;0;0;0;0;2023-06-30
-2023-07;775.51;226.28;27.10;10.13;0.79;9.84;17.89;0;0;0;0;0;0;0;0;0;0;2023-07-31
-2023-08;891.60;164.07;8.79;0;4.24;21.72;8.50;0;0;0;0;0;0;0;0;0;0;2023-08-31
-2023-09;793.16;96.39;0;0;0;19.15;0;0;0;0;0;0;0;0;0;0;0;2023-09-30
-2023-10;759.75;146.73;0;10.48;14.18;47.49;18.61;0;0;0;0;0;0;0;0;0;0;2023-10-31
-2023-11;667.71;185.79;0;0;2.64;10.33;0;0;0;0;0;0;0;0;0;0;0;2023-11-30
-2023-12;639.18;351.57;20.06;40.45;14.28;10.61;9.03;0;0;0;0;0;0;0;0;0;0;2023-12-31
-2024-01;582.70;220.97;19.57;15.48;0.55;0;3.98;0;0;0;0;0;0;0;0;0;0;2024-01-31
-2024-02;497.99;183.80;0;0;0.81;0;5.52;0;0;0;0;0;0;7.94;0;0;0;2024-02-29
-2024-03;596.71;197.10;20.42;0;0.81;0;0;0;0;0;0;0;0;0;0;0;0;2024-03-31
-2024-04;633.83;267.72;0;0;3.01;0;0;0;0;0;0;0;0;0;0;0;0;2024-04-30
-2024-05;773.21;184.09;16.40;2.61;1.35;0;5.32;0;0;0;0;0;0;5.06;0;0;0;2024-05-31
-2024-06;815.45;208.92;21.41;42.47;0.58;10.25;6.30;0;0;0;0;0;0;0;0;0;0;2024-06-30
-2024-07;653.58;283.90;84.15;25.20;7.29;9.52;0;0;0;0;0;0;0;0;0;0;0;2024-07-31
-2024-08;682.70;355.17;56.38;22.15;2.70;0;8.45;0;0;0;0;0;0;0;0;0;0;2024-08-31
-2024-09;724.29;253.59;55.00;10.37;0;0;6.33;0;0;0;0;0;0;0;0;0;0;2024-09-30
-2024-10;633.55;282.17;20.47;19.35;10.53;9.70;0;0;0;0;0;0;0;0;0;0;0;2024-10-31
-2024-11;869.84;304.04;21.46;10.23;10.05;0;6.33;0;0;0;0;0;0;0;0;0;0;2024-11-30
-2024-12;789.63;337.69;10.00;4.90;11.12;9.68;7.10;0;0;0;1.04;0;0;0;0;0;0;2024-12-31
-2025-01;716.78;167.96;9.68;0;4.25;0;4.84;0;0;0;0;0;0;0;0;0;0;2025-01-31
-2025-02;608.49;53.67;21.43;0;3.65;0;0;0;0;4.21;0;0;0;0;0;0;0;2025-02-28
-2025-03;635.11;122.08;18.36;19.68;3.55;0;0;0;0;0;0;0;0;0;0;0;0;2025-03-31
-2025-04;772.47;164.89;33.78;14.84;19.93;0;15.00;0;0;0;0;0;0;0;0;0;0;2025-04-30
-2025-05;798.30;186.77;26.42;52.82;36.55;9.44;10.81;0;0;0;0;0.87;0;0;0;0;0;2025-05-31
-2025-06;798.34;225.50;38.87;6.94;28.76;10.00;5.60;0;0;0;0;0;0;0;0;0;0;2025-06-30
-2025-07;786.30;285.39;28.11;9.99;19.91;0;8.06;0;0;0;0;0;0;0;0;0;2.37;2025-07-31
-2025-08;762.23;203.98;45.52;31.96;18.77;0;0;0;0;0;0;0;0;0;0;0;0;2025-08-31
-2025-09;590.97;273.93;10.00;31.26;19.30;10.33;7.00;0;0;0;0;0;0;0;0;0;0;2025-09-30
-2025-10;837.45;103.66;32.33;0;10.91;0;6.46;0;0;0;0;0;0;0;0;0;0;2025-10-31
-2025-11;768.89;243.27;10.90;50.56;15.71;10.00;5.00;0;0;0;0;0;0;0;0;0;0;2025-11-30
-2025-12;728.15;234.30;25.60;45.48;11.81;0;6.06;0;0;0;0;0;0;0;0;0;0;2025-12-31
-2026-01;540.02;350.32;67.17;2.82;9.67;33.39;7.31;0;0;0;0;0;0;0;0;0;0;2026-01-31
-2026-02;555.73;237.30;23.21;22.45;2.76;2.60;0;0;0;0;0;0;0;0;0;0;0;2026-02-28
-2026-03;557.33;159.19;19.65;29.52;5.91;47.13;7.26;88.89;35.50;9.68;1.93;0;25.62;0;0;0;0;2026-03-31
-2026-04;761.37;174.90;40.32;29.87;17.03;77.38;6.43;42.04;33.60;20.50;8.05;0;0;0;0;0;0;2026-04-30
-2026-05;838.06;210.48;55.48;36.14;19.72;68.15;7.61;44.06;0;6.90;0;0;0;0;0;0;0;2026-05-31
-2026-06;962.75;97.48;47.73;44.36;27.73;30.07;10.09;3.97;0;6.16;0;0;0;0;0;0;0;2026-06-30
-2026-07;222.57;107.90;29.85;0;64.08;0;0;0;0;0;0;0;0;0;0;0;0;2026-07-31
-2026-08;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;2026-08-31
+period;destinationTradingRegions;quantity
+2018-01;East Coast Canada;10.51
+2018-01;Eastern Asia;0.71
+2018-01;Latin America;622.94
+2018-01;MED Zone (MED Sea+Black Sea);60.65
+2018-01;North West Europe Zone;56.51
+2018-01;Other North Africa;22.16
+2018-01;Southern Africa;8.03
+2018-01;Unknown;5.54
+2018-02;Latin America;620.65
+2018-02;MED Zone (MED Sea+Black Sea);30.74
+2018-02;North West Europe Zone;36.58
+2018-02;Unknown;16.60
+2018-03;Eastern Asia;2.76
+2018-03;Latin America;767.32
+2018-03;MED Zone (MED Sea+Black Sea);26.59
+2018-03;North West Europe Zone;50.07
+2018-03;Other Middle East;1.56
+2018-03;Other North Africa;14.13
+2018-03;Southern Africa;6.74
+2018-03;Unknown;11.22
+2018-04;East Coast Canada;28.97
+2018-04;Latin America;900.20
+2018-04;MED Zone (MED Sea+Black Sea);73.75
+2018-04;North West Europe Zone;62.20
+2018-04;Other North Africa;8.07
+2018-04;Unknown;14.02
+2018-04;Western Africa;46.63
+2018-05;East Coast Canada;17.76
+2018-05;Latin America;885.13
+2018-05;MED Zone (MED Sea+Black Sea);129.92
+2018-05;North West Europe Zone;20.78
+2018-05;Unknown;18.78
+2018-05;Western Africa;10.15
+2018-06;East Coast Canada;1.06
+2018-06;Latin America;716.78
+2018-06;MED Zone (MED Sea+Black Sea);145.11
+2018-06;North West Europe Zone;232.57
+2018-06;Oceania;16.41
+2018-06;Other North Africa;20.63
+2018-06;Unknown;13.36
+2018-07;East Coast Canada;7.42
+2018-07;Latin America;733.10
+2018-07;MED Zone (MED Sea+Black Sea);124.16
+2018-07;North West Europe Zone;89.08
+2018-07;Other North Africa;37.41
+2018-07;Unknown;4.15
+2018-07;Western Africa;9.31
+2018-08;East Coast Canada;7.06
+2018-08;Latin America;800.57
+2018-08;MED Zone (MED Sea+Black Sea);112.18
+2018-08;North West Europe Zone;75.73
+2018-08;Other North Africa;45.62
+2018-08;Unknown;9.91
+2018-09;Latin America;807.56
+2018-09;MED Zone (MED Sea+Black Sea);90.04
+2018-09;North West Europe Zone;55.65
+2018-09;Other North Africa;48.01
+2018-09;Other Southern Europe;9.90
+2018-09;Southern Africa;4.76
+2018-09;Unknown;1.08
+2018-10;East Coast Canada;1.77
+2018-10;Latin America;924.44
+2018-10;MED Zone (MED Sea+Black Sea);67.37
+2018-10;North West Europe Zone;36.18
+2018-10;Other North Africa;9.85
+2018-10;Unknown;6.44
+2018-11;East Coast Canada;16.52
+2018-11;Latin America;771.46
+2018-11;MED Zone (MED Sea+Black Sea);122.06
+2018-11;North West Europe Zone;103.16
+2018-11;Other North Africa;20.96
+2018-11;Unknown;18.90
+2018-11;Western Africa;43.03
+2018-12;East Coast Canada;24.32
+2018-12;Latin America;749.67
+2018-12;MED Zone (MED Sea+Black Sea);48.38
+2018-12;North West Europe Zone;181.00
+2018-12;Other North Africa;10.16
+2018-12;Unknown;20.06
+2018-12;Western Africa;21.03
+2019-01;East Coast Canada;7.19
+2019-01;Eastern Asia;0.30
+2019-01;Latin America;842.61
+2019-01;MED Zone (MED Sea+Black Sea);62.48
+2019-01;North West Europe Zone;67.96
+2019-01;Unknown;4.07
+2019-01;Western Africa;9.15
+2019-02;East Coast Canada;18.64
+2019-02;Latin America;579.27
+2019-02;MED Zone (MED Sea+Black Sea);53.82
+2019-02;North West Europe Zone;59.66
+2019-02;Unknown;3.73
+2019-03;Latin America;685.36
+2019-03;MED Zone (MED Sea+Black Sea);39.74
+2019-03;North West Europe Zone;88.34
+2019-03;Other North Africa;10.50
+2019-03;Unknown;12.62
+2019-04;East Coast Canada;8.90
+2019-04;Eastern Asia;0.30
+2019-04;Latin America;829.46
+2019-04;MED Zone (MED Sea+Black Sea);8.87
+2019-04;North West Europe Zone;73.46
+2019-04;Other North Africa;11.02
+2019-04;Unknown;21.90
+2019-05;East Coast Canada;8.85
+2019-05;Latin America;661.60
+2019-05;MED Zone (MED Sea+Black Sea);44.79
+2019-05;North West Europe Zone;143.42
+2019-05;Other North Africa;37.11
+2019-05;Unknown;25.40
+2019-05;Western Africa;31.76
+2019-06;Latin America;782.50
+2019-06;MED Zone (MED Sea+Black Sea);60.28
+2019-06;North West Europe Zone;175.06
+2019-06;Other North Africa;52.60
+2019-06;Unknown;30.06
+2019-06;Western Africa;9.95
+2019-07;East Coast Canada;16.74
+2019-07;Latin America;710.01
+2019-07;MED Zone (MED Sea+Black Sea);100.66
+2019-07;North West Europe Zone;83.90
+2019-07;Other North Africa;19.28
+2019-07;Unknown;20.73
+2019-07;Western Africa;10.22
+2019-08;Latin America;854.34
+2019-08;MED Zone (MED Sea+Black Sea);139.44
+2019-08;North West Europe Zone;141.33
+2019-08;Other North Africa;67.42
+2019-08;Unknown;11.67
+2019-09;East Coast Canada;10.61
+2019-09;Latin America;959.53
+2019-09;MED Zone (MED Sea+Black Sea);9.95
+2019-09;North West Europe Zone;49.56
+2019-09;Other North Africa;21.37
+2019-09;Unknown;17.92
+2019-10;East Coast Canada;18.61
+2019-10;Latin America;787.06
+2019-10;MED Zone (MED Sea+Black Sea);16.97
+2019-10;North West Europe Zone;11.07
+2019-10;Other North Africa;0.02
+2019-10;Unknown;13.20
+2019-11;East Coast Canada;4.75
+2019-11;Latin America;802.09
+2019-11;MED Zone (MED Sea+Black Sea);32.57
+2019-11;North West Europe Zone;43.62
+2019-11;Other North Africa;10.94
+2019-11;Unknown;7.51
+2019-12;East Coast Canada;1.97
+2019-12;Latin America;723.03
+2019-12;MED Zone (MED Sea+Black Sea);66.72
+2019-12;North West Europe Zone;41.32
+2019-12;Other North Africa;10.37
+2019-12;Unknown;8.33
+2020-01;Latin America;736.32
+2020-01;MED Zone (MED Sea+Black Sea);14.44
+2020-01;North West Europe Zone;61.04
+2020-01;Other North Africa;25.98
+2020-01;South-East Asia;2.06
+2020-01;Unknown;19.43
+2020-01;Western Africa;14.31
+2020-02;Latin America;717.53
+2020-02;MED Zone (MED Sea+Black Sea);90.86
+2020-02;North West Europe Zone;86.36
+2020-02;Other North Africa;49.67
+2020-02;Unknown;13.43
+2020-02;Western Africa;37.38
+2020-03;Eastern Asia;0.10
+2020-03;Latin America;888.49
+2020-03;North West Europe Zone;13.11
+2020-03;Unknown;10.87
+2020-04;East Coast Canada;0.03
+2020-04;Latin America;445.31
+2020-04;MED Zone (MED Sea+Black Sea);29.89
+2020-04;North West Europe Zone;45.29
+2020-04;Unknown;32.02
+2020-04;Western Africa;21.01
+2020-05;East Coast Canada;1.56
+2020-05;Eastern Asia;2.32
+2020-05;Latin America;427.80
+2020-05;MED Zone (MED Sea+Black Sea);53.63
+2020-05;North West Europe Zone;33.81
+2020-05;Western Africa;10.11
+2020-06;East Coast Canada;2.25
+2020-06;Eastern Asia;10.63
+2020-06;Latin America;619.02
+2020-06;MED Zone (MED Sea+Black Sea);84.57
+2020-06;North West Europe Zone;38.21
+2020-06;Other North Africa;16.77
+2020-06;South-East Asia;3.37
+2020-06;Unknown;12.75
+2020-06;Western Africa;30.30
+2020-07;East Coast Canada;1.75
+2020-07;Latin America;722.62
+2020-07;MED Zone (MED Sea+Black Sea);62.09
+2020-07;North West Europe Zone;113.32
+2020-07;Other North Africa;20.41
+2020-07;South-East Asia;11.45
+2020-07;Unknown;16.21
+2020-07;Western Africa;38.94
+2020-08;East Coast Canada;1.60
+2020-08;Latin America;683.40
+2020-08;MED Zone (MED Sea+Black Sea);19.75
+2020-08;North West Europe Zone;190.05
+2020-08;Other North Africa;35.92
+2020-08;South-East Asia;0.96
+2020-08;Unknown;30.22
+2020-09;East Coast Canada;1.05
+2020-09;Latin America;607.87
+2020-09;MED Zone (MED Sea+Black Sea);49.14
+2020-09;North West Europe Zone;94.02
+2020-09;Other North Africa;8.09
+2020-09;South-Central Asia;2.32
+2020-09;South-East Asia;2.98
+2020-09;Unknown;28.94
+2020-09;Western Africa;10.46
+2020-10;East Coast Canada;10.98
+2020-10;Latin America;645.89
+2020-10;MED Zone (MED Sea+Black Sea);27.09
+2020-10;North West Europe Zone;26.07
+2020-10;South-East Asia;1.12
+2020-10;Unknown;12.52
+2020-10;Western Africa;9.53
+2020-11;Latin America;699.70
+2020-11;North West Europe Zone;13.17
+2020-11;South-Central Asia;0.90
+2020-11;Unknown;12.09
+2020-12;East Coast Canada;9.32
+2020-12;Latin America;678.26
+2020-12;MED Zone (MED Sea+Black Sea);10.31
+2020-12;North West Europe Zone;13.76
+2020-12;Other North Africa;9.58
+2020-12;South-East Asia;3.09
+2020-12;Unknown;9.92
+2020-12;Western Africa;10.11
+2021-01;East Coast Canada;5.25
+2021-01;Latin America;625.10
+2021-01;MED Zone (MED Sea+Black Sea);10.34
+2021-01;Unknown;31.31
+2021-02;East Coast Canada;6.61
+2021-02;Latin America;497.63
+2021-02;North West Europe Zone;16.51
+2021-02;South-East Asia;6.84
+2021-02;Unknown;23.25
+2021-03;Latin America;494.77
+2021-03;Unknown;10.37
+2021-04;East Coast Canada;9.18
+2021-04;Latin America;735.78
+2021-04;MED Zone (MED Sea+Black Sea);3.57
+2021-04;North West Europe Zone;10.40
+2021-04;South-East Asia;4.78
+2021-04;Unknown;15.07
+2021-05;East Coast Canada;15.84
+2021-05;Latin America;725.66
+2021-05;North West Europe Zone;31.65
+2021-05;Unknown;20.11
+2021-06;East Coast Canada;8.67
+2021-06;Latin America;724.28
+2021-06;North West Europe Zone;102.97
+2021-06;Other North Africa;22.21
+2021-06;Unknown;15.17
+2021-07;Latin America;719.06
+2021-07;MED Zone (MED Sea+Black Sea);19.75
+2021-07;North West Europe Zone;66.75
+2021-07;Unknown;32.08
+2021-08;East Coast Canada;15.71
+2021-08;Latin America;849.38
+2021-08;MED Zone (MED Sea+Black Sea);16.78
+2021-08;North West Europe Zone;11.50
+2021-08;Unknown;11.75
+2021-09;East Coast Canada;4.84
+2021-09;Latin America;586.37
+2021-09;North West Europe Zone;12.73
+2021-09;Unknown;24.54
+2021-10;Latin America;615.72
+2021-10;North West Europe Zone;24.05
+2021-10;Unknown;11.66
+2021-11;East Coast Canada;5.05
+2021-11;Latin America;759.32
+2021-11;North West Europe Zone;13.93
+2021-11;Unknown;16.09
+2021-12;East Coast Canada;18.60
+2021-12;Latin America;796.79
+2021-12;North West Europe Zone;25.02
+2021-12;Other Southern Europe;2.34
+2021-12;Unknown;3.48
+2022-01;East Coast Canada;8.15
+2022-01;Eastern Asia;10.29
+2022-01;Latin America;676.21
+2022-01;North West Europe Zone;22.33
+2022-02;Latin America;618.92
+2022-03;East Coast Canada;14.82
+2022-03;Latin America;886.44
+2022-03;North West Europe Zone;52.28
+2022-03;Unknown;13.85
+2022-03;West Coast Canada;3.51
+2022-04;East Coast Canada;9.86
+2022-04;Latin America;993.44
+2022-04;MED Zone (MED Sea+Black Sea);9.29
+2022-04;North West Europe Zone;37.73
+2022-04;Unknown;10.82
+2022-05;East Coast Canada;9.28
+2022-05;Latin America;834.87
+2022-05;MED Zone (MED Sea+Black Sea);10.22
+2022-05;North West Europe Zone;19.70
+2022-05;Other Middle East;5.57
+2022-05;Unknown;7.76
+2022-05;Western Africa;3.55
+2022-06;East Coast Canada;4.80
+2022-06;Latin America;911.75
+2022-06;North West Europe Zone;38.52
+2022-06;Unknown;6.73
+2022-06;Western Africa;21.85
+2022-07;East Coast Canada;21.80
+2022-07;Latin America;1120.92
+2022-07;North West Europe Zone;74.30
+2022-07;South-East Asia;0.67
+2022-07;Western Africa;10.04
+2022-08;East Coast Canada;12.17
+2022-08;Latin America;1009.68
+2022-08;North West Europe Zone;50.18
+2022-08;Unknown;12.76
+2022-09;East Coast Canada;7.46
+2022-09;Latin America;809.13
+2022-09;North West Europe Zone;137.30
+2022-09;Other North Africa;3.58
+2022-09;Unknown;2.83
+2022-10;Latin America;785.50
+2022-10;MED Zone (MED Sea+Black Sea);11.14
+2022-10;North West Europe Zone;75.50
+2022-10;Unknown;7.07
+2022-10;Western Africa;9.79
+2022-11;Latin America;788.95
+2022-11;North West Europe Zone;91.91
+2022-11;Unknown;5.53
+2022-11;Western Africa;29.58
+2022-12;East Coast Canada;0.65
+2022-12;Latin America;746.75
+2022-12;North West Europe Zone;193.34
+2022-12;Western Africa;9.63
+2023-01;East Coast Canada;16.65
+2023-01;Latin America;671.37
+2023-01;North West Europe Zone;81.76
+2023-02;Latin America;616.34
+2023-02;MED Zone (MED Sea+Black Sea);0.23
+2023-02;North West Europe Zone;37.85
+2023-03;Latin America;822.91
+2023-03;MED Zone (MED Sea+Black Sea);10.52
+2023-03;North West Europe Zone;58.49
+2023-03;Other North Africa;9.63
+2023-04;Latin America;638.30
+2023-04;MED Zone (MED Sea+Black Sea);21.36
+2023-04;North West Europe Zone;97.82
+2023-04;Unknown;12.50
+2023-05;East Coast Canada;8.83
+2023-05;Latin America;629.64
+2023-05;MED Zone (MED Sea+Black Sea);9.94
+2023-05;North West Europe Zone;266.54
+2023-05;Unknown;23.86
+2023-06;East Coast Canada;8.51
+2023-06;Latin America;707.86
+2023-06;MED Zone (MED Sea+Black Sea);9.95
+2023-06;North West Europe Zone;201.64
+2023-06;Other North Africa;9.96
+2023-06;Unknown;6.22
+2023-07;East Coast Canada;17.89
+2023-07;Latin America;775.51
+2023-07;MED Zone (MED Sea+Black Sea);27.10
+2023-07;North West Europe Zone;226.28
+2023-07;Other North Africa;10.13
+2023-07;Unknown;0.79
+2023-07;Western Africa;9.84
+2023-08;East Coast Canada;8.50
+2023-08;Latin America;891.60
+2023-08;MED Zone (MED Sea+Black Sea);8.79
+2023-08;North West Europe Zone;164.07
+2023-08;Unknown;4.24
+2023-08;Western Africa;21.72
+2023-09;Latin America;793.16
+2023-09;North West Europe Zone;96.39
+2023-09;Western Africa;19.15
+2023-10;East Coast Canada;18.61
+2023-10;Latin America;759.75
+2023-10;North West Europe Zone;146.73
+2023-10;Other North Africa;10.48
+2023-10;Unknown;14.18
+2023-10;Western Africa;47.49
+2023-11;Latin America;667.71
+2023-11;North West Europe Zone;185.79
+2023-11;Unknown;2.64
+2023-11;Western Africa;10.33
+2023-12;East Coast Canada;9.03
+2023-12;Latin America;639.18
+2023-12;MED Zone (MED Sea+Black Sea);20.06
+2023-12;North West Europe Zone;351.57
+2023-12;Other North Africa;40.45
+2023-12;Unknown;14.28
+2023-12;Western Africa;10.61
+2024-01;East Coast Canada;3.98
+2024-01;Latin America;582.70
+2024-01;MED Zone (MED Sea+Black Sea);19.57
+2024-01;North West Europe Zone;220.97
+2024-01;Other North Africa;15.48
+2024-01;Unknown;0.55
+2024-02;East Coast Canada;5.52
+2024-02;Latin America;497.99
+2024-02;North West Europe Zone;183.80
+2024-02;Other Southern Europe;7.94
+2024-02;Unknown;0.81
+2024-03;Latin America;596.71
+2024-03;MED Zone (MED Sea+Black Sea);20.42
+2024-03;North West Europe Zone;197.10
+2024-03;Unknown;0.81
+2024-04;Latin America;633.83
+2024-04;North West Europe Zone;267.72
+2024-04;Unknown;3.01
+2024-05;East Coast Canada;5.32
+2024-05;Latin America;773.21
+2024-05;MED Zone (MED Sea+Black Sea);16.40
+2024-05;North West Europe Zone;184.09
+2024-05;Other North Africa;2.61
+2024-05;Other Southern Europe;5.06
+2024-05;Unknown;1.35
+2024-06;East Coast Canada;6.30
+2024-06;Latin America;815.45
+2024-06;MED Zone (MED Sea+Black Sea);21.41
+2024-06;North West Europe Zone;208.92
+2024-06;Other North Africa;42.47
+2024-06;Unknown;0.58
+2024-06;Western Africa;10.25
+2024-07;Latin America;653.58
+2024-07;MED Zone (MED Sea+Black Sea);84.15
+2024-07;North West Europe Zone;283.90
+2024-07;Other North Africa;25.20
+2024-07;Unknown;7.29
+2024-07;Western Africa;9.52
+2024-08;East Coast Canada;8.45
+2024-08;Latin America;682.70
+2024-08;MED Zone (MED Sea+Black Sea);56.38
+2024-08;North West Europe Zone;355.17
+2024-08;Other North Africa;22.15
+2024-08;Unknown;2.70
+2024-09;East Coast Canada;6.33
+2024-09;Latin America;724.29
+2024-09;MED Zone (MED Sea+Black Sea);55.00
+2024-09;North West Europe Zone;253.59
+2024-09;Other North Africa;10.37
+2024-10;Latin America;633.55
+2024-10;MED Zone (MED Sea+Black Sea);20.47
+2024-10;North West Europe Zone;282.17
+2024-10;Other North Africa;19.35
+2024-10;Unknown;10.53
+2024-10;Western Africa;9.70
+2024-11;East Coast Canada;6.33
+2024-11;Latin America;869.84
+2024-11;MED Zone (MED Sea+Black Sea);21.46
+2024-11;North West Europe Zone;304.04
+2024-11;Other North Africa;10.23
+2024-11;Unknown;10.05
+2024-12;East Coast Canada;7.10
+2024-12;Latin America;789.63
+2024-12;MED Zone (MED Sea+Black Sea);10.00
+2024-12;North West Europe Zone;337.69
+2024-12;Other North Africa;4.90
+2024-12;South-East Asia;1.04
+2024-12;Unknown;11.12
+2024-12;Western Africa;9.68
+2025-01;East Coast Canada;4.84
+2025-01;Latin America;716.78
+2025-01;MED Zone (MED Sea+Black Sea);9.68
+2025-01;North West Europe Zone;167.96
+2025-01;Unknown;4.25
+2025-02;Latin America;608.49
+2025-02;MED Zone (MED Sea+Black Sea);21.43
+2025-02;North West Europe Zone;53.67
+2025-02;South-Central Asia;4.21
+2025-02;Unknown;3.65
+2025-03;Latin America;635.11
+2025-03;MED Zone (MED Sea+Black Sea);18.36
+2025-03;North West Europe Zone;122.08
+2025-03;Other North Africa;19.68
+2025-03;Unknown;3.55
+2025-04;East Coast Canada;15.00
+2025-04;Latin America;772.47
+2025-04;MED Zone (MED Sea+Black Sea);33.78
+2025-04;North West Europe Zone;164.89
+2025-04;Other North Africa;14.84
+2025-04;Unknown;19.93
+2025-05;East Coast Canada;10.81
+2025-05;Eastern Asia;0.87
+2025-05;Latin America;798.30
+2025-05;MED Zone (MED Sea+Black Sea);26.42
+2025-05;North West Europe Zone;186.77
+2025-05;Other North Africa;52.82
+2025-05;Unknown;36.55
+2025-05;Western Africa;9.44
+2025-06;East Coast Canada;5.60
+2025-06;Latin America;798.34
+2025-06;MED Zone (MED Sea+Black Sea);38.87
+2025-06;North West Europe Zone;225.50
+2025-06;Other North Africa;6.94
+2025-06;Unknown;28.76
+2025-06;Western Africa;10.00
+2025-07;East Coast Canada;8.06
+2025-07;Latin America;786.30
+2025-07;MED Zone (MED Sea+Black Sea);28.11
+2025-07;Mideast Gulf;2.37
+2025-07;North West Europe Zone;285.39
+2025-07;Other North Africa;9.99
+2025-07;Unknown;19.91
+2025-08;Latin America;762.23
+2025-08;MED Zone (MED Sea+Black Sea);45.52
+2025-08;North West Europe Zone;203.98
+2025-08;Other North Africa;31.96
+2025-08;Unknown;18.77
+2025-09;East Coast Canada;7.00
+2025-09;Latin America;590.97
+2025-09;MED Zone (MED Sea+Black Sea);10.00
+2025-09;North West Europe Zone;273.93
+2025-09;Other North Africa;31.26
+2025-09;Unknown;19.30
+2025-09;Western Africa;10.33
+2025-10;East Coast Canada;6.46
+2025-10;Latin America;837.45
+2025-10;MED Zone (MED Sea+Black Sea);32.33
+2025-10;North West Europe Zone;103.66
+2025-10;Unknown;10.91
+2025-11;East Coast Canada;5.00
+2025-11;Latin America;768.89
+2025-11;MED Zone (MED Sea+Black Sea);10.90
+2025-11;North West Europe Zone;243.27
+2025-11;Other North Africa;50.56
+2025-11;Unknown;15.71
+2025-11;Western Africa;10.00
+2025-12;East Coast Canada;6.06
+2025-12;Latin America;728.15
+2025-12;MED Zone (MED Sea+Black Sea);25.60
+2025-12;North West Europe Zone;234.30
+2025-12;Other North Africa;45.48
+2025-12;Unknown;11.81
+2026-01;East Coast Canada;7.31
+2026-01;Latin America;540.02
+2026-01;MED Zone (MED Sea+Black Sea);67.17
+2026-01;North West Europe Zone;350.32
+2026-01;Other North Africa;2.82
+2026-01;Unknown;9.67
+2026-01;Western Africa;33.39
+2026-02;Latin America;555.73
+2026-02;MED Zone (MED Sea+Black Sea);23.21
+2026-02;North West Europe Zone;237.30
+2026-02;Other North Africa;22.45
+2026-02;Unknown;2.76
+2026-02;Western Africa;2.60
+2026-03;East Coast Canada;7.26
+2026-03;Eastern Africa;25.62
+2026-03;Latin America;557.33
+2026-03;MED Zone (MED Sea+Black Sea);19.65
+2026-03;North West Europe Zone;159.19
+2026-03;Oceania;35.50
+2026-03;Other North Africa;29.52
+2026-03;South-Central Asia;9.68
+2026-03;South-East Asia;1.93
+2026-03;Southern Africa;88.89
+2026-03;Unknown;6.06
+2026-03;Western Africa;46.98
+2026-04;East Coast Canada;6.43
+2026-04;Latin America;764.60
+2026-04;MED Zone (MED Sea+Black Sea);41.93
+2026-04;North West Europe Zone;174.90
+2026-04;Oceania;33.60
+2026-04;Other North Africa;29.87
+2026-04;South-Central Asia;20.50
+2026-04;South-East Asia;8.05
+2026-04;Southern Africa;42.04
+2026-04;Unknown;13.80
+2026-04;Western Africa;75.76
+2026-05;East Coast Canada;7.61
+2026-05;Latin America;838.33
+2026-05;MED Zone (MED Sea+Black Sea);55.48
+2026-05;North West Europe Zone;210.48
+2026-05;Other North Africa;36.14
+2026-05;South-Central Asia;5.80
+2026-05;Southern Africa;44.06
+2026-05;Unknown;19.72
+2026-05;Western Africa;68.15
+2026-06;East Coast Canada;10.09
+2026-06;Latin America;933.06
+2026-06;MED Zone (MED Sea+Black Sea);47.73
+2026-06;North West Europe Zone;100.46
+2026-06;Other North Africa;50.18
+2026-06;South-Central Asia;7.43
+2026-06;Southern Africa;3.97
+2026-06;Unknown;42.02
+2026-06;Western Africa;41.96
+2026-07;Latin America;336.50
+2026-07;MED Zone (MED Sea+Black Sea);29.32
+2026-07;North West Europe Zone;86.93
+2026-07;Other North Africa;16.74
+2026-07;Unknown;153.83
+2026-07;Western Africa;9.73
+2026-08;North West Europe Zone;11.01

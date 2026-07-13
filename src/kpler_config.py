@@ -387,9 +387,20 @@ def build_pull_specs(config: RuntimeConfig) -> list[PullSpec]:
     return specs
 
 
-def credential_pair() -> tuple[str, str]:
-    email = os.environ.get("KPLER_EMAIL") or os.environ.get("KPLER_USERNAME") or ""
-    password = os.environ.get("KPLER_PASSWORD") or ""
-    if not email or not password:
-        raise RuntimeError("Missing Kpler credentials. Set KPLER_USERNAME or KPLER_EMAIL, plus KPLER_PASSWORD.")
-    return email, password
+def has_kpler_api_key() -> bool:
+    return bool(os.environ.get("KPLER_API_V2_BASIC_AUTH") or os.environ.get("KPLER_API_KEY"))
+
+
+def kpler_api_key() -> str:
+    configured = (os.environ.get("KPLER_API_V2_BASIC_AUTH") or os.environ.get("KPLER_API_KEY") or "").strip()
+    if not configured:
+        raise RuntimeError("Missing Kpler API v2 key. Set KPLER_API_KEY or KPLER_API_V2_BASIC_AUTH.")
+    if configured.lower().startswith("basic "):
+        configured = configured[6:].strip()
+    if not configured or any(char.isspace() for char in configured):
+        raise RuntimeError("Invalid Kpler API v2 key format. Provide the key with no embedded whitespace.")
+    return configured
+
+
+def kpler_authorization_header() -> str:
+    return f"Basic {kpler_api_key()}"

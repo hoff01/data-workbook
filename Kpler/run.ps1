@@ -13,6 +13,18 @@ $PythonRoot = Join-Path $RuntimeRoot "python"
 $CacheRoot = Join-Path $RuntimeRoot "cache"
 $Venv = Join-Path $PythonRoot ".venv"
 $Python = Join-Path $Venv "Scripts\python.exe"
+$LocalEnvScript = Join-Path $Root "config\local.env.ps1"
+
+if (Test-Path $LocalEnvScript) {
+    . $LocalEnvScript
+}
+
+function Assert-NativeSuccess {
+    param([string]$Label)
+    if ($LASTEXITCODE -ne 0) {
+        throw "$Label failed with exit code $LASTEXITCODE."
+    }
+}
 
 function Set-RuntimeEnvironment {
     if (!(Test-Path $CacheRoot)) {
@@ -50,6 +62,7 @@ function Invoke-SystemPython {
         $cmdArgs += $cmd[1..($cmd.Length - 1)]
     }
     & $cmd[0] @($cmdArgs + $Arguments)
+    Assert-NativeSuccess "Python"
 }
 
 function Setup-Environment {
@@ -64,7 +77,9 @@ function Setup-Environment {
         Invoke-SystemPython @("-m", "venv", $Venv)
     }
     & $Python -m pip install --upgrade pip
+    Assert-NativeSuccess "pip upgrade"
     & $Python -m pip install -r (Join-Path $Root "requirements.txt")
+    Assert-NativeSuccess "Kpler dependency setup"
 }
 
 function Test-Environment {
@@ -86,10 +101,12 @@ if ($Preflight) {
     Set-RuntimeEnvironment
     Test-Environment
     & $Python (Join-Path $RepoRoot "src\kpler_pull.py") --preflight
+    Assert-NativeSuccess "Kpler preflight"
 }
 
 if ($Run) {
     Set-RuntimeEnvironment
     Test-Environment
     & $Python (Join-Path $RepoRoot "src\kpler_pull.py")
+    Assert-NativeSuccess "Kpler pull"
 }

@@ -1442,6 +1442,10 @@ function makeStandardTests(runtime) {
     if (!point) throw new Error(`${runtime.product.key} ${frequency} has no forecast point for ${regionKey}`);
     tests.push({ kind: "direct", name: "demand adjustment", frequency, regionKey, period: point.period, lineId: "demandAdjustment", targetLine: "demand", value: round3(Number(point.demandKbd || 0) + 17.321) });
     tests.push({ kind: "direct", name: "imports adjustment", frequency, regionKey, period: point.period, lineId: "importsAdjustment", targetLine: "imports", value: round3(Number(point.importsKbd || 0) + 13.217) });
+    const p5 = firstForecastPoint(calc, frequency, "padd5");
+    if (p5) {
+      tests.push({ kind: "direct", name: "PADD 5 imports adjustment", frequency, regionKey: "padd5", period: p5.period, lineId: "importsAdjustment", targetLine: "imports", value: round3(Number(p5.importsKbd || 0) + 15.513) });
+    }
     const yieldTarget = Number(point.yieldPct || 0) > 92 ? round3(Number(point.yieldPct || 0) - 2.25) : round3(Number(point.yieldPct || 0) + 2.25);
     tests.push({ kind: "direct", name: "yield adjustment", frequency, regionKey, period: point.period, lineId: "yieldAdjustmentPct", targetLine: "yieldPct", value: yieldTarget });
 

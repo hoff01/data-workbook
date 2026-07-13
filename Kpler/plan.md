@@ -60,7 +60,7 @@ Relevant SDK enum values from the docs:
 - `FlowsSplit.DestinationTradingRegions = "destination trading regions"`
 - `FlowsSplit.Total = "total"`
 
-Implementation update: use direct HTTPS requests to `https://api.kpler.com/v1/flows` rather than instantiating the Kpler Python SDK client. The SDK documentation and local SDK source are still useful for confirming request parameters, authentication, and response format. The direct implementation mirrors the SDK's Basic Auth and semicolon-delimited CSV response handling while avoiding the SDK runtime layer.
+Implementation update: use direct HTTPS requests to the Kpler API v2 Cargo Flows endpoint at `https://api.kpler.com/v2/cargo/flows` rather than instantiating the Kpler Python SDK client. The client uses the v2 Basic API key, v2 parameter names, and the v2 `period`/`quantity` CSV response while avoiding an SDK runtime layer.
 
 Use Polars for parsing and transformations. Pandas is not required for this pipeline.
 
@@ -105,15 +105,13 @@ Use environment variables for credentials. Do not commit credentials.
 
 Required:
 
-- `KPLER_EMAIL` or SDK-supported username variable.
-- `KPLER_PASSWORD` or SDK-supported password variable.
-- If Kpler supports API tokens in the installed SDK version, prefer `KPLER_API_KEY` or the SDK's documented token variable.
+- `KPLER_API_KEY`, or the complete `KPLER_API_V2_BASIC_AUTH` header value.
 
 Optional:
 
 - `KPLER_START_DATE`, default `2018-01-01`.
-- `KPLER_END_DATE`, default current date unless the SDK accepts `None` for latest.
-- `KPLER_SNAPSHOT_DATE`, default unset.
+- `KPLER_END_DATE`, default current date plus 45 days.
+- `KPLER_SNAPSHOT_DATE` is not supported by the Kpler Cargo API v2 Flows endpoint; the client fails explicitly if it is set.
 - `KPLER_WITH_FORECAST`, default `true`.
 - `KPLER_ONLY_REALIZED`, default `false`.
 - `KPLER_CONCURRENCY`, default conservative, such as `2`.

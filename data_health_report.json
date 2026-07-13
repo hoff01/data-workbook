@@ -1,13 +1,13 @@
 {
   "balances": {
     "diesel": {
-      "generated_at": "2026-07-12T03:23:26.779Z",
+      "generated_at": "2026-07-13T15:49:46.240Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-07-03",
       "path": "Diesel_Balance/manifest.json"
     },
     "jet": {
-      "generated_at": "2026-07-12T03:23:26.900Z",
+      "generated_at": "2026-07-13T15:49:46.423Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-07-03",
       "path": "Jet_Balance/manifest.json"
@@ -58,7 +58,7 @@
       "max_allowed_age_days": 14,
       "name": "eia_weekly_freshness",
       "status": "pass",
-      "today": "2026-07-11"
+      "today": "2026-07-13"
     },
     {
       "columns": 232,
@@ -104,7 +104,7 @@
       "max_allowed_age_days": 150,
       "name": "eia_monthly_freshness",
       "status": "pass",
-      "today": "2026-07-11"
+      "today": "2026-07-13"
     },
     {
       "fallback_active": false,
@@ -112,31 +112,31 @@
       "mode": "live",
       "name": "kpler",
       "path": "Kpler/manifest.json",
-      "rows": 121562,
+      "rows": 16743,
       "status": "pass"
     },
     {
-      "generated_day": "2026-07-09",
+      "generated_day": "2026-07-13",
       "max_allowed_age_days": 7,
       "name": "kpler_freshness",
       "status": "pass",
-      "today": "2026-07-11"
+      "today": "2026-07-13"
     },
     {
-      "fallback_active": true,
-      "fallback_reason": "RuntimeError: Kpler authentication failed: HTTP 403",
-      "mode": "eia_error_fallback",
+      "fallback_active": false,
+      "fallback_reason": "",
+      "mode": "live",
       "name": "kpler_padd1_eia_split",
       "path": "Kpler/padd1_eia_split_manifest.json",
-      "rows": 12296,
-      "status": "warn"
+      "rows": 12621,
+      "status": "pass"
     },
     {
-      "generated_day": "2026-07-10",
+      "generated_day": "2026-07-13",
       "max_allowed_age_days": 7,
       "name": "kpler_padd1_eia_split_freshness",
       "status": "pass",
-      "today": "2026-07-11"
+      "today": "2026-07-13"
     },
     {
       "current_month": "2026-07",
@@ -194,13 +194,13 @@
       "name": "power_generation_dfo",
       "run_end": "2026-07-10",
       "status": "pass",
-      "today": "2026-07-11"
+      "today": "2026-07-13"
     },
     {
       "generated_day": "2026-07-10",
       "name": "power_generation_dfo_hourly",
       "status": "pass",
-      "today": "2026-07-11"
+      "today": "2026-07-13"
     },
     {
       "crlf_files": [],
@@ -298,25 +298,25 @@
       "rows": 549
     }
   },
-  "generated_at": "2026-07-12T03:23:54.701884+00:00",
+  "generated_at": "2026-07-13T15:49:59.394430+00:00",
   "kpler": {
     "fallback": {},
-    "generated_at": "2026-07-09T02:08:57.505640+00:00",
+    "generated_at": "2026-07-13T15:49:55.610614+00:00",
     "mode": "live",
     "path": "Kpler/manifest.json",
-    "rows": 121562
+    "rows": 16743
   },
   "kpler_padd1_eia_split": {
     "fallback": {
-      "active": true,
+      "active": false,
       "padd1ab_share": 1.0,
       "padd1c_share": 0.0,
-      "reason": "RuntimeError: Kpler authentication failed: HTTP 403"
+      "reason": ""
     },
-    "generated_at": "2026-07-10T13:12:56.253099+00:00",
-    "mode": "eia_error_fallback",
+    "generated_at": "2026-07-13T15:49:26.565038+00:00",
+    "mode": "live",
     "path": "Kpler/padd1_eia_split_manifest.json",
-    "rows": 12296
+    "rows": 12621
   },
   "power_generation_dfo": {
     "generated_at": "2026-07-10T13:07:10.975276+00:00",
@@ -351,8 +351,7 @@
   },
   "status": "pass",
   "summary": {
-    "pass": 23,
-    "warn": 1
+    "pass": 24
   },
-  "today": "2026-07-11"
+  "today": "2026-07-13"
 }
