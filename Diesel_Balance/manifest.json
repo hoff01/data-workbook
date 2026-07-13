@@ -1,7 +1,7 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-07-13T15:50:56.998Z",
+  "generatedAt": "2026-07-13T16:42:56.741Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through the saved forecast end date.",
   "latestMonthly": "2026-04-15",
@@ -12,34 +12,34 @@
       "path": "eia_monthly/diesel.csv",
       "rows": 124,
       "checksum": "7a34584efdf7fd2befb3547e0c9395a198be93fce77fba3f3e5e9d527cffe28e",
-      "modifiedAt": "2026-07-13T15:49:26.514Z"
+      "modifiedAt": "2026-07-13T16:42:49.650Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/diesel.csv",
       "rows": 549,
       "checksum": "8d7bffc4fe3e83dca456198fe42c4bd665fe989d136cc274173357e99ba8a294",
-      "modifiedAt": "2026-07-13T15:49:26.527Z"
+      "modifiedAt": "2026-07-13T16:42:49.659Z"
     },
     {
       "role": "kpler_manifest",
       "path": "kpler/manifest.json",
-      "checksum": "6b2ced52ae24dc4bcdfbb2b6215eb91dfee998bfa5fc5486deb66c3b994b282a",
-      "modifiedAt": "2026-07-13T15:49:55.612Z"
+      "checksum": "8e5717d5fb215ac9eea510475ddf1049558a1e6d25475e6de1f03be58d6ee2aa",
+      "modifiedAt": "2026-07-13T16:42:28.542Z"
     },
     {
       "role": "kpler_guide_monthly",
       "path": "kpler/output/monthly/us_diesel_balance_guides_monthly.csv",
       "rows": 104,
-      "checksum": "05c2577dddba06431e72edf95ce0583f300173e00436b8b9e22777d3908097a1",
-      "modifiedAt": "2026-07-13T15:49:55.544Z"
+      "checksum": "5e816966dd37633d2ff2d901251c7d18b7abd9bc5d32e1476371953b1e64d4b4",
+      "modifiedAt": "2026-07-13T16:42:28.462Z"
     },
     {
       "role": "kpler_guide_weekly",
       "path": "kpler/output/weekly/us_diesel_balance_guides_weekly.csv",
       "rows": 452,
-      "checksum": "86f6e844c6145f765c84dd340cf00cd84bb8c6dee4d14775ffd775ae2783ef04",
-      "modifiedAt": "2026-07-13T15:49:55.544Z"
+      "checksum": "f63e9b7e70890e3c57eb9294a23f9554d0d3f8123dd4d604e5a47c25a61f3495",
+      "modifiedAt": "2026-07-13T16:42:28.461Z"
     },
     {
       "role": "padd_1",
@@ -90,9 +90,9 @@
   "checksums": {
     "eia_monthly": "7a34584efdf7fd2befb3547e0c9395a198be93fce77fba3f3e5e9d527cffe28e",
     "eia_weekly": "8d7bffc4fe3e83dca456198fe42c4bd665fe989d136cc274173357e99ba8a294",
-    "kpler_manifest": "6b2ced52ae24dc4bcdfbb2b6215eb91dfee998bfa5fc5486deb66c3b994b282a",
-    "kpler_guide_monthly": "05c2577dddba06431e72edf95ce0583f300173e00436b8b9e22777d3908097a1",
-    "kpler_guide_weekly": "86f6e844c6145f765c84dd340cf00cd84bb8c6dee4d14775ffd775ae2783ef04",
+    "kpler_manifest": "8e5717d5fb215ac9eea510475ddf1049558a1e6d25475e6de1f03be58d6ee2aa",
+    "kpler_guide_monthly": "5e816966dd37633d2ff2d901251c7d18b7abd9bc5d32e1476371953b1e64d4b4",
+    "kpler_guide_weekly": "f63e9b7e70890e3c57eb9294a23f9554d0d3f8123dd4d604e5a47c25a61f3495",
     "padd_1": "befec683578526b8c13128d9be7dafb264c0864131cc5c498a2a9026994e500e",
     "power_dfo_daily": "b8b3a314d4dc5e8c5e88eba044f8fde638ae9a4c1424864f1cb76a53a34d9791",
     "power_dfo_weather": "539a399a0db07abbb5530ee2ebd196fd9e6b45bb944935433e728040ec692928",
@@ -102,10 +102,10 @@
     "refinery_unit_capacity": "8434ccdf7e466b2786b52f8c840877d116551f1dff15640ae2e4a0ee4e707d2f"
   },
   "optimization": {
-    "generatedAt": "2026-07-13T15:50:57.055Z",
+    "generatedAt": "2026-07-13T16:42:56.798Z",
     "runtimePlan": {
       "baseRows": 6974,
-      "lazyRows": 45042,
+      "lazyRows": 45044,
       "lazyRowSharePct": 86.6,
       "basePayloadKb": 1881.8,
       "weeklyPayloadKb": 2765.2,
@@ -125,7 +125,7 @@
       "sourceFiles": 12,
       "sourceHubSources": 7,
       "refineryCapacityRows": 311,
-      "kplerRows": 16743,
+      "kplerRows": 16745,
       "powerDfoDailyRows": 2701,
       "powerDfoWeatherRows": 16
     },
@@ -157,7 +157,7 @@
       {
         "name": "reference",
         "path": "data/diesel_balance_runtime_reference.js",
-        "rows": 17073,
+        "rows": 17075,
         "estimatedKb": 151.4,
         "status": "optimized",
         "reason": "Source inventory, refinery capacity, Kpler metadata, and checksums load only for Balance, Charts, Reference, Outages, or Crude runs."

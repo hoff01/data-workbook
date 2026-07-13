@@ -575,7 +575,7 @@ period;destinationTradingRegions;quantity
 2026-04;Unknown;13.80
 2026-04;Western Africa;75.76
 2026-05;East Coast Canada;7.61
-2026-05;Latin America;838.33
+2026-05;Latin America;838.34
 2026-05;MED Zone (MED Sea+Black Sea);55.48
 2026-05;North West Europe Zone;210.48
 2026-05;Other North Africa;36.14
@@ -590,12 +590,13 @@ period;destinationTradingRegions;quantity
 2026-06;Other North Africa;50.18
 2026-06;South-Central Asia;7.43
 2026-06;Southern Africa;3.97
-2026-06;Unknown;42.02
+2026-06;Unknown;39.19
 2026-06;Western Africa;41.96
-2026-07;Latin America;336.50
+2026-07;Latin America;348.64
 2026-07;MED Zone (MED Sea+Black Sea);29.32
 2026-07;North West Europe Zone;86.93
 2026-07;Other North Africa;16.74
-2026-07;Unknown;153.83
+2026-07;Unknown;150.25
 2026-07;Western Africa;9.73
 2026-08;North West Europe Zone;11.01
+2026-08;Unknown;10.90

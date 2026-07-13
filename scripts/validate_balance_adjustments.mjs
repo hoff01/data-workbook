@@ -7,6 +7,8 @@ import vm from "node:vm";
 const ROOT = process.cwd();
 const DAY_MS = 24 * 60 * 60 * 1000;
 const OUTAGE_RAMP_DOWN_DAYS = 3;
+const CRUDE_RUN_OUTAGE_UNIT_KEY = "atmos_distillation";
+const REGIONAL_CAPACITY_REFINERY_ID = "__regional_capacity__";
 
 const PRODUCTS = [
   {
@@ -30,6 +32,16 @@ const CRUDE_AGGREGATES = {
   p123: ["padd1", "padd2", "padd3"],
   p13: ["padd1", "padd3"],
 };
+
+function canonicalOutageUnitKey(unitKey = "", unitLabel = "") {
+  const raw = `${String(unitKey || "")} ${String(unitLabel || "")}`.toLowerCase().replace(/[^a-z0-9]+/g, " ");
+  if (raw.includes("atmos") || raw.includes("crude distillation") || raw.includes("cdu")) return CRUDE_RUN_OUTAGE_UNIT_KEY;
+  if (raw.includes("fcc") || raw.includes("catalytic cracking")) return "fcc";
+  if (raw.includes("cok")) return "coking";
+  if (raw.includes("hydrocrack") && (raw.includes("gasoil") || raw.includes("gas oil") || raw.includes("resid"))) return "gasoil_resid_hydrocracking";
+  if (raw.includes("hydrocrack")) return "distillate_hydrocracking";
+  return String(unitKey || unitLabel || "unknown").trim() || "unknown";
+}
 
 const EXPORT_DESTINATION_FIELDS = [
   "exportsLatinAmericaKbd",
@@ -573,15 +585,28 @@ class Calculator {
 
   latestRegionalCapacityAdjustment(regionKey, lineId, periodMonth) {
     const rows = this.capacityAdjustments
-      .filter((row) => row.refineryId === "__regional_capacity__" && row.regionKey === regionKey && row.unitKey === lineId)
+      .filter((row) => row.scope !== "crude_cell" && row.refineryId === REGIONAL_CAPACITY_REFINERY_ID && row.regionKey === regionKey && row.unitKey === lineId)
       .sort((a, b) => String(a.periodMonth || "").localeCompare(String(b.periodMonth || "")));
     const exact = this.regionalCapacityAdjustmentCarriesForward(lineId) ? this.latestCapacityAdjustmentIn(rows, periodMonth) : this.exactCapacityAdjustmentIn(rows, periodMonth);
     if (exact) return exact;
     if (lineId !== "operableCapacityKbd") return null;
     const fallbackRows = this.capacityAdjustments
-      .filter((row) => row.refineryId === "__regional_capacity__" && row.regionKey === regionKey && row.unitKey === "operatingCapacityKbd")
+      .filter((row) => row.scope !== "crude_cell" && row.refineryId === REGIONAL_CAPACITY_REFINERY_ID && row.regionKey === regionKey && row.unitKey === "operatingCapacityKbd")
       .sort((a, b) => String(a.periodMonth || "").localeCompare(String(b.periodMonth || "")));
     return this.latestCapacityAdjustmentIn(fallbackRows, periodMonth);
+  }
+
+  exactCrudeCellAdjustment(regionKey, unitKey, period, frequency) {
+    const targetPeriod = frequency === "weekly" ? String(period || "").slice(0, 10) : periodMonthValue(period);
+    return this.capacityAdjustments
+      .filter((row) => row.scope === "crude_cell"
+        && row.refineryId === REGIONAL_CAPACITY_REFINERY_ID
+        && row.regionKey === regionKey
+        && row.unitKey === unitKey
+        && (row.frequency === "weekly" ? "weekly" : "monthly") === frequency
+        && (frequency === "weekly" ? String(row.period || "").slice(0, 10) : periodMonthValue(row.period || row.periodMonth)) === targetPeriod)
+      .sort((a, b) => String(a.updatedAt || "").localeCompare(String(b.updatedAt || "")))
+      .at(-1) || null;
   }
 
   regionalCapacityRowValue(regionKey, lineId, periodMonth, fallback = 0) {
@@ -602,13 +627,16 @@ class Calculator {
         target[bucket] += value;
         target.total += value;
       };
-      const applyOutageValue = (regionKey, type, dateMs, value) => {
+      const applyOutageValue = (regionKey, unitKey, type, dateMs, value) => {
         if (!value) return;
         const dateKey = dateKeyFromMs(dateMs);
         const byRegion = days.get(dateKey) || {};
-        const regionTotals = byRegion[regionKey] || { planned: 0, unplanned: 0, other: 0, total: 0 };
-        addValue(regionTotals, type, value);
-        byRegion[regionKey] = regionTotals;
+        const regionUnits = byRegion[regionKey] || {};
+        const canonicalUnitKey = canonicalOutageUnitKey(unitKey);
+        const unitTotals = regionUnits[canonicalUnitKey] || { planned: 0, unplanned: 0, other: 0, total: 0 };
+        addValue(unitTotals, type, value);
+        regionUnits[canonicalUnitKey] = unitTotals;
+        byRegion[regionKey] = regionUnits;
         days.set(dateKey, byRegion);
       };
       for (const outage of this.crudeOutages) {
@@ -617,10 +645,11 @@ class Calculator {
         const end = dateValue(outage.endDate);
         const value = Number(outage.capacityOfflineKbd || 0);
         if (!regionKey || start === null || end === null || !value) continue;
-        for (let ms = start, guard = 0; ms <= end && guard < 10000; ms += DAY_MS, guard += 1) applyOutageValue(regionKey, outage.type, ms, value);
+        const unitKey = outage.unitKey || outage.unitLabel || "unknown";
+        for (let ms = start, guard = 0; ms <= end && guard < 10000; ms += DAY_MS, guard += 1) applyOutageValue(regionKey, unitKey, outage.type, ms, value);
         for (let dayOffset = 1; dayOffset <= OUTAGE_RAMP_DOWN_DAYS; dayOffset += 1) {
           const rampValue = roundCapacity1(value * this.outageRampFactor(dayOffset));
-          if (rampValue) applyOutageValue(regionKey, outage.type, end + dayOffset * DAY_MS, rampValue);
+          if (rampValue) applyOutageValue(regionKey, unitKey, outage.type, end + dayOffset * DAY_MS, rampValue);
         }
       }
       return days;
@@ -636,7 +665,7 @@ class Calculator {
       if (!byRegion) continue;
       const sourceKeys = CRUDE_AGGREGATES[regionKey] || [regionKey];
       for (const key of sourceKeys) {
-        const daily = byRegion[key];
+        const daily = byRegion[key]?.[CRUDE_RUN_OUTAGE_UNIT_KEY];
         if (!daily) continue;
         totals.planned += Number(daily.planned || 0);
         totals.unplanned += Number(daily.unplanned || 0);
@@ -719,7 +748,8 @@ class Calculator {
     const operable = basisOperable;
     const basisOperating = Number(basis.operatingCapacityKbd || Math.max(0, basisOperable - Number(basis.idleCapacityKbd || 0)) || 0);
     const basisIdle = actual && isActual ? Math.max(0, basisOperable - basisOperating) : 0;
-    const idle = actual && isActual ? basisIdle : this.regionalCapacityRowValue(regionKey, "idleCapacityKbd", month, basisIdle);
+    const idleCellAdjustment = actual && isActual ? null : this.exactCrudeCellAdjustment(regionKey, "idleCapacityKbd", period, frequency);
+    const idle = actual && isActual ? basisIdle : idleCellAdjustment ? Number(idleCellAdjustment.capacityKbd || 0) : this.regionalCapacityRowValue(regionKey, "idleCapacityKbd", month, basisIdle);
     const operating = actual && isActual ? basisOperating : Math.max(0, operable - idle);
     const baseRuns = Number((actual && isActual ? actual.crudeRunsKbd : monthlyBasis.crudeRunsKbd) || 0);
     const blankHistoricalOutages = Boolean(actual && isActual && !this.useHistoricalCrudeOutageEstimate(period));
@@ -729,15 +759,18 @@ class Calculator {
     const explicitUnplanned = unplannedOverride ? Number(unplannedOverride.capacityKbd || 0) : Number(outage.unplanned || 0);
     const exPlannedCapacity = Math.max(0, operable - plannedForCalc);
     const runCeiling = Math.max(0, operating - plannedForCalc);
-    const exPlannedUtilizationAdjustment = actual && isActual ? null : this.latestRegionalCapacityAdjustment(regionKey, "exPlannedUtilizationAdjustmentPct", month);
+    const exPlannedCellAdjustment = actual && isActual ? null : this.exactCrudeCellAdjustment(regionKey, "exPlannedUtilizationAdjustmentPct", period, frequency);
+    const exPlannedUtilizationAdjustment = exPlannedCellAdjustment || (actual && isActual ? null : this.latestRegionalCapacityAdjustment(regionKey, "exPlannedUtilizationAdjustmentPct", month));
     const modeledUnplanned = this.modeledUnplannedMaintenanceKbd(regionKey, period, operable, plannedForCalc, idle, frequency);
     const targetRuns = exPlannedUtilizationAdjustment ? (exPlannedCapacity * Math.max(0, Math.min(100, Number(exPlannedUtilizationAdjustment.capacityKbd || 0)))) / 100 : null;
     const utilizationSolvedUnplanned = targetRuns !== null ? Math.max(0, runCeiling - targetRuns) : null;
+    const crudeRunsAdjustment = actual && isActual ? null : this.exactCrudeCellAdjustment(regionKey, "crudeRunsKbd", period, frequency);
+    const manualCrudeRuns = crudeRunsAdjustment ? Math.max(0, Number(crudeRunsAdjustment.capacityKbd || 0)) : null;
     const explicitUnplannedAboveModel = explicitUnplanned > modeledUnplanned;
     const historicalUnplanned = blankHistoricalOutages ? null : this.historicalUnplannedMaintenanceKbd(operable, plannedForCalc, baseRuns);
-    const unplanned = actual && isActual ? historicalUnplanned : explicitUnplannedAboveModel ? explicitUnplanned : utilizationSolvedUnplanned !== null ? utilizationSolvedUnplanned : modeledUnplanned;
+    const unplanned = actual && isActual ? historicalUnplanned : manualCrudeRuns !== null ? Math.max(0, runCeiling - manualCrudeRuns) : explicitUnplannedAboveModel ? explicitUnplanned : utilizationSolvedUnplanned !== null ? utilizationSolvedUnplanned : modeledUnplanned;
     const totalOffline = planned === null && unplanned === null ? null : Number(planned || 0) + Number(unplanned || 0);
-    const crudeRuns = actual && isActual ? baseRuns : Math.max(0, runCeiling - Number(unplanned || 0));
+    const crudeRuns = actual && isActual ? baseRuns : manualCrudeRuns !== null ? manualCrudeRuns : Math.max(0, runCeiling - Number(unplanned || 0));
     const baseGross = Number((actual && isActual ? actual.grossInputsKbd : monthlyBasis.grossInputsKbd) || crudeRuns || baseRuns || 0);
     return {
       period,
@@ -1433,6 +1466,124 @@ function runtimeWithAdjustmentList(runtime, calc, adjustments) {
   return next;
 }
 
+function runtimeWithOutages(runtime, outages) {
+  const next = clone(runtime);
+  next.settings.crudeOutages = [...(next.settings.crudeOutages || []), ...outages];
+  return next;
+}
+
+function runtimeWithCapacityAdjustment(runtime, adjustment) {
+  const next = clone(runtime);
+  next.settings.refineryCapacityAdjustments = [...(next.settings.refineryCapacityAdjustments || []), adjustment];
+  return next;
+}
+
+function crudeForecastPoint(calc, regionKey, period, frequency) {
+  const info = calc.crudeInfoIndex(frequency).get(period);
+  if (!info || info.isActual) return null;
+  return calc.crudeSchedulePoint(regionKey, period, info.bucket || {}, false, frequency);
+}
+
+function validateOverlappingOutageIsolation(runtime) {
+  const failures = [];
+  const baselineCalc = new Calculator(runtime);
+  const period = baselineCalc.crudeAllPeriods("weekly").find(([, , isActual]) => !isActual)?.[0] || "";
+  if (!period) return { failures: [`${runtime.product.key}: no forecast crude week for outage-isolation test`], summary: null };
+  const range = periodRange(period, "weekly");
+  const startDate = dateKeyFromMs(range.start);
+  const refineryId = `synthetic-overlap-${runtime.product.key}`;
+  const shared = {
+    regionKey: "padd1",
+    refineryId,
+    refineryName: "Synthetic PADD 1 refinery",
+    refinery: "Synthetic PADD 1 refinery",
+    capacityOfflineKbd: 25,
+    startDate,
+    endDate: period,
+    type: "Planned",
+    updatedAt: "2099-01-01T00:00:00.000Z",
+  };
+  const fcc = { ...shared, id: `${refineryId}-fcc`, unitKey: "fcc", unitLabel: "FCC" };
+  const atmos = { ...shared, id: `${refineryId}-atmos`, unitKey: CRUDE_RUN_OUTAGE_UNIT_KEY, unitLabel: "Atmos Distillation" };
+  const baseline = crudeForecastPoint(baselineCalc, "padd1", period, "weekly");
+  const fccCalc = new Calculator(runtimeWithOutages(runtime, [fcc]));
+  const fccOnly = crudeForecastPoint(fccCalc, "padd1", period, "weekly");
+  const bothCalc = new Calculator(runtimeWithOutages(runtime, [fcc, atmos]));
+  const both = crudeForecastPoint(bothCalc, "padd1", period, "weekly");
+  if (!baseline || !fccOnly || !both) {
+    failures.push(`${runtime.product.key}: missing PADD 1 crude point for overlapping-outage test`);
+  } else {
+    for (const field of ["plannedMaintenanceKbd", "unplannedMaintenanceKbd", "crudeRunsKbd"]) {
+      if (!near(fccOnly[field], baseline[field], 0.03)) failures.push(`${runtime.product.key}: FCC-only outage changed PADD 1 ${field} in ${period}`);
+    }
+    const plannedDelta = round2(Number(both.plannedMaintenanceKbd || 0) - Number(fccOnly.plannedMaintenanceKbd || 0));
+    if (!near(plannedDelta, 25, 0.03)) failures.push(`${runtime.product.key}: overlapping Atmos outage changed planned CDU offline by ${plannedDelta}, expected 25`);
+    if (!(Number(both.crudeRunsKbd || 0) < Number(fccOnly.crudeRunsKbd || 0))) failures.push(`${runtime.product.key}: overlapping Atmos outage did not reduce PADD 1 crude runs in ${period}`);
+  }
+  return {
+    failures,
+    summary: {
+      product: runtime.product.key,
+      frequency: "weekly",
+      period,
+      region: "padd1",
+      edit: "FCC + Atmos overlap isolation",
+      targetValue: 25,
+      changedCells: both && fccOnly ? changedCells([fccOnly], [both]).length : 0,
+      changedRegions: ["padd1"],
+      changedFields: ["plannedMaintenanceKbd", "crudeRunsKbd"],
+    },
+  };
+}
+
+function validateSingleWeekCrudeOverride(runtime) {
+  const failures = [];
+  const baselineCalc = new Calculator(runtime);
+  const forecastWeeks = baselineCalc.crudeAllPeriods("weekly").filter(([, , isActual]) => !isActual).map(([period]) => period);
+  const pair = forecastWeeks.map((period, index) => [period, forecastWeeks[index + 1]])
+    .find(([left, right]) => right && periodMonthValue(left) === periodMonthValue(right));
+  if (!pair) return { failures: [`${runtime.product.key}: no adjacent forecast weeks in one month for crude-override scope test`], summary: null };
+  const [period, adjacentPeriod] = pair;
+  const baseline = crudeForecastPoint(baselineCalc, "padd1", period, "weekly");
+  const adjacentBaseline = crudeForecastPoint(baselineCalc, "padd1", adjacentPeriod, "weekly");
+  if (!baseline || !adjacentBaseline) return { failures: [`${runtime.product.key}: missing PADD 1 crude point for single-week override test`], summary: null };
+  const target = round2(Math.max(0, Number(baseline.crudeRunsKbd || 0) - 37.5));
+  const adjustment = {
+    id: `synthetic-crude-week-${runtime.product.key}`,
+    scope: "crude_cell",
+    frequency: "weekly",
+    period,
+    periodMonth: periodMonthValue(period),
+    regionKey: "padd1",
+    refineryId: REGIONAL_CAPACITY_REFINERY_ID,
+    refineryName: "PADD row override",
+    unitKey: "crudeRunsKbd",
+    unitLabel: "Crude Runs",
+    capacityKbd: target,
+    note: "Synthetic single-week crude override",
+    updatedAt: "2099-01-01T00:00:00.000Z",
+  };
+  const adjustedCalc = new Calculator(runtimeWithCapacityAdjustment(runtime, adjustment));
+  const adjusted = crudeForecastPoint(adjustedCalc, "padd1", period, "weekly");
+  const adjacent = crudeForecastPoint(adjustedCalc, "padd1", adjacentPeriod, "weekly");
+  if (!adjusted || !near(adjusted.crudeRunsKbd, target, 0.03)) failures.push(`${runtime.product.key}: PADD 1 weekly crude override did not set only ${period} to ${target}`);
+  if (!adjacent || !near(adjacent.crudeRunsKbd, adjacentBaseline.crudeRunsKbd, 0.03)) failures.push(`${runtime.product.key}: PADD 1 weekly crude override for ${period} leaked into ${adjacentPeriod}`);
+  return {
+    failures,
+    summary: {
+      product: runtime.product.key,
+      frequency: "weekly",
+      period,
+      region: "padd1",
+      edit: "single-week crude runs override",
+      targetValue: target,
+      changedCells: adjusted ? changedCells([baseline], [adjusted]).length : 0,
+      changedRegions: ["padd1"],
+      changedFields: ["crudeRunsKbd"],
+    },
+  };
+}
+
 function makeStandardTests(runtime) {
   const calc = new Calculator(runtime);
   const tests = [];
@@ -1518,6 +1669,12 @@ function runProduct(product) {
     ...assertFormulaInvariants(baselineCalc, "weekly", baselineCalc.rowsForFrequency("weekly"), `${product.key} baseline`),
   ];
   const summaries = [];
+  const outageIsolation = validateOverlappingOutageIsolation(runtime);
+  failures.push(...outageIsolation.failures);
+  if (outageIsolation.summary) summaries.push(outageIsolation.summary);
+  const crudeWeekScope = validateSingleWeekCrudeOverride(runtime);
+  failures.push(...crudeWeekScope.failures);
+  if (crudeWeekScope.summary) summaries.push(crudeWeekScope.summary);
 
   for (const test of tests) {
     const testRuntime = runtimeWithAdjustments(runtime, baselineCalc, {
@@ -1611,5 +1768,5 @@ if (failures.length) {
   if (failures.length > 80) console.error(` - ... ${failures.length - 80} more`);
   process.exitCode = 1;
 } else {
-  console.log("\nPASS balance adjustment propagation and formula invariants passed for Diesel_Balance and Jet_Balance monthly/weekly modes.");
+  console.log("\nPASS balance propagation, single-week crude overrides, Atmos-only outage isolation, and formula invariants passed for Diesel_Balance and Jet_Balance monthly/weekly modes.");
 }

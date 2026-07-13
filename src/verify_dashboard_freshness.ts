@@ -516,6 +516,10 @@ function verifyCrudeRunsRowFormatting(indexHtml: string, config: ProductConfig):
   assertIncludes(`${config.key} weekly crude override labels its single-week scope`, indexHtml, "state.frequency === 'weekly' ? 'week' : 'month'");
   assertIncludes(`${config.key} capacity ledger shows exact crude override period`, indexHtml, "if (isCrudeCellAdjustment(adj)) return (adj.frequency === 'weekly' ? 'Week ending ' : 'Month ') + adj.period + ' only';");
   assertNotIncludes(`${config.key} crude cell lookup is not month-wide`, indexHtml, "latestRegionalCapacityAdjustment(point.regionKey, crudeAdjustmentTargetLineId(lineId), periodMonthValue(point.period))");
+  assertIncludes(`${config.key} settings saves are serialized to avoid revision races`, indexHtml, "let settingsSaveChain = Promise.resolve();");
+  assertIncludes(`${config.key} settings saves survive an immediate reload`, indexHtml, "body:JSON.stringify(settingsPayload()),keepalive:true");
+  assertIncludes(`${config.key} balance cell saves start immediately`, indexHtml, "function queueBalanceAdjustmentsToServer(options=null){ void saveBalanceAdjustmentsToServer(options || {}); }");
+  assertIncludes(`${config.key} crude cell saves start immediately`, indexHtml, "function queueCapacityAdjustmentsToServer(){ void saveCapacityAdjustmentsToServer(); }");
   assertIncludes(`${config.key} historical crude outage estimate starts in 2022`, indexHtml, "function useHistoricalCrudeOutageEstimate(period){ return periodMonthValue(period) >= '2022-01'; }");
   assertIncludes(`${config.key} historical unplanned outage formula`, indexHtml, "function historicalUnplannedMaintenanceKbd(operableCapacityKbd, plannedMaintenanceKbd, crudeRunsKbd){ return Math.max(0, Number(operableCapacityKbd || 0) - Number(plannedMaintenanceKbd || 0) - Number(crudeRunsKbd || 0)); }");
   assertIncludes(`${config.key} pre-2022 planned/unplanned outages stay blank`, indexHtml, "plannedMaintenanceKbd:planned === null ? null : round2(planned),unplannedMaintenanceKbd:unplanned === null ? null : round2(unplanned)");

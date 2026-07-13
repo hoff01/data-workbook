@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T15:49:55.610614+00:00",
+  "generated_at": "2026-07-13T16:42:28.540253+00:00",
   "kpler_access_mode": "direct_http_v2",
   "kpler_api": {
     "auth_configured": true,
@@ -9,7 +9,7 @@
   "mode": "live",
   "normalized_long": {
     "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/normalized_long.csv",
-    "rows": 16743
+    "rows": 16745
   },
   "outputs": {
     "us_diesel_balance_guides": {
@@ -56,7 +56,7 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 5563,
+            "bytes": 5573,
             "columns": [
               "period",
               "destinationTradingRegions",
@@ -252,7 +252,7 @@
       "status": "ok"
     },
     "us_diesel_monthly_padd3_exports_external": {
-      "rows": 600,
+      "rows": 601,
       "splits": [
         {
           "attempts": 1,
@@ -271,14 +271,14 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 19088,
+            "bytes": 19110,
             "columns": [
               "period",
               "destinationTradingRegions",
               "quantity"
             ],
             "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_padd3_exports_external.csv",
-            "rows": 599
+            "rows": 600
           },
           "split": "destinationTradingRegions",
           "status": "ok",
@@ -377,7 +377,7 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 20992,
+            "bytes": 20993,
             "columns": [
               "period",
               "destinationTradingRegions",
@@ -430,7 +430,7 @@
       "status": "ok"
     },
     "us_diesel_weekly_diesel_padd1ab_exports_external": {
-      "rows": 235,
+      "rows": 234,
       "splits": [
         {
           "attempts": 1,
@@ -449,14 +449,14 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 8506,
+            "bytes": 8491,
             "columns": [
               "period",
               "destinationTradingRegions",
               "quantity"
             ],
             "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd1ab_exports_external.csv",
-            "rows": 234
+            "rows": 233
           },
           "split": "destinationTradingRegions",
           "status": "ok",
@@ -645,7 +645,7 @@
       "status": "ok"
     },
     "us_diesel_weekly_padd3_exports_external": {
-      "rows": 1598,
+      "rows": 1599,
       "splits": [
         {
           "attempts": 1,
@@ -664,14 +664,14 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 55994,
+            "bytes": 56019,
             "columns": [
               "period",
               "destinationTradingRegions",
               "quantity"
             ],
             "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_padd3_exports_external.csv",
-            "rows": 1597
+            "rows": 1598
           },
           "split": "destinationTradingRegions",
           "status": "ok",
@@ -751,7 +751,7 @@
       "status": "ok"
     },
     "us_diesel_weekly_us_exports_external": {
-      "rows": 1749,
+      "rows": 1750,
       "splits": [
         {
           "attempts": 1,
@@ -770,14 +770,14 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 60948,
+            "bytes": 60983,
             "columns": [
               "period",
               "destinationTradingRegions",
               "quantity"
             ],
             "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_us_exports_external.csv",
-            "rows": 1748
+            "rows": 1749
           },
           "split": "destinationTradingRegions",
           "status": "ok",
@@ -1234,7 +1234,7 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 30992,
+            "bytes": 30993,
             "columns": [
               "period",
               "destinationTradingRegions",

@@ -140,7 +140,7 @@
     </header>
     <section class="balanceToolbar" id="balanceOptions">
       <div class="balanceToolbarMain">
-        <div class="panel pad"><div class="caption">Balance options</div><div class="chiprow"><span class="chip">Actual headers: blue</span><span class="chip">Forecast headers: yellow</span><span class="chip">Forecast starts 2026-05</span><span class="chip">Last pull 7/13/2026, 11:50:57 AM</span></div></div>
+        <div class="panel pad"><div class="caption">Balance options</div><div class="chiprow"><span class="chip">Actual headers: blue</span><span class="chip">Forecast headers: yellow</span><span class="chip">Forecast starts 2026-05</span><span class="chip">Last pull 7/13/2026, 12:42:56 PM</span></div></div>
         <section class="controlbar balanceControlbar" id="balanceControls">
           <div class="panel pad"><div class="caption">View</div><div class="seg"><button class="toggle active" data-frequency="monthly" type="button">Monthly</button><button class="toggle" data-frequency="weekly" type="button">Weekly</button></div></div>
           <div class="panel pad"><div class="caption">Period focus</div><select id="periodWindowSelect" class="select" aria-label="Period window"><option value="smart">Smart window</option><option value="latest">Latest actual</option><option value="forecast">Forecast runway</option><option value="full">Full history</option></select><div class="periodActionGrid"><button class="btn" id="jumpLatestActualBtn" type="button">Latest actual</button><button class="btn" id="jumpFirstForecastBtn" type="button">First forecast</button></div></div>
@@ -149,7 +149,7 @@
       <div class="panel pad"><div class="caption">Refresh / saved views</div><div class="quickActionGrid"><button class="btn primary full" id="refreshBtn" type="button">Refresh dashboard</button><button class="btn primary full" id="saveViewBtn" type="button">Save view</button></div><div class="viewPresetGrid"><select id="savedViewSelect" class="select" aria-label="Saved views"></select><div class="viewPresetActions"><button class="btn" id="loadViewBtn" type="button">Load</button><button class="btn" id="deleteViewBtn" type="button">Delete</button><button class="btn" id="resetViewBtn" type="button">Reset</button></div></div></div>
     </section>
     <section class="options" id="chartOptions" hidden>
-	      <div class="panel pad"><div class="caption">Chart options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip" id="showForecastChip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><label class="chip" id="fourWeekAverageChip"><input id="showFourWeekAverage" type="checkbox">4-week avg</label><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull 7/13/2026, 11:50:57 AM</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Historical band years</div><div class="chiprow" id="historyChips"></div></div>
+	      <div class="panel pad"><div class="caption">Chart options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip" id="showForecastChip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><label class="chip" id="fourWeekAverageChip"><input id="showFourWeekAverage" type="checkbox">4-week avg</label><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull 7/13/2026, 12:42:56 PM</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Historical band years</div><div class="chiprow" id="historyChips"></div></div>
       <div class="panel pad"><div class="caption">Chart workspace</div><p class="small">Use chart cards for zoom, export, copy, and saved-forecast overlays. Imports and exports save raw kbd adjustments; operating utilization ex-planned saves as a net-capacity utilization target.</p></div>
     </section>
     <section class="controlbar" id="chartControls" hidden>
@@ -167,7 +167,7 @@
   <section class="chartScenarioWorkbench" id="outageCollisionModal" hidden></section>
   <section class="chartZoomModal" id="chartZoomModal" hidden></section>
   <div class="toast" id="toast"></div>
-  <script src="data/jet_balance_runtime_base.js?v=2026-07-13T15%3A50%3A57.120Z"></script>
+  <script src="data/jet_balance_runtime_base.js?v=2026-07-13T16%3A42%3A56.862Z"></script>
   <script>
     const D = window.BALANCE_DATA || {};
     const BALANCE_LAZY_FILES = window.BALANCE_LAZY_FILES || {};
@@ -379,8 +379,7 @@
     let deferredRenderTimer = 0;
     let cellEditRenderTimer = 0;
     let cellEditRenderPending = false;
-    let balanceAdjustmentSaveTimer = 0;
-    let capacityAdjustmentSaveTimer = 0;
+    let settingsSaveChain = Promise.resolve();
     let pendingEditableFocus = null;
     let pendingTableViewportRestore = null;
     let tableScrollSignatures = {};
@@ -630,7 +629,19 @@
     function saveCapacityAdjustmentsLocal(priorStable){ const before = priorStable ?? stableSettingsRows(workbookSettings.refineryCapacityAdjustments); workbookSettings.refineryCapacityAdjustments = normalizeCapacityAdjustmentList(workbookSettings.refineryCapacityAdjustments); localStorage.setItem(CAPACITY_ADJ_STORAGE_KEY, JSON.stringify(workbookSettings.refineryCapacityAdjustments)); const changed = before !== stableSettingsRows(workbookSettings.refineryCapacityAdjustments); if (changed) invalidateCalculationCaches(); saveWorkbookSettingsLocal(); return changed; }
 	    function settingsPayload(){ return {forecastEnd:workbookSettings.forecastEnd,baseRevision:workbookSettings.revision || '',product:D.product.key,adjustments:workbookSettings.adjustments,crudeOutages:workbookSettings.crudeOutages,refineryCapacityAdjustments:workbookSettings.refineryCapacityAdjustments}; }
 	    function sharedSaveOfflineMessage(label){ return label + ' saved in this browser only; shared settings server offline'; }
-	    async function postSettingsPayload(){ const response = await fetch(updateBaseUrl() + '/api/settings', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(settingsPayload())}); let payload = {}; try { payload = await response.json(); } catch {} if (response.status === 409 && payload.settings) { applyWorkbookSettingsSnapshot(payload.settings, {renderDelay:260}); saveWorkbookSettingsLocal(); throw new Error('Shared settings changed; latest file loaded. Re-enter the edit and save again.'); } if (!response.ok) throw new Error('save '+response.status); if (payload.settings?.revision) workbookSettings.revision = String(payload.settings.revision); return payload; }
+	    function postSettingsPayload(){
+      const request = settingsSaveChain.catch(() => {}).then(async () => {
+        const response = await fetch(updateBaseUrl() + '/api/settings', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(settingsPayload()),keepalive:true});
+        let payload = {};
+        try { payload = await response.json(); } catch {}
+        if (response.status === 409 && payload.settings) { applyWorkbookSettingsSnapshot(payload.settings, {renderDelay:260}); saveWorkbookSettingsLocal(); throw new Error('Shared settings changed; latest file loaded. Re-enter the edit and save again.'); }
+        if (!response.ok) throw new Error('save '+response.status);
+        if (payload.settings?.revision) workbookSettings.revision = String(payload.settings.revision);
+        return payload;
+      });
+      settingsSaveChain = request.catch(() => {});
+      return request;
+    }
 	    async function saveOutagesToServer(){ try { const payload = await postSettingsPayload(); if (Array.isArray(payload.settings?.crudeOutages)) { outageEntries = normalizeOutageList(payload.settings.crudeOutages); saveOutagesLocal(); } if (Array.isArray(payload.settings?.refineryCapacityAdjustments)) { workbookSettings.refineryCapacityAdjustments = normalizeCapacityAdjustmentList(payload.settings.refineryCapacityAdjustments); saveCapacityAdjustmentsLocal(); } showToast('Outage schedule saved'); } catch (error) { showToast(error instanceof Error ? error.message : sharedSaveOfflineMessage('Outage schedule')); } }
     function minForecastEnd(a,b){ const left = String(a || ''); const right = String(b || ''); if (!left) return right; if (!right) return left; return left < right ? left : right; }
     function embeddedForecastEndForFrequency(frequency=state.frequency){ return frequency === 'weekly' ? (D.forecast.weeklyThrough || workbookSettings.forecastEnd) : (D.forecast.monthlyThrough || workbookSettings.forecastEnd.slice(0,7)); }
@@ -3007,9 +3018,8 @@
     function flushCellEditRender(){ clearTimeout(cellEditRenderTimer); cellEditRenderTimer = 0; if (!cellEditRenderPending || hasOpenCellEditor()) return; cellEditRenderPending = false; queueRender(); }
     function queueCellEditRender(){ cellEditRenderPending = true; clearTimeout(cellEditRenderTimer); cellEditRenderTimer = setTimeout(flushCellEditRender, 220); }
     function scheduleAdjustmentRender(deferRender){ if (deferRender) queueCellEditRender(); else { cellEditRenderPending = false; clearTimeout(cellEditRenderTimer); cellEditRenderTimer = 0; queueRender(); } }
-    let pendingBalanceAdjustmentSaveOptions = null;
-    function queueBalanceAdjustmentsToServer(options=null){ pendingBalanceAdjustmentSaveOptions = options; clearTimeout(balanceAdjustmentSaveTimer); balanceAdjustmentSaveTimer = setTimeout(() => { balanceAdjustmentSaveTimer = 0; const nextOptions = pendingBalanceAdjustmentSaveOptions || {}; pendingBalanceAdjustmentSaveOptions = null; saveBalanceAdjustmentsToServer(nextOptions); }, 650); }
-    function queueCapacityAdjustmentsToServer(){ clearTimeout(capacityAdjustmentSaveTimer); capacityAdjustmentSaveTimer = setTimeout(() => { capacityAdjustmentSaveTimer = 0; saveCapacityAdjustmentsToServer(); }, 650); }
+    function queueBalanceAdjustmentsToServer(options=null){ void saveBalanceAdjustmentsToServer(options || {}); }
+    function queueCapacityAdjustmentsToServer(){ void saveCapacityAdjustmentsToServer(); }
     function setBalanceCellDisplay(cell, lineId, value, manual){ if (!cell) return; const hasValue = value !== null && value !== undefined && value !== ''; cell.textContent = balanceValueHtml(lineId, value); cell.classList.toggle('manualCell', Boolean(manual)); cell.classList.toggle('activeValue', Boolean(isBalanceLineAdjustable(lineId) && hasValue)); }
     function setCrudeCellDisplay(cell, lineId, value, manual){ if (!cell) return; const hasValue = value !== null && value !== undefined && value !== ''; cell.textContent = crudeValueHtml(lineId, value); cell.classList.toggle('manualCell', Boolean(manual)); cell.classList.toggle('activeValue', Boolean(isCrudeLineAdjustable(lineId) && hasValue)); }
     function currentBalanceCellValue(regionKey, lineId, period){ const entry = periodEntriesForBalance().find(([candidate]) => candidate === period); const point = entry?.[1]?.[regionKey] || null; return point ? valueForLine(point, lineId) : null; }

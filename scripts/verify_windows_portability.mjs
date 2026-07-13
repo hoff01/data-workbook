@@ -29,6 +29,9 @@ requireText("src/open_dashboard.ts", "function dashboardServerInvocation()", "po
 requireText("src/dashboard_update_server.ts", "const tsxCli = process.env.US_BALANCES_TSX_CLI;", "portable update-job invocation");
 requireText("Kpler/run.ps1", 'Assert-NativeSuccess "Kpler preflight"', "Kpler preflight failure propagation");
 requireText("Kpler/run.ps1", 'Assert-NativeSuccess "Kpler pull"', "Kpler pull failure propagation");
+requireText(".github/workflows/windows-production.yml", "runs-on: windows-latest", "native Windows CI runner");
+requireText(".github/workflows/windows-production.yml", "Start_Balance_Runner.ps1 -Route diesel -NoOpen", "native Windows launcher smoke test");
+requireText(".github/workflows/windows-production.yml", "Kpler\\run.ps1 -Preflight", "native Windows Kpler preflight");
 requireText("docs/operating-guide.md", "https://github.com/hoff01/data-workbook.git", "canonical Windows clone URL");
 rejectText("docs/operating-guide.md", "https://github.com/hoff01/balances_us.git", "stale Windows clone URL");
 requireText(".gitattributes", "*.bat text eol=crlf", "Windows batch line endings");

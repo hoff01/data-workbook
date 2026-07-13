@@ -4324,8 +4324,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     let deferredRenderTimer = 0;
     let cellEditRenderTimer = 0;
     let cellEditRenderPending = false;
-    let balanceAdjustmentSaveTimer = 0;
-    let capacityAdjustmentSaveTimer = 0;
+    let settingsSaveChain = Promise.resolve();
     let pendingEditableFocus = null;
     let pendingTableViewportRestore = null;
     let tableScrollSignatures = {};
@@ -4575,7 +4574,19 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function saveCapacityAdjustmentsLocal(priorStable){ const before = priorStable ?? stableSettingsRows(workbookSettings.refineryCapacityAdjustments); workbookSettings.refineryCapacityAdjustments = normalizeCapacityAdjustmentList(workbookSettings.refineryCapacityAdjustments); localStorage.setItem(CAPACITY_ADJ_STORAGE_KEY, JSON.stringify(workbookSettings.refineryCapacityAdjustments)); const changed = before !== stableSettingsRows(workbookSettings.refineryCapacityAdjustments); if (changed) invalidateCalculationCaches(); saveWorkbookSettingsLocal(); return changed; }
 	    function settingsPayload(){ return {forecastEnd:workbookSettings.forecastEnd,baseRevision:workbookSettings.revision || '',product:D.product.key,adjustments:workbookSettings.adjustments,crudeOutages:workbookSettings.crudeOutages,refineryCapacityAdjustments:workbookSettings.refineryCapacityAdjustments}; }
 	    function sharedSaveOfflineMessage(label){ return label + ' saved in this browser only; shared settings server offline'; }
-	    async function postSettingsPayload(){ const response = await fetch(updateBaseUrl() + '/api/settings', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(settingsPayload())}); let payload = {}; try { payload = await response.json(); } catch {} if (response.status === 409 && payload.settings) { applyWorkbookSettingsSnapshot(payload.settings, {renderDelay:260}); saveWorkbookSettingsLocal(); throw new Error('Shared settings changed; latest file loaded. Re-enter the edit and save again.'); } if (!response.ok) throw new Error('save '+response.status); if (payload.settings?.revision) workbookSettings.revision = String(payload.settings.revision); return payload; }
+	    function postSettingsPayload(){
+      const request = settingsSaveChain.catch(() => {}).then(async () => {
+        const response = await fetch(updateBaseUrl() + '/api/settings', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(settingsPayload()),keepalive:true});
+        let payload = {};
+        try { payload = await response.json(); } catch {}
+        if (response.status === 409 && payload.settings) { applyWorkbookSettingsSnapshot(payload.settings, {renderDelay:260}); saveWorkbookSettingsLocal(); throw new Error('Shared settings changed; latest file loaded. Re-enter the edit and save again.'); }
+        if (!response.ok) throw new Error('save '+response.status);
+        if (payload.settings?.revision) workbookSettings.revision = String(payload.settings.revision);
+        return payload;
+      });
+      settingsSaveChain = request.catch(() => {});
+      return request;
+    }
 	    async function saveOutagesToServer(){ try { const payload = await postSettingsPayload(); if (Array.isArray(payload.settings?.crudeOutages)) { outageEntries = normalizeOutageList(payload.settings.crudeOutages); saveOutagesLocal(); } if (Array.isArray(payload.settings?.refineryCapacityAdjustments)) { workbookSettings.refineryCapacityAdjustments = normalizeCapacityAdjustmentList(payload.settings.refineryCapacityAdjustments); saveCapacityAdjustmentsLocal(); } showToast('Outage schedule saved'); } catch (error) { showToast(error instanceof Error ? error.message : sharedSaveOfflineMessage('Outage schedule')); } }
     function minForecastEnd(a,b){ const left = String(a || ''); const right = String(b || ''); if (!left) return right; if (!right) return left; return left < right ? left : right; }
     function embeddedForecastEndForFrequency(frequency=state.frequency){ return frequency === 'weekly' ? (D.forecast.weeklyThrough || workbookSettings.forecastEnd) : (D.forecast.monthlyThrough || workbookSettings.forecastEnd.slice(0,7)); }
@@ -6952,9 +6963,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function flushCellEditRender(){ clearTimeout(cellEditRenderTimer); cellEditRenderTimer = 0; if (!cellEditRenderPending || hasOpenCellEditor()) return; cellEditRenderPending = false; queueRender(); }
     function queueCellEditRender(){ cellEditRenderPending = true; clearTimeout(cellEditRenderTimer); cellEditRenderTimer = setTimeout(flushCellEditRender, 220); }
     function scheduleAdjustmentRender(deferRender){ if (deferRender) queueCellEditRender(); else { cellEditRenderPending = false; clearTimeout(cellEditRenderTimer); cellEditRenderTimer = 0; queueRender(); } }
-    let pendingBalanceAdjustmentSaveOptions = null;
-    function queueBalanceAdjustmentsToServer(options=null){ pendingBalanceAdjustmentSaveOptions = options; clearTimeout(balanceAdjustmentSaveTimer); balanceAdjustmentSaveTimer = setTimeout(() => { balanceAdjustmentSaveTimer = 0; const nextOptions = pendingBalanceAdjustmentSaveOptions || {}; pendingBalanceAdjustmentSaveOptions = null; saveBalanceAdjustmentsToServer(nextOptions); }, 650); }
-    function queueCapacityAdjustmentsToServer(){ clearTimeout(capacityAdjustmentSaveTimer); capacityAdjustmentSaveTimer = setTimeout(() => { capacityAdjustmentSaveTimer = 0; saveCapacityAdjustmentsToServer(); }, 650); }
+    function queueBalanceAdjustmentsToServer(options=null){ void saveBalanceAdjustmentsToServer(options || {}); }
+    function queueCapacityAdjustmentsToServer(){ void saveCapacityAdjustmentsToServer(); }
     function setBalanceCellDisplay(cell, lineId, value, manual){ if (!cell) return; const hasValue = value !== null && value !== undefined && value !== ''; cell.textContent = balanceValueHtml(lineId, value); cell.classList.toggle('manualCell', Boolean(manual)); cell.classList.toggle('activeValue', Boolean(isBalanceLineAdjustable(lineId) && hasValue)); }
     function setCrudeCellDisplay(cell, lineId, value, manual){ if (!cell) return; const hasValue = value !== null && value !== undefined && value !== ''; cell.textContent = crudeValueHtml(lineId, value); cell.classList.toggle('manualCell', Boolean(manual)); cell.classList.toggle('activeValue', Boolean(isCrudeLineAdjustable(lineId) && hasValue)); }
     function currentBalanceCellValue(regionKey, lineId, period){ const entry = periodEntriesForBalance().find(([candidate]) => candidate === period); const point = entry?.[1]?.[regionKey] || null; return point ? valueForLine(point, lineId) : null; }
