@@ -1,0 +1,122 @@
+{
+  "generated_at": "2026-07-13T07:29:17-04:00",
+  "actual_week_ending": "2026-07-03",
+  "product": "diesel",
+  "weekly_json": "diesel_weekly_stats.json",
+  "dpi": 180,
+  "format": {
+    "font_scale": 1.0,
+    "colors": {
+      "ink": "#16181d",
+      "muted": "#636b75",
+      "grid": "#d8dde3",
+      "header": "#24272d",
+      "actual_fill": "#eef0f2",
+      "forecast_highlight": "#e2cf39",
+      "region_fill": "#d7cdb8",
+      "section_fill": "#e5e7e9",
+      "positive": "#17823b",
+      "negative": "#d52317",
+      "title_red": "#ba2828",
+      "white": "#ffffff"
+    },
+    "table": {
+      "width_in": 7.35,
+      "height_in": 7.05,
+      "title_x": 0.018,
+      "title_y": 0.968,
+      "title_font_size": 26.0,
+      "left": 0.012,
+      "right": 0.992,
+      "top": 0.905,
+      "bottom": 0.018,
+      "region_column_share": 0.125,
+      "metric_column_share": 0.21,
+      "header_font_size": 7.5,
+      "region_font_size": 7.0,
+      "body_font_size": 6.7,
+      "us_section_gap_rows": 0.65,
+      "repeat_header_before_us": true
+    },
+    "chart": {
+      "width_in": 4.25,
+      "height_in": 2.55,
+      "left": 0.16,
+      "right": 0.985,
+      "bottom": 0.23,
+      "top": 0.76,
+      "bar_width": 0.82,
+      "title_font_size": 13.5,
+      "x_font_size": 8.2,
+      "y_font_size": 7.6,
+      "value_font_size": 8.0,
+      "title_pad": 12.0,
+      "value_label_offset_points": 4.0
+    },
+    "slide": {
+      "width_px": 2400,
+      "height_px": 1350,
+      "placements": {
+        "table": [
+          0.005,
+          0.015,
+          0.545,
+          0.97
+        ],
+        "forecast_week_1": [
+          0.555,
+          0.665,
+          0.215,
+          0.31
+        ],
+        "forecast_week_2": [
+          0.775,
+          0.665,
+          0.215,
+          0.31
+        ],
+        "eia_actuals": [
+          0.555,
+          0.335,
+          0.215,
+          0.31
+        ]
+      },
+      "enforce_equal_chart_size": true,
+      "note_title_x": 0.585,
+      "note_title_y": 0.255,
+      "note_title_font_size": 16.0,
+      "note_body_x": 0.585,
+      "note_body_y": 0.215,
+      "note_body_font_size": 9.5,
+      "note_body_line_spacing": 1.45
+    }
+  },
+  "images": [
+    {
+      "file": "individual_outputs/diesel_weekly_balance_table.png",
+      "width_px": 1323,
+      "height_px": 1269
+    },
+    {
+      "file": "individual_outputs/diesel_eia_actuals.png",
+      "width_px": 765,
+      "height_px": 458
+    },
+    {
+      "file": "individual_outputs/diesel_forecast_week_1.png",
+      "width_px": 765,
+      "height_px": 458
+    },
+    {
+      "file": "individual_outputs/diesel_forecast_week_2.png",
+      "width_px": 765,
+      "height_px": 458
+    },
+    {
+      "file": "diesel_weekly_stats_slide.png",
+      "width_px": 2400,
+      "height_px": 1350
+    }
+  ]
+}

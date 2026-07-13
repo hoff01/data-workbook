@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-07-13T07:29:17-04:00",
+  "weeks": [
+    {
+      "actual_week_ending": "2026-07-03",
+      "product": "diesel",
+      "folder": "2026-07-03",
+      "weekly_json": "diesel_weekly_stats.json",
+      "generated_at": "2026-07-13T06:37:17-04:00"
+    }
+  ]
+}
