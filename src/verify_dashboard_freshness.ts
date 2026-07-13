@@ -365,8 +365,8 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} coking utilization chart label`, indexHtml, "label:'Coking Utilization'");
   assertIncludes(`${config.key} hydrocracking utilization chart label`, indexHtml, "label:'Hydrocracking Utilization'");
   assertIncludes(`${config.key} chart missing values are not coerced to zero`, indexHtml, "function finiteNumberOrNull(value){ if (value === null || value === undefined || value === '') return null; const n = Number(value); return Number.isFinite(n) ? n : null; }");
-  assertIncludes(`${config.key} secondary unit utilization charts use tight percent scale`, indexHtml, "chartScale(raw, 5, {percent:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey),tight:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey)})");
-  assertIncludes(`${config.key} percent chart axis labels include percent sign`, indexHtml, "const axisValueLabel = value => metric.unit === '%' ? fmt(value, metric.digits) + '%' : fmt(value);");
+  assertIncludes(`${config.key} secondary unit utilization charts use tight percent scale`, indexHtml, "chartScale(raw, 5, {percent:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey),tight:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey),nonNegative:isOutageSeasonChart})");
+  assertIncludes(`${config.key} percent chart axis labels include percent sign`, indexHtml, "const axisValueLabel = value => metric.unit === '%' ? fmt(value, metric.digits) + '%' : fmt(value, outageAxisDigits);");
   assertIncludes(`${config.key} Kpler periods are completed only`, indexHtml, "function completedKplerPeriod(period, frequency=state.frequency)");
   assertIncludes(`${config.key} actual-only chart metric registry`, indexHtml, "function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey) || OUTAGE_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }");
   assertIncludes(`${config.key} secondary unit charts are monthly-only`, indexHtml, "if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return [];");
@@ -438,9 +438,10 @@ function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig)
   assertIncludes(`${config.key} outage capacity rows use unit capacity totals`, indexHtml, "else (OUTAGE_UNIT_GROUPS[spec.unitGroup] || []).forEach(unitKey => addOutageTotals(totals, daily.units?.[unitKey]));");
   assertIncludes(`${config.key} weekly outage charts use Friday-ending 7-day window`, indexHtml, "return {start:end - 6 * DAY_MS,end,days:7};");
   assertIncludes(`${config.key} known production offline balance values`, indexHtml, "else if (OUTAGE_CHART_METRICS.has(lineId)) value = outageMetricValue({...point,regionKey}, lineId, state.frequency);");
+  assertIncludes(`${config.key} outage balance values retain visible decimal precision`, indexHtml, "target === 'daysForwardCover' || OUTAGE_CHART_METRICS.has(target) ? 1 : 0");
   assertIncludes(`${config.key} outage charts render all outage metrics`, indexHtml, "function orderedOutageChartMetrics(){ return Array.from(OUTAGE_CHART_METRICS); }");
   assertIncludes(`${config.key} outage charts use crude outage regions`, indexHtml, "function renderOutageChartRegionOptions()");
-  assertIncludes(`${config.key} outage charts use actual periods only`, indexHtml, "function outageChartSourceRows(frequency=state.frequency){ return rawRowsForFrequency(frequency).filter(row => row?.status !== 'forecast'); }");
+  assertIncludes(`${config.key} outage charts include scheduled periods through the forecast end`, indexHtml, "function outageChartSourceRows(frequency=state.frequency){ const forecastEnd = forecastEndForFrequency(frequency); return rawRowsForFrequency(frequency).filter(row => row?.period && row.period <= forecastEnd); }");
   assertIncludes(`${config.key} outage charts use custom rows`, indexHtml, "function outageChartRowsForMetric(regionKey, metricKey, frequency=state.frequency)");
   assertIncludes(`${config.key} outage charts use selected band years with default fallback`, indexHtml, "function outageBandYears(frequency=state?.frequency || 'monthly'){ const selected = normalizeBandYears(state?.bandYears, frequency, false); return selected.length ? selected : defaultOutageBandYears(frequency); }");
   assertIncludes(`${config.key} outage charts expose shared chart options`, indexHtml, "document.getElementById('chartOptions').hidden = !(state.sheet === 'charts' || state.sheet === 'outages');");
@@ -449,6 +450,10 @@ function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig)
   assertIncludes(`${config.key} outage chart legends filter unavailable years per card`, indexHtml, "const lineLegend = chartLineLegendEntries(bundle, metricKey, state.frequency).map(entry =>");
   assertIncludes(`${config.key} outage chart cache scope tracks outage settings`, indexHtml, "function outageChartCacheScope(regionKey, metricKey, rows)");
   assertIncludes(`${config.key} outage chart suppresses white current-year markers`, indexHtml, "const actualMarkers = isOutageSeasonChart ? '' : currentActual.map");
+  assertIncludes(`${config.key} zero-only outage charts use a clean nonnegative scale`, indexHtml, "const outageZeroScale = isOutageSeasonChart && chartVisiblePointCount(seriesBundle) > 0 && !seriesBundle.values.some((value, index) => seriesBundle.valid[index] && Math.abs(value) >= .0001);");
+  assertIncludes(`${config.key} zero-only outage charts do not render negative zero ticks`, indexHtml, "outageZeroScale ? {min:0,max:1,ticks:[0,1],step:1}");
+  assertIncludes(`${config.key} nonzero outage charts keep their axis nonnegative`, indexHtml, "if (options.nonNegative) min = Math.max(0, min);");
+  assertIncludes(`${config.key} small outage values keep readable decimal ticks`, indexHtml, "const outageAxisDigits = isOutageSeasonChart && scale.step < 1 ? Math.max(metric.digits, 1) : 0;");
   assertIncludes(`${config.key} outage history chips hide unavailable next forecast`, indexHtml, "if (!outageActualOnly && nextYearForecast) chips.push");
   assertIncludes(`${config.key} outage chart render signature tracks forecast visibility`, indexHtml, "state.showForecast ? 'forecast' : 'actual-only'");
   assertIncludes(`${config.key} outage chart render signature tracks next-year visibility`, indexHtml, "state.showNextYearForecast ? 'next' : 'no-next'");
@@ -457,6 +462,10 @@ function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig)
   assertIncludes(`${config.key} outage chart export control`, indexHtml, "data-outage-export-chart");
   assertIncludes(`${config.key} outage chart grid click handler`, indexHtml, "document.getElementById('outageChartGrid').addEventListener('click'");
   assertIncludes(`${config.key} outage chart region change handler`, indexHtml, "document.getElementById('outageChartRegion').addEventListener('change'");
+  assertIncludes(`${config.key} outage start-date edits preserve manual offline capacity`, indexHtml, "outageStart').addEventListener('change', () => updateOutageCapacityDefault(false));");
+  assertIncludes(`${config.key} outage type edits preserve manual offline capacity`, indexHtml, "if (e.target.value === 'Unplanned') applyUnplannedOutageDefault(); updateOutageCapacityDefault(false);");
+  assertIncludes(`${config.key} unplanned defaults only fill missing dates`, indexHtml, "if (start && !start.value) start.value = localDateText(); if (end && !end.value) end.value = addLocalDays(start?.value || localDateText(), 7);");
+  assertIncludes(`${config.key} adding an outage immediately queues a dashboard render`, indexHtml, "saveOutagesLocal(); clearOutageForm(); tableScrollSignatures = {}; queueRender();");
 }
 
 function verifyNortheastPowerCharts(indexHtml: string, config: ProductConfig, runtimePowerDfo: RuntimePowerDfo): void {
