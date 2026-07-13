@@ -52,6 +52,10 @@ requireText("src/update_data_fingerprint.ts", "VOLATILE_CSV_COLUMNS", "volatile 
 requireText("scripts/test_update_data_fingerprint.ts", "volatile-only refresh must remain current", "truthful current-data regression test");
 requireText("src/dashboard_update_server.ts", "refreshReady: refreshToolsReady()", "server readiness reporting");
 requireText("src/dashboard_update_server.ts", "First-run refresh setup is still finishing", "early-click readiness protection");
+requireText("src/dashboard_update_server.ts", 'process.env.US_BALANCES_PYTHON', "weekly call outputs reuse the installed local Python runtime");
+requireText("src/dashboard_update_server.ts", '"weekly-call-outputs"', "weekly call output server action");
+requireText("weekly_call_ouputs/generate_weekly_images.py", 'env.get("US_BALANCES_NODE_COMMAND"', "weekly output builder reuses the local Node runtime");
+requireText("weekly_call_ouputs/generate_weekly_images.py", 'env.get("US_BALANCES_TSX_CLI"', "weekly output builder reuses the local tsx CLI");
 requireText("package.json", '"test:dashboard-runner"', "dashboard runner contract test");
 requireText(".github/workflows/windows-production.yml", "npm run test:dashboard-runner", "native Windows runner contract test");
 requireText("src/dashboard_update_server.ts", 'hasWarnings ? "partial" : "succeeded"', "skipped-step partial status");

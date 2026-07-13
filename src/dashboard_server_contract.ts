@@ -9,6 +9,8 @@ const DASHBOARD_SERVER_BUILD_INPUTS = [
   "src/dashboard_update_server.ts",
   "src/update_data_fingerprint.ts",
   "src/update_pipeline.ts",
+  "weekly_call_ouputs/generate_weekly_images.py",
+  "weekly_call_ouputs/weekly_stats_config.json",
 ];
 
 export function dashboardServerBuildId(root: string): string {

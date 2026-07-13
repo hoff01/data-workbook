@@ -344,9 +344,19 @@ def run_balance_json_builder(balance_root: Path) -> None:
         )
     env = os.environ.copy()
     env["BALANCE_WRITE_FULL_BUNDLE"] = "1"
+    node_command = env.get("US_BALANCES_NODE_COMMAND", "").strip()
+    tsx_cli = env.get("US_BALANCES_TSX_CLI", "").strip()
+    if node_command and tsx_cli:
+        command = [
+            node_command,
+            tsx_cli,
+            str(balance_root / "src" / "build_balance_dashboards.ts"),
+        ]
+    else:
+        command = [npm_executable(), "run", "build:balances"]
     print("Creating the balance JSON with the existing build:balances function...")
     completed = subprocess.run(
-        [npm_executable(), "run", "build:balances"],
+        command,
         cwd=balance_root,
         env=env,
         text=True,

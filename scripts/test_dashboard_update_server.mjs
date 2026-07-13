@@ -62,8 +62,10 @@ const child = spawn(process.execPath, ["--import", "tsx", "src/dashboard_update_
     ...process.env,
     DASHBOARD_UPDATE_PORT: String(port),
     US_BALANCES_NODE_COMMAND: process.execPath,
+    US_BALANCES_PYTHON: process.execPath,
     US_BALANCES_REFRESH_READY_FILE: readyFile,
     US_BALANCES_TSX_CLI: join(ROOT, "scripts", "fake_update_cli.mjs"),
+    US_BALANCES_WEEKLY_OUTPUT_SCRIPT: join(ROOT, "scripts", "fake_update_cli.mjs"),
   },
   stdio: ["ignore", "pipe", "pipe"],
 });
@@ -104,6 +106,24 @@ try {
   assert.equal(job.result, "current");
   assert.equal(job.dataChanged, false);
   assert.match(job.lines.join("\n"), /upstream source data was already current/);
+
+  const weeklyOutputsStarted = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "weekly-call-outputs" }),
+  });
+  assert.equal(weeklyOutputsStarted.response.status, 202);
+  assert.equal(weeklyOutputsStarted.body.job.group, "weekly-call-outputs");
+  assert.equal(weeklyOutputsStarted.body.job.status, "running");
+
+  const weeklyOutputsJob = await waitForTerminalJob(baseUrl);
+  assert.equal(weeklyOutputsJob.group, "weekly-call-outputs");
+  assert.equal(weeklyOutputsJob.status, "succeeded");
+  assert.equal(weeklyOutputsJob.exitCode, 0);
+  assert.equal(weeklyOutputsJob.signal, null);
+  assert.equal(weeklyOutputsJob.result, "saved");
+  assert.equal(weeklyOutputsJob.dataChanged, true);
+  assert.match(weeklyOutputsJob.lines.join("\n"), /Weekly call outputs were saved/);
   console.log(`dashboard update server contract ok build=${initialHealth.buildId}`);
 } catch (error) {
   console.error(output.join(""));

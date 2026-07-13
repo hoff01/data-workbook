@@ -303,6 +303,10 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} refresh button reloads dashboard data before rerender`, indexHtml, "document.getElementById('refreshBtn').addEventListener('click', () => { refreshDashboardData('Dashboard refreshed'); });");
   assertIncludes(`${config.key} changed-data update status is explicit`, indexHtml, "Updated — new data loaded");
   assertIncludes(`${config.key} already-current update status is explicit`, indexHtml, "Checked — already current");
+  assertIncludes(`${config.key} Reference has weekly call output save button`, indexHtml, 'data-update-group="weekly-call-outputs"');
+  assertIncludes(`${config.key} weekly call output save status is explicit`, indexHtml, "Saved — weekly call outputs ready");
+  assertIncludes(`${config.key} weekly call output path is explicit`, indexHtml, "weekly_call_ouputs/outputs");
+  assertIncludes(`${config.key} weekly call output save does not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast('Weekly call outputs saved in weekly_call_ouputs/outputs');");
   assertIncludes(`${config.key} changed-data update log is explicit`, indexHtml, "UPDATED — NEW DATA");
   assertIncludes(`${config.key} already-current update log is explicit`, indexHtml, "CHECKED — ALREADY CURRENT");
   assertIncludes(`${config.key} partial update status is explicit`, indexHtml, "Updated with warnings");
@@ -638,6 +642,9 @@ assertIncludes("Kpler PADD 1 split remains in the all/other package", updatePipe
 const updateServerSource = await readFile("src/dashboard_update_server.ts", "utf8");
 assertIncludes("runner distinguishes partial completion", updateServerSource, 'type JobStatus = "running" | "succeeded" | "partial" | "failed";');
 assertIncludes("runner promotes skipped steps to warnings", updateServerSource, 'hasWarnings ? "partial" : "succeeded"');
+assertIncludes("runner accepts the weekly call output job", updateServerSource, '"weekly-call-outputs"');
+assertIncludes("runner saves weekly call outputs with the configured Python runtime", updateServerSource, "args: [weeklyCallOutputScript]");
+assertIncludes("runner reports weekly call outputs as saved", updateServerSource, 'job.result = "saved";');
 assertNotIncludes("runner no longer emits misleading raw child status", updateServerSource, "finished status=");
 
 const results = await Promise.all(PRODUCTS.map((config) => verifyProduct(config)));

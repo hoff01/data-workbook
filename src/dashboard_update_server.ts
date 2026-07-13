@@ -21,11 +21,12 @@ import { DASHBOARD_SERVER_APP_ID, dashboardServerBuildId } from "./dashboard_ser
 import { updateDataFingerprint, type UpdateGroup } from "./update_data_fingerprint.js";
 
 type JobStatus = "running" | "succeeded" | "partial" | "failed";
-type UpdateResult = "updated" | "current";
+type DashboardJobGroup = UpdateGroup | "weekly-call-outputs";
+type UpdateResult = "updated" | "current" | "saved";
 
 type Job = {
   id: string;
-  group: UpdateGroup;
+  group: DashboardJobGroup;
   status: JobStatus;
   command: string;
   args: string[];
@@ -105,10 +106,21 @@ const PORT = Number(process.env.DASHBOARD_UPDATE_PORT || 8787);
 const SERVER_BUILD_ID = dashboardServerBuildId(ROOT);
 const SERVER_STARTED_AT = new Date().toISOString();
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const pythonCommand = process.env.US_BALANCES_PYTHON || (process.platform === "win32" ? "python" : "python3");
 const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
 const nodeCommand = process.env.US_BALANCES_NODE_COMMAND || process.execPath;
 const tsxCli = process.env.US_BALANCES_TSX_CLI;
-const validGroups = new Set<UpdateGroup>(["weekly", "monthly", "other", "all", "power-dfo"]);
+const weeklyCallOutputScript = process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT
+  ? resolve(process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT)
+  : join(ROOT, "weekly_call_ouputs", "generate_weekly_images.py");
+const validGroups = new Set<DashboardJobGroup>([
+  "weekly",
+  "monthly",
+  "other",
+  "all",
+  "power-dfo",
+  "weekly-call-outputs",
+]);
 const maxLines = 600;
 const settingsPath = join(ROOT, "balance_dashboard_settings.json");
 const runnerLockPath = join(ROOT, "logs", "update_runner.lock");
@@ -244,13 +256,13 @@ let refreshReady = true;
 function setStatus(job){
   const state = job?.status || 'idle';
   const result = job?.result;
-  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' checked — already current' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' current with warnings' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group + ' refresh running';
+  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? 'Weekly call outputs saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' checked — already current' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' current with warnings' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving weekly call outputs' : job.group + ' refresh running';
   statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
   buttons.forEach(button => button.disabled = state === 'running' || !refreshReady);
   logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : refreshReady ? 'Refresh tools are ready. The one-click launcher starts an All refresh automatically.' : 'First-run setup is installing the local refresh tools. The launcher will start an All refresh automatically when setup finishes.';
 }
 function publishUpdateCompletion(job){
-  if (!job?.id || !['succeeded','partial'].includes(job.status)) return;
+  if (!job?.id || job.result === 'saved' || !['succeeded','partial'].includes(job.status)) return;
   try { if (localStorage.getItem(updateCompletionStorageKey) !== job.id) localStorage.setItem(updateCompletionStorageKey, job.id); } catch {}
 }
 async function refreshStatus(){
@@ -305,11 +317,11 @@ function publicJob(): Job | null {
   return currentJob ? { ...currentJob, lines: [...currentJob.lines] } : null;
 }
 
-function parseGroup(value: unknown): UpdateGroup | null {
-  return typeof value === "string" && validGroups.has(value as UpdateGroup) ? (value as UpdateGroup) : null;
+function parseGroup(value: unknown): DashboardJobGroup | null {
+  return typeof value === "string" && validGroups.has(value as DashboardJobGroup) ? (value as DashboardJobGroup) : null;
 }
 
-function acquireRunnerLock(group: UpdateGroup): RunnerLock {
+function acquireRunnerLock(group: DashboardJobGroup): RunnerLock {
   mkdirSync(dirname(runnerLockPath), { recursive: true });
   try {
     const existing = statSync(runnerLockPath);
@@ -345,16 +357,20 @@ function releaseRunnerLock(lock: RunnerLock | null): void {
   if (currentLock === lock) currentLock = null;
 }
 
-function startJob(group: UpdateGroup): Job {
+function startJob(group: DashboardJobGroup): Job {
   if (currentProcess && currentJob?.status === "running") return currentJob;
-  const dataFingerprintBefore = updateDataFingerprint(ROOT, group);
+  const savesWeeklyCallOutputs = group === "weekly-call-outputs";
+  const updateGroup: UpdateGroup | null = group === "weekly-call-outputs" ? null : group;
+  const dataFingerprintBefore = updateGroup ? updateDataFingerprint(ROOT, updateGroup) : null;
   const lock = acquireRunnerLock(group);
   const updateScript = join(ROOT, "src", "update_pipeline.ts");
-  const invocation = tsxCli
-    ? { command: nodeCommand, args: [tsxCli, updateScript, group] }
-    : tsxCommand && !(process.platform === "win32" && /\.(?:cmd|bat)$/i.test(tsxCommand))
-      ? { command: tsxCommand, args: [updateScript, group] }
-      : { command: npmCommand, args: ["run", `update:${group}`] };
+  const invocation = savesWeeklyCallOutputs
+    ? { command: pythonCommand, args: [weeklyCallOutputScript] }
+    : tsxCli
+      ? { command: nodeCommand, args: [tsxCli, updateScript, group] }
+      : tsxCommand && !(process.platform === "win32" && /\.(?:cmd|bat)$/i.test(tsxCommand))
+        ? { command: tsxCommand, args: [updateScript, group] }
+        : { command: npmCommand, args: ["run", `update:${group}`] };
   const { command, args } = invocation;
   const started = Date.now();
   const job: Job = {
@@ -392,15 +408,19 @@ function startJob(group: UpdateGroup): Job {
     releaseRunnerLock(lock);
   });
   child.on("close", (code, signal) => {
-    const hasWarnings = job.lines.some((line) => /\[update\] step \d+\/\d+ (?:skipped|warning):/.test(line));
+    const hasWarnings = !savesWeeklyCallOutputs
+      && job.lines.some((line) => /\[update\] step \d+\/\d+ (?:skipped|warning):/.test(line));
     job.status = code === 0 ? (hasWarnings ? "partial" : "succeeded") : "failed";
     job.exitCode = code;
     job.signal = signal;
     job.endedAt = new Date().toISOString();
     job.durationMs = Date.now() - started;
-    if (code === 0) {
+    if (code === 0 && savesWeeklyCallOutputs) {
+      job.dataChanged = true;
+      job.result = "saved";
+    } else if (code === 0 && updateGroup && dataFingerprintBefore !== null) {
       try {
-        job.dataChanged = updateDataFingerprint(ROOT, group) !== dataFingerprintBefore;
+        job.dataChanged = updateDataFingerprint(ROOT, updateGroup) !== dataFingerprintBefore;
         job.result = job.dataChanged ? "updated" : "current";
       } catch (error) {
         job.status = "partial";
@@ -408,13 +428,15 @@ function startJob(group: UpdateGroup): Job {
       }
     }
     const completionMessage = code === 0
-      ? job.result === null
-        ? "Refresh completed and the workbooks were rebuilt, but the source change comparison was unavailable."
-        : hasWarnings
-        ? `Refresh completed with warnings; dashboard source data is ${job.dataChanged ? "updated" : "already current"}. Review skipped steps.`
-        : job.dataChanged
-          ? "Refresh completed; new dashboard source data was loaded and the workbooks were rebuilt."
-          : "Refresh completed; upstream source data was already current and the workbooks were rebuilt."
+      ? job.result === "saved"
+        ? "Weekly call outputs were saved to weekly_call_ouputs/outputs with the latest actual-week archive, individual images, and PowerPoint-ready slide."
+        : job.result === null
+          ? "Refresh completed and the workbooks were rebuilt, but the source change comparison was unavailable."
+          : hasWarnings
+            ? `Refresh completed with warnings; dashboard source data is ${job.dataChanged ? "updated" : "already current"}. Review skipped steps.`
+            : job.dataChanged
+              ? "Refresh completed; new dashboard source data was loaded and the workbooks were rebuilt."
+              : "Refresh completed; upstream source data was already current and the workbooks were rebuilt."
       : `Update failed (exit code ${code ?? "n/a"}${signal ? `, signal ${signal}` : ""}).`;
     appendJobLine(job, code === 0 ? "stdout" : "stderr", completionMessage);
     currentProcess = null;
@@ -503,7 +525,7 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
       });
       return;
     }
-    let group: UpdateGroup | null = null;
+    let group: DashboardJobGroup | null = null;
     try {
       const body = await readBody(request);
       group = parseGroup(JSON.parse(body || "{}").group);
@@ -511,7 +533,9 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
       group = null;
     }
     if (!group) {
-      writeJson(response, 400, { error: "group must be weekly, monthly, other, all, or power-dfo" });
+      writeJson(response, 400, {
+        error: "group must be weekly, monthly, other, all, power-dfo, or weekly-call-outputs",
+      });
       return;
     }
     const alreadyRunning = currentJob?.status === "running";

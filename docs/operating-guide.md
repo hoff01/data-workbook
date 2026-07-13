@@ -92,8 +92,12 @@ If a browser shows a certificate warning, the URL is wrong for this local runner
    - `Power DFO` for Northeast diesel power-generation context
    - `Other` for supporting exports/context
    - `All` for another full pipeline run
-4. Review `Diesel Balance` and `Jet Balance`.
-5. Commit and push refreshed outputs when the checks pass:
+4. To create the PowerPoint-ready weekly call archive, open either workbook's
+   `Reference` tab and select `Save weekly call outputs`. Wait for `Saved —
+   weekly call outputs ready`; the dated files are written under
+   `weekly_call_ouputs\outputs`.
+5. Review `Diesel Balance` and `Jet Balance`.
+6. Commit and push refreshed outputs when the checks pass:
    ```powershell
    git status --short
    git add .
@@ -271,7 +275,9 @@ Use this before tomorrow-morning or shared-drive use:
 4. Switch Balance, Charts, Crude Runs, Outages, and Reference.
 5. Toggle Monthly/Weekly.
 6. Confirm shared saves do not show the offline/local-only message.
-7. Run:
+7. In Reference, select `Save weekly call outputs` and confirm the saved status,
+   current actual-week folder, individual PNGs, and 2400 x 1350 slide.
+8. Run:
    ```bash
    npm run typecheck
    npm run verify:dashboard
@@ -279,4 +285,4 @@ Use this before tomorrow-morning or shared-drive use:
    npm run verify:monthly
    npm run trace:dashboard:optimize
    ```
-8. Commit and push to `origin/main`.
+9. Commit and push to `origin/main`.

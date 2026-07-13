@@ -10,6 +10,12 @@ JSON.
 
 Double-click `run_weekly_images.bat`.
 
+When the main dashboard is opened with its one-click launcher, the same workflow
+is available in either workbook's **Reference** tab through **Save weekly call
+outputs**. The button runs in the background, uses the launcher's user-local
+Python and Node runtimes, and reports the saved or failed status in the Reference
+panel.
+
 The launcher:
 
 1. Creates a private `.venv` inside this folder.
