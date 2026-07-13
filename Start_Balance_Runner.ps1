@@ -15,6 +15,17 @@ $PythonRoot = Join-Path $LocalRoot "python"
 $CacheRoot = Join-Path $LocalRoot "cache"
 $NodeStamp = Join-Path $NodeRoot ".package-lock.sha256"
 $PythonStamp = Join-Path $PythonRoot ".requirements.sha256"
+$LocalPython = Join-Path $PythonRoot ".venv\Scripts\python.exe"
+
+foreach ($RequiredPath in @(
+    (Join-Path $SharedRoot "package.json"),
+    (Join-Path $SharedRoot "src\open_dashboard.ts"),
+    (Join-Path $SharedRoot "src\dashboard_update_server.ts")
+)) {
+    if (!(Test-Path $RequiredPath)) {
+        throw "The complete US Balances checkout was not found at $SharedRoot. If you downloaded a ZIP, extract the entire ZIP before running the .bat launcher."
+    }
+}
 
 function New-Directory {
     param([string]$Path)
@@ -67,7 +78,7 @@ function Resolve-SystemPython {
 
 function Invoke-SystemPython {
     param([string[]]$Arguments)
-    $cmd = Resolve-SystemPython
+    $cmd = @(Resolve-SystemPython)
     $cmdArgs = @()
     if ($cmd.Length -gt 1) {
         $cmdArgs += $cmd[1..($cmd.Length - 1)]
@@ -146,6 +157,31 @@ function Ensure-PythonRuntime {
     return $python
 }
 
+function Open-DashboardUrl {
+    param([string]$Url)
+
+    $probePath = $env:US_BALANCES_BROWSER_OPEN_PROBE
+    if ($probePath) {
+        $probeDirectory = Split-Path -Parent $probePath
+        if ($probeDirectory) {
+            New-Directory $probeDirectory
+        }
+        Set-Content -Path $probePath -Value $Url -Encoding UTF8
+        Write-Host "[US Balances] Browser-open probe recorded $Url"
+        return
+    }
+
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = $Url
+    $startInfo.UseShellExecute = $true
+    try {
+        [System.Diagnostics.Process]::Start($startInfo) | Out-Null
+    }
+    catch {
+        throw "The dashboard server is ready at $Url, but Windows could not open the default browser. Copy that URL into Chrome or Edge. $($_.Exception.Message)"
+    }
+}
+
 New-Directory $LocalRoot
 New-Directory $CacheRoot
 New-Directory (Join-Path $CacheRoot "npm")
@@ -159,11 +195,12 @@ $env:PYTHONPYCACHEPREFIX = Join-Path $CacheRoot "pycache"
 $env:MPLCONFIGDIR = Join-Path $CacheRoot "matplotlib"
 $env:US_BALANCES_SHARED_ROOT = $SharedRoot
 $env:US_BALANCES_RUNTIME_ROOT = $LocalRoot
+Write-Host "[US Balances] Preparing the local Node runtime under $NodeRoot"
 $env:US_BALANCES_TSX_COMMAND = Ensure-NodeRuntime
 $env:US_BALANCES_NODE_COMMAND = (Get-Command node.exe -ErrorAction Stop).Source
 $env:US_BALANCES_TSX_CLI = Join-Path $NodeRoot "node_modules\tsx\dist\cli.mjs"
-if (!$SkipPythonSetup) {
-    $env:US_BALANCES_PYTHON = Ensure-PythonRuntime
+if (!$SkipPythonSetup -or (Test-Path $LocalPython)) {
+    $env:US_BALANCES_PYTHON = $LocalPython
 }
 $KplerLocalEnvScript = Join-Path $SharedRoot "Kpler\config\local.env.ps1"
 if (Test-Path $KplerLocalEnvScript) {
@@ -175,10 +212,34 @@ if ($Port -gt 0) {
 
 Set-Location $SharedRoot
 $openArgs = @((Join-Path $SharedRoot "src\open_dashboard.ts"), $Route)
-if ($NoOpen) {
-    $openArgs += "--no-open"
+$openArgs += "--no-open"
+Write-Host "[US Balances] Starting the local dashboard server"
+$openOutput = @(& $env:US_BALANCES_NODE_COMMAND $env:US_BALANCES_TSX_CLI @openArgs 2>&1)
+$openExitCode = $LASTEXITCODE
+$openOutput | ForEach-Object { Write-Host $_ }
+if ($openExitCode -ne 0) {
+    exit $openExitCode
 }
-& $env:US_BALANCES_NODE_COMMAND $env:US_BALANCES_TSX_CLI @openArgs
-if ($LASTEXITCODE -ne 0) {
-    exit $LASTEXITCODE
+
+$dashboardUrl = ""
+foreach ($line in $openOutput) {
+    if ([string]$line -match "https?://[^\s]+") {
+        $dashboardUrl = $Matches[0]
+    }
+}
+if (!$dashboardUrl) {
+    throw "The dashboard server started, but its local URL was not reported."
+}
+if (!$NoOpen) {
+    Open-DashboardUrl $dashboardUrl
+    Write-Host "[US Balances] Opened $dashboardUrl"
+}
+else {
+    Write-Host "[US Balances] Dashboard ready at $dashboardUrl"
+}
+
+if (!$SkipPythonSetup) {
+    Write-Host "[US Balances] The dashboard is available. Preparing Python refresh tools under $PythonRoot"
+    $env:US_BALANCES_PYTHON = Ensure-PythonRuntime
+    Write-Host "[US Balances] Dashboard and refresh tools are ready"
 }

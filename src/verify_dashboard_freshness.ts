@@ -301,6 +301,14 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} balance loads reference context before rendering crude-derived rows`, indexHtml, "if (needsBalanceContext || sheet === 'reference' || sheet === 'outages' || sheet === 'crude') await ensureReferenceData();");
   assertIncludes(`${config.key} frequency switches use shared data loader`, indexHtml, "try { await ensureDataForState({...state,frequency:nextFrequency}); }");
   assertIncludes(`${config.key} refresh button reloads dashboard data before rerender`, indexHtml, "document.getElementById('refreshBtn').addEventListener('click', () => { refreshDashboardData('Dashboard refreshed'); });");
+  assertIncludes(`${config.key} successful update status is unambiguous`, indexHtml, "Complete — no errors");
+  assertIncludes(`${config.key} successful update log is unambiguous`, indexHtml, "SUCCESS — NO ERRORS");
+  assertIncludes(`${config.key} partial update status is explicit`, indexHtml, "Complete with warnings");
+  assertIncludes(`${config.key} partial update log is explicit`, indexHtml, "COMPLETE WITH WARNINGS");
+  assertIncludes(`${config.key} successful update reload toast is unambiguous`, indexHtml, "Update completed successfully; reloading dashboard");
+  assertIncludes(`${config.key} failed update does not imply fresh data`, indexHtml, "Update failed; dashboard data was not reloaded");
+  assertIncludes(`${config.key} update completion is shared across workbook tabs`, indexHtml, "const UPDATE_COMPLETION_STORAGE_KEY = 'us-balances:update-complete';");
+  assertIncludes(`${config.key} landing-page updates reload open workbook tabs`, indexHtml, "Update completed; loading the latest dashboard data");
   assertIncludes(`${config.key} F9 is routed through safe dashboard refresh`, indexHtml, "const isF9 = e.key === 'F9' || e.keyCode === 120;");
   assertIncludes(`${config.key} F9 recalculation loads dependencies first`, indexHtml, "refreshDashboardData('Dashboard recalculated');");
   assertIncludes(`${config.key} balance bootstrap refreshes server settings after data load`, indexHtml, "else if (state.sheet === 'balance' || state.sheet === 'charts' || state.sheet === 'outages' || state.sheet === 'crude') { refreshWorkbookSettings(); }");
@@ -615,6 +623,17 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
 
   return `${config.key}:weekly=${weeklyLatest}:monthly=${monthlyLatest}`;
 }
+
+const updatePipelineSource = await readFile("src/update_pipeline.ts", "utf8");
+assertNotIncludes("Kpler failures are not optional", updatePipelineSource, "continueOnFailure");
+assertNotIncludes("Kpler steps do not use the removed optional wrapper", updatePipelineSource, "optionalStep(");
+assertIncludes("Kpler full flow step remains in the all/other package", updatePipelineSource, 'scriptStep("Kpler flow package", "kpler")');
+assertIncludes("Kpler PADD 1 split remains in the all/other package", updatePipelineSource, 'scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")');
+
+const updateServerSource = await readFile("src/dashboard_update_server.ts", "utf8");
+assertIncludes("runner distinguishes partial completion", updateServerSource, 'type JobStatus = "running" | "succeeded" | "partial" | "failed";');
+assertIncludes("runner promotes skipped steps to warnings", updateServerSource, 'hasWarnings ? "partial" : "succeeded"');
+assertNotIncludes("runner no longer emits misleading raw child status", updateServerSource, "finished status=");
 
 const results = await Promise.all(PRODUCTS.map((config) => verifyProduct(config)));
 console.log(`dashboard freshness ok ${results.join(" ")}`);

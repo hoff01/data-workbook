@@ -19,7 +19,7 @@ import { createGzip } from "node:zlib";
 import { createHash } from "node:crypto";
 
 type UpdateGroup = "weekly" | "monthly" | "other" | "all" | "power-dfo";
-type JobStatus = "running" | "succeeded" | "failed";
+type JobStatus = "running" | "succeeded" | "partial" | "failed";
 
 type Job = {
   id: string;
@@ -224,24 +224,30 @@ function landingPage(): string {
   return `<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Balance Dashboards</title>
-<style>body{margin:0;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#eef2f6;color:#151c2c}.wrap{max-width:940px;margin:48px auto;padding:0 20px}h1{font-size:28px;margin:0 0 10px}h2{font-size:18px;margin:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}.runner{background:#fff;border:1px solid #cfd7e3;border-radius:8px;box-shadow:0 12px 28px rgba(26,39,65,.08);padding:18px;margin-top:20px}.runnerHead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.runnerButtons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.runnerStatus{display:inline-flex;border-radius:999px;background:#eef6ff;color:#294f88;padding:5px 9px;font-size:12px;font-weight:850}.runnerStatus.running{background:#fff6df;color:#976100}.runnerStatus.succeeded{background:#eaf8ef;color:#137047}.runnerStatus.failed{background:#fee4e2;color:#981b1b}.log{margin-top:12px;max-height:240px;overflow:auto;background:#101828;color:#e5edf8;border-radius:8px;padding:10px;font-size:11px;line-height:1.45;white-space:pre-wrap}a{display:block;background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:18px;color:#1d4ed8;text-decoration:none;font-weight:800;box-shadow:0 12px 28px rgba(26,39,65,.08)}button{border:1px solid #cbd5e1;background:#fff;color:#1f2937;border-radius:7px;padding:8px 11px;font-weight:850;cursor:pointer}button.primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff}button:disabled{opacity:.55;cursor:not-allowed}p{color:#667085;line-height:1.5}.note{background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:14px 16px;margin-top:18px;color:#475467;font-size:13px}@media(max-width:620px){.grid{grid-template-columns:1fr}.runnerHead{display:block}}</style></head>
-<body><main class="wrap"><h1>Balance Dashboards</h1><p>The local update runner is active. Open a workbook, or start a background refresh directly from this page.</p><div class="grid"><a href="/Diesel_Balance/index.html">Diesel Balance</a><a href="/Jet_Balance/index.html">Jet Balance</a><a href="/Diesel_Balance/index.html?sheet=reference">Diesel Reference</a><a href="/Jet_Balance/index.html?sheet=reference">Jet Reference</a></div><section class="runner"><div class="runnerHead"><div><h2>Update Runner</h2><p>Run the existing npm update groups from this checkout. The runner keeps working if the folder is moved because the server resolves the repo root dynamically.</p></div><span class="runnerStatus" id="runnerStatus">Idle</span></div><div class="runnerButtons"><button class="primary" data-run-group="weekly" type="button">Weekly</button><button data-run-group="monthly" type="button">Monthly</button><button data-run-group="other" type="button">Other</button><button data-run-group="power-dfo" type="button">Power DFO</button><button data-run-group="all" type="button">All</button></div><pre class="log" id="runnerLog">No runner job started.</pre></section><div class="note">For one-click launch from the file system, use <strong>Start_Balance_Runner.command</strong> on Mac or <strong>Start_Balance_Runner.bat</strong> on Windows from the repo folder.</div></main><script>
+<style>body{margin:0;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#eef2f6;color:#151c2c}.wrap{max-width:940px;margin:48px auto;padding:0 20px}h1{font-size:28px;margin:0 0 10px}h2{font-size:18px;margin:0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}.runner{background:#fff;border:1px solid #cfd7e3;border-radius:8px;box-shadow:0 12px 28px rgba(26,39,65,.08);padding:18px;margin-top:20px}.runnerHead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.runnerButtons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.runnerStatus{display:inline-flex;border-radius:999px;background:#eef6ff;color:#294f88;padding:5px 9px;font-size:12px;font-weight:850}.runnerStatus.running,.runnerStatus.partial{background:#fff6df;color:#976100}.runnerStatus.succeeded{background:#eaf8ef;color:#137047}.runnerStatus.failed{background:#fee4e2;color:#981b1b}.log{margin-top:12px;max-height:240px;overflow:auto;background:#101828;color:#e5edf8;border-radius:8px;padding:10px;font-size:11px;line-height:1.45;white-space:pre-wrap}a{display:block;background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:18px;color:#1d4ed8;text-decoration:none;font-weight:800;box-shadow:0 12px 28px rgba(26,39,65,.08)}button{border:1px solid #cbd5e1;background:#fff;color:#1f2937;border-radius:7px;padding:8px 11px;font-weight:850;cursor:pointer}button.primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff}button:disabled{opacity:.55;cursor:not-allowed}p{color:#667085;line-height:1.5}.note{background:#fff;border:1px solid #cfd7e3;border-radius:8px;padding:14px 16px;margin-top:18px;color:#475467;font-size:13px}@media(max-width:620px){.grid{grid-template-columns:1fr}.runnerHead{display:block}}</style></head>
+  <body><main class="wrap"><h1>Balance Dashboards</h1><p>The local update runner is active. Open a workbook, or start a background refresh directly from this page.</p><div class="grid"><a href="/Diesel_Balance/index.html">Diesel Balance</a><a href="/Jet_Balance/index.html">Jet Balance</a><a href="/Diesel_Balance/index.html?sheet=reference">Diesel Reference</a><a href="/Jet_Balance/index.html?sheet=reference">Jet Reference</a></div><section class="runner"><div class="runnerHead"><div><h2>Update Runner</h2><p>Run the existing npm update groups from this checkout. The runner keeps working if the folder is moved because the server resolves the repo root dynamically.</p></div><span class="runnerStatus" id="runnerStatus">Idle</span></div><div class="runnerButtons"><button class="primary" data-run-group="weekly" type="button">Weekly</button><button data-run-group="monthly" type="button">Monthly</button><button data-run-group="other" type="button">Other</button><button data-run-group="power-dfo" type="button">Power DFO</button><button data-run-group="all" type="button">All</button></div><pre class="log" id="runnerLog">No runner job started.</pre></section><div class="note">For one-click launch from the file system, use <strong>Open_Balance_Dashboards.command</strong> on Mac or <strong>Open_Balance_Dashboards.bat</strong> on Windows from the fully extracted repo folder.</div></main><script>
 const statusEl = document.getElementById('runnerStatus');
 const logEl = document.getElementById('runnerLog');
 const buttons = Array.from(document.querySelectorAll('[data-run-group]'));
+const updateCompletionStorageKey = 'us-balances:update-complete';
 let pollTimer = 0;
 function setStatus(job){
   const state = job?.status || 'idle';
-  statusEl.textContent = state === 'idle' ? 'Idle' : job.group + ' ' + state;
+  statusEl.textContent = state === 'idle' ? 'Idle' : state === 'succeeded' ? job.group + ' complete — no errors' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group + ' running';
   statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
   buttons.forEach(button => button.disabled = state === 'running');
   logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : 'No runner job started.';
+}
+function publishUpdateCompletion(job){
+  if (!job?.id || !['succeeded','partial'].includes(job.status)) return;
+  try { if (localStorage.getItem(updateCompletionStorageKey) !== job.id) localStorage.setItem(updateCompletionStorageKey, job.id); } catch {}
 }
 async function refreshStatus(){
   try {
     const response = await fetch('/api/update/status', { cache:'no-store' });
     const payload = await response.json();
     setStatus(payload.job);
+    publishUpdateCompletion(payload.job);
     if (payload.job?.status === 'running') pollTimer = window.setTimeout(refreshStatus, 2000);
   } catch (error) {
     statusEl.textContent = 'Unavailable';
@@ -359,12 +365,16 @@ function startJob(group: UpdateGroup): Job {
     releaseRunnerLock(lock);
   });
   child.on("close", (code, signal) => {
-    job.status = code === 0 ? "succeeded" : "failed";
+    const hasWarnings = job.lines.some((line) => /\[update\] step \d+\/\d+ (?:skipped|warning):/.test(line));
+    job.status = code === 0 ? (hasWarnings ? "partial" : "succeeded") : "failed";
     job.exitCode = code;
     job.signal = signal;
     job.endedAt = new Date().toISOString();
     job.durationMs = Date.now() - started;
-    appendJobLine(job, code === 0 ? "stdout" : "stderr", `finished status=${job.status} code=${code ?? "n/a"} signal=${signal ?? "n/a"}`);
+    const completionMessage = code === 0
+      ? (hasWarnings ? "Update completed with warnings. Review skipped steps." : "Update completed successfully.")
+      : `Update failed (exit code ${code ?? "n/a"}${signal ? `, signal ${signal}` : ""}).`;
+    appendJobLine(job, code === 0 ? "stdout" : "stderr", completionMessage);
     currentProcess = null;
     releaseRunnerLock(lock);
   });

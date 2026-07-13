@@ -20,16 +20,16 @@ The runner serves the dashboard over plain local HTTP at `http://127.0.0.1:8787`
    node --version
    npm --version
    ```
-3. Install Python 3.11 or newer. Confirm:
+3. Python 3.11 or newer is required for data refreshes, but is no longer required merely to open the dashboard. Before running an update, confirm:
    ```powershell
    py -3 --version
    ```
-4. Clone the canonical GitHub repo, or pull it if it already exists:
+4. Clone the canonical GitHub repo, or download and fully extract the ZIP. Do not run the `.bat` from inside Windows' compressed-folder view. For a clone:
    ```powershell
    git clone https://github.com/hoff01/data-workbook.git US_Balances
    cd US_Balances
    ```
-5. Double-click `Open_Balance_Dashboards.bat` from the repo folder.
+5. Double-click `Open_Balance_Dashboards.bat` from the fully extracted repo folder. The launcher prepares Node, starts the local server, and opens the exact local URL with the Windows default-browser shell. It opens the dashboard before preparing optional Python refresh tools, so a Python setup problem cannot hide the dashboard.
 
 Keep Git certificate verification enabled. GitHub uses a publicly trusted
 certificate, so a normal Git for Windows installation should push without a
@@ -63,7 +63,7 @@ On first run, `Start_Balance_Runner.ps1` creates local runtime folders under:
 %USERPROFILE%\US_Balances\
 ```
 
-Those local folders hold Node packages, the Python virtual environment, pip/npm caches, Python bytecode, and matplotlib caches. The shared repo remains the source/output folder, while user-specific runtime files stay out of the shared drive.
+Those local folders hold Node packages, the optional Python virtual environment, pip/npm caches, Python bytecode, and matplotlib caches. The launcher prepares the required Node runtime, opens the dashboard, and then finishes the Python refresh environment. The shared repo remains the source/output folder, while user-specific runtime files stay out of the shared drive.
 
 ## Certificate Error Avoidance
 
@@ -168,6 +168,20 @@ git status --short --branch
 The final status should show `## main...origin/main` and no modified or untracked files, except ignored local runtime/cache files.
 
 ## Troubleshooting
+
+### Double-Click Does Not Open a Browser
+
+1. Confirm the GitHub ZIP was fully extracted. The launcher cannot run from inside the compressed-folder view.
+2. Confirm `package.json`, `Start_Balance_Runner.bat`, `Start_Balance_Runner.ps1`, and the `src` folder are beside `Open_Balance_Dashboards.bat`.
+3. Double-click `Open_Balance_Dashboards.bat` again. On failure, the window now remains open with the exact prerequisite or startup error instead of silently closing.
+4. If the window reports that Node is missing, install Node.js LTS and retry. Python is not needed just to open the dashboard.
+5. If the server starts but the browser association is unavailable, copy the printed `http://127.0.0.1:<port>/` URL into Edge or Chrome.
+
+The launcher deliberately bypasses any inherited `DASHBOARD_OPEN_BROWSER=0` value and delegates the final URL to Windows ShellExecute, which uses the configured default browser.
+
+`Complete — no errors` and `Update completed successfully.` appear only when every required refresh step finishes. An explicit operator skip is labeled `Complete with warnings` in amber. Any Kpler or other required-source failure is labeled `Failed`, reports a nonzero exit code, remains visible in red, and does not reload the workbook as though new data were available.
+
+When an update started from the landing page completes, already-open Diesel and Jet workbook tabs automatically reload the newly built dashboard files. If the source published no newer observation, the displayed latest date will remain unchanged even though the pull completed normally.
 
 ### Browser Certificate Warning
 

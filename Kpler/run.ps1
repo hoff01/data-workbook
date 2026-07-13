@@ -56,7 +56,7 @@ function Resolve-SystemPython {
 
 function Invoke-SystemPython {
     param([string[]]$Arguments)
-    $cmd = Resolve-SystemPython
+    $cmd = @(Resolve-SystemPython)
     $cmdArgs = @()
     if ($cmd.Length -gt 1) {
         $cmdArgs += $cmd[1..($cmd.Length - 1)]

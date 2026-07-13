@@ -10,7 +10,6 @@ type Step = {
   label: string;
   command: string;
   args: string[];
-  continueOnFailure?: string;
   skipIfEnv?: string;
   skipReason?: string;
 };
@@ -98,10 +97,6 @@ function branch(label: string, steps: Step[]): StepBranch {
   return { label, steps };
 }
 
-function optionalStep(step: Step, continueOnFailure: string): Step {
-  return { ...step, continueOnFailure };
-}
-
 function skipIfEnv(step: Step, envName: string, skipReason: string): Step {
   return { ...step, skipIfEnv: envName, skipReason };
 }
@@ -109,18 +104,12 @@ function skipIfEnv(step: Step, envName: string, skipReason: string): Step {
 function kplerContextSteps(): Step[] {
   return [
     skipIfEnv(
-      optionalStep(
-        scriptStep("Kpler flow package", "kpler"),
-        "using the existing local Kpler outputs; run Kpler again when account access is approved",
-      ),
+      scriptStep("Kpler flow package", "kpler"),
       "US_BALANCES_SKIP_KPLER_REFRESH",
       "using the existing local Kpler outputs because US_BALANCES_SKIP_KPLER_REFRESH is set",
     ),
     skipIfEnv(
-      optionalStep(
-        scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia"),
-        "using the existing local Kpler PADD 1 split outputs; run Kpler again when account access is approved",
-      ),
+      scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia"),
       "US_BALANCES_SKIP_KPLER_REFRESH",
       "using the existing local Kpler PADD 1 split outputs because US_BALANCES_SKIP_KPLER_REFRESH is set",
     ),
@@ -225,7 +214,6 @@ async function runStep(step: Step, progress: RunProgress, context?: string): Pro
     return 0;
   }
   console.log(`[update] step ${index}/${progress.totalSteps} start: ${label} :: ${commandText(step)}`);
-  let continuedAfterFailure = false;
   await new Promise<void>((resolve, reject) => {
     const child = spawn(step.command, step.args, {
       cwd: ROOT,
@@ -240,23 +228,11 @@ async function runStep(step: Step, progress: RunProgress, context?: string): Pro
         resolve();
         return;
       }
-      if (step.continueOnFailure) {
-        continuedAfterFailure = true;
-        console.warn(
-          `[update] step ${index}/${progress.totalSteps} warning: ${label} failed with code ${code ?? "n/a"} signal ${
-            signal ?? "n/a"
-          }; ${step.continueOnFailure}`,
-        );
-        resolve();
-        return;
-      }
       reject(new Error(`${step.label} failed with code ${code ?? "n/a"} signal ${signal ?? "n/a"}`));
     });
   });
   const elapsed = performance.now() - started;
-  console.log(
-    `[update] step ${index}/${progress.totalSteps} ${continuedAfterFailure ? "continued" : "done"}: ${label} duration=${formatDuration(elapsed)}`,
-  );
+  console.log(`[update] step ${index}/${progress.totalSteps} done: ${label} duration=${formatDuration(elapsed)}`);
   return elapsed;
 }
 

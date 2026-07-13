@@ -1689,15 +1689,16 @@ period;destinationTradingRegions;quantity
 2026-05-15;Latin America;841.32
 2026-05-15;MED Zone (MED Sea+Black Sea);47.17
 2026-05-15;North West Europe Zone;268.01
-2026-05-15;Western Africa;140.49
+2026-05-15;Unknown;10.71
+2026-05-15;Western Africa;129.78
 2026-05-22;East Coast Canada;17.14
 2026-05-22;Latin America;808.13
 2026-05-22;North West Europe Zone;333.73
 2026-05-22;Other North Africa;114.70
 2026-05-22;South-East Asia;42.86
 2026-05-22;Southern Africa;45.00
-2026-05-22;Unknown;20.36
-2026-05-22;Western Africa;29.71
+2026-05-22;Unknown;22.97
+2026-05-22;Western Africa;27.10
 2026-05-29;Latin America;951.45
 2026-05-29;MED Zone (MED Sea+Black Sea);87.82
 2026-05-29;North West Europe Zone;209.37
@@ -1730,19 +1731,19 @@ period;destinationTradingRegions;quantity
 2026-06-26;Other North Africa;44.29
 2026-06-26;Unknown;125.04
 2026-06-26;Western Africa;86.03
-2026-07-03;Latin America;1025.47
+2026-07-03;Latin America;982.05
 2026-07-03;MED Zone (MED Sea+Black Sea);173.29
 2026-07-03;North West Europe Zone;82.00
-2026-07-03;Unknown;85.71
-2026-07-10;Latin America;1109.33
+2026-07-03;Unknown;129.14
+2026-07-10;Latin America;1109.57
 2026-07-10;North West Europe Zone;216.18
 2026-07-10;Other North Africa;74.14
-2026-07-10;Unknown;164.34
-2026-07-17;Latin America;116.36
+2026-07-10;Unknown;120.92
+2026-07-17;Latin America;201.94
 2026-07-17;North West Europe Zone;86.80
-2026-07-17;Unknown;363.49
+2026-07-17;Unknown;325.85
 2026-07-17;Western Africa;43.09
-2026-07-24;Latin America;243.11
+2026-07-24;Latin America;197.55
 2026-07-24;Unknown;98.34
 2026-08-07;Latin America;49.35
 2026-08-07;North West Europe Zone;48.74
