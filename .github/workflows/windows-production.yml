@@ -66,13 +66,27 @@ jobs:
           }
           if ($failed) { exit 1 }
 
-      - name: Exercise the real Windows launcher and Kpler preflight
+      - name: Exercise the real Windows batch launcher, browser handoff, and Kpler preflight
         shell: pwsh
         run: |
           $port = 8797
           $health = $null
+          $browserProbe = Join-Path $env:RUNNER_TEMP "us-balances-opened-url.txt"
           try {
-            & .\Start_Balance_Runner.ps1 -Route diesel -NoOpen -Port $port
+            $env:US_BALANCES_BROWSER_OPEN_PROBE = $browserProbe
+            $env:DASHBOARD_OPEN_BROWSER = "0"
+            & .\Open_Diesel_Dashboard.bat -Port $port
+            if ($LASTEXITCODE -ne 0) {
+              throw "Windows .bat launcher exited with code $LASTEXITCODE."
+            }
+            if (!(Test-Path $browserProbe)) {
+              throw "Windows .bat launcher did not reach the browser-open path."
+            }
+            $openedUrl = (Get-Content -Raw $browserProbe).Trim()
+            $expectedUrl = "http://127.0.0.1:$port/Diesel_Balance/index.html"
+            if ($openedUrl -ne $expectedUrl) {
+              throw "Windows browser handoff mismatch: expected $expectedUrl, received $openedUrl"
+            }
             for ($attempt = 0; $attempt -lt 30; $attempt += 1) {
               try {
                 $health = Invoke-RestMethod "http://127.0.0.1:$port/api/health"
@@ -103,6 +117,8 @@ jobs:
             & $python -m unittest tests.test_kpler_v2 tests.test_kpler_padd1_eia_split
           }
           finally {
+            Remove-Item Env:\US_BALANCES_BROWSER_OPEN_PROBE -ErrorAction SilentlyContinue
+            Remove-Item Env:\DASHBOARD_OPEN_BROWSER -ErrorAction SilentlyContinue
             if ($health -and $health.pid) {
               Stop-Process -Id ([int]$health.pid) -Force -ErrorAction SilentlyContinue
             }
