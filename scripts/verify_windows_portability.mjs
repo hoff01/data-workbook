@@ -30,6 +30,9 @@ requireText("src/dashboard_update_server.ts", "const tsxCli = process.env.US_BAL
 requireText("Kpler/run.ps1", 'Assert-NativeSuccess "Kpler preflight"', "Kpler preflight failure propagation");
 requireText("Kpler/run.ps1", 'Assert-NativeSuccess "Kpler pull"', "Kpler pull failure propagation");
 requireText(".github/workflows/windows-production.yml", "runs-on: windows-latest", "native Windows CI runner");
+requireText(".github/workflows/windows-production.yml", "actions/checkout@v6", "Node 24 checkout action");
+requireText(".github/workflows/windows-production.yml", "actions/setup-node@v6", "Node 24 setup-node action");
+requireText(".github/workflows/windows-production.yml", "actions/setup-python@v6", "Node 24 setup-python action");
 requireText(".github/workflows/windows-production.yml", "Start_Balance_Runner.ps1 -Route diesel -NoOpen", "native Windows launcher smoke test");
 requireText(".github/workflows/windows-production.yml", "Kpler\\run.ps1 -Preflight", "native Windows Kpler preflight");
 requireText("docs/operating-guide.md", "https://github.com/hoff01/data-workbook.git", "canonical Windows clone URL");
