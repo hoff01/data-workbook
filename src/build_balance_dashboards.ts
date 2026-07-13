@@ -4119,6 +4119,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     const BALANCE_LAZY_FILES = window.BALANCE_LAZY_FILES || {};
     const STORAGE_KEY = D.product.key + ':regional-balance-v2';
     const UPDATE_COMPLETION_STORAGE_KEY = 'us-balances:update-complete';
+    const UPDATE_RELOAD_SESSION_KEY = 'us-balances:update-reloaded';
     const CHART_SCENARIO_STORAGE_KEY = STORAGE_KEY + ':chart-scenarios';
     const CHART_SCENARIO_DRAFT_STORAGE_KEY = STORAGE_KEY + ':chart-scenario-draft';
     const BAND_YEARS = ${JSON.stringify(BAND_YEARS)};
@@ -4343,6 +4344,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     let lastUpdateJob = null;
     let updateApiAvailable = true;
     let activeUpdateStartedByTab = '';
+    let observedRunningUpdateJobId = '';
     let updatePollTimer = 0;
     let crudeActiveHeaderRaf = 0;
     let weeklyGuideLoadQueued = false;
@@ -7108,12 +7110,47 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function sourceStatusDot(status){ return '<span class="sourceDot '+esc(status)+'"></span>'; }
     function updateBaseUrl(){ return /^https?:$/.test(location.protocol) ? location.origin : 'http://127.0.0.1:8787'; }
     function updateGroupMeta(group){ return UPDATE_GROUPS[group] || UPDATE_GROUPS.all; }
-    function updateStatusText(job){ if (!updateApiAvailable) return 'Runner offline'; if (!job) return 'Idle'; if (job.status === 'running') return 'Running '+updateGroupMeta(job.group).label; if (job.status === 'succeeded') return 'Complete — no errors'; if (job.status === 'partial') return 'Complete with warnings'; return 'Failed'; }
-    function updateLogText(job){ if (!updateApiAvailable) return 'Start npm run dashboard:server, then reopen this page from http://127.0.0.1:8787/ for background refreshes.'; if (!job) return 'Local runner idle.'; const meta = updateGroupMeta(job.group); const elapsed = job.durationMs ? 'duration '+Math.round(job.durationMs/1000)+'s' : 'started '+new Date(job.startedAt).toLocaleString(); const lines = (job.lines || []).slice(-80).join('\\n'); const statusLabel = job.status === 'succeeded' ? 'SUCCESS — NO ERRORS' : job.status === 'partial' ? 'COMPLETE WITH WARNINGS' : job.status.toUpperCase(); return '['+statusLabel+'] '+meta.label+' update | '+elapsed+'\\n'+(lines || 'Waiting for output...'); }
+    function updateStatusText(job){ if (!updateApiAvailable) return 'Runner offline'; if (!job) return 'Ready — waiting to refresh'; if (job.status === 'running') return 'Refreshing '+updateGroupMeta(job.group).label; if (job.status === 'succeeded' && job.result === 'updated') return 'Updated — new data loaded'; if (job.status === 'succeeded' && job.result === 'current') return 'Checked — already current'; if (job.status === 'succeeded') return 'Refresh complete'; if (job.status === 'partial' && job.result === 'updated') return 'Updated with warnings'; if (job.status === 'partial' && job.result === 'current') return 'Current with warnings'; if (job.status === 'partial') return 'Refresh complete with warnings'; return 'Refresh failed'; }
+    function updateLogText(job){ if (!updateApiAvailable) return 'The local runner is unavailable. Reopen the dashboard with the one-click launcher.'; if (!job) return 'Refresh tools are ready. A normal launcher click starts a forced Complete refresh.'; const meta = updateGroupMeta(job.group); const elapsed = job.durationMs ? 'duration '+Math.round(job.durationMs/1000)+'s' : 'started '+new Date(job.startedAt).toLocaleString(); const lines = (job.lines || []).slice(-80).join('\\n'); const statusLabel = job.status === 'succeeded' && job.result === 'updated' ? 'UPDATED — NEW DATA' : job.status === 'succeeded' && job.result === 'current' ? 'CHECKED — ALREADY CURRENT' : job.status === 'succeeded' ? 'REFRESH COMPLETE' : job.status === 'partial' && job.result === 'updated' ? 'UPDATED WITH WARNINGS' : job.status === 'partial' && job.result === 'current' ? 'CURRENT WITH WARNINGS' : job.status === 'partial' ? 'REFRESH COMPLETE WITH WARNINGS' : job.status.toUpperCase(); return '['+statusLabel+'] '+meta.label+' refresh | '+elapsed+'\\n'+(lines || 'Waiting for output...'); }
     function renderReferenceUpdates(){ const job = lastUpdateJob; const group = job?.group || document.getElementById('referenceUpdatePanel')?.dataset.group || 'all'; const meta = updateGroupMeta(group); const pill = document.getElementById('updateStatusPill'); if (!pill) return; pill.textContent = updateStatusText(job); pill.className = 'pill updateStatus '+(!updateApiAvailable ? 'unavailable' : (job?.status || 'idle')); document.querySelectorAll('[data-update-group]').forEach(btn => { btn.classList.toggle('active', btn.dataset.updateGroup === group); btn.disabled = Boolean(job && job.status === 'running'); }); document.getElementById('updateSteps').innerHTML = meta.steps.map((step, idx) => '<div class="updateStep"><b>'+(idx+1)+'. '+esc(step)+'</b><span>'+esc(meta.label)+' sequence</span></div>').join(''); document.getElementById('updateLog').textContent = updateLogText(job); }
     function scheduleUpdatePoll(delay=2000){ clearTimeout(updatePollTimer); updatePollTimer = setTimeout(pollUpdateStatus, delay); }
-    async function pollUpdateStatus(){ try { const response = await fetch(updateBaseUrl() + '/api/update/status', {cache:'no-store'}); if (!response.ok) throw new Error('status '+response.status); const payload = await response.json(); updateApiAvailable = true; lastUpdateJob = payload.job || null; renderReferenceUpdates(); if (lastUpdateJob?.status === 'running') scheduleUpdatePoll(2000); else if (lastUpdateJob && activeUpdateStartedByTab === lastUpdateJob.id) { const completed = lastUpdateJob.status === 'succeeded' || lastUpdateJob.status === 'partial'; activeUpdateStartedByTab = ''; if (completed) { try { if (localStorage.getItem(UPDATE_COMPLETION_STORAGE_KEY) !== lastUpdateJob.id) localStorage.setItem(UPDATE_COMPLETION_STORAGE_KEY, lastUpdateJob.id); } catch {} showToast(lastUpdateJob.status === 'succeeded' ? 'Update completed successfully; reloading dashboard' : 'Update completed with warnings; reloading dashboard'); setTimeout(() => location.reload(), 900); } else showToast('Update failed; dashboard data was not reloaded'); } } catch { updateApiAvailable = false; renderReferenceUpdates(); } }
-    async function startDashboardUpdate(group){ document.getElementById('referenceUpdatePanel').dataset.group = group; renderReferenceUpdates(); try { const response = await fetch(updateBaseUrl() + '/api/update/start', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({group})}); const payload = await response.json(); if (!response.ok && response.status !== 409) throw new Error(payload.error || 'update failed to start'); updateApiAvailable = true; lastUpdateJob = payload.job || null; activeUpdateStartedByTab = response.status === 202 && lastUpdateJob ? lastUpdateJob.id : ''; renderReferenceUpdates(); scheduleUpdatePoll(1200); showToast(response.status === 409 ? 'Update already running' : updateGroupMeta(group).label+' update started'); } catch (error) { updateApiAvailable = false; renderReferenceUpdates(); showToast(error instanceof Error ? error.message : 'Runner unavailable'); } }
+    async function pollUpdateStatus(){
+      try {
+        const response = await fetch(updateBaseUrl() + '/api/update/status', {cache:'no-store'});
+        if (!response.ok) throw new Error('status '+response.status);
+        const payload = await response.json();
+        updateApiAvailable = true;
+        lastUpdateJob = payload.job || null;
+        if (lastUpdateJob?.status === 'running') observedRunningUpdateJobId = lastUpdateJob.id;
+        renderReferenceUpdates();
+        const terminal = lastUpdateJob && lastUpdateJob.status !== 'running';
+        const tracked = terminal && (activeUpdateStartedByTab === lastUpdateJob.id || observedRunningUpdateJobId === lastUpdateJob.id);
+        if (tracked) {
+          const completed = lastUpdateJob.status === 'succeeded' || lastUpdateJob.status === 'partial';
+          activeUpdateStartedByTab = '';
+          observedRunningUpdateJobId = '';
+          let alreadyHandled = false;
+          try { alreadyHandled = sessionStorage.getItem(UPDATE_RELOAD_SESSION_KEY) === lastUpdateJob.id; } catch {}
+          if (!alreadyHandled) {
+            try { sessionStorage.setItem(UPDATE_RELOAD_SESSION_KEY, lastUpdateJob.id); } catch {}
+            if (completed) {
+              try { if (localStorage.getItem(UPDATE_COMPLETION_STORAGE_KEY) !== lastUpdateJob.id) localStorage.setItem(UPDATE_COMPLETION_STORAGE_KEY, lastUpdateJob.id); } catch {}
+              const message = lastUpdateJob.result === 'updated' ? 'New source data loaded; reloading dashboard' : lastUpdateJob.result === 'current' ? 'Refresh complete; dashboard source data was already current' : 'Refresh complete; reloading dashboard';
+              showToast(message);
+              setTimeout(() => location.reload(), 900);
+              return;
+            }
+            showToast('Refresh failed; dashboard data was not reloaded');
+          }
+        }
+        scheduleUpdatePoll(lastUpdateJob?.status === 'running' ? 2000 : lastUpdateJob ? 8000 : 1200);
+      } catch {
+        updateApiAvailable = false;
+        renderReferenceUpdates();
+        scheduleUpdatePoll(3000);
+      }
+    }
+    async function startDashboardUpdate(group){ document.getElementById('referenceUpdatePanel').dataset.group = group; renderReferenceUpdates(); let runnerReached = false; try { const response = await fetch(updateBaseUrl() + '/api/update/start', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({group,force:true})}); runnerReached = true; const payload = await response.json(); if (!response.ok && response.status !== 409) throw new Error(payload.error || 'refresh failed to start'); updateApiAvailable = true; lastUpdateJob = payload.job || null; activeUpdateStartedByTab = response.status === 202 && lastUpdateJob ? lastUpdateJob.id : ''; if (lastUpdateJob?.status === 'running') observedRunningUpdateJobId = lastUpdateJob.id; renderReferenceUpdates(); scheduleUpdatePoll(1200); showToast(response.status === 409 ? 'Refresh already running' : updateGroupMeta(group).label+' refresh started'); } catch (error) { updateApiAvailable = runnerReached; renderReferenceUpdates(); scheduleUpdatePoll(2000); showToast(error instanceof Error ? error.message : 'Runner unavailable'); } }
     function optimizationCardHtml(label, value, note){ return '<div class="signalCard" data-optimization-card><span>'+esc(label)+'</span><b>'+esc(value)+'</b><i>'+esc(note)+'</i></div>'; }
     function renderOptimizationDiagnostics(){
       const panel = document.getElementById('optimizationDiagnostics');
@@ -7329,7 +7366,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	    document.addEventListener('keydown', e => { const isF9 = e.key === 'F9' || e.keyCode === 120; if (isF9) { e.preventDefault(); e.stopPropagation(); refreshDashboardData('Dashboard recalculated'); return; } const tag = document.activeElement?.tagName || ''; const editing = ['INPUT','SELECT','TEXTAREA'].includes(tag); if (e.key === '/' && state.sheet === 'balance' && !editing) { const searchInput = document.getElementById('balanceSearchInput'); if (searchInput) { e.preventDefault(); searchInput.focus(); return; } } if (e.key === 'Escape' && chartScenarioModalOpen) closeChartScenarioModal(); else if (e.key === 'Escape' && !document.getElementById('chartZoomModal')?.hidden) closeChartZoomModal(); else if (e.key === 'Escape' && !document.getElementById('outageCollisionModal')?.hidden) closeOutageCollisionModal(); else if (e.key === 'Escape' && state.sheet === 'balance' && balanceFilterActive() && !editing) clearBalanceFocus(); });
     document.querySelectorAll('.tablewrap').forEach(wrap => { wrap.addEventListener('mousedown', () => wrap.focus({preventScroll:true})); wrap.addEventListener('keydown', e => { const stepX = e.shiftKey ? 360 : 96; const stepY = e.shiftKey ? 240 : 54; const pageWide = tableUsesPageWideScroll(wrap); const movePageX = delta => window.scrollBy({left:delta,top:0,behavior:'instant'}); if (e.key === 'ArrowRight') { pageWide ? movePageX(stepX) : wrap.scrollLeft += stepX; e.preventDefault(); } else if (e.key === 'ArrowLeft') { pageWide ? movePageX(-stepX) : wrap.scrollLeft -= stepX; e.preventDefault(); } else if (e.key === 'ArrowDown') { wrap.scrollTop += stepY; e.preventDefault(); } else if (e.key === 'ArrowUp') { wrap.scrollTop -= stepY; e.preventDefault(); } else if (e.key === 'Home' && e.ctrlKey) { pageWide ? window.scrollTo({left:0,top:window.scrollY,behavior:'instant'}) : wrap.scrollLeft = 0; e.preventDefault(); } else if (e.key === 'End' && e.ctrlKey) { pageWide ? window.scrollTo({left:document.documentElement.scrollWidth,top:window.scrollY,behavior:'instant'}) : wrap.scrollLeft = wrap.scrollWidth; e.preventDefault(); } }); });
     document.getElementById('crudeRunsTableWrap').addEventListener('scroll', () => { if (state.sheet === 'crude') scheduleCrudeActiveHeader(); }, {passive:true});
-    addEventListener('storage', event => { if (!event) return; if (event.key === UPDATE_COMPLETION_STORAGE_KEY && event.newValue) { showToast('Update completed; loading the latest dashboard data'); setTimeout(() => location.reload(), 250); return; } if ([SETTINGS_STORAGE_KEY, OUTAGE_STORAGE_KEY, CAPACITY_ADJ_STORAGE_KEY].includes(event.key)) { applyWorkbookSettingsSnapshot(readWorkbookSettings(), {renderDelay:260}); return; } if (event.key === EXPERIMENTAL_BALANCE_SYNC_STORAGE_KEY) { experimentalBalanceSyncState = readExperimentalBalanceSyncState(); queueRender(120); return; } if (event.key === STORAGE_KEY) { savedViewsSignature = ''; renderSavedViews(); return; } if ([CHART_SCENARIO_STORAGE_KEY, CHART_SCENARIO_DRAFT_STORAGE_KEY].includes(event.key)) { chartScenarios = readChartScenarios(); chartScenarioDraft = readChartScenarioDraft(); queueRender(120); } });
+    addEventListener('storage', event => { if (!event) return; if (event.key === UPDATE_COMPLETION_STORAGE_KEY && event.newValue) { try { sessionStorage.setItem(UPDATE_RELOAD_SESSION_KEY, event.newValue); } catch {} showToast('Refresh completed; loading the latest dashboard data'); setTimeout(() => location.reload(), 250); return; } if ([SETTINGS_STORAGE_KEY, OUTAGE_STORAGE_KEY, CAPACITY_ADJ_STORAGE_KEY].includes(event.key)) { applyWorkbookSettingsSnapshot(readWorkbookSettings(), {renderDelay:260}); return; } if (event.key === EXPERIMENTAL_BALANCE_SYNC_STORAGE_KEY) { experimentalBalanceSyncState = readExperimentalBalanceSyncState(); queueRender(120); return; } if (event.key === STORAGE_KEY) { savedViewsSignature = ''; renderSavedViews(); return; } if ([CHART_SCENARIO_STORAGE_KEY, CHART_SCENARIO_DRAFT_STORAGE_KEY].includes(event.key)) { chartScenarios = readChartScenarios(); chartScenarioDraft = readChartScenarioDraft(); queueRender(120); } });
     addEventListener('pageshow', () => { refreshBalanceChartHydration(true); }, {passive:true});
     addEventListener('focus', () => { refreshBalanceChartHydration(true); });
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshBalanceChartHydration(true); });
@@ -7346,8 +7383,9 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       renderHistoryChips();
       render();
       if (state.sheet === 'charts') setTimeout(() => refreshBalanceChartHydration(true), 80);
-      if (state.sheet === 'reference') { refreshWorkbookSettings(); pollUpdateStatus(); }
+      if (state.sheet === 'reference') { refreshWorkbookSettings(); }
       else if (state.sheet === 'balance' || state.sheet === 'charts' || state.sheet === 'outages' || state.sheet === 'crude') { refreshWorkbookSettings(); }
+      pollUpdateStatus();
     }
     bootstrap();
   </script>

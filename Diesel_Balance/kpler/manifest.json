@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T20:56:54.287995+00:00",
+  "generated_at": "2026-07-13T21:44:22.740844+00:00",
   "kpler_access_mode": "direct_http_v2",
   "kpler_api": {
     "auth_configured": true,
@@ -985,7 +985,7 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 11979,
+            "bytes": 11978,
             "columns": [
               "period",
               "destinationTradingRegions",
@@ -1234,7 +1234,7 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 30993,
+            "bytes": 30991,
             "columns": [
               "period",
               "destinationTradingRegions",

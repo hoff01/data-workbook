@@ -31,7 +31,7 @@ npm run validate
 npm run verify:dashboard
 ```
 
-The `update:*` commands rebuild `Diesel_Balance/index.html` and `Jet_Balance/index.html` after data changes, then run the dashboard freshness check. `npm run update:all` attempts the live Kpler pull; if Kpler authentication fails, it continues with the existing local `Kpler/output/` files so the dashboard still rebuilds from the latest available Kpler data. Set `US_BALANCES_SKIP_KPLER_REFRESH=1` to intentionally skip the live Kpler pull and Kpler-derived split refresh while using the local Kpler files.
+The `update:*` commands rebuild `Diesel_Balance/index.html` and `Jet_Balance/index.html` after data changes, then run the dashboard freshness check. `npm run update:all` includes the live Kpler pull and fails visibly if a required Kpler step fails. Set `US_BALANCES_SKIP_KPLER_REFRESH=1` only when you intentionally want a warning-labeled run that keeps the existing local `Kpler/output/` files.
 
 ## Documentation
 

@@ -1,7 +1,7 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-07-13T21:00:02.563Z",
+  "generatedAt": "2026-07-13T21:47:57.479Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through the saved forecast end date.",
   "latestMonthly": "2026-04-15",
@@ -12,53 +12,53 @@
       "path": "eia_monthly/jet.csv",
       "rows": 124,
       "checksum": "e31c6beee0ba3d779f95c692ce309c097539e5b725b009f838e2fef530d68512",
-      "modifiedAt": "2026-07-13T20:57:07.702Z"
+      "modifiedAt": "2026-07-13T21:44:35.048Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/jet.csv",
       "rows": 549,
       "checksum": "4d3b9974b8c013c54c3508651e191c5cf98c9e4a149a0742d5dbc9f747ce2f9e",
-      "modifiedAt": "2026-07-13T20:57:07.711Z"
+      "modifiedAt": "2026-07-13T21:44:35.056Z"
     },
     {
       "role": "kpler_manifest",
       "path": "kpler/manifest.json",
-      "checksum": "d8ab600b77c657b48b91cab19db0275c30dceed0a97c3876b0df1df1fde257a3",
-      "modifiedAt": "2026-07-13T20:56:54.290Z"
+      "checksum": "d055f1debb1c943589fdc5ca5a0f2c553f6d5607a820fe9cce43ea184bfa9dd9",
+      "modifiedAt": "2026-07-13T21:44:22.742Z"
     },
     {
       "role": "kpler_guide_monthly",
       "path": "kpler/output/monthly/us_jet_balance_guides_monthly.csv",
       "rows": 104,
-      "checksum": "fcb1ddcefd42e9c7db81fc11452f0141b654336501f7e0ad14e986bc6f657530",
-      "modifiedAt": "2026-07-13T20:56:54.273Z"
+      "checksum": "4c3566a6d543267fe36510ad7ee188822ddd0d151d7c7e5a713e2568c471b164",
+      "modifiedAt": "2026-07-13T21:44:22.724Z"
     },
     {
       "role": "kpler_guide_weekly",
       "path": "kpler/output/weekly/us_jet_balance_guides_weekly.csv",
       "rows": 450,
-      "checksum": "6e4fcb03d4f43de88c651fb0acd08209fa692288d45ed199b6d0982ad415c5ac",
-      "modifiedAt": "2026-07-13T20:56:54.272Z"
+      "checksum": "000c0a4106339ab96972d7477d71630b0bb01d85c754d35dd9851c5da78c5281",
+      "modifiedAt": "2026-07-13T21:44:22.724Z"
     },
     {
       "role": "refinery_unit_capacity",
       "path": "data/refinery_unit_capacities_2025.csv",
       "rows": 311,
-      "checksum": "c3b0c465779dfa937f41ef43f2b382f116841ee19a41a9f3138ec6f026cf2fc7",
-      "modifiedAt": "2026-07-13T21:00:00.639Z"
+      "checksum": "e9d43467dcc3b841b83d82f854c2b9b75fc83eeadfecc5a207d27c5ccbe126e1",
+      "modifiedAt": "2026-07-13T21:47:55.528Z"
     }
   ],
   "checksums": {
     "eia_monthly": "e31c6beee0ba3d779f95c692ce309c097539e5b725b009f838e2fef530d68512",
     "eia_weekly": "4d3b9974b8c013c54c3508651e191c5cf98c9e4a149a0742d5dbc9f747ce2f9e",
-    "kpler_manifest": "d8ab600b77c657b48b91cab19db0275c30dceed0a97c3876b0df1df1fde257a3",
-    "kpler_guide_monthly": "fcb1ddcefd42e9c7db81fc11452f0141b654336501f7e0ad14e986bc6f657530",
-    "kpler_guide_weekly": "6e4fcb03d4f43de88c651fb0acd08209fa692288d45ed199b6d0982ad415c5ac",
-    "refinery_unit_capacity": "c3b0c465779dfa937f41ef43f2b382f116841ee19a41a9f3138ec6f026cf2fc7"
+    "kpler_manifest": "d055f1debb1c943589fdc5ca5a0f2c553f6d5607a820fe9cce43ea184bfa9dd9",
+    "kpler_guide_monthly": "4c3566a6d543267fe36510ad7ee188822ddd0d151d7c7e5a713e2568c471b164",
+    "kpler_guide_weekly": "000c0a4106339ab96972d7477d71630b0bb01d85c754d35dd9851c5da78c5281",
+    "refinery_unit_capacity": "e9d43467dcc3b841b83d82f854c2b9b75fc83eeadfecc5a207d27c5ccbe126e1"
   },
   "optimization": {
-    "generatedAt": "2026-07-13T21:00:02.605Z",
+    "generatedAt": "2026-07-13T21:47:57.519Z",
     "runtimePlan": {
       "baseRows": 6432,
       "lazyRows": 40535,

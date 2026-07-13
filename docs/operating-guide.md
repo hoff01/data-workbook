@@ -20,7 +20,7 @@ The runner serves the dashboard over plain local HTTP at `http://127.0.0.1:8787`
    node --version
    npm --version
    ```
-3. Python 3.11 or newer is required for data refreshes, but is no longer required merely to open the dashboard. Before running an update, confirm:
+3. Python 3.11 or newer is required because a normal launcher click performs a full refresh after opening the dashboard. Confirm:
    ```powershell
    py -3 --version
    ```
@@ -29,7 +29,7 @@ The runner serves the dashboard over plain local HTTP at `http://127.0.0.1:8787`
    git clone https://github.com/hoff01/data-workbook.git US_Balances
    cd US_Balances
    ```
-5. Double-click `Open_Balance_Dashboards.bat` from the fully extracted repo folder. The launcher prepares Node, starts the local server, and opens the exact local URL with the Windows default-browser shell. It opens the dashboard before preparing optional Python refresh tools, so a Python setup problem cannot hide the dashboard.
+5. Double-click `Open_Balance_Dashboards.bat` from the fully extracted repo folder. The launcher prepares Node, starts the current local server, and opens the exact local URL with the Windows default-browser shell. On first run it then creates the Python environment and automatically starts a forced `All` refresh. The page shows setup readiness, live progress, and whether new source data was loaded or the dashboard source data was already current.
 
 Keep Git certificate verification enabled. GitHub uses a publicly trusted
 certificate, so a normal Git for Windows installation should push without a
@@ -63,7 +63,7 @@ On first run, `Start_Balance_Runner.ps1` creates local runtime folders under:
 %USERPROFILE%\US_Balances\
 ```
 
-Those local folders hold Node packages, the optional Python virtual environment, pip/npm caches, Python bytecode, and matplotlib caches. The launcher prepares the required Node runtime, opens the dashboard, and then finishes the Python refresh environment. The shared repo remains the source/output folder, while user-specific runtime files stay out of the shared drive.
+Those local folders hold Node packages, the Python virtual environment, pip/npm caches, Python bytecode, and matplotlib caches. The launcher prepares the required Node runtime, opens the dashboard, finishes the Python refresh environment, and starts the full refresh. The shared repo remains the source/output folder, while user-specific runtime files stay out of the shared drive.
 
 ## Certificate Error Avoidance
 
@@ -82,16 +82,16 @@ If a browser shows a certificate warning, the URL is wrong for this local runner
    ```powershell
    git pull origin main
    ```
-2. Open the dashboard:
+2. Open the dashboard and start the forced full refresh:
    ```powershell
    .\Open_Balance_Dashboards.bat
    ```
-3. Use the dashboard landing page buttons for refreshes:
+3. Watch the landing page or any open workbook for live refresh status. Use the buttons only when an additional targeted refresh is needed:
    - `Weekly` for weekly EIA updates
    - `Monthly` for monthly EIA updates
    - `Power DFO` for Northeast diesel power-generation context
    - `Other` for supporting exports/context
-   - `All` for the full pipeline
+   - `All` for another full pipeline run
 4. Review `Diesel Balance` and `Jet Balance`.
 5. Commit and push refreshed outputs when the checks pass:
    ```powershell
@@ -179,9 +179,11 @@ The final status should show `## main...origin/main` and no modified or untracke
 
 The launcher deliberately bypasses any inherited `DASHBOARD_OPEN_BROWSER=0` value and delegates the final URL to Windows ShellExecute, which uses the configured default browser.
 
-`Complete — no errors` and `Update completed successfully.` appear only when every required refresh step finishes. An explicit operator skip is labeled `Complete with warnings` in amber. Any Kpler or other required-source failure is labeled `Failed`, reports a nonzero exit code, remains visible in red, and does not reload the workbook as though new data were available.
+The final result distinguishes `Updated — new data loaded` from `Checked — already current`; it never uses a generic success message to imply that a source published a newer observation. An explicit operator skip is labeled with warnings in amber. Any Kpler or other required-source failure is labeled `Failed`, reports a nonzero exit code, remains visible in red, and does not reload the workbook as though new data were available.
 
-When an update started from the landing page completes, already-open Diesel and Jet workbook tabs automatically reload the newly built dashboard files. If the source published no newer observation, the displayed latest date will remain unchanged even though the pull completed normally.
+When a launcher or dashboard refresh completes, already-open Diesel and Jet workbook tabs automatically reload the newly built dashboard files. If the source published no newer observation, the result says `Checked — already current` and the displayed latest date remains unchanged.
+
+For an intentional open-only diagnostic run, use `Start_Balance_Runner.ps1 -NoRefresh`. Normal `.bat` clicks do not use this escape hatch.
 
 ### Browser Certificate Warning
 

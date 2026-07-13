@@ -17,9 +17,11 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createGzip } from "node:zlib";
 import { createHash } from "node:crypto";
+import { DASHBOARD_SERVER_APP_ID, dashboardServerBuildId } from "./dashboard_server_contract.js";
+import { updateDataFingerprint, type UpdateGroup } from "./update_data_fingerprint.js";
 
-type UpdateGroup = "weekly" | "monthly" | "other" | "all" | "power-dfo";
 type JobStatus = "running" | "succeeded" | "partial" | "failed";
+type UpdateResult = "updated" | "current";
 
 type Job = {
   id: string;
@@ -32,6 +34,8 @@ type Job = {
   durationMs: number | null;
   exitCode: number | null;
   signal: NodeJS.Signals | null;
+  result: UpdateResult | null;
+  dataChanged: boolean | null;
   lines: string[];
 };
 
@@ -98,7 +102,7 @@ const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
 const HOST = process.env.DASHBOARD_UPDATE_HOST || "127.0.0.1";
 const PORT = Number(process.env.DASHBOARD_UPDATE_PORT || 8787);
-const SERVER_APP_ID = "balance-dashboard-update-server";
+const SERVER_BUILD_ID = dashboardServerBuildId(ROOT);
 const SERVER_STARTED_AT = new Date().toISOString();
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
@@ -109,10 +113,15 @@ const maxLines = 600;
 const settingsPath = join(ROOT, "balance_dashboard_settings.json");
 const runnerLockPath = join(ROOT, "logs", "update_runner.lock");
 const runnerLockStaleMs = 12 * 60 * 60 * 1000;
+const refreshReadyFile = String(process.env.US_BALANCES_REFRESH_READY_FILE || "").trim();
 
 let currentProcess: ReturnType<typeof spawn> | null = null;
 let currentJob: Job | null = null;
 let currentLock: RunnerLock | null = null;
+
+function refreshToolsReady(): boolean {
+  return !refreshReadyFile || existsSync(refreshReadyFile);
+}
 
 function mimeType(pathname: string): string {
   return {
@@ -231,12 +240,14 @@ const logEl = document.getElementById('runnerLog');
 const buttons = Array.from(document.querySelectorAll('[data-run-group]'));
 const updateCompletionStorageKey = 'us-balances:update-complete';
 let pollTimer = 0;
+let refreshReady = true;
 function setStatus(job){
   const state = job?.status || 'idle';
-  statusEl.textContent = state === 'idle' ? 'Idle' : state === 'succeeded' ? job.group + ' complete — no errors' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group + ' running';
+  const result = job?.result;
+  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' checked — already current' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' current with warnings' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group + ' refresh running';
   statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
-  buttons.forEach(button => button.disabled = state === 'running');
-  logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : 'No runner job started.';
+  buttons.forEach(button => button.disabled = state === 'running' || !refreshReady);
+  logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : refreshReady ? 'Refresh tools are ready. The one-click launcher starts an All refresh automatically.' : 'First-run setup is installing the local refresh tools. The launcher will start an All refresh automatically when setup finishes.';
 }
 function publishUpdateCompletion(job){
   if (!job?.id || !['succeeded','partial'].includes(job.status)) return;
@@ -244,25 +255,38 @@ function publishUpdateCompletion(job){
 }
 async function refreshStatus(){
   try {
-    const response = await fetch('/api/update/status', { cache:'no-store' });
-    const payload = await response.json();
+    const [statusResponse, healthResponse] = await Promise.all([fetch('/api/update/status', { cache:'no-store' }), fetch('/api/health', { cache:'no-store' })]);
+    if (!statusResponse.ok || !healthResponse.ok) throw new Error('runner status unavailable');
+    const payload = await statusResponse.json();
+    const health = await healthResponse.json();
+    refreshReady = health.refreshReady !== false;
     setStatus(payload.job);
     publishUpdateCompletion(payload.job);
-    if (payload.job?.status === 'running') pollTimer = window.setTimeout(refreshStatus, 2000);
+    const delay = payload.job?.status === 'running' ? 2000 : !refreshReady || !payload.job ? 1200 : 8000;
+    pollTimer = window.setTimeout(refreshStatus, delay);
   } catch (error) {
     statusEl.textContent = 'Unavailable';
     statusEl.className = 'runnerStatus failed';
     logEl.textContent = error instanceof Error ? error.message : String(error);
+    pollTimer = window.setTimeout(refreshStatus, 3000);
   }
 }
 buttons.forEach(button => button.addEventListener('click', async () => {
   window.clearTimeout(pollTimer);
   const group = button.dataset.runGroup;
   setStatus({ group, status:'running', lines:['starting update:' + group] });
-  const response = await fetch('/api/update/start', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ group }) });
-  const payload = await response.json();
-  setStatus(payload.job);
-  pollTimer = window.setTimeout(refreshStatus, response.status === 409 ? 1000 : 2000);
+  try {
+    const response = await fetch('/api/update/start', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ group, force:true }) });
+    const payload = await response.json();
+    if (!response.ok && response.status !== 409) throw new Error(payload.error || 'refresh failed to start');
+    setStatus(payload.job);
+    pollTimer = window.setTimeout(refreshStatus, response.status === 409 ? 1000 : 1500);
+  } catch (error) {
+    statusEl.textContent = 'Refresh not started';
+    statusEl.className = 'runnerStatus failed';
+    logEl.textContent = error instanceof Error ? error.message : String(error);
+    pollTimer = window.setTimeout(refreshStatus, 2000);
+  }
 }));
 refreshStatus();
 </script></body>
@@ -323,6 +347,7 @@ function releaseRunnerLock(lock: RunnerLock | null): void {
 
 function startJob(group: UpdateGroup): Job {
   if (currentProcess && currentJob?.status === "running") return currentJob;
+  const dataFingerprintBefore = updateDataFingerprint(ROOT, group);
   const lock = acquireRunnerLock(group);
   const updateScript = join(ROOT, "src", "update_pipeline.ts");
   const invocation = tsxCli
@@ -343,6 +368,8 @@ function startJob(group: UpdateGroup): Job {
     durationMs: null,
     exitCode: null,
     signal: null,
+    result: null,
+    dataChanged: null,
     lines: [],
   };
   currentJob = job;
@@ -371,8 +398,23 @@ function startJob(group: UpdateGroup): Job {
     job.signal = signal;
     job.endedAt = new Date().toISOString();
     job.durationMs = Date.now() - started;
+    if (code === 0) {
+      try {
+        job.dataChanged = updateDataFingerprint(ROOT, group) !== dataFingerprintBefore;
+        job.result = job.dataChanged ? "updated" : "current";
+      } catch (error) {
+        job.status = "partial";
+        appendJobLine(job, "stderr", `source change comparison unavailable: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
     const completionMessage = code === 0
-      ? (hasWarnings ? "Update completed with warnings. Review skipped steps." : "Update completed successfully.")
+      ? job.result === null
+        ? "Refresh completed and the workbooks were rebuilt, but the source change comparison was unavailable."
+        : hasWarnings
+        ? `Refresh completed with warnings; dashboard source data is ${job.dataChanged ? "updated" : "already current"}. Review skipped steps.`
+        : job.dataChanged
+          ? "Refresh completed; new dashboard source data was loaded and the workbooks were rebuilt."
+          : "Refresh completed; upstream source data was already current and the workbooks were rebuilt."
       : `Update failed (exit code ${code ?? "n/a"}${signal ? `, signal ${signal}` : ""}).`;
     appendJobLine(job, code === 0 ? "stdout" : "stderr", completionMessage);
     currentProcess = null;
@@ -399,12 +441,14 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
   if (pathname === "/api/health" && request.method === "GET") {
     writeJson(response, 200, {
       ok: true,
-      app: SERVER_APP_ID,
+      app: DASHBOARD_SERVER_APP_ID,
+      buildId: SERVER_BUILD_ID,
       root: ROOT,
       host: HOST,
       port: PORT,
       pid: process.pid,
       startedAt: SERVER_STARTED_AT,
+      refreshReady: refreshToolsReady(),
       currentJob: publicJob(),
     });
     return;
@@ -452,6 +496,13 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
     return;
   }
   if (pathname === "/api/update/start" && request.method === "POST") {
+    if (!refreshToolsReady()) {
+      writeJson(response, 503, {
+        error: "First-run refresh setup is still finishing. The launcher will start the refresh automatically when it is ready.",
+        job: publicJob(),
+      });
+      return;
+    }
     let group: UpdateGroup | null = null;
     try {
       const body = await readBody(request);

@@ -1,13 +1,13 @@
 {
   "balances": {
     "diesel": {
-      "generated_at": "2026-07-13T20:51:59.109Z",
+      "generated_at": "2026-07-13T21:41:02.772Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-07-03",
       "path": "Diesel_Balance/manifest.json"
     },
     "jet": {
-      "generated_at": "2026-07-13T20:51:59.240Z",
+      "generated_at": "2026-07-13T21:41:02.896Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-07-03",
       "path": "Jet_Balance/manifest.json"
@@ -128,7 +128,7 @@
       "mode": "live",
       "name": "kpler_padd1_eia_split",
       "path": "Kpler/padd1_eia_split_manifest.json",
-      "rows": 12623,
+      "rows": 12622,
       "status": "pass"
     },
     {
@@ -215,7 +215,7 @@
     "eia_monthly_rows": 199136,
     "end_month": "2026-07",
     "forward_fill": "Annual EIA downstream charge capacity values are assigned to every month in their source year and carried forward until a newer annual value exists.",
-    "generated_at": "2026-07-13T20:55:51.775558+00:00",
+    "generated_at": "2026-07-13T21:43:30.563268+00:00",
     "high_level_monthly_rows": 93345,
     "high_level_wide_rows": 127,
     "manual_forward_fill": "Rows in eia_capacity/manual_capacity.csv are forward-filled monthly from period_month or source_year and override EIA rows with the same period_month and series_id.",
@@ -298,10 +298,10 @@
       "rows": 549
     }
   },
-  "generated_at": "2026-07-13T21:00:00.838338+00:00",
+  "generated_at": "2026-07-13T21:47:55.717234+00:00",
   "kpler": {
     "fallback": {},
-    "generated_at": "2026-07-13T20:56:54.287995+00:00",
+    "generated_at": "2026-07-13T21:44:22.740844+00:00",
     "mode": "live",
     "path": "Kpler/manifest.json",
     "rows": 16747
@@ -313,13 +313,13 @@
       "padd1c_share": 0.0,
       "reason": ""
     },
-    "generated_at": "2026-07-13T20:57:07.724300+00:00",
+    "generated_at": "2026-07-13T21:44:35.069148+00:00",
     "mode": "live",
     "path": "Kpler/padd1_eia_split_manifest.json",
-    "rows": 12623
+    "rows": 12622
   },
   "power_generation_dfo": {
-    "generated_at": "2026-07-13T20:58:13.948579+00:00",
+    "generated_at": "2026-07-13T21:45:44.243586+00:00",
     "path": "power_generation_dfo/manifest.json",
     "row_counts": {
       "annual_factors": 7,
@@ -335,7 +335,7 @@
     "run_end": "2026-07-13"
   },
   "power_generation_dfo_hourly": {
-    "generated_at": "2026-07-13T20:59:00.102508+00:00",
+    "generated_at": "2026-07-13T21:46:30.756073+00:00",
     "path": "power_generation_dfo/hourly_forecast_manifest.json",
     "row_counts": {
       "forecast_rows": 24,

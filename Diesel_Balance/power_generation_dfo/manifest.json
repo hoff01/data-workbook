@@ -14,7 +14,7 @@
     "target_factor_candidate_pool_months": 55,
     "target_factor_min_correlation": 0.5
   },
-  "generated_at": "2026-07-13T20:58:13.948579+00:00",
+  "generated_at": "2026-07-13T21:45:44.243586+00:00",
   "inputs": {
     "facility_fuel_url": "https://api.eia.gov/v2/electricity/facility-fuel/data/",
     "facility_fuels": [

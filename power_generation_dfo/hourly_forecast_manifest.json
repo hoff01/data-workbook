@@ -4,7 +4,7 @@
   "dfo_factor_source": "2026",
   "fallback_model_note": "Fallback uses a larger recent hourly history window and blends toward higher historical oil-to-load ratios when forecast demand is elevated.",
   "forecast_hours": 24,
-  "generated_at": "2026-07-13T20:59:00.102508+00:00",
+  "generated_at": "2026-07-13T21:46:30.756073+00:00",
   "history_windows": {
     "max_oil_rows": 20000,
     "max_region_rows": 40000,

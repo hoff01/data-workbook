@@ -4,13 +4,14 @@ import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { setTimeout as sleep } from "node:timers/promises";
+import { DASHBOARD_SERVER_APP_ID, dashboardServerBuildId } from "./dashboard_server_contract.js";
 
 const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
 const HOST = process.env.DASHBOARD_UPDATE_HOST || "127.0.0.1";
 const DEFAULT_PORT = Number(process.env.DASHBOARD_UPDATE_PORT || 8787);
 const PORT_WINDOW = Number(process.env.DASHBOARD_UPDATE_PORT_WINDOW || 10);
-const SERVER_APP_ID = "balance-dashboard-update-server";
+const EXPECTED_SERVER_BUILD_ID = dashboardServerBuildId(ROOT);
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
 const nodeCommand = process.env.US_BALANCES_NODE_COMMAND || process.execPath;
@@ -62,8 +63,11 @@ async function serverHealthy(port: number): Promise<boolean> {
   try {
     const response = await fetchWithTimeout(`${baseUrl(port)}/api/health`);
     if (!response.ok) return false;
-    const health = (await response.json()) as { app?: unknown; root?: unknown };
-    return health.app === SERVER_APP_ID && typeof health.root === "string" && resolve(health.root) === ROOT;
+    const health = (await response.json()) as { app?: unknown; root?: unknown; buildId?: unknown };
+    return health.app === DASHBOARD_SERVER_APP_ID
+      && typeof health.root === "string"
+      && resolve(health.root) === ROOT
+      && health.buildId === EXPECTED_SERVER_BUILD_ID;
   } catch {
     return false;
   }
