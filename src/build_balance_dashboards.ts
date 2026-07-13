@@ -678,7 +678,6 @@ function dashboardSettingsRevision(settings: BalanceDashboardSettings): string {
 const DASHBOARD_SETTINGS = readDashboardSettings();
 const DASHBOARD_SETTINGS_REVISION = dashboardSettingsRevision(DASHBOARD_SETTINGS);
 const MONTHLY_FORECAST_THROUGH = DASHBOARD_SETTINGS.forecastEnd.slice(0, 7);
-const WEEKLY_FORECAST_WEEKS = 22;
 const SEASON_YEARS = [2023, 2024, 2025];
 const BAND_YEARS = [2019, 2022, 2023, 2024, 2025];
 
@@ -1628,7 +1627,7 @@ function weeklyActual(config: ProductConfig, rows: CsvRow[]): WeeklyPoint[] {
 
 function weeklyForecastThrough(actual: WeeklyPoint[]): string {
   const latestActual = actual[actual.length - 1]?.weekEnding ?? "2026-05-08";
-  return addDays(latestActual, WEEKLY_FORECAST_WEEKS * 7);
+  return DASHBOARD_SETTINGS.forecastEnd > latestActual ? DASHBOARD_SETTINGS.forecastEnd : latestActual;
 }
 
 function weeklyForecast(actual: WeeklyPoint[], monthly: BalancePoint[]): WeeklyPoint[] {
@@ -4119,7 +4118,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     const CHART_SCENARIO_DRAFT_STORAGE_KEY = STORAGE_KEY + ':chart-scenario-draft';
     const BAND_YEARS = ${JSON.stringify(BAND_YEARS)};
     const HISTORY_LINE_PALETTE = ['#16835f','#d9468b','#f08c00','#0f9488','#64748b','#a16207'];
-    const NEXT_YEAR_FORECAST_COLOR = '#0f9488';
+    const NEXT_YEAR_FORECAST_COLOR = '#ff8a00';
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const MIN_CHART_HISTORY_YEAR = 2017;
     const METRICS = [
@@ -6083,7 +6082,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
         addHoverTargets(series.name, series.color, series.currentBridge.filter(point => point.status === 'forecast'));
         addHoverTargets(series.name + (nextYearForecast ? ' ' + nextYearForecast + ' forecast' : ' forecast'), series.color, series.nextForecast);
       });
-      svg.innerHTML = '<line x1="'+pad.l+'" x2="'+pad.l+'" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/><line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+(h-pad.b)+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/>' + grid + (bandPath ? '<path class="seasonBand" data-band-years="'+esc(activeBandYears.join(','))+'" d="'+bandPath+'" fill="var(--band)" opacity=".66" stroke="#8a909b" stroke-width=".8"/>' : '') + labels + (avgLine && activeBandYears.length ? '<path d="'+avgLine+'" fill="none" stroke="#4b5563" stroke-width="1.45" stroke-dasharray="6 7"/>' : '') + historyPaths + (priorPath ? '<path d="'+priorPath+'" fill="none" stroke="#315b99" stroke-width="2.25"/>' : '') + (actualPath ? '<path d="'+actualPath+'" fill="none" stroke="#b42318" stroke-width="2.35"/>' : '') + actualMarkers + (forecastPath ? '<path d="'+forecastPath+'" fill="none" stroke="#b42318" stroke-width="2.35" stroke-dasharray="6 7"/>' : '') + (nextYearPath ? '<path d="'+nextYearPath+'" fill="none" stroke="'+NEXT_YEAR_FORECAST_COLOR+'" stroke-width="2.25" stroke-dasharray="4 6"/>' : '') + overlayPaths + '<g class="hoverMarker" visibility="hidden"><line class="hoverLine" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#111827" stroke-width="1" opacity=".35"/><circle class="hoverPoint" r="4.7" fill="#fff" stroke="#111827" stroke-width="2.2"/></g>';
+      svg.innerHTML = '<line x1="'+pad.l+'" x2="'+pad.l+'" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/><line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+(h-pad.b)+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/>' + grid + (bandPath ? '<path class="seasonBand" data-band-years="'+esc(activeBandYears.join(','))+'" d="'+bandPath+'" fill="var(--band)" opacity=".66" stroke="#8a909b" stroke-width=".8"/>' : '') + labels + (avgLine && activeBandYears.length ? '<path d="'+avgLine+'" fill="none" stroke="#4b5563" stroke-width="1.45" stroke-dasharray="6 7"/>' : '') + historyPaths + (priorPath ? '<path d="'+priorPath+'" fill="none" stroke="#315b99" stroke-width="2.25"/>' : '') + (actualPath ? '<path d="'+actualPath+'" fill="none" stroke="#b42318" stroke-width="2.35"/>' : '') + actualMarkers + (forecastPath ? '<path d="'+forecastPath+'" fill="none" stroke="#b42318" stroke-width="2.35" stroke-dasharray="6 7"/>' : '') + (nextYearPath ? '<path d="'+nextYearPath+'" fill="none" stroke="'+NEXT_YEAR_FORECAST_COLOR+'" stroke-width="2.35" stroke-dasharray="6 7"/>' : '') + overlayPaths + '<g class="hoverMarker" visibility="hidden"><line class="hoverLine" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#111827" stroke-width="1" opacity=".35"/><circle class="hoverPoint" r="4.7" fill="#fff" stroke="#111827" stroke-width="2.2"/></g>';
       const marker = svg.querySelector('.hoverMarker');
       const hoverLine = marker?.querySelector('.hoverLine');
       const hoverPoint = marker?.querySelector('.hoverPoint');
@@ -7350,7 +7349,7 @@ function buildProduct(
     },
     generatedAt: new Date().toISOString(),
 	    forecast: {
-	      method: `Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for ${WEEKLY_FORECAST_WEEKS} weeks after the latest actual week.`,
+	      method: `Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through the saved forecast end date.`,
 	      monthlyThrough: MONTHLY_FORECAST_THROUGH,
 	      weeklyThrough: weeklyForecastThroughDate,
 	      seasonYears: SEASON_YEARS,

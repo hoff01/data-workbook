@@ -1,9 +1,9 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-07-12T03:23:26.779Z",
+  "generatedAt": "2026-07-13T00:02:06.760Z",
   "folder": "Diesel_Balance",
-  "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values for 22 weeks after the latest actual week.",
+  "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through the saved forecast end date.",
   "latestMonthly": "2026-04-15",
   "latestWeekly": "2026-07-03",
   "sourceFiles": [
@@ -102,26 +102,26 @@
     "refinery_unit_capacity": "8434ccdf7e466b2786b52f8c840877d116551f1dff15640ae2e4a0ee4e707d2f"
   },
   "optimization": {
-    "generatedAt": "2026-07-12T03:23:26.836Z",
+    "generatedAt": "2026-07-13T00:02:06.838Z",
     "runtimePlan": {
-      "baseRows": 6764,
-      "lazyRows": 148986,
-      "lazyRowSharePct": 95.7,
-      "basePayloadKb": 1852.3,
-      "weeklyPayloadKb": 2639.9,
+      "baseRows": 6974,
+      "lazyRows": 149861,
+      "lazyRowSharePct": 95.6,
+      "basePayloadKb": 1880.6,
+      "weeklyPayloadKb": 2759.5,
       "crudeWeeklyPayloadKb": 1124.6,
       "powerDfoPayloadKb": 355.2,
       "referencePayloadKb": 151.4
     },
     "rowCounts": {
-      "monthlyRegional": 1188,
-      "weeklyRegional": 5139,
+      "monthlyRegional": 1242,
+      "weeklyRegional": 5364,
       "monthlyCrude": 992,
       "weeklyCrude": 4392,
       "weeklyGuideMonthly": 1152,
       "movementFlows": 26,
-      "monthlyMovementFlowRows": 3432,
-      "weeklyMovementFlowRows": 14846,
+      "monthlyMovementFlowRows": 3588,
+      "weeklyMovementFlowRows": 15496,
       "sourceFiles": 12,
       "sourceHubSources": 7,
       "refineryCapacityRows": 311,
@@ -133,8 +133,8 @@
       {
         "name": "weekly",
         "path": "data/diesel_balance_runtime_weekly.js",
-        "rows": 19985,
-        "estimatedKb": 2639.9,
+        "rows": 20860,
+        "estimatedKb": 2759.5,
         "status": "optimized",
         "reason": "Weekly regional balances and movement flows stay out of the initial workbook payload."
       },
@@ -168,7 +168,7 @@
         "key": "lazy-runtime",
         "label": "Lazy runtime split",
         "status": "optimized",
-        "detail": "95.7% of generated rows are deferred into lazy chunks."
+        "detail": "95.6% of generated rows are deferred into lazy chunks."
       },
       {
         "key": "shared-crude",
@@ -194,13 +194,13 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 151.4 KB versus 1852.3 KB estimated base payload."
+        "detail": "Reference payload is 151.4 KB versus 1880.6 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",
         "label": "Keep weekly rows lazy",
         "priority": "watch",
-        "detail": "19,985 weekly balance rows remain outside the base workbook until requested."
+        "detail": "20,860 weekly balance rows remain outside the base workbook until requested."
       }
     ]
   }

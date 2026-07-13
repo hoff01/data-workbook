@@ -140,7 +140,7 @@
     </header>
     <section class="balanceToolbar" id="balanceOptions">
       <div class="balanceToolbarMain">
-        <div class="panel pad"><div class="caption">Balance options</div><div class="chiprow"><span class="chip">Actual headers: blue</span><span class="chip">Forecast headers: yellow</span><span class="chip">Forecast starts 2026-05</span><span class="chip">Last pull 7/11/2026, 11:23:26 PM</span></div></div>
+        <div class="panel pad"><div class="caption">Balance options</div><div class="chiprow"><span class="chip">Actual headers: blue</span><span class="chip">Forecast headers: yellow</span><span class="chip">Forecast starts 2026-05</span><span class="chip">Last pull 7/12/2026, 8:02:06 PM</span></div></div>
         <section class="controlbar balanceControlbar" id="balanceControls">
           <div class="panel pad"><div class="caption">View</div><div class="seg"><button class="toggle active" data-frequency="monthly" type="button">Monthly</button><button class="toggle" data-frequency="weekly" type="button">Weekly</button></div></div>
           <div class="panel pad"><div class="caption">Period focus</div><select id="periodWindowSelect" class="select" aria-label="Period window"><option value="smart">Smart window</option><option value="latest">Latest actual</option><option value="forecast">Forecast runway</option><option value="full">Full history</option></select><div class="periodActionGrid"><button class="btn" id="jumpLatestActualBtn" type="button">Latest actual</button><button class="btn" id="jumpFirstForecastBtn" type="button">First forecast</button></div></div>
@@ -149,7 +149,7 @@
       <div class="panel pad"><div class="caption">Refresh / saved views</div><div class="quickActionGrid"><button class="btn primary full" id="refreshBtn" type="button">Refresh dashboard</button><button class="btn primary full" id="saveViewBtn" type="button">Save view</button></div><div class="viewPresetGrid"><select id="savedViewSelect" class="select" aria-label="Saved views"></select><div class="viewPresetActions"><button class="btn" id="loadViewBtn" type="button">Load</button><button class="btn" id="deleteViewBtn" type="button">Delete</button><button class="btn" id="resetViewBtn" type="button">Reset</button></div></div></div>
     </section>
     <section class="options" id="chartOptions" hidden>
-	      <div class="panel pad"><div class="caption">Chart options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip" id="showForecastChip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><label class="chip" id="fourWeekAverageChip"><input id="showFourWeekAverage" type="checkbox">4-week avg</label><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull 7/11/2026, 11:23:26 PM</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Historical band years</div><div class="chiprow" id="historyChips"></div></div>
+	      <div class="panel pad"><div class="caption">Chart options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip" id="showForecastChip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><label class="chip" id="fourWeekAverageChip"><input id="showFourWeekAverage" type="checkbox">4-week avg</label><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull 7/12/2026, 8:02:06 PM</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Historical band years</div><div class="chiprow" id="historyChips"></div></div>
       <div class="panel pad"><div class="caption">Chart workspace</div><p class="small">Use chart cards for zoom, export, copy, and saved-forecast overlays. Imports and exports save raw kbd adjustments; operating utilization ex-planned saves as a net-capacity utilization target.</p></div>
     </section>
     <section class="controlbar" id="chartControls" hidden>
@@ -167,7 +167,7 @@
   <section class="chartScenarioWorkbench" id="outageCollisionModal" hidden></section>
   <section class="chartZoomModal" id="chartZoomModal" hidden></section>
   <div class="toast" id="toast"></div>
-  <script src="data/jet_balance_runtime_base.js?v=2026-07-12T03%3A23%3A26.900Z"></script>
+  <script src="data/jet_balance_runtime_base.js?v=2026-07-13T00%3A02%3A06.918Z"></script>
   <script>
     const D = window.BALANCE_DATA || {};
     const BALANCE_LAZY_FILES = window.BALANCE_LAZY_FILES || {};
@@ -176,7 +176,7 @@
     const CHART_SCENARIO_DRAFT_STORAGE_KEY = STORAGE_KEY + ':chart-scenario-draft';
     const BAND_YEARS = [2019,2022,2023,2024,2025];
     const HISTORY_LINE_PALETTE = ['#16835f','#d9468b','#f08c00','#0f9488','#64748b','#a16207'];
-    const NEXT_YEAR_FORECAST_COLOR = '#0f9488';
+    const NEXT_YEAR_FORECAST_COLOR = '#ff8a00';
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const MIN_CHART_HISTORY_YEAR = 2017;
     const METRICS = [
@@ -2140,7 +2140,7 @@
         addHoverTargets(series.name, series.color, series.currentBridge.filter(point => point.status === 'forecast'));
         addHoverTargets(series.name + (nextYearForecast ? ' ' + nextYearForecast + ' forecast' : ' forecast'), series.color, series.nextForecast);
       });
-      svg.innerHTML = '<line x1="'+pad.l+'" x2="'+pad.l+'" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/><line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+(h-pad.b)+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/>' + grid + (bandPath ? '<path class="seasonBand" data-band-years="'+esc(activeBandYears.join(','))+'" d="'+bandPath+'" fill="var(--band)" opacity=".66" stroke="#8a909b" stroke-width=".8"/>' : '') + labels + (avgLine && activeBandYears.length ? '<path d="'+avgLine+'" fill="none" stroke="#4b5563" stroke-width="1.45" stroke-dasharray="6 7"/>' : '') + historyPaths + (priorPath ? '<path d="'+priorPath+'" fill="none" stroke="#315b99" stroke-width="2.25"/>' : '') + (actualPath ? '<path d="'+actualPath+'" fill="none" stroke="#b42318" stroke-width="2.35"/>' : '') + actualMarkers + (forecastPath ? '<path d="'+forecastPath+'" fill="none" stroke="#b42318" stroke-width="2.35" stroke-dasharray="6 7"/>' : '') + (nextYearPath ? '<path d="'+nextYearPath+'" fill="none" stroke="'+NEXT_YEAR_FORECAST_COLOR+'" stroke-width="2.25" stroke-dasharray="4 6"/>' : '') + overlayPaths + '<g class="hoverMarker" visibility="hidden"><line class="hoverLine" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#111827" stroke-width="1" opacity=".35"/><circle class="hoverPoint" r="4.7" fill="#fff" stroke="#111827" stroke-width="2.2"/></g>';
+      svg.innerHTML = '<line x1="'+pad.l+'" x2="'+pad.l+'" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/><line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+(h-pad.b)+'" y2="'+(h-pad.b)+'" stroke="#adb8c6"/>' + grid + (bandPath ? '<path class="seasonBand" data-band-years="'+esc(activeBandYears.join(','))+'" d="'+bandPath+'" fill="var(--band)" opacity=".66" stroke="#8a909b" stroke-width=".8"/>' : '') + labels + (avgLine && activeBandYears.length ? '<path d="'+avgLine+'" fill="none" stroke="#4b5563" stroke-width="1.45" stroke-dasharray="6 7"/>' : '') + historyPaths + (priorPath ? '<path d="'+priorPath+'" fill="none" stroke="#315b99" stroke-width="2.25"/>' : '') + (actualPath ? '<path d="'+actualPath+'" fill="none" stroke="#b42318" stroke-width="2.35"/>' : '') + actualMarkers + (forecastPath ? '<path d="'+forecastPath+'" fill="none" stroke="#b42318" stroke-width="2.35" stroke-dasharray="6 7"/>' : '') + (nextYearPath ? '<path d="'+nextYearPath+'" fill="none" stroke="'+NEXT_YEAR_FORECAST_COLOR+'" stroke-width="2.35" stroke-dasharray="6 7"/>' : '') + overlayPaths + '<g class="hoverMarker" visibility="hidden"><line class="hoverLine" y1="'+pad.t+'" y2="'+(h-pad.b)+'" stroke="#111827" stroke-width="1" opacity=".35"/><circle class="hoverPoint" r="4.7" fill="#fff" stroke="#111827" stroke-width="2.2"/></g>';
       const marker = svg.querySelector('.hoverMarker');
       const hoverLine = marker?.querySelector('.hoverLine');
       const hoverPoint = marker?.querySelector('.hoverPoint');

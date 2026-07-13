@@ -68,4 +68,4 @@ Local app workflow:
 
 Forecast method: monthly balance anchored to a 3-year seasonal average from
 2023, 2024, and 2025, with weekly EIA forecast values reconciled back to the
-monthly balance through 2026-12-31.
+monthly balance through 2027-06-01.
