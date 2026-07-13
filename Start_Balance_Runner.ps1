@@ -34,12 +34,28 @@ function New-Directory {
     }
 }
 
+function Get-FileSha256 {
+    param([string]$Path)
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $stream = $null
+    try {
+        $stream = [System.IO.File]::OpenRead($Path)
+        return [System.BitConverter]::ToString($sha.ComputeHash($stream)).Replace("-", "")
+    }
+    finally {
+        if ($stream) {
+            $stream.Dispose()
+        }
+        $sha.Dispose()
+    }
+}
+
 function Get-CombinedHash {
     param([string[]]$Paths)
     $text = ""
     foreach ($Path in $Paths) {
         if (Test-Path $Path) {
-            $hash = (Get-FileHash -Algorithm SHA256 $Path).Hash
+            $hash = Get-FileSha256 $Path
             $text += "$Path=$hash`n"
         }
     }

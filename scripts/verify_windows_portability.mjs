@@ -35,6 +35,8 @@ requireText("Start_Balance_Runner.ps1", "$env:US_BALANCES_BROWSER_OPEN_PROBE", "
 requireText("Start_Balance_Runner.ps1", '$openArgs += "--no-open"', "single browser owner on Windows");
 requireText("Start_Balance_Runner.ps1", "The dashboard is available. Preparing Python refresh tools", "browser-first Python setup");
 requireText("Start_Balance_Runner.ps1", "$cmd = @(Resolve-SystemPython)", "single-command Python resolution remains an array");
+requireText("Start_Balance_Runner.ps1", "[System.IO.File]::OpenRead($Path)", "PowerShell-module-independent file hashing");
+rejectText("Start_Balance_Runner.ps1", "Get-FileHash", "launcher must not depend on inherited PowerShell module paths");
 requireText("Start_Balance_Runner.ps1", 'Kpler\\config\\local.env.ps1', "optional Kpler PowerShell environment loading");
 requireText("src/open_dashboard.ts", "function dashboardServerInvocation()", "portable dashboard server invocation");
 requireText("src/dashboard_update_server.ts", "const tsxCli = process.env.US_BALANCES_TSX_CLI;", "portable update-job invocation");
