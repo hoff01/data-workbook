@@ -1,0 +1,109 @@
+name: Windows production smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-production-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  production-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Validate generated workbooks and Windows contracts
+        run: |
+          npm run typecheck
+          npm run verify:windows
+          npm run verify:dashboard
+          node scripts/validate_balance_adjustments.mjs
+
+      - name: Parse every PowerShell entry point
+        shell: pwsh
+        run: |
+          $files = @(
+            "Start_Balance_Runner.ps1",
+            "Kpler/run.ps1",
+            "Kpler/config/env.example.ps1"
+          )
+          $failed = $false
+          foreach ($file in $files) {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $file).Path,
+              [ref]$tokens,
+              [ref]$errors
+            )
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              $errors | ForEach-Object { Write-Error "${file}: $($_.Message)" }
+            }
+          }
+          if ($failed) { exit 1 }
+
+      - name: Exercise the real Windows launcher and Kpler preflight
+        shell: pwsh
+        run: |
+          $port = 8797
+          $health = $null
+          try {
+            & .\Start_Balance_Runner.ps1 -Route diesel -NoOpen -Port $port
+            for ($attempt = 0; $attempt -lt 30; $attempt += 1) {
+              try {
+                $health = Invoke-RestMethod "http://127.0.0.1:$port/api/health"
+                break
+              }
+              catch {
+                Start-Sleep -Milliseconds 500
+              }
+            }
+            if (!$health -or !$health.ok -or $health.app -ne "balance-dashboard-update-server") {
+              throw "Windows dashboard server did not become healthy."
+            }
+            $expectedRoot = (Resolve-Path ".").Path.TrimEnd("\")
+            $actualRoot = [System.IO.Path]::GetFullPath([string]$health.root).TrimEnd("\")
+            if (![System.StringComparer]::OrdinalIgnoreCase.Equals($expectedRoot, $actualRoot)) {
+              throw "Dashboard server root mismatch: expected $expectedRoot, received $actualRoot"
+            }
+            $diesel = Invoke-WebRequest "http://127.0.0.1:$port/Diesel_Balance/index.html" -UseBasicParsing
+            $jet = Invoke-WebRequest "http://127.0.0.1:$port/Jet_Balance/index.html" -UseBasicParsing
+            if ($diesel.StatusCode -ne 200 -or $diesel.Content -notmatch "Diesel Regional Balance Workbook") {
+              throw "Diesel workbook smoke check failed."
+            }
+            if ($jet.StatusCode -ne 200 -or $jet.Content -notmatch "Jet Regional Balance Workbook") {
+              throw "Jet workbook smoke check failed."
+            }
+            & .\Kpler\run.ps1 -Preflight
+            $python = Join-Path $env:USERPROFILE "US_Balances\python\.venv\Scripts\python.exe"
+            & $python -m unittest tests.test_kpler_v2 tests.test_kpler_padd1_eia_split
+          }
+          finally {
+            if ($health -and $health.pid) {
+              Stop-Process -Id ([int]$health.pid) -Force -ErrorAction SilentlyContinue
+            }
+          }
