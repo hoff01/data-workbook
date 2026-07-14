@@ -47,7 +47,7 @@ say `auth_configured=true`. Validate the key with one small API request using
 `npm run kpler:auth-check` (or `Kpler\run.ps1 -CheckAuth` on Windows). Never
 commit `.env.local` or a real key.
 
-The `update:*` commands rebuild `Diesel_Balance/index.html` and `Jet_Balance/index.html` after data changes, then run the dashboard freshness check. `npm run update:all` includes the live Kpler pull and fails visibly if a required Kpler step fails. Set `US_BALANCES_SKIP_KPLER_REFRESH=1` only when you intentionally want a warning-labeled run that keeps the existing local `Kpler/output/` files.
+The `update:*` commands rebuild `Diesel_Balance/index.html` and `Jet_Balance/index.html` after data changes, then run the dashboard freshness check. Monthly and complete updates download the ignored `cache/eia/PET.zip` prerequisite before exporting, so a fresh GitHub clone does not require a pre-populated cache. `npm run update:all` includes the live Kpler pull and fails visibly if a required Kpler step fails. Set `US_BALANCES_SKIP_KPLER_REFRESH=1` only when you intentionally want a warning-labeled run that keeps the existing local `Kpler/output/` files.
 
 ## Documentation
 

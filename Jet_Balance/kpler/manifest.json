@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T21:44:22.740844+00:00",
+  "generated_at": "2026-07-14T03:24:23.233809+00:00",
   "kpler_access_mode": "direct_http_v2",
   "kpler_api": {
     "auth_configured": true,
@@ -8,29 +8,29 @@
   },
   "mode": "live",
   "normalized_long": {
-    "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/normalized_long.csv",
-    "rows": 16747
+    "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/normalized_long.csv",
+    "rows": 16750
   },
   "outputs": {
     "us_diesel_balance_guides": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_diesel_balance_guides_daily.csv",
+      "daily_path": "/private/tmp/us-balances-refresh-repull/Kpler/output/daily/us_diesel_balance_guides_daily.csv",
       "daily_rows": 0,
       "max_date": "2026-08-28",
       "min_date": "2018-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_diesel_balance_guides_monthly.csv",
+      "monthly_path": "/private/tmp/us-balances-refresh-repull/Kpler/output/monthly/us_diesel_balance_guides_monthly.csv",
       "monthly_rows": 104,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_diesel_balance_guides_weekly.csv",
+      "weekly_path": "/private/tmp/us-balances-refresh-repull/Kpler/output/weekly/us_diesel_balance_guides_weekly.csv",
       "weekly_rows": 451
     },
     "us_jet_balance_guides": {
-      "daily_path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_jet_balance_guides_daily.csv",
+      "daily_path": "/private/tmp/us-balances-refresh-repull/Kpler/output/daily/us_jet_balance_guides_daily.csv",
       "daily_rows": 0,
       "max_date": "2026-08-21",
       "min_date": "2018-01",
-      "monthly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_jet_balance_guides_monthly.csv",
+      "monthly_path": "/private/tmp/us-balances-refresh-repull/Kpler/output/monthly/us_jet_balance_guides_monthly.csv",
       "monthly_rows": 104,
-      "weekly_path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_jet_balance_guides_weekly.csv",
-      "weekly_rows": 450
+      "weekly_path": "/private/tmp/us-balances-refresh-repull/Kpler/output/weekly/us_jet_balance_guides_weekly.csv",
+      "weekly_rows": 449
     }
   },
   "pipeline_name": "kpler_flows",
@@ -62,7 +62,7 @@
               "destinationTradingRegions",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd1ab_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd1ab_exports_external.csv",
             "rows": 173
           },
           "split": "destinationTradingRegions",
@@ -98,7 +98,7 @@
               "originCountries",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd1ab_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd1ab_imports_external.csv",
             "rows": 393
           },
           "split": "originCountries",
@@ -133,7 +133,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd1c_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd1c_exports_external.csv",
             "rows": 103
           },
           "split": "Total",
@@ -169,7 +169,7 @@
               "originCountries",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd1c_imports_intracountry.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd1c_imports_intracountry.csv",
             "rows": 166
           },
           "split": "originCountries",
@@ -205,7 +205,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd3_to_padd1ab.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd3_to_padd1ab.csv",
             "rows": 103
           },
           "split": "Total",
@@ -241,7 +241,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd3_to_padd1c.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_diesel_padd3_to_padd1c.csv",
             "rows": 103
           },
           "split": "Total",
@@ -271,13 +271,13 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 19110,
+            "bytes": 19111,
             "columns": [
               "period",
               "destinationTradingRegions",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_padd3_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_padd3_exports_external.csv",
             "rows": 600
           },
           "split": "destinationTradingRegions",
@@ -312,7 +312,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_padd5_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_padd5_exports_external.csv",
             "rows": 103
           },
           "split": "Total",
@@ -347,7 +347,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_padd5_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_padd5_imports_external.csv",
             "rows": 103
           },
           "split": "Total",
@@ -377,13 +377,13 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 20993,
+            "bytes": 20994,
             "columns": [
               "period",
               "destinationTradingRegions",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_us_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_us_exports_external.csv",
             "rows": 667
           },
           "split": "destinationTradingRegions",
@@ -419,7 +419,7 @@
               "originCountries",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_monthly_us_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_monthly_us_imports_external.csv",
             "rows": 642
           },
           "split": "originCountries",
@@ -455,7 +455,7 @@
               "destinationTradingRegions",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd1ab_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd1ab_exports_external.csv",
             "rows": 235
           },
           "split": "destinationTradingRegions",
@@ -491,7 +491,7 @@
               "originCountries",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd1ab_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd1ab_imports_external.csv",
             "rows": 882
           },
           "split": "originCountries",
@@ -526,7 +526,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd1c_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd1c_exports_external.csv",
             "rows": 451
           },
           "split": "Total",
@@ -562,7 +562,7 @@
               "originCountries",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd1c_imports_intracountry.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd1c_imports_intracountry.csv",
             "rows": 256
           },
           "split": "originCountries",
@@ -598,7 +598,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd3_to_padd1ab.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd3_to_padd1ab.csv",
             "rows": 451
           },
           "split": "Total",
@@ -634,7 +634,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd3_to_padd1c.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_diesel_padd3_to_padd1c.csv",
             "rows": 457
           },
           "split": "Total",
@@ -645,7 +645,7 @@
       "status": "ok"
     },
     "us_diesel_weekly_padd3_exports_external": {
-      "rows": 1599,
+      "rows": 1601,
       "splits": [
         {
           "attempts": 1,
@@ -664,14 +664,14 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 56020,
+            "bytes": 56097,
             "columns": [
               "period",
               "destinationTradingRegions",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_padd3_exports_external.csv",
-            "rows": 1598
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_padd3_exports_external.csv",
+            "rows": 1600
           },
           "split": "destinationTradingRegions",
           "status": "ok",
@@ -705,7 +705,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_padd5_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_padd5_exports_external.csv",
             "rows": 455
           },
           "split": "Total",
@@ -740,7 +740,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_padd5_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_padd5_imports_external.csv",
             "rows": 451
           },
           "split": "Total",
@@ -751,7 +751,7 @@
       "status": "ok"
     },
     "us_diesel_weekly_us_exports_external": {
-      "rows": 1751,
+      "rows": 1753,
       "splits": [
         {
           "attempts": 1,
@@ -770,14 +770,14 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 61008,
+            "bytes": 61086,
             "columns": [
               "period",
               "destinationTradingRegions",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_us_exports_external.csv",
-            "rows": 1750
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_us_exports_external.csv",
+            "rows": 1752
           },
           "split": "destinationTradingRegions",
           "status": "ok",
@@ -812,7 +812,7 @@
               "originCountries",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_diesel_weekly_us_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_diesel_weekly_us_imports_external.csv",
             "rows": 1279
           },
           "split": "originCountries",
@@ -847,7 +847,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_monthly_jet_padd1_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_monthly_jet_padd1_exports_external.csv",
             "rows": 103
           },
           "split": "Total",
@@ -883,7 +883,7 @@
               "originCountries",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_monthly_jet_padd1_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_monthly_jet_padd1_imports_external.csv",
             "rows": 429
           },
           "split": "originCountries",
@@ -919,7 +919,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_monthly_jet_padd3_to_padd1.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_monthly_jet_padd3_to_padd1.csv",
             "rows": 103
           },
           "split": "Total",
@@ -955,7 +955,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_monthly_jet_padd3_to_padd5.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_monthly_jet_padd3_to_padd5.csv",
             "rows": 103
           },
           "split": "Total",
@@ -991,7 +991,7 @@
               "destinationTradingRegions",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_monthly_padd3_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_monthly_padd3_exports_external.csv",
             "rows": 376
           },
           "split": "destinationTradingRegions",
@@ -1026,7 +1026,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_monthly_padd5_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_monthly_padd5_exports_external.csv",
             "rows": 103
           },
           "split": "Total",
@@ -1061,7 +1061,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_monthly_padd5_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_monthly_padd5_imports_external.csv",
             "rows": 103
           },
           "split": "Total",
@@ -1096,7 +1096,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_weekly_jet_padd1_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_weekly_jet_padd1_exports_external.csv",
             "rows": 452
           },
           "split": "Total",
@@ -1132,7 +1132,7 @@
               "originCountries",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_weekly_jet_padd1_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_weekly_jet_padd1_imports_external.csv",
             "rows": 793
           },
           "split": "originCountries",
@@ -1168,7 +1168,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_weekly_jet_padd3_to_padd1.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_weekly_jet_padd3_to_padd1.csv",
             "rows": 455
           },
           "split": "Total",
@@ -1204,7 +1204,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_weekly_jet_padd3_to_padd5.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_weekly_jet_padd3_to_padd5.csv",
             "rows": 451
           },
           "split": "Total",
@@ -1215,7 +1215,7 @@
       "status": "ok"
     },
     "us_jet_weekly_padd3_exports_external": {
-      "rows": 915,
+      "rows": 914,
       "splits": [
         {
           "attempts": 1,
@@ -1234,14 +1234,14 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 30991,
+            "bytes": 30967,
             "columns": [
               "period",
               "destinationTradingRegions",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_weekly_padd3_exports_external.csv",
-            "rows": 914
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_weekly_padd3_exports_external.csv",
+            "rows": 913
           },
           "split": "destinationTradingRegions",
           "status": "ok",
@@ -1275,7 +1275,7 @@
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_weekly_padd5_exports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_weekly_padd5_exports_external.csv",
             "rows": 451
           },
           "split": "Total",
@@ -1305,12 +1305,12 @@
             "withProductEstimation": "false"
           },
           "raw": {
-            "bytes": 7949,
+            "bytes": 7948,
             "columns": [
               "period",
               "quantity"
             ],
-            "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/balance_guides/us_jet_weekly_padd5_imports_external.csv",
+            "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/balance_guides/us_jet_weekly_padd5_imports_external.csv",
             "rows": 454
           },
           "split": "Total",
@@ -2269,42 +2269,42 @@
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_diesel_balance_guides_daily.csv",
+        "path": "/private/tmp/us-balances-refresh-repull/Kpler/output/daily/us_diesel_balance_guides_daily.csv",
         "rows": 0
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_diesel_balance_guides_weekly.csv",
+        "path": "/private/tmp/us-balances-refresh-repull/Kpler/output/weekly/us_diesel_balance_guides_weekly.csv",
         "rows": 451
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_diesel_balance_guides_monthly.csv",
+        "path": "/private/tmp/us-balances-refresh-repull/Kpler/output/monthly/us_diesel_balance_guides_monthly.csv",
         "rows": 104
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/daily/us_jet_balance_guides_daily.csv",
+        "path": "/private/tmp/us-balances-refresh-repull/Kpler/output/daily/us_jet_balance_guides_daily.csv",
         "rows": 0
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/weekly/us_jet_balance_guides_weekly.csv",
-        "rows": 450
+        "path": "/private/tmp/us-balances-refresh-repull/Kpler/output/weekly/us_jet_balance_guides_weekly.csv",
+        "rows": 449
       },
       {
         "all_weekly_dates_friday": true,
         "duplicate_dates": false,
         "numeric_kbd_columns": true,
-        "path": "/Users/alexhoffmann/US_Balances/Kpler/output/monthly/us_jet_balance_guides_monthly.csv",
+        "path": "/private/tmp/us-balances-refresh-repull/Kpler/output/monthly/us_jet_balance_guides_monthly.csv",
         "rows": 104
       }
     ],

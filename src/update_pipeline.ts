@@ -52,6 +52,8 @@ function scriptStep(label: string, script: string): Step {
       return pythonStep(label, "src/weekly_xls.py");
     case "monthly":
       return tsStep(label, "src/monthly.ts");
+    case "bulk:refresh":
+      return tsStep(label, "src/bulk_series_pull.ts");
     case "capacity":
       return pythonStep(label, "src/eia_capacity.py");
     case "capacity:refineries":
@@ -136,6 +138,7 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
   ],
   monthly: [
     scriptStep("monthly EIA pull", "monthly"),
+    scriptStep("monthly PET bulk source refresh", "bulk:refresh"),
     scriptStep("monthly export files", "export:monthly"),
     scriptStep("monthly needed bulk series inventory", "export:bulk-series"),
     scriptStep("PADD 1 distillate split", "padd1"),
@@ -159,6 +162,7 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
     parallelPhase("EIA source refreshes", [
       branch("weekly EIA", [scriptStep("weekly EIA pull", "weekly:raw")]),
       branch("monthly EIA", [scriptStep("monthly EIA pull", "monthly")]),
+      branch("monthly PET bulk", [scriptStep("monthly PET bulk source refresh", "bulk:refresh")]),
     ]),
     scriptStep("weekly/monthly export files", "export:headers:clean"),
     scriptStep("monthly needed bulk series inventory", "export:bulk-series"),

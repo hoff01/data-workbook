@@ -1,7 +1,7 @@
 {
   "actual_share_periods": 147,
   "estimate_rows": 124,
-  "generated_at": "2026-07-13T21:43:27.919524+00:00",
+  "generated_at": "2026-07-14T03:23:36.903275+00:00",
   "outputs": {
     "estimates": "padd_1/padd_1_distillate_estimates.csv",
     "monthly_diesel_backup": "eia_monthly/diesel.csv.bak",

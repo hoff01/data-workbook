@@ -1,7 +1,7 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-07-14T03:03:04.651Z",
+  "generatedAt": "2026-07-14T03:27:03.036Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through the saved forecast end date.",
   "latestMonthly": "2026-04-15",
@@ -12,58 +12,58 @@
       "path": "eia_monthly/jet.csv",
       "rows": 124,
       "checksum": "e31c6beee0ba3d779f95c692ce309c097539e5b725b009f838e2fef530d68512",
-      "modifiedAt": "2026-07-14T02:47:45.872Z"
+      "modifiedAt": "2026-07-14T03:24:32.881Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/jet.csv",
       "rows": 549,
       "checksum": "4d3b9974b8c013c54c3508651e191c5cf98c9e4a149a0742d5dbc9f747ce2f9e",
-      "modifiedAt": "2026-07-14T02:47:45.875Z"
+      "modifiedAt": "2026-07-14T03:24:32.888Z"
     },
     {
       "role": "kpler_manifest",
       "path": "kpler/manifest.json",
-      "checksum": "d055f1debb1c943589fdc5ca5a0f2c553f6d5607a820fe9cce43ea184bfa9dd9",
-      "modifiedAt": "2026-07-14T02:47:45.756Z"
+      "checksum": "42dab543801314253ce07cb1efdd853c2a421ede92dc562093d911ae53307ef0",
+      "modifiedAt": "2026-07-14T03:24:23.236Z"
     },
     {
       "role": "kpler_guide_monthly",
       "path": "kpler/output/monthly/us_jet_balance_guides_monthly.csv",
       "rows": 104,
-      "checksum": "4c3566a6d543267fe36510ad7ee188822ddd0d151d7c7e5a713e2568c471b164",
-      "modifiedAt": "2026-07-13T21:44:22.724Z"
+      "checksum": "67e5b051f93db3e6da605e07528f5de7b97ddb1d46ca8ac0891d5b73d9dbcd97",
+      "modifiedAt": "2026-07-14T03:24:23.226Z"
     },
     {
       "role": "kpler_guide_weekly",
       "path": "kpler/output/weekly/us_jet_balance_guides_weekly.csv",
-      "rows": 450,
-      "checksum": "000c0a4106339ab96972d7477d71630b0bb01d85c754d35dd9851c5da78c5281",
-      "modifiedAt": "2026-07-13T21:44:22.724Z"
+      "rows": 449,
+      "checksum": "204a19723e856fbc9899f2df1909cbe83a071ef432a7246e5bcd0851419f3556",
+      "modifiedAt": "2026-07-14T03:24:23.226Z"
     },
     {
       "role": "refinery_unit_capacity",
       "path": "data/refinery_unit_capacities_2025.csv",
       "rows": 311,
-      "checksum": "e9d43467dcc3b841b83d82f854c2b9b75fc83eeadfecc5a207d27c5ccbe126e1",
-      "modifiedAt": "2026-07-14T02:47:45.870Z"
+      "checksum": "1c512baa10fb4e535784225642aaca5bbce86800311a0fc87d25df1075c5d2a8",
+      "modifiedAt": "2026-07-14T03:27:01.456Z"
     }
   ],
   "checksums": {
     "eia_monthly": "e31c6beee0ba3d779f95c692ce309c097539e5b725b009f838e2fef530d68512",
     "eia_weekly": "4d3b9974b8c013c54c3508651e191c5cf98c9e4a149a0742d5dbc9f747ce2f9e",
-    "kpler_manifest": "d055f1debb1c943589fdc5ca5a0f2c553f6d5607a820fe9cce43ea184bfa9dd9",
-    "kpler_guide_monthly": "4c3566a6d543267fe36510ad7ee188822ddd0d151d7c7e5a713e2568c471b164",
-    "kpler_guide_weekly": "000c0a4106339ab96972d7477d71630b0bb01d85c754d35dd9851c5da78c5281",
-    "refinery_unit_capacity": "e9d43467dcc3b841b83d82f854c2b9b75fc83eeadfecc5a207d27c5ccbe126e1"
+    "kpler_manifest": "42dab543801314253ce07cb1efdd853c2a421ede92dc562093d911ae53307ef0",
+    "kpler_guide_monthly": "67e5b051f93db3e6da605e07528f5de7b97ddb1d46ca8ac0891d5b73d9dbcd97",
+    "kpler_guide_weekly": "204a19723e856fbc9899f2df1909cbe83a071ef432a7246e5bcd0851419f3556",
+    "refinery_unit_capacity": "1c512baa10fb4e535784225642aaca5bbce86800311a0fc87d25df1075c5d2a8"
   },
   "optimization": {
-    "generatedAt": "2026-07-14T03:03:04.687Z",
+    "generatedAt": "2026-07-14T03:27:03.074Z",
     "runtimePlan": {
       "baseRows": 6432,
-      "lazyRows": 40535,
+      "lazyRows": 40538,
       "lazyRowSharePct": 86.3,
-      "basePayloadKb": 1755.3,
+      "basePayloadKb": 1754.3,
       "weeklyPayloadKb": 2447.1,
       "crudeWeeklyPayloadKb": 1124.6,
       "powerDfoPayloadKb": 0.4,
@@ -81,7 +81,7 @@
       "sourceFiles": 6,
       "sourceHubSources": 7,
       "refineryCapacityRows": 311,
-      "kplerRows": 16747,
+      "kplerRows": 16750,
       "powerDfoDailyRows": 0,
       "powerDfoWeatherRows": 0
     },
@@ -113,7 +113,7 @@
       {
         "name": "reference",
         "path": "data/jet_balance_runtime_reference.js",
-        "rows": 17071,
+        "rows": 17074,
         "estimatedKb": 149.5,
         "status": "optimized",
         "reason": "Source inventory, refinery capacity, Kpler metadata, and checksums load only for Balance, Charts, Reference, Outages, or Crude runs."
@@ -150,7 +150,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 149.5 KB versus 1755.3 KB estimated base payload."
+        "detail": "Reference payload is 149.5 KB versus 1754.3 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",

@@ -60,7 +60,7 @@ async function loadWeeklySourceConfig(): Promise<{ config: WeeklySourceConfig; p
 }
 
 function latestSourceMode(config: WeeklySourceConfig): LatestSource {
-  const raw = (process.env[EIA_WEEKLY_LATEST_SOURCE_ENV] ?? config.latest_source ?? "xls").trim().toLowerCase();
+  const raw = (process.env[EIA_WEEKLY_LATEST_SOURCE_ENV]?.trim() || config.latest_source?.trim() || "xls").toLowerCase();
   if (["xls", "xlsx", "excel", "tables", "wpsr_xls", "wpsr-xls"].includes(raw)) return "xls";
   if (["csv", "wpsr_csv", "wpsr-csv"].includes(raw)) return "csv";
   throw new Error(`Unsupported ${EIA_WEEKLY_LATEST_SOURCE_ENV}=${raw}; use xls or csv`);

@@ -14,7 +14,7 @@
     "target_factor_candidate_pool_months": 55,
     "target_factor_min_correlation": 0.5
   },
-  "generated_at": "2026-07-13T21:45:44.243586+00:00",
+  "generated_at": "2026-07-14T03:25:24.532736+00:00",
   "inputs": {
     "facility_fuel_url": "https://api.eia.gov/v2/electricity/facility-fuel/data/",
     "facility_fuels": [
@@ -46,16 +46,16 @@
   },
   "method": "Monthly PADD 1 DFO facility-fuel consumption is pulled from 2018 forward. Daily MIDA+NE oil generation is used as the proportional indicator. Calibration is recalculated by year using all available months through that year, ignoring calendar month, and selecting 20 high-correlation months whose weighted DFO/MWh factor is closest to the configured target.",
   "outputs": {
-    "annual_calibration_factors": "/Users/alexhoffmann/US_Balances/power_generation_dfo/annual_calibration_factors.csv",
-    "calibration_months": "/Users/alexhoffmann/US_Balances/power_generation_dfo/calibration_months.csv",
-    "daily_2026_chart": "/Users/alexhoffmann/US_Balances/power_generation_dfo/daily_distillate_burn_2026.jpg",
-    "daily_2026_estimates": "/Users/alexhoffmann/US_Balances/power_generation_dfo/estimated_daily_dfo_2026.csv",
-    "daily_estimates": "/Users/alexhoffmann/US_Balances/power_generation_dfo/estimated_daily_dfo.csv",
-    "daily_generation": "/Users/alexhoffmann/US_Balances/power_generation_dfo/daily_padd1_ne_oil_generation.csv",
-    "facility_raw": "/Users/alexhoffmann/US_Balances/power_generation_dfo/facility_fuel_raw.csv",
-    "monthly_estimates": "/Users/alexhoffmann/US_Balances/power_generation_dfo/estimated_monthly_dfo.csv",
-    "monthly_facility": "/Users/alexhoffmann/US_Balances/power_generation_dfo/monthly_padd1_facility_fuel.csv",
-    "rto_raw": "/Users/alexhoffmann/US_Balances/power_generation_dfo/rto_oil_daily_raw.csv"
+    "annual_calibration_factors": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/annual_calibration_factors.csv",
+    "calibration_months": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/calibration_months.csv",
+    "daily_2026_chart": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/daily_distillate_burn_2026.jpg",
+    "daily_2026_estimates": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/estimated_daily_dfo_2026.csv",
+    "daily_estimates": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/estimated_daily_dfo.csv",
+    "daily_generation": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/daily_padd1_ne_oil_generation.csv",
+    "facility_raw": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/facility_fuel_raw.csv",
+    "monthly_estimates": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/estimated_monthly_dfo.csv",
+    "monthly_facility": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/monthly_padd1_facility_fuel.csv",
+    "rto_raw": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/rto_oil_daily_raw.csv"
   },
   "pipeline_name": "power_generation_dfo",
   "row_counts": {
@@ -69,7 +69,7 @@
     "monthly_facility": 200,
     "rto_raw": 5294
   },
-  "run_end": "2026-07-13",
+  "run_end": "2026-07-14",
   "run_start": "2018-01-01",
   "sources": [
     {

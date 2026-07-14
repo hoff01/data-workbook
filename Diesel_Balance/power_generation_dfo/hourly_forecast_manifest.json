@@ -4,7 +4,7 @@
   "dfo_factor_source": "2026",
   "fallback_model_note": "Fallback uses a larger recent hourly history window and blends toward higher historical oil-to-load ratios when forecast demand is elevated.",
   "forecast_hours": 24,
-  "generated_at": "2026-07-13T21:46:30.756073+00:00",
+  "generated_at": "2026-07-14T03:26:16.687352+00:00",
   "history_windows": {
     "max_oil_rows": 20000,
     "max_region_rows": 40000,
@@ -13,12 +13,12 @@
   },
   "model": "fallback_hourly_load_weather_profile",
   "outputs": {
-    "forecast_24h": "/Users/alexhoffmann/US_Balances/power_generation_dfo/dfo_generation_forecast_24h.csv",
-    "forecast_chart": "/Users/alexhoffmann/US_Balances/power_generation_dfo/dfo_generation_forecast_24h.jpg",
-    "hourly_model_input": "/Users/alexhoffmann/US_Balances/power_generation_dfo/hourly_dfo_model_input.csv",
-    "hourly_oil_raw": "/Users/alexhoffmann/US_Balances/power_generation_dfo/hourly_oil_generation_raw.csv",
-    "hourly_region_raw": "/Users/alexhoffmann/US_Balances/power_generation_dfo/hourly_region_data_raw.csv",
-    "weather_14d": "/Users/alexhoffmann/US_Balances/power_generation_dfo/weather_14d_padd1_cities.csv"
+    "forecast_24h": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/dfo_generation_forecast_24h.csv",
+    "forecast_chart": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/dfo_generation_forecast_24h.jpg",
+    "hourly_model_input": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/hourly_dfo_model_input.csv",
+    "hourly_oil_raw": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/hourly_oil_generation_raw.csv",
+    "hourly_region_raw": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/hourly_region_data_raw.csv",
+    "weather_14d": "/private/tmp/us-balances-refresh-repull/power_generation_dfo/weather_14d_padd1_cities.csv"
   },
   "pipeline_name": "power_generation_dfo_hourly_forecast",
   "row_counts": {
@@ -32,49 +32,49 @@
     {
       "offset": 0,
       "row_count": 5000,
-      "total": 527411,
+      "total": 527423,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 5000,
       "row_count": 5000,
-      "total": 527411,
+      "total": 527423,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 10000,
       "row_count": 5000,
-      "total": 527411,
+      "total": 527423,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 15000,
       "row_count": 5000,
-      "total": 527411,
+      "total": 527423,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 20000,
       "row_count": 5000,
-      "total": 527411,
+      "total": 527423,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 25000,
       "row_count": 5000,
-      "total": 527411,
+      "total": 527423,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 30000,
       "row_count": 5000,
-      "total": 527411,
+      "total": 527423,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {
       "offset": 35000,
       "row_count": 5000,
-      "total": 527411,
+      "total": 527423,
       "url": "https://api.eia.gov/v2/electricity/rto/region-data/data/"
     },
     {

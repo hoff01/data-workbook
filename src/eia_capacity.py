@@ -20,9 +20,10 @@ load_env_files()
 OUT_DIR = Path("eia_capacity")
 RAW_DIR = OUT_DIR / "raw"
 RAW_ZIP = RAW_DIR / "PET_capacity_bulk.zip"
-BULK_URL = os.environ.get("EIA_CAPACITY_BULK_URL", "https://api.eia.gov/bulk/PET.zip")
-START_MONTH = os.environ.get("EIA_CAPACITY_START", "2016-01")
-END_MONTH = os.environ.get("EIA_CAPACITY_END", date.today().strftime("%Y-%m"))
+DEFAULT_BULK_URL = "https://api.eia.gov/bulk/PET.zip"
+BULK_URL = os.environ.get("EIA_CAPACITY_BULK_URL", "").strip() or DEFAULT_BULK_URL
+START_MONTH = os.environ.get("EIA_CAPACITY_START", "").strip() or "2016-01"
+END_MONTH = os.environ.get("EIA_CAPACITY_END", "").strip() or date.today().strftime("%Y-%m")
 MATCH_PHRASE = "Downstream Charge Capacity as of January 1"
 USER_AGENT = "python-pulls-eia-capacity/0.1 (monthly downstream capacity pull)"
 

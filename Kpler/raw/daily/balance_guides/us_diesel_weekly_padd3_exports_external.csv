@@ -1553,12 +1553,12 @@ period;destinationTradingRegions;quantity
 2026-05-29;Latin America;898.59
 2026-05-29;MED Zone (MED Sea+Black Sea);87.82
 2026-05-29;North West Europe Zone;209.37
-2026-05-29;South-Central Asia;25.67
-2026-05-29;Southern Africa;106.87
+2026-05-29;South-Central Asia;24.62
+2026-05-29;Southern Africa;107.92
 2026-05-29;Unknown;24.14
 2026-05-29;Western Africa;47.47
 2026-06-05;East Coast Canada;33.68
-2026-06-05;Latin America;780.52
+2026-06-05;Latin America;788.69
 2026-06-05;MED Zone (MED Sea+Black Sea);80.25
 2026-06-05;North West Europe Zone;203.39
 2026-06-05;South-Central Asia;26.39
@@ -1571,7 +1571,7 @@ period;destinationTradingRegions;quantity
 2026-06-12;Other North Africa;131.07
 2026-06-12;Unknown;0.07
 2026-06-19;East Coast Canada;43.26
-2026-06-19;Latin America;799.35
+2026-06-19;Latin America;799.34
 2026-06-19;North West Europe Zone;96.46
 2026-06-19;Other North Africa;39.72
 2026-06-19;South-Central Asia;5.47
@@ -1582,19 +1582,21 @@ period;destinationTradingRegions;quantity
 2026-06-26;Other North Africa;44.29
 2026-06-26;Unknown;125.04
 2026-06-26;Western Africa;86.03
-2026-07-03;Latin America;982.05
-2026-07-03;MED Zone (MED Sea+Black Sea);173.29
-2026-07-03;North West Europe Zone;82.00
-2026-07-03;Unknown;129.14
-2026-07-10;Latin America;990.77
-2026-07-10;North West Europe Zone;256.18
+2026-07-03;Latin America;909.03
+2026-07-03;MED Zone (MED Sea+Black Sea);215.44
+2026-07-03;North West Europe Zone;38.93
+2026-07-03;Unknown;186.00
+2026-07-10;Latin America;998.40
+2026-07-10;MED Zone (MED Sea+Black Sea);43.11
+2026-07-10;North West Europe Zone;179.00
 2026-07-10;Other North Africa;74.14
-2026-07-10;Unknown;160.92
-2026-07-17;Latin America;158.52
+2026-07-10;Unknown;162.69
+2026-07-17;Latin America;93.36
 2026-07-17;North West Europe Zone;86.80
-2026-07-17;Unknown;325.85
+2026-07-17;Unknown;331.26
 2026-07-17;Western Africa;43.09
-2026-07-24;Latin America;148.21
+2026-07-24;Latin America;144.32
 2026-07-24;Unknown;98.34
+2026-07-24;Western Africa;49.53
 2026-08-07;North West Europe Zone;48.74
 2026-08-07;Unknown;48.28
