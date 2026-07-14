@@ -101,7 +101,7 @@ type WeeklyCallCatalogEntry = {
   folder: string;
   weekly_json: string;
   manifest: string;
-  slide: string;
+  table_image: string;
   generated_at: string;
 };
 
@@ -301,7 +301,8 @@ function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig
   assertIncludes(`${config.key} mobile crude table stays inside its scroll container`, indexHtml, "@media(max-width:760px){#crudeRunsTableWrap{display:block;min-width:0;width:100%;max-width:100%;max-height:58vh;overflow:auto}");
   assertIncludes(`${config.key} mobile crude period count wraps inside the viewport`, indexHtml, "#crudeRunsCount{white-space:normal;max-width:100%;line-height:1.35}");
   assertIncludes(`${config.key} mobile workbook disables desktop compositor transforms`, indexHtml, ".topbar,.crudeViewportLock,.chartGrid{will-change:auto;transform:none!important}");
-  assertIncludes(`${config.key} mobile crude table uses container scrolling`, indexHtml, "function tableUsesPageWideScroll(wrap){ return Boolean(wrap?.id === 'crudeRunsTableWrap' && !matchMedia('(max-width: 760px)').matches); }");
+  assertIncludes(`${config.key} desktop crude table stays inside its bordered scroll container`, indexHtml, "#crudeRunsTableWrap{display:block;min-width:0;width:100%;max-width:100%;max-height:72vh;overflow:auto;vertical-align:top}");
+  assertIncludes(`${config.key} crude table disables page-wide horizontal scrolling`, indexHtml, "function tableUsesPageWideScroll(){ return false; }");
   assertIncludes(`${config.key} mobile workbook disables page-wide viewport tracking`, indexHtml, "function viewportTrackingActive(){ return (state.sheet === 'charts' || state.sheet === 'crude') && !matchMedia('(max-width: 760px)').matches; }");
   assertIncludes(`${config.key} mobile crude table limits its rasterized period window`, indexHtml, "function crudeTableDisplayPeriods(allPeriods=crudeDisplayPeriods())");
   assertIncludes(`${config.key} crude table distinguishes mobile and desktop windows`, indexHtml, "const actualLookback = mobile ? 12 : 104;");
@@ -329,11 +330,11 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} changed-data update status is explicit`, indexHtml, "Updated — new data loaded");
   assertIncludes(`${config.key} unchanged-data refresh status is explicit`, indexHtml, "Refreshed — data unchanged");
   const productLabel = config.key === "jet" ? "Jet" : "Diesel";
-  assertIncludes(`${config.key} Reference has product-specific weekly call output save button`, indexHtml, `Save ${productLabel} weekly call outputs`);
+  assertIncludes(`${config.key} Reference has product-specific weekly table image save button`, indexHtml, `Save ${productLabel} weekly table image`);
   assertIncludes(`${config.key} weekly call output request sends active workbook product`, indexHtml, "product:D.product?.key");
-  assertIncludes(`${config.key} weekly call output save status is product-specific`, indexHtml, "Saved — '+productLabel+' weekly call outputs ready");
+  assertIncludes(`${config.key} weekly table image save status is product-specific`, indexHtml, "Saved — '+productLabel+' weekly table image ready");
   assertIncludes(`${config.key} weekly call output path is explicit`, indexHtml, "weekly_call_ouputs/outputs");
-  assertIncludes(`${config.key} weekly call output save does not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(workbookProductLabel(lastUpdateJob.product)+' weekly call outputs saved in weekly_call_ouputs/outputs');");
+  assertIncludes(`${config.key} weekly table image save does not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(workbookProductLabel(lastUpdateJob.product)+' weekly table image saved in weekly_call_ouputs/outputs');");
   assertIncludes(`${config.key} changed-data update log is explicit`, indexHtml, "UPDATED — NEW DATA");
   assertIncludes(`${config.key} unchanged-data refresh log is explicit`, indexHtml, "REFRESHED — DATA UNCHANGED");
   assertIncludes(`${config.key} partial update status is explicit`, indexHtml, "Updated with warnings");
@@ -672,7 +673,7 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
 async function verifyWeeklyCallArchives(): Promise<string[]> {
   const outputRoot = join("weekly_call_ouputs", "outputs");
   const catalog = await readJson<WeeklyCallCatalog>(join(outputRoot, "index.json"));
-  if (catalog.schema_version !== 2) throw new Error(`weekly call catalog schema must be 2, received ${catalog.schema_version}`);
+  if (catalog.schema_version !== 3) throw new Error(`weekly call catalog schema must be 3, received ${catalog.schema_version}`);
   const results: string[] = [];
   for (const config of PRODUCTS) {
     const latestWeekly = await latestCsvDate(config.weeklyCsv);
@@ -683,19 +684,20 @@ async function verifyWeeklyCallArchives(): Promise<string[]> {
     if (!entry) throw new Error(`${config.key} weekly call archive is missing from index.json`);
     assertEqual(`${config.key} weekly call archive latest week`, entry.actual_week_ending, latestWeekly);
     assertEqual(`${config.key} weekly call archive manifest name`, entry.manifest, `${config.key}_manifest.json`);
-    assertEqual(`${config.key} weekly call archive slide name`, entry.slide, `${config.key}_weekly_stats_slide.png`);
+    assertEqual(`${config.key} weekly call archive table image name`, entry.table_image, `${config.key}_weekly_balance_table.png`);
     const archiveDir = join(outputRoot, entry.folder);
     const manifest = await readJson<WeeklyCallManifest>(join(archiveDir, entry.manifest));
     assertEqual(`${config.key} weekly call manifest product`, manifest.product, config.key);
     assertEqual(`${config.key} weekly call manifest latest week`, manifest.actual_week_ending, latestWeekly);
     assertEqual(`${config.key} weekly call manifest JSON`, manifest.weekly_json, entry.weekly_json);
-    if (manifest.images.length !== 5) throw new Error(`${config.key} weekly call manifest expected 5 images, received ${manifest.images.length}`);
-    const slide = manifest.images.find((image) => image.file === entry.slide);
-    if (!slide || slide.width_px !== 2400 || slide.height_px !== 1350) {
-      throw new Error(`${config.key} weekly call slide must be 2400 x 1350`);
+    if (manifest.images.length !== 1) throw new Error(`${config.key} weekly call manifest expected 1 image, received ${manifest.images.length}`);
+    const tableImage = manifest.images[0];
+    if (tableImage.file !== entry.table_image || tableImage.width_px !== 1323 || tableImage.height_px !== 1269) {
+      throw new Error(`${config.key} weekly call table image must be the only 1323 x 1269 PNG`);
     }
-    const payload = await readJson<{ product?: { key?: string } }>(join(archiveDir, entry.weekly_json));
+    const payload = await readJson<{ product?: { key?: string; stats_title?: string } }>(join(archiveDir, entry.weekly_json));
     assertEqual(`${config.key} weekly call JSON product`, payload.product?.key ?? "", config.key);
+    if (payload.product?.stats_title) throw new Error(`${config.key} weekly call JSON still contains a stats title`);
     for (const image of manifest.images) {
       const content = await readFile(join(archiveDir, image.file));
       if (content.byteLength < 1_000) throw new Error(`${config.key} weekly call image ${image.file} is unexpectedly small`);

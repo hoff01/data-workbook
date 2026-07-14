@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main_module.js";
 
 type Step = {
   label: string;
@@ -33,6 +34,7 @@ async function runStep(step: Step, index: number, total: number): Promise<number
       cwd: ROOT,
       env: { ...process.env, FORCE_COLOR: "0" },
       stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
     });
     child.stdout.on("data", (chunk: Buffer) => process.stdout.write(chunk));
     child.stderr.on("data", (chunk: Buffer) => process.stderr.write(chunk));
@@ -71,7 +73,7 @@ async function main(): Promise<void> {
   console.log(`[weekly] complete total=${formatDuration(elapsed)} work_runtime=${formatDuration(workRuntime)}`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(import.meta.url)) {
   main().catch((error: unknown) => {
     console.error(`[weekly] failed: ${error instanceof Error ? error.message : String(error)}`);
     process.exitCode = 1;

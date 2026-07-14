@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
+import { isMainModule } from "./main_module.js";
 
 type UpdateGroup = "weekly" | "monthly" | "other" | "all" | "power-dfo";
 
@@ -33,7 +34,8 @@ type RunProgress = {
 
 const pythonCommand = process.env.US_BALANCES_PYTHON || (process.platform === "win32" ? "python" : "python3");
 const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
-const nodeCommand = process.execPath;
+const nodeCommand = process.env.US_BALANCES_NODE_COMMAND || process.execPath;
+const tsxCli = process.env.US_BALANCES_TSX_CLI;
 const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
 
@@ -42,7 +44,10 @@ function pythonStep(label: string, script: string, args: string[] = []): Step {
 }
 
 function tsStep(label: string, script: string, args: string[] = []): Step {
-  if (tsxCommand) return { label, command: tsxCommand, args: [script, ...args] };
+  if (tsxCli) return { label, command: nodeCommand, args: [tsxCli, script, ...args] };
+  if (tsxCommand && !(process.platform === "win32" && /\.(?:cmd|bat)$/i.test(tsxCommand))) {
+    return { label, command: tsxCommand, args: [script, ...args] };
+  }
   return { label, command: nodeCommand, args: ["--import", "tsx", script, ...args] };
 }
 
@@ -223,6 +228,7 @@ async function runStep(step: Step, progress: RunProgress, context?: string): Pro
       cwd: ROOT,
       env: { ...process.env, FORCE_COLOR: "0" },
       stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
     });
     child.stdout.on("data", (chunk: Buffer) => process.stdout.write(chunk));
     child.stderr.on("data", (chunk: Buffer) => process.stderr.write(chunk));
@@ -289,7 +295,7 @@ function parseGroup(value: string | undefined): UpdateGroup {
   throw new Error(`Unknown update group ${value ?? ""}. Use weekly, monthly, other, all, or power-dfo.`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(import.meta.url)) {
   runUpdateGroup(parseGroup(process.argv[2] ?? "all")).catch((error: unknown) => {
     console.error(`[update] failed: ${error instanceof Error ? error.message : String(error)}`);
     process.exitCode = 1;

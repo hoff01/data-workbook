@@ -55,6 +55,7 @@ async function waitForTerminalJob(baseUrl, timeoutMs = 12_000) {
 const port = await openPort();
 const baseUrl = `http://127.0.0.1:${port}`;
 const readyFile = join(tmpdir(), `us-balances-refresh-ready-${process.pid}-${Date.now()}`);
+const silentNoopFile = join(tmpdir(), `us-balances-silent-noop-${process.pid}-${Date.now()}`);
 const output = [];
 const child = spawn(process.execPath, ["--import", "tsx", "src/dashboard_update_server.ts"], {
   cwd: ROOT,
@@ -66,6 +67,7 @@ const child = spawn(process.execPath, ["--import", "tsx", "src/dashboard_update_
     US_BALANCES_REFRESH_READY_FILE: readyFile,
     US_BALANCES_TSX_CLI: join(ROOT, "scripts", "fake_update_cli.mjs"),
     US_BALANCES_WEEKLY_OUTPUT_SCRIPT: join(ROOT, "scripts", "fake_update_cli.mjs"),
+    US_BALANCES_FAKE_NO_START_FILE: silentNoopFile,
   },
   stdio: ["ignore", "pipe", "pipe"],
 });
@@ -98,6 +100,7 @@ try {
   });
   assert.equal(started.response.status, 202);
   assert.equal(started.body.job.status, "running");
+  assert.ok(Number.isInteger(started.body.job.pid) && started.body.job.pid > 0);
 
   const job = await waitForTerminalJob(baseUrl);
   assert.equal(job.status, "succeeded");
@@ -105,6 +108,7 @@ try {
   assert.equal(job.signal, null);
   assert.equal(job.result, "current");
   assert.equal(job.dataChanged, false);
+  assert.match(job.lines.join("\n"), /process started pid=\d+/);
   assert.match(job.lines.join("\n"), /source data was unchanged, and the workbooks were rebuilt anyway/);
 
   const repeated = await fetchJson(`${baseUrl}/api/update/start`, {
@@ -138,7 +142,6 @@ try {
     assert.equal(routedJob.result, "current");
     assert.match(routedJob.lines.join("\n"), /source data was unchanged, and the workbooks were rebuilt anyway/);
   }
-
   const missingWeeklyOutputProduct = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -166,7 +169,21 @@ try {
   assert.equal(weeklyOutputsJob.signal, null);
   assert.equal(weeklyOutputsJob.result, "saved");
   assert.equal(weeklyOutputsJob.dataChanged, true);
-  assert.match(weeklyOutputsJob.lines.join("\n"), /Jet weekly call outputs were saved/);
+  assert.match(weeklyOutputsJob.lines.join("\n"), /Jet weekly table image was saved/);
+
+  writeFileSync(silentNoopFile, "trigger\n");
+  const silentNoopStarted = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "monthly", force: true }),
+  });
+  assert.equal(silentNoopStarted.response.status, 202);
+  const silentNoopJob = await waitForTerminalJob(baseUrl);
+  assert.equal(silentNoopJob.status, "failed");
+  assert.equal(silentNoopJob.exitCode, 0);
+  assert.equal(silentNoopJob.result, null);
+  assert.equal(silentNoopJob.dataChanged, null);
+  assert.match(silentNoopJob.lines.join("\n"), /no update steps were confirmed/);
   console.log(`dashboard update server contract ok build=${initialHealth.buildId}`);
 } catch (error) {
   console.error(output.join(""));
@@ -174,4 +191,5 @@ try {
 } finally {
   child.kill();
   rmSync(readyFile, { force: true });
+  rmSync(silentNoopFile, { force: true });
 }

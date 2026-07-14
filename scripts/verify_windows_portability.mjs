@@ -56,6 +56,8 @@ requireText("scripts/test_dashboard_update_server.mjs", "a repeated forced refre
 requireText("scripts/test_dashboard_update_server.mjs", 'const routedGroups = ["weekly", "monthly", "other", "power-dfo"]', "every dashboard refresh group routes to a real update job");
 requireText("src/build_balance_dashboards.ts", "document.getElementById('refreshBtn').addEventListener('click', () => { startDashboardUpdate('all'); });", "top dashboard refresh starts the forced full upstream data pull");
 requireText("src/build_balance_dashboards.ts", "Connecting to the local runner and starting the forced", "dashboard refresh buttons show immediate progress");
+requireText("src/dashboard_update_server.ts", "windowsHide: true", "hidden Windows update subprocesses");
+requireText("src/dashboard_update_server.ts", "no update steps were confirmed", "silent no-op refresh failure detection");
 requireText("src/dashboard_update_server.ts", "new dashboard source data was loaded", "truthful changed-data result");
 requireText("src/update_data_fingerprint.ts", "VOLATILE_CSV_COLUMNS", "volatile metadata is excluded from change detection");
 requireText("scripts/test_update_data_fingerprint.ts", "volatile-only refresh must remain current", "truthful current-data regression test");
@@ -66,6 +68,15 @@ requireText("src/dashboard_update_server.ts", '"weekly-call-outputs"', "weekly c
 requireText("weekly_call_ouputs/generate_weekly_images.py", 'env.get("US_BALANCES_NODE_COMMAND"', "weekly output builder reuses the local Node runtime");
 requireText("weekly_call_ouputs/generate_weekly_images.py", 'env.get("US_BALANCES_TSX_CLI"', "weekly output builder reuses the local tsx CLI");
 requireText("package.json", '"test:dashboard-runner"', "dashboard runner contract test");
+requireText("src/main_module.ts", "const entryUrl = pathToFileURL(resolve(entryPath)).href", "platform-safe main-module URL conversion");
+requireText("src/main_module.ts", 'process.platform === "win32"', "case-insensitive Windows main-module comparison");
+requireText("src/update_pipeline.ts", "const tsxCli = process.env.US_BALANCES_TSX_CLI;", "nested TypeScript jobs reuse the portable tsx CLI");
+requireText("src/update_pipeline.ts", "if (isMainModule(import.meta.url))", "Windows-safe update entrypoint detection");
+requireText("src/update_pipeline.ts", "windowsHide: true", "hidden Windows pipeline subprocesses");
+requireText("src/run_weekly_pipeline.ts", "if (isMainModule(import.meta.url))", "Windows-safe weekly entrypoint detection");
+requireText("src/run_weekly_pipeline.ts", "windowsHide: true", "hidden Windows weekly subprocesses");
+rejectText("src/update_pipeline.ts", "`file://${process.argv[1]}`", "raw Windows paths are not file URLs");
+rejectText("src/run_weekly_pipeline.ts", "`file://${process.argv[1]}`", "raw Windows paths are not file URLs");
 requireText(".github/workflows/windows-production.yml", "npm run test:dashboard-runner", "native Windows runner contract test");
 requireText("src/dashboard_update_server.ts", 'hasWarnings ? "partial" : "succeeded"', "skipped-step partial status");
 rejectText("src/dashboard_update_server.ts", "finished status=", "misleading process completion message");

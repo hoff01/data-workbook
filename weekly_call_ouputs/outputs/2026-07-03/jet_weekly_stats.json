@@ -1,17 +1,16 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-07-13T18:55:38-04:00",
+  "schema_version": 2,
+  "generated_at": "2026-07-13T20:22:06-04:00",
   "source": {
     "bundle_json": "Jet_Balance/data/jet_balance_bundle.json",
-    "bundle_generated_at": "2026-07-13T22:55:38.678Z",
+    "bundle_generated_at": "2026-07-14T00:22:06.700Z",
     "balance_latest_weekly": "2026-07-03",
     "forecast_method": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through the saved forecast end date."
   },
   "product": {
     "key": "jet",
     "title": "Jet Balance",
-    "short_title": "Jet",
-    "stats_title": "Jet Stats"
+    "short_title": "Jet"
   },
   "periods": [
     {
@@ -603,95 +602,6 @@
               "2026-08-07": 23.0
             }
           }
-        ]
-      }
-    ]
-  },
-  "inventory_changes": {
-    "unit": "million barrels",
-    "actual": {
-      "week_ending": "2026-07-03",
-      "status": "actual",
-      "labels": [
-        "P1",
-        "P2",
-        "P3",
-        "P4",
-        "P5",
-        "Total"
-      ],
-      "region_keys": [
-        "padd1",
-        "padd2",
-        "padd3",
-        "padd4",
-        "padd5",
-        "us"
-      ],
-      "values_mb": [
-        0.18,
-        -0.59,
-        -0.5,
-        0.01,
-        0.47,
-        -0.43
-      ]
-    },
-    "forecasts": [
-      {
-        "week_ending": "2026-07-10",
-        "status": "forecast",
-        "labels": [
-          "P1",
-          "P2",
-          "P3",
-          "P4",
-          "P5",
-          "Total"
-        ],
-        "region_keys": [
-          "padd1",
-          "padd2",
-          "padd3",
-          "padd4",
-          "padd5",
-          "us"
-        ],
-        "values_mb": [
-          -0.03,
-          0.07,
-          -0.05,
-          0.01,
-          0.1,
-          0.11
-        ]
-      },
-      {
-        "week_ending": "2026-07-17",
-        "status": "forecast",
-        "labels": [
-          "P1",
-          "P2",
-          "P3",
-          "P4",
-          "P5",
-          "Total"
-        ],
-        "region_keys": [
-          "padd1",
-          "padd2",
-          "padd3",
-          "padd4",
-          "padd5",
-          "us"
-        ],
-        "values_mb": [
-          -0.03,
-          0.07,
-          -0.05,
-          0.01,
-          0.1,
-          0.11
         ]
       }
     ]

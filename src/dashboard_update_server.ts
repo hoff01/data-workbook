@@ -30,6 +30,7 @@ type Job = {
   group: DashboardJobGroup;
   product: ProductKey | null;
   status: JobStatus;
+  pid: number | null;
   command: string;
   args: string[];
   startedAt: string;
@@ -259,7 +260,7 @@ function setStatus(job){
   const state = job?.status || 'idle';
   const result = job?.result;
   const productLabel = job?.product === 'jet' ? 'Jet' : job?.product === 'diesel' ? 'Diesel' : '';
-  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly call outputs saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' refreshed — data unchanged' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' refreshed with warnings — data unchanged' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly call outputs' : job.group + ' refresh running';
+  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly table image saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' refreshed — data unchanged' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' refreshed with warnings — data unchanged' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly table image' : job.group + ' refresh running';
   statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
   buttons.forEach(button => button.disabled = state === 'running' || !refreshReady);
   logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : refreshReady ? 'Refresh tools are ready. The one-click launcher starts an All refresh automatically.' : 'First-run setup is installing the local refresh tools. The launcher will start an All refresh automatically when setup finishes.';
@@ -389,6 +390,7 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
     group,
     product: outputProduct,
     status: "running",
+    pid: null,
     command,
     args,
     startedAt: new Date(started).toISOString(),
@@ -402,32 +404,66 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
   };
   currentJob = job;
   currentLock = lock;
-  const child = spawn(command, args, {
-    cwd: ROOT,
-    env: { ...process.env, FORCE_COLOR: "0" },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  currentProcess = child;
-  appendJobLine(job, "stdout", `started ${command} ${args.join(" ")}`);
-  child.stdout.on("data", (chunk: Buffer) => appendJobLine(job, "stdout", chunk.toString("utf8")));
-  child.stderr.on("data", (chunk: Buffer) => appendJobLine(job, "stderr", chunk.toString("utf8")));
-  child.on("error", (error) => {
+  let child: ReturnType<typeof spawn>;
+  try {
+    child = spawn(command, args, {
+      cwd: ROOT,
+      env: { ...process.env, FORCE_COLOR: "0" },
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    });
+  } catch (error) {
     job.status = "failed";
     job.endedAt = new Date().toISOString();
     job.durationMs = Date.now() - started;
-    appendJobLine(job, "stderr", error.message);
+    appendJobLine(job, "stderr", `process launch failed: ${error instanceof Error ? error.message : String(error)}`);
+    releaseRunnerLock(lock);
+    throw error;
+  }
+  currentProcess = child;
+  job.pid = child.pid ?? null;
+  let finalized = false;
+  let pipelineStarted = savesWeeklyCallOutputs;
+  let hasWarnings = false;
+  let outputProbeTail = "";
+  const recordOutput = (stream: "stdout" | "stderr", chunk: Buffer): void => {
+    const text = chunk.toString("utf8");
+    const probe = outputProbeTail + text;
+    if (!pipelineStarted && probe.includes(`[update] group=${group} `)) pipelineStarted = true;
+    if (!savesWeeklyCallOutputs && /\[update\] step \d+\/\d+ (?:skipped|warning):/.test(probe)) hasWarnings = true;
+    outputProbeTail = probe.slice(-256);
+    appendJobLine(job, stream, text);
+  };
+  appendJobLine(job, "stdout", `launch requested: ${command} ${args.join(" ")}`);
+  child.once("spawn", () => {
+    job.pid = child.pid ?? null;
+    appendJobLine(job, "stdout", `process started${job.pid ? ` pid=${job.pid}` : ""}`);
+  });
+  child.stdout!.on("data", (chunk: Buffer) => recordOutput("stdout", chunk));
+  child.stderr!.on("data", (chunk: Buffer) => recordOutput("stderr", chunk));
+  child.on("error", (error) => {
+    if (finalized) return;
+    finalized = true;
+    job.status = "failed";
+    job.endedAt = new Date().toISOString();
+    job.durationMs = Date.now() - started;
+    appendJobLine(job, "stderr", `process failed to start: ${error.message}`);
     currentProcess = null;
     releaseRunnerLock(lock);
   });
   child.on("close", (code, signal) => {
-    const hasWarnings = !savesWeeklyCallOutputs
-      && job.lines.some((line) => /\[update\] step \d+\/\d+ (?:skipped|warning):/.test(line));
-    job.status = code === 0 ? (hasWarnings ? "partial" : "succeeded") : "failed";
+    if (finalized) return;
+    finalized = true;
+    const silentNoop = code === 0 && !pipelineStarted;
+    job.status = silentNoop ? "failed" : code === 0 ? (hasWarnings ? "partial" : "succeeded") : "failed";
     job.exitCode = code;
     job.signal = signal;
     job.endedAt = new Date().toISOString();
     job.durationMs = Date.now() - started;
-    if (code === 0 && savesWeeklyCallOutputs) {
+    if (silentNoop) {
+      job.dataChanged = null;
+      job.result = null;
+    } else if (code === 0 && savesWeeklyCallOutputs) {
       job.dataChanged = true;
       job.result = "saved";
     } else if (code === 0 && updateGroup && dataFingerprintBefore !== null) {
@@ -439,9 +475,11 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
         appendJobLine(job, "stderr", `source change comparison unavailable: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
-    const completionMessage = code === 0
+    const completionMessage = silentNoop
+      ? "Update process exited without reporting pipeline startup; no update steps were confirmed. Reopen the dashboard with the current launcher and retry."
+      : code === 0
       ? job.result === "saved"
-        ? `${outputProduct === "jet" ? "Jet" : "Diesel"} weekly call outputs were saved to weekly_call_ouputs/outputs with the latest actual-week archive, individual images, and PowerPoint-ready slide.`
+        ? `${outputProduct === "jet" ? "Jet" : "Diesel"} weekly table image was saved to weekly_call_ouputs/outputs in the latest actual-week archive.`
         : job.result === null
           ? "Refresh completed and the workbooks were rebuilt, but the source change comparison was unavailable."
           : hasWarnings
@@ -450,7 +488,7 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
               ? "Refresh completed; new dashboard source data was loaded and the workbooks were rebuilt."
               : "Refresh completed; upstream source data was unchanged, and the workbooks were rebuilt anyway."
       : `Update failed (exit code ${code ?? "n/a"}${signal ? `, signal ${signal}` : ""}).`;
-    appendJobLine(job, code === 0 ? "stdout" : "stderr", completionMessage);
+    appendJobLine(job, silentNoop || code !== 0 ? "stderr" : "stdout", completionMessage);
     currentProcess = null;
     releaseRunnerLock(lock);
   });

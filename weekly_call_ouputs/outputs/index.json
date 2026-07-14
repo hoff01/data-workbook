@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "updated_at": "2026-07-13T18:57:44-04:00",
+  "schema_version": 3,
+  "updated_at": "2026-07-13T20:22:07-04:00",
   "weeks": [
     {
       "actual_week_ending": "2026-07-03",
@@ -8,8 +8,8 @@
       "folder": "2026-07-03",
       "weekly_json": "diesel_weekly_stats.json",
       "manifest": "diesel_manifest.json",
-      "slide": "diesel_weekly_stats_slide.png",
-      "generated_at": "2026-07-13T18:57:44-04:00"
+      "table_image": "diesel_weekly_balance_table.png",
+      "generated_at": "2026-07-13T20:22:02-04:00"
     },
     {
       "actual_week_ending": "2026-07-03",
@@ -17,8 +17,8 @@
       "folder": "2026-07-03",
       "weekly_json": "jet_weekly_stats.json",
       "manifest": "jet_manifest.json",
-      "slide": "jet_weekly_stats_slide.png",
-      "generated_at": "2026-07-13T18:55:38-04:00"
+      "table_image": "jet_weekly_balance_table.png",
+      "generated_at": "2026-07-13T20:22:06-04:00"
     }
   ]
 }
