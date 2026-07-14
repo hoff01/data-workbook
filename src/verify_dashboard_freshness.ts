@@ -307,6 +307,7 @@ function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig
   assertIncludes(`${config.key} crude table distinguishes mobile and desktop windows`, indexHtml, "const actualLookback = mobile ? 12 : 104;");
   assertIncludes(`${config.key} desktop weekly crude window keeps full forecast horizon`, indexHtml, "return mobile ? allPeriods.slice(start, Math.min(allPeriods.length, start + 64)) : allPeriods.slice(start);");
   assertIncludes(`${config.key} mobile crude window tells users exports keep full history`, indexHtml, "period columns; exports keep full history");
+  assertIncludes(`${config.key} crude table retains its visible enclosure`, indexHtml, "border:2px solid #5f6d80;border-radius:9px;box-shadow:inset 0 0 0 1px #dce3ec,0 8px 20px rgba(15,23,42,.12)");
 }
 
 function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConfig): void {
@@ -323,6 +324,8 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} balance loads reference context before rendering crude-derived rows`, indexHtml, "if (needsBalanceContext || sheet === 'reference' || sheet === 'outages' || sheet === 'crude') await ensureReferenceData();");
   assertIncludes(`${config.key} frequency switches use shared data loader`, indexHtml, "try { await ensureDataForState({...state,frequency:nextFrequency}); }");
   assertIncludes(`${config.key} refresh button starts the forced full upstream data pull`, indexHtml, "document.getElementById('refreshBtn').addEventListener('click', () => { startDashboardUpdate('all'); });");
+  assertIncludes(`${config.key} refresh controls show an immediate durable starting state`, indexHtml, "Connecting to the local runner and starting the forced '+updateGroupMeta(group).label+' data pull");
+  assertIncludes(`${config.key} refresh control failures stay visible in the status panel`, indexHtml, "lastUpdateJob = {...startingJob,status:'failed'");
   assertIncludes(`${config.key} changed-data update status is explicit`, indexHtml, "Updated — new data loaded");
   assertIncludes(`${config.key} unchanged-data refresh status is explicit`, indexHtml, "Refreshed — data unchanged");
   const productLabel = config.key === "jet" ? "Jet" : "Diesel";

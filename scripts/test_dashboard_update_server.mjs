@@ -119,6 +119,26 @@ try {
   assert.equal(repeatedJob.result, "current");
   assert.match(repeatedJob.lines.join("\n"), /source data was unchanged, and the workbooks were rebuilt anyway/);
 
+  const routedGroups = ["weekly", "monthly", "other", "power-dfo"];
+  const routedJobIds = new Set([job.id, repeatedJob.id]);
+  for (const group of routedGroups) {
+    const routed = await fetchJson(`${baseUrl}/api/update/start`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ group, force: true }),
+    });
+    assert.equal(routed.response.status, 202, `${group} refresh must start`);
+    assert.equal(routed.body.job.group, group);
+    assert.equal(routed.body.job.status, "running");
+    assert.equal(routedJobIds.has(routed.body.job.id), false, `${group} refresh must get a new job id`);
+    routedJobIds.add(routed.body.job.id);
+    const routedJob = await waitForTerminalJob(baseUrl);
+    assert.equal(routedJob.group, group);
+    assert.equal(routedJob.status, "succeeded");
+    assert.equal(routedJob.result, "current");
+    assert.match(routedJob.lines.join("\n"), /source data was unchanged, and the workbooks were rebuilt anyway/);
+  }
+
   const missingWeeklyOutputProduct = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",
     headers: { "content-type": "application/json" },
