@@ -48,6 +48,7 @@ requireText("src/open_dashboard.ts", "EXPECTED_SERVER_BUILD_ID", "stale local se
 requireText("src/dashboard_update_server.ts", "const tsxCli = process.env.US_BALANCES_TSX_CLI;", "portable update-job invocation");
 requireText("src/dashboard_update_server.ts", "source data was unchanged, and the workbooks were rebuilt anyway", "forced refresh rebuilds unchanged source data");
 requireText("scripts/test_dashboard_update_server.mjs", "a repeated forced refresh must start a new job", "repeated unchanged refresh contract test");
+requireText("src/build_balance_dashboards.ts", "document.getElementById('refreshBtn').addEventListener('click', () => { startDashboardUpdate('all'); });", "top dashboard refresh starts the forced full upstream data pull");
 requireText("src/dashboard_update_server.ts", "new dashboard source data was loaded", "truthful changed-data result");
 requireText("src/update_data_fingerprint.ts", "VOLATILE_CSV_COLUMNS", "volatile metadata is excluded from change detection");
 requireText("scripts/test_update_data_fingerprint.ts", "volatile-only refresh must remain current", "truthful current-data regression test");
