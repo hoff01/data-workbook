@@ -127,10 +127,11 @@ jobs:
               throw "Windows Python unit tests failed."
             }
 
-            $sitePackages = (& $python -c "import site; print(site.getsitepackages()[0])").Trim()
-            Get-ChildItem $sitePackages -Directory |
-              Where-Object { $_.Name -eq "pip" } |
-              Remove-Item -Recurse -Force
+            $pipPackagePath = (& $python -c "import pip; print(pip.__path__[0])").Trim()
+            if (!(Test-Path -LiteralPath $pipPackagePath)) {
+              throw "The pip package directory could not be located for the damaged-environment fixture."
+            }
+            Remove-Item -LiteralPath $pipPackagePath -Recurse -Force
             $missingPipExitCode = 0
             try {
               & $python -m pip --version 2>$null | Out-Null
