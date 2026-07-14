@@ -11,7 +11,8 @@ if not exist "%~dp0package.json" goto :incomplete_checkout
 if not exist "%~dp0src\open_dashboard.ts" goto :incomplete_checkout
 
 echo [US Balances] Starting the local dashboard...
-echo [US Balances] First launch prepares Node and Python.
+echo [US Balances] First launch prepares Node and Python and can take several minutes.
+echo [US Balances] The launcher reports each setup stage so normal work does not look stuck.
 echo [US Balances] Data refreshes run only when you click a dashboard refresh button.
 echo.
 
@@ -19,7 +20,7 @@ echo.
 set "EXIT_CODE=%ERRORLEVEL%"
 if not "%EXIT_CODE%"=="0" (
   echo.
-  echo [US Balances] The dashboard did not start. Review the error above.
+  echo [US Balances] Dashboard launcher setup did not complete. Review the error above.
   echo [US Balances] Make sure the ZIP is fully extracted and Node.js LTS is installed.
   if /I not "%CI%"=="true" pause
 )

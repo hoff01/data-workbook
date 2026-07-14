@@ -66,17 +66,72 @@ function Invoke-SystemPython {
     Assert-NativeSuccess "Python"
 }
 
+function Ensure-PythonPip {
+    $probeExitCode = 1
+    try {
+        & $Python -m pip --version *> $null
+        $probeExitCode = $LASTEXITCODE
+    }
+    catch {
+        $probeExitCode = 1
+    }
+    if ($probeExitCode -eq 0) {
+        return
+    }
+    Remove-Item -Force (Join-Path $PythonRoot ".requirements.sha256") -ErrorAction SilentlyContinue
+    Remove-Item -Force (Join-Path $PythonRoot ".refresh-ready") -ErrorAction SilentlyContinue
+    Write-Host "[Kpler] pip is missing from the local environment; restoring it with Python -m ensurepip"
+    $ensurePipExitCode = 1
+    try {
+        & $Python -m ensurepip --upgrade
+        $ensurePipExitCode = $LASTEXITCODE
+    }
+    catch {
+        $ensurePipExitCode = 1
+    }
+    $pipAvailable = $false
+    if ($ensurePipExitCode -eq 0) {
+        try {
+            & $Python -m pip --version *> $null
+            $pipAvailable = $LASTEXITCODE -eq 0
+        }
+        catch {
+            $pipAvailable = $false
+        }
+    }
+    if (!$pipAvailable) {
+        Write-Host "[Kpler] The shared Python environment is incomplete; rebuilding the managed virtual environment"
+        Remove-Item -Recurse -Force $Venv
+        Remove-Item -Force (Join-Path $PythonRoot ".requirements.sha256") -ErrorAction SilentlyContinue
+        Remove-Item -Force (Join-Path $PythonRoot ".refresh-ready") -ErrorAction SilentlyContinue
+        Invoke-SystemPython @("-m", "venv", $Venv)
+    }
+    & $Python -m pip --version
+    Assert-NativeSuccess "Python -m pip validation"
+}
+
 function Setup-Environment {
     Set-RuntimeEnvironment
+    $venvWasCreated = $false
     if (!(Test-Path $PythonRoot)) {
         New-Item -ItemType Directory -Force -Path $PythonRoot | Out-Null
+    }
+    if ($Force -or !(Test-Path $Python)) {
+        Remove-Item -Force (Join-Path $PythonRoot ".requirements.sha256") -ErrorAction SilentlyContinue
+        Remove-Item -Force (Join-Path $PythonRoot ".refresh-ready") -ErrorAction SilentlyContinue
     }
     if ($Force -and (Test-Path $Venv)) {
         Remove-Item -Recurse -Force $Venv
     }
     if (!(Test-Path $Python)) {
         Invoke-SystemPython @("-m", "venv", $Venv)
+        $venvWasCreated = $true
     }
+    if ($venvWasCreated) {
+        Remove-Item -Force (Join-Path $PythonRoot ".requirements.sha256") -ErrorAction SilentlyContinue
+        Remove-Item -Force (Join-Path $PythonRoot ".refresh-ready") -ErrorAction SilentlyContinue
+    }
+    Ensure-PythonPip
     & $Python -m pip install --upgrade pip
     Assert-NativeSuccess "pip upgrade"
     & $Python -m pip install -r (Join-Path $Root "requirements.txt")

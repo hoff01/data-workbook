@@ -24,10 +24,28 @@ fi
 PYTHON="$PYTHON_ROOT/.venv/bin/python"
 PYTHON_STAMP="$PYTHON_ROOT/.requirements.sha256"
 PYTHON_HASH="$(shasum -a 256 "$SCRIPT_DIR/requirements.txt" | awk '{print $1}')"
+VENV_WAS_CREATED=0
 if [[ ! -x "$PYTHON" ]]; then
+  rm -f "$PYTHON_STAMP"
   python3 -m venv "$PYTHON_ROOT/.venv"
+  VENV_WAS_CREATED=1
 fi
-if [[ ! -f "$PYTHON_STAMP" || "$(cat "$PYTHON_STAMP")" != "$PYTHON_HASH" ]]; then
+PIP_WAS_REPAIRED=0
+if ! "$PYTHON" -m pip --version >/dev/null 2>&1; then
+  rm -f "$PYTHON_STAMP"
+  echo "[US Balances] Python setup: pip is missing; restoring it with Python -m ensurepip"
+  "$PYTHON" -m ensurepip --upgrade || true
+  if ! "$PYTHON" -m pip --version; then
+    echo "[US Balances] Python setup: the local environment is incomplete; rebuilding the managed virtual environment"
+    rm -rf "$PYTHON_ROOT/.venv"
+    python3 -m venv "$PYTHON_ROOT/.venv"
+    VENV_WAS_CREATED=1
+    "$PYTHON" -m pip --version
+  fi
+  PIP_WAS_REPAIRED=1
+fi
+if [[ "$VENV_WAS_CREATED" -eq 1 || "$PIP_WAS_REPAIRED" -eq 1 || ! -f "$PYTHON_STAMP" || "$(cat "$PYTHON_STAMP")" != "$PYTHON_HASH" ]]; then
+  rm -f "$PYTHON_STAMP"
   "$PYTHON" -m pip install --upgrade pip
   "$PYTHON" -m pip install -r "$SCRIPT_DIR/requirements.txt"
   printf '%s\n' "$PYTHON_HASH" > "$PYTHON_STAMP"

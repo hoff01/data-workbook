@@ -20,6 +20,16 @@ setup() {
   if [[ ! -x "$PYTHON" ]]; then
     python3 -m venv "$VENV"
   fi
+  if ! "$PYTHON" -m pip --version >/dev/null 2>&1; then
+    echo "[Kpler] pip is missing; restoring it with Python -m ensurepip"
+    "$PYTHON" -m ensurepip --upgrade || true
+    if ! "$PYTHON" -m pip --version; then
+      echo "[Kpler] The local environment is incomplete; rebuilding the managed virtual environment"
+      rm -rf "$VENV"
+      python3 -m venv "$VENV"
+      "$PYTHON" -m pip --version
+    fi
+  fi
   "$PYTHON" -m pip install --upgrade pip
   "$PYTHON" -m pip install -r "$KPLER_DIR/requirements.txt"
 }

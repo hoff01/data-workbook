@@ -31,6 +31,8 @@ The runner serves the dashboard over plain local HTTP at `http://127.0.0.1:8787`
    ```
 5. Double-click `Open_Balance_Dashboards.bat` from the fully extracted repo folder. The launcher prepares Node, starts the current local server, opens the exact local URL with the Windows default-browser shell, and creates the Python environment on first run. It does not refresh data automatically. Once the page reports that refresh tools are ready, use a dashboard refresh button; the page then shows live progress and whether new source data was loaded or the source data was unchanged while the workbooks were still rebuilt.
 
+The first Python setup installs several large packages and can take a few minutes. The launcher now reports virtual-environment, pip, dependency-install, and validation stages while it works. If a previous setup left a virtual environment without pip, the launcher repairs it through that environment's `python -m ensurepip` and continues using `python -m pip`; no launcher calls `pip`, `pip3`, or `pip.exe` directly. npm is intentionally permitted to run only the exact reviewed `esbuild@0.28.1` install script required by `tsx`; do not replace that pinned approval with a blanket allow-all setting.
+
 ### Add The Kpler API Key
 
 1. Double-click `Configure_Kpler_Auth.bat` in the repo root.

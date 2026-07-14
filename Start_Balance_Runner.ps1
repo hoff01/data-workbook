@@ -57,7 +57,8 @@ function Get-CombinedHash {
     foreach ($Path in $Paths) {
         if (Test-Path $Path) {
             $hash = Get-FileSha256 $Path
-            $text += "$Path=$hash`n"
+            $name = [System.IO.Path]::GetFileName($Path)
+            $text += "$name=$hash`n"
         }
     }
     if (!$text) {
@@ -106,6 +107,52 @@ function Invoke-SystemPython {
     }
 }
 
+function Test-PythonPip {
+    param([string]$PythonPath)
+    $probeExitCode = 1
+    try {
+        & $PythonPath -m pip --version *> $null
+        $probeExitCode = $LASTEXITCODE
+    }
+    catch {
+        $probeExitCode = 1
+    }
+    return $probeExitCode -eq 0
+}
+
+function Ensure-PythonPip {
+    param(
+        [string]$PythonPath,
+        [string]$VenvPath,
+        [string]$StampPath
+    )
+    if (Test-PythonPip -PythonPath $PythonPath) {
+        return $false
+    }
+
+    Write-Host "[US Balances] Python setup: pip is missing from the local environment; restoring it with Python -m ensurepip"
+    Remove-Item -Force $StampPath -ErrorAction SilentlyContinue
+    $ensurePipExitCode = 1
+    try {
+        & $PythonPath -m ensurepip --upgrade | Out-Host
+        $ensurePipExitCode = $LASTEXITCODE
+    }
+    catch {
+        $ensurePipExitCode = 1
+    }
+    if ($ensurePipExitCode -ne 0 -or !(Test-PythonPip -PythonPath $PythonPath)) {
+        Write-Host "[US Balances] Python setup: the local environment is incomplete; rebuilding the managed virtual environment"
+        Remove-Item -Recurse -Force $VenvPath
+        Invoke-SystemPython @("-m", "venv", $VenvPath)
+    }
+    if (!(Test-PythonPip -PythonPath $PythonPath)) {
+        throw "Python -m pip is unavailable after automatic repair. Install or repair Python 3.11+ and retry."
+    }
+    & $PythonPath -m pip --version | Out-Host
+    Write-Host "[US Balances] Python setup: pip restored successfully"
+    return $true
+}
+
 function Ensure-NodeRuntime {
     $node = Get-Command node.exe -ErrorAction SilentlyContinue
     $npm = Get-Command npm.cmd -ErrorAction SilentlyContinue
@@ -124,6 +171,7 @@ function Ensure-NodeRuntime {
     $tsxCli = Join-Path $NodeRoot "node_modules\tsx\dist\cli.mjs"
     $hash = Get-CombinedHash @((Join-Path $SharedRoot "package.json"), $sharedLock)
     if ($ForceSetup -or !(Test-Path $tsx) -or (Read-Stamp $NodeStamp) -ne $hash) {
+        Write-Host "[US Balances] Node setup: installing reviewed local dependencies"
         Push-Location $NodeRoot
         try {
             if (Test-Path (Join-Path $NodeRoot "package-lock.json")) {
@@ -140,6 +188,7 @@ function Ensure-NodeRuntime {
             Pop-Location
         }
         Set-Content -Path $NodeStamp -Value $hash -Encoding UTF8
+        Write-Host "[US Balances] Node setup: dependencies installed"
     }
     if (!(Test-Path $tsx) -or !(Test-Path $tsxCli)) {
         throw "Local tsx runtime was not created under $NodeRoot\node_modules"
@@ -148,28 +197,55 @@ function Ensure-NodeRuntime {
 }
 
 function Ensure-PythonRuntime {
+    Write-Host "[US Balances] Python setup: resolving Python 3"
     New-Directory $PythonRoot
     $venv = Join-Path $PythonRoot ".venv"
     $python = Join-Path $venv "Scripts\python.exe"
     $requirements = Join-Path $SharedRoot "requirements.txt"
     $hash = Get-CombinedHash @($requirements)
+    $venvWasCreated = $false
 
+    if ($ForceSetup -or !(Test-Path $python)) {
+        Remove-Item -Force $PythonStamp -ErrorAction SilentlyContinue
+    }
     if ($ForceSetup -and (Test-Path $venv)) {
+        Write-Host "[US Balances] Python setup: removing the previous local environment"
         Remove-Item -Recurse -Force $venv
     }
     if (!(Test-Path $python)) {
+        Write-Host "[US Balances] Python setup: creating the local virtual environment (this can take about a minute)"
         Invoke-SystemPython @("-m", "venv", $venv)
+        $venvWasCreated = $true
+        Write-Host "[US Balances] Python setup: local virtual environment created"
     }
-    if ($ForceSetup -or (Read-Stamp $PythonStamp) -ne $hash) {
-        & $python -m pip install --upgrade pip | Out-Host
+    $pipWasRepaired = Ensure-PythonPip -PythonPath $python -VenvPath $venv -StampPath $PythonStamp
+    if ($ForceSetup -or $venvWasCreated -or $pipWasRepaired -or (Read-Stamp $PythonStamp) -ne $hash) {
+        Remove-Item -Force $PythonStamp -ErrorAction SilentlyContinue
+        $pipOptions = @("--disable-pip-version-check", "--no-input", "--timeout", "60", "--retries", "2")
+        Write-Host "[US Balances] Python setup: upgrading pip"
+        & $python -m pip @pipOptions install --upgrade pip | Out-Host
         if ($LASTEXITCODE -ne 0) {
             throw "pip upgrade failed with exit code $LASTEXITCODE."
         }
-        & $python -m pip install -r $requirements | Out-Host
+        Write-Host "[US Balances] Python setup: installing refresh dependencies (large wheels can take several minutes)"
+        & $python -m pip @pipOptions install -r $requirements | Out-Host
         if ($LASTEXITCODE -ne 0) {
             throw "Python dependency setup failed with exit code $LASTEXITCODE."
         }
+        Write-Host "[US Balances] Python setup: validating installed dependencies"
+        & $python -m pip check | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            throw "Python dependency validation failed with exit code $LASTEXITCODE."
+        }
+        & $python -c "import matplotlib, polars, pyarrow, requests, yaml"
+        if ($LASTEXITCODE -ne 0) {
+            throw "Python refresh dependency import validation failed with exit code $LASTEXITCODE."
+        }
         Set-Content -Path $PythonStamp -Value $hash -Encoding UTF8
+        Write-Host "[US Balances] Python setup: refresh dependencies installed and validated"
+    }
+    else {
+        Write-Host "[US Balances] Python setup: existing refresh dependencies are current"
     }
     return $python
 }
@@ -218,6 +294,7 @@ if (!$SkipPythonSetup) {
 }
 Write-Host "[US Balances] Preparing the local Node runtime under $NodeRoot"
 $env:US_BALANCES_TSX_COMMAND = Ensure-NodeRuntime
+try { $Host.UI.RawUI.WindowTitle = "US Balances Dashboard" } catch {}
 $env:US_BALANCES_NODE_COMMAND = (Get-Command node.exe -ErrorAction Stop).Source
 $env:US_BALANCES_TSX_CLI = Join-Path $NodeRoot "node_modules\tsx\dist\cli.mjs"
 if (!$SkipPythonSetup -or (Test-Path $LocalPython)) {
@@ -261,9 +338,16 @@ else {
 
 if (!$SkipPythonSetup) {
     Write-Host "[US Balances] The dashboard is available. Preparing Python refresh tools under $PythonRoot"
-    $env:US_BALANCES_PYTHON = Ensure-PythonRuntime
-    Set-Content -Path $RefreshReadyFile -Value (Get-Date).ToUniversalTime().ToString("o") -Encoding UTF8
-    Write-Host "[US Balances] Dashboard and refresh tools are ready"
+    try {
+        $env:US_BALANCES_PYTHON = Ensure-PythonRuntime
+        Set-Content -Path $RefreshReadyFile -Value (Get-Date).ToUniversalTime().ToString("o") -Encoding UTF8
+        Write-Host "[US Balances] Dashboard and refresh tools are ready"
+    }
+    catch {
+        Remove-Item -Force $RefreshReadyFile -ErrorAction SilentlyContinue
+        Write-Host "[US Balances] Python refresh-tool setup failed. Review the stage output above, check network access, and retry. If the local environment is damaged, rerun with -ForceSetup."
+        throw
+    }
 }
 elseif (Test-Path $LocalPython) {
     $env:US_BALANCES_PYTHON = $LocalPython
