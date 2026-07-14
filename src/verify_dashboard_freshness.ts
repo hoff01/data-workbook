@@ -303,6 +303,7 @@ function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig
   assertIncludes(`${config.key} mobile workbook disables desktop compositor transforms`, indexHtml, ".topbar,.crudeViewportLock,.chartGrid{will-change:auto;transform:none!important}");
   assertIncludes(`${config.key} desktop crude table stays inside its bordered scroll container`, indexHtml, "#crudeRunsTableWrap{display:block;min-width:0;width:100%;max-width:100%;max-height:72vh;overflow:auto;vertical-align:top}");
   assertIncludes(`${config.key} crude table disables page-wide horizontal scrolling`, indexHtml, "function tableUsesPageWideScroll(){ return false; }");
+  assertIncludes(`${config.key} crude sticky header excludes external controls inside its scroll container`, indexHtml, "const controlOffset = tableUsesPageWideScroll(wrap) && controlsSticky ? Math.ceil(controls.getBoundingClientRect().height) : 0;");
   assertIncludes(`${config.key} mobile workbook disables page-wide viewport tracking`, indexHtml, "function viewportTrackingActive(){ return (state.sheet === 'charts' || state.sheet === 'crude') && !matchMedia('(max-width: 760px)').matches; }");
   assertIncludes(`${config.key} mobile crude table limits its rasterized period window`, indexHtml, "function crudeTableDisplayPeriods(allPeriods=crudeDisplayPeriods())");
   assertIncludes(`${config.key} crude table distinguishes mobile and desktop windows`, indexHtml, "const actualLookback = mobile ? 12 : 104;");
