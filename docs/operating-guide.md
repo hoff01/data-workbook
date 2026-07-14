@@ -20,7 +20,7 @@ The runner serves the dashboard over plain local HTTP at `http://127.0.0.1:8787`
    node --version
    npm --version
    ```
-3. Python 3.11 or newer is required because a normal launcher click performs a full refresh after opening the dashboard. Confirm:
+3. Python 3.11 or newer is required for button-triggered data refreshes. Confirm:
    ```powershell
    py -3 --version
    ```
@@ -29,7 +29,7 @@ The runner serves the dashboard over plain local HTTP at `http://127.0.0.1:8787`
    git clone https://github.com/hoff01/data-workbook.git US_Balances
    cd US_Balances
    ```
-5. Double-click `Open_Balance_Dashboards.bat` from the fully extracted repo folder. The launcher prepares Node, starts the current local server, and opens the exact local URL with the Windows default-browser shell. On first run it then creates the Python environment and automatically starts a forced `All` refresh. The page shows setup readiness, live progress, and whether new source data was loaded or the source data was unchanged while the workbooks were still rebuilt.
+5. Double-click `Open_Balance_Dashboards.bat` from the fully extracted repo folder. The launcher prepares Node, starts the current local server, opens the exact local URL with the Windows default-browser shell, and creates the Python environment on first run. It does not refresh data automatically. Once the page reports that refresh tools are ready, use a dashboard refresh button; the page then shows live progress and whether new source data was loaded or the source data was unchanged while the workbooks were still rebuilt.
 
 ### Add The Kpler API Key
 
@@ -82,7 +82,7 @@ On first run, `Start_Balance_Runner.ps1` creates local runtime folders under:
 %USERPROFILE%\US_Balances\
 ```
 
-Those local folders hold Node packages, the Python virtual environment, pip/npm caches, Python bytecode, and matplotlib caches. The launcher prepares the required Node runtime, opens the dashboard, finishes the Python refresh environment, and starts the full refresh. The shared repo remains the source/output folder, while user-specific runtime files stay out of the shared drive.
+Those local folders hold Node packages, the Python virtual environment, pip/npm caches, Python bytecode, and matplotlib caches. The launcher prepares the required Node runtime, opens the dashboard, and finishes the Python refresh environment. No data pull starts until a dashboard refresh button is clicked. The shared repo remains the source/output folder, while user-specific runtime files stay out of the shared drive.
 
 ## Certificate Error Avoidance
 
@@ -101,16 +101,16 @@ If a browser shows a certificate warning, the URL is wrong for this local runner
    ```powershell
    git pull origin main
    ```
-2. Open the dashboard and start the forced full refresh:
+2. Open the dashboard and prepare the local refresh tools:
    ```powershell
    .\Open_Balance_Dashboards.bat
    ```
-3. Watch the landing page or any open workbook for live refresh status. Use the buttons only when an additional targeted refresh is needed:
+3. Once the dashboard reports that refresh tools are ready, start the refresh you need from a button. No refresh starts automatically:
    - `Weekly` for weekly EIA updates
    - `Monthly` for monthly EIA updates
    - `Power DFO` for Northeast diesel power-generation context
    - `Other` for supporting exports/context
-   - `All` for another full pipeline run
+   - `All`, `Complete`, or the workbook's top `Refresh dashboard` button for a forced full pipeline run
 4. To create the weekly table images, open each workbook's `Reference` tab and
    select its product-specific save button. Wait for `Saved — Diesel weekly
    table image ready` and `Saved — Jet weekly table image ready`; both dated
@@ -205,9 +205,9 @@ The launcher deliberately bypasses any inherited `DASHBOARD_OPEN_BROWSER=0` valu
 
 The final result distinguishes `Updated — new data loaded` from `Refreshed — data unchanged`; it never uses a generic success message to imply that a source published a newer observation. Both outcomes rebuild and reload the workbooks. An explicit operator skip is labeled with warnings in amber. Any Kpler or other required-source failure is labeled `Failed`, reports a nonzero exit code, remains visible in red, and does not reload the workbook as though new data were available.
 
-When a launcher or dashboard refresh completes, already-open Diesel and Jet workbook tabs automatically reload the newly built dashboard files. If the source published no newer observation, the result says `Refreshed — data unchanged`, the workbooks are still rebuilt and reloaded, and the displayed latest source date correctly remains unchanged. Every click of the top `Refresh dashboard` button starts the forced `All` pipeline: it repulls all configured upstream sources, including Kpler when its auth key is configured, rebuilds both workbooks even when the returned data is unchanged, and reloads the packaged dashboard only after that run completes. A client-only rerender or page reload is not treated as a refresh.
+When a dashboard-button refresh completes, already-open Diesel and Jet workbook tabs automatically reload the newly built dashboard files. If the source published no newer observation, the result says `Refreshed — data unchanged`, the workbooks are still rebuilt and reloaded, and the displayed latest source date correctly remains unchanged. Every click of the top `Refresh dashboard` button starts the forced `All` pipeline: it repulls all configured upstream sources, including Kpler when its auth key is configured, rebuilds both workbooks even when the returned data is unchanged, and reloads the packaged dashboard only after that run completes. A client-only rerender or page reload is not treated as a refresh.
 
-For an intentional open-only diagnostic run, use `Start_Balance_Runner.ps1 -NoRefresh`. Normal `.bat` clicks do not use this escape hatch.
+All launcher runs are open-only with respect to data. Use the workbook or landing-page buttons when a refresh is intentionally requested.
 
 ### Black Node Window Or Zero-Second Refresh
 

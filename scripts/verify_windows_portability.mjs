@@ -32,13 +32,13 @@ requireText("Start_Balance_Runner.ps1", "$env:US_BALANCES_TSX_CLI", "Node CLI ha
 requireText("Start_Balance_Runner.ps1", "$env:US_BALANCES_NODE_COMMAND", "Node executable handoff");
 requireText("Start_Balance_Runner.ps1", "$startInfo.UseShellExecute = $true", "Windows default-browser shell launch");
 requireText("Start_Balance_Runner.ps1", "$env:US_BALANCES_BROWSER_OPEN_PROBE", "testable browser-open path");
-requireText("Start_Balance_Runner.ps1", "$env:US_BALANCES_REFRESH_START_PROBE", "testable automatic-refresh path");
+rejectText("Start_Balance_Runner.ps1", "US_BALANCES_REFRESH_START_PROBE", "launcher must not start refresh jobs");
 requireText("Start_Balance_Runner.ps1", '$openArgs += "--no-open"', "single browser owner on Windows");
 requireText("Start_Balance_Runner.ps1", "The dashboard is available. Preparing Python refresh tools", "browser-first Python setup");
 requireText("Start_Balance_Runner.ps1", "$env:US_BALANCES_REFRESH_READY_FILE = $RefreshReadyFile", "first-run refresh readiness gate");
-requireText("Start_Balance_Runner.ps1", "Start-DashboardRefresh $dashboardUrl", "normal click automatically starts a refresh");
-requireText("Start_Balance_Runner.ps1", 'group = "all"; force = $true', "normal click forces the complete update group");
-requireText("Start_Balance_Runner.ps1", "[switch]$NoRefresh", "explicit open-only escape hatch");
+rejectText("Start_Balance_Runner.ps1", "Start-DashboardRefresh", "refreshes must be started only by dashboard buttons");
+rejectText("Start_Balance_Runner.ps1", "[switch]$NoRefresh", "open-only launcher no longer needs a refresh escape hatch");
+requireText("Start_Balance_Runner.ps1", "No data refresh has started; use a dashboard refresh button", "button-only refresh handoff");
 requireText("Start_Balance_Runner.ps1", "$cmd = @(Resolve-SystemPython)", "single-command Python resolution remains an array");
 requireText("Start_Balance_Runner.ps1", "[System.IO.File]::OpenRead($Path)", "PowerShell-module-independent file hashing");
 rejectText("Start_Balance_Runner.ps1", "Get-FileHash", "launcher must not depend on inherited PowerShell module paths");
@@ -62,7 +62,8 @@ requireText("src/dashboard_update_server.ts", "new dashboard source data was loa
 requireText("src/update_data_fingerprint.ts", "VOLATILE_CSV_COLUMNS", "volatile metadata is excluded from change detection");
 requireText("scripts/test_update_data_fingerprint.ts", "volatile-only refresh must remain current", "truthful current-data regression test");
 requireText("src/dashboard_update_server.ts", "refreshReady: refreshToolsReady()", "server readiness reporting");
-requireText("src/dashboard_update_server.ts", "First-run refresh setup is still finishing", "early-click readiness protection");
+requireText("src/dashboard_update_server.ts", "Refresh tools are still being prepared", "early-click readiness protection");
+rejectText("src/dashboard_update_server.ts", "DASHBOARD_POWER_DFO_STARTUP_REFRESH", "server startup refresh path removed");
 requireText("src/dashboard_update_server.ts", 'process.env.US_BALANCES_PYTHON', "weekly call outputs reuse the installed local Python runtime");
 requireText("src/dashboard_update_server.ts", '"weekly-call-outputs"', "weekly call output server action");
 requireText("weekly_call_ouputs/generate_weekly_images.py", 'env.get("US_BALANCES_NODE_COMMAND"', "weekly output builder reuses the local Node runtime");
@@ -92,7 +93,7 @@ requireText(".github/workflows/windows-production.yml", "actions/setup-node@v6",
 requireText(".github/workflows/windows-production.yml", "actions/setup-python@v6", "Node 24 setup-python action");
 requireText(".github/workflows/windows-production.yml", "Open_Diesel_Dashboard.bat -Port", "native Windows batch launcher and Python refresh setup smoke test");
 requireText(".github/workflows/windows-production.yml", "US_BALANCES_BROWSER_OPEN_PROBE", "native Windows browser-open probe");
-requireText(".github/workflows/windows-production.yml", "US_BALANCES_REFRESH_START_PROBE", "native Windows automatic-refresh probe");
+rejectText(".github/workflows/windows-production.yml", "US_BALANCES_REFRESH_START_PROBE", "native Windows launcher must remain refresh-idle");
 requireText(".github/workflows/windows-production.yml", '$env:DASHBOARD_OPEN_BROWSER = "0"', "inherited browser-disable regression probe");
 requireText(".github/workflows/windows-production.yml", "Kpler\\run.ps1 -Preflight", "native Windows Kpler preflight");
 requireText("docs/operating-guide.md", "https://github.com/hoff01/data-workbook.git", "canonical Windows clone URL");

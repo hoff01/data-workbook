@@ -22,6 +22,7 @@ import { updateDataFingerprint, type UpdateGroup } from "./update_data_fingerpri
 
 type JobStatus = "running" | "succeeded" | "partial" | "failed";
 type DashboardJobGroup = UpdateGroup | "weekly-call-outputs";
+type RunnerLockGroup = DashboardJobGroup | "settings-rebuild";
 type UpdateResult = "updated" | "current" | "saved";
 type ProductKey = "diesel" | "jet";
 
@@ -113,6 +114,9 @@ const pythonCommand = process.env.US_BALANCES_PYTHON || (process.platform === "w
 const tsxCommand = process.env.US_BALANCES_TSX_COMMAND;
 const nodeCommand = process.env.US_BALANCES_NODE_COMMAND || process.execPath;
 const tsxCli = process.env.US_BALANCES_TSX_CLI;
+const settingsRebuildScript = process.env.US_BALANCES_SETTINGS_REBUILD_SCRIPT
+  ? resolve(ROOT, process.env.US_BALANCES_SETTINGS_REBUILD_SCRIPT)
+  : "";
 const weeklyCallOutputScript = process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT
   ? resolve(process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT)
   : join(ROOT, "weekly_call_ouputs", "generate_weekly_images.py");
@@ -125,7 +129,9 @@ const validGroups = new Set<DashboardJobGroup>([
   "weekly-call-outputs",
 ]);
 const maxLines = 600;
-const settingsPath = join(ROOT, "balance_dashboard_settings.json");
+const settingsPath = process.env.US_BALANCES_SETTINGS_PATH
+  ? resolve(ROOT, process.env.US_BALANCES_SETTINGS_PATH)
+  : join(ROOT, "balance_dashboard_settings.json");
 const runnerLockPath = join(ROOT, "logs", "update_runner.lock");
 const runnerLockStaleMs = 12 * 60 * 60 * 1000;
 const refreshReadyFile = String(process.env.US_BALANCES_REFRESH_READY_FILE || "").trim();
@@ -133,6 +139,7 @@ const refreshReadyFile = String(process.env.US_BALANCES_REFRESH_READY_FILE || ""
 let currentProcess: ReturnType<typeof spawn> | null = null;
 let currentJob: Job | null = null;
 let currentLock: RunnerLock | null = null;
+let pendingSettingsRebuild: { previous: DashboardSettings; startedAt: string } | null = null;
 
 function refreshToolsReady(): boolean {
   return !refreshReadyFile || existsSync(refreshReadyFile);
@@ -169,6 +176,10 @@ function settingsRevision(settings: DashboardSettings): string {
 
 function publicSettings(settings: DashboardSettings): DashboardSettingsResponse {
   return { ...settings, revision: settingsRevision(settings) };
+}
+
+function committedSettings(): DashboardSettings {
+  return pendingSettingsRebuild?.previous ?? readSettings();
 }
 
 function normalizeForecastEnd(value: unknown): string {
@@ -256,14 +267,15 @@ const buttons = Array.from(document.querySelectorAll('[data-run-group]'));
 const updateCompletionStorageKey = 'us-balances:update-complete';
 let pollTimer = 0;
 let refreshReady = true;
+let settingsRebuildRunning = false;
 function setStatus(job){
   const state = job?.status || 'idle';
   const result = job?.result;
   const productLabel = job?.product === 'jet' ? 'Jet' : job?.product === 'diesel' ? 'Diesel' : '';
-  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly table image saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' refreshed — data unchanged' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' refreshed with warnings — data unchanged' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly table image' : job.group + ' refresh running';
+  statusEl.textContent = state === 'idle' && settingsRebuildRunning ? 'Rebuilding forecast horizon…' : state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly table image saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' refreshed — data unchanged' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' refreshed with warnings — data unchanged' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly table image' : job.group + ' refresh running';
   statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
-  buttons.forEach(button => button.disabled = state === 'running' || !refreshReady);
-  logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : refreshReady ? 'Refresh tools are ready. The one-click launcher starts an All refresh automatically.' : 'First-run setup is installing the local refresh tools. The launcher will start an All refresh automatically when setup finishes.';
+  buttons.forEach(button => button.disabled = state === 'running' || settingsRebuildRunning || !refreshReady);
+  logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : settingsRebuildRunning ? 'The forecast horizon is rebuilding and verifying both dashboards. Refresh buttons will unlock when it commits.' : refreshReady ? 'No refresh is running. Choose a refresh button to begin.' : 'First-run setup is installing the local refresh tools. No refresh will start automatically.';
 }
 function publishUpdateCompletion(job){
   if (!job?.id || job.result === 'saved' || !['succeeded','partial'].includes(job.status)) return;
@@ -276,6 +288,7 @@ async function refreshStatus(){
     const payload = await statusResponse.json();
     const health = await healthResponse.json();
     refreshReady = health.refreshReady !== false;
+    settingsRebuildRunning = payload.settingsRebuild === true;
     setStatus(payload.job);
     publishUpdateCompletion(payload.job);
     const delay = payload.job?.status === 'running' ? 2000 : !refreshReady || !payload.job ? 1200 : 8000;
@@ -329,7 +342,7 @@ function parseProduct(value: unknown): ProductKey | null {
   return value === "diesel" || value === "jet" ? value : null;
 }
 
-function acquireRunnerLock(group: DashboardJobGroup): RunnerLock {
+function acquireRunnerLock(group: RunnerLockGroup): RunnerLock {
   mkdirSync(dirname(runnerLockPath), { recursive: true });
   try {
     const existing = statSync(runnerLockPath);
@@ -347,6 +360,106 @@ function acquireRunnerLock(group: DashboardJobGroup): RunnerLock {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Another update runner appears to be active. Lock: ${runnerLockPath}. ${message}`);
+  }
+}
+
+type CommandInvocation = { command: string; args: string[]; label: string };
+
+function dashboardBuildInvocations(): CommandInvocation[] {
+  if (settingsRebuildScript) {
+    return [{ command: nodeCommand, args: [settingsRebuildScript], label: "test dashboard rebuild" }];
+  }
+  const buildScript = join(ROOT, "src", "build_balance_dashboards.ts");
+  const verifyScript = join(ROOT, "src", "verify_dashboard_freshness.ts");
+  if (tsxCli) {
+    return [
+      { command: nodeCommand, args: [tsxCli, buildScript], label: "dashboard build" },
+      { command: nodeCommand, args: [tsxCli, verifyScript], label: "dashboard verification" },
+    ];
+  }
+  if (tsxCommand && !(process.platform === "win32" && /\.(?:cmd|bat)$/i.test(tsxCommand))) {
+    return [
+      { command: tsxCommand, args: [buildScript], label: "dashboard build" },
+      { command: tsxCommand, args: [verifyScript], label: "dashboard verification" },
+    ];
+  }
+  return [
+    { command: npmCommand, args: ["run", "build:balances"], label: "dashboard build" },
+    { command: npmCommand, args: ["run", "verify:dashboard"], label: "dashboard verification" },
+  ];
+}
+
+async function runCommandInvocation(invocation: CommandInvocation): Promise<void> {
+  await new Promise<void>((resolveRun, rejectRun) => {
+    let output = "";
+    let settled = false;
+    const child = spawn(invocation.command, invocation.args, {
+      cwd: ROOT,
+      env: { ...process.env, FORCE_COLOR: "0" },
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    });
+    const record = (chunk: Buffer): void => {
+      output = (output + chunk.toString("utf8")).slice(-24_000);
+    };
+    child.stdout?.on("data", record);
+    child.stderr?.on("data", record);
+    child.once("error", (error) => {
+      if (settled) return;
+      settled = true;
+      rejectRun(new Error(`${invocation.label} could not start: ${error.message}`));
+    });
+    child.once("close", (code, signal) => {
+      if (settled) return;
+      settled = true;
+      if (code === 0) {
+        resolveRun();
+        return;
+      }
+      const detail = output.trim();
+      rejectRun(new Error(`${invocation.label} failed (exit ${code ?? "n/a"}${signal ? `, signal ${signal}` : ""})${detail ? `: ${detail}` : ""}`));
+    });
+  });
+}
+
+async function runDashboardBuildAndVerify(): Promise<void> {
+  for (const invocation of dashboardBuildInvocations()) await runCommandInvocation(invocation);
+}
+
+async function rebuildForForecastEnd(previous: DashboardSettings, next: DashboardSettings): Promise<void> {
+  if (currentProcess && currentJob?.status === "running") {
+    throw new Error("A dashboard refresh is already running. Wait for it to finish, then save the forecast end again.");
+  }
+  if (pendingSettingsRebuild) {
+    throw new Error("A forecast-end rebuild is already running. Wait for it to finish, then retry the settings change.");
+  }
+  const lock = acquireRunnerLock("settings-rebuild");
+  currentLock = lock;
+  pendingSettingsRebuild = {
+    previous: JSON.parse(JSON.stringify(previous)) as DashboardSettings,
+    startedAt: new Date().toISOString(),
+  };
+  try {
+    writeSettings(next);
+    try {
+      await runDashboardBuildAndVerify();
+    } catch (buildError) {
+      writeSettings(previous);
+      let restoreError: unknown = null;
+      try {
+        await runDashboardBuildAndVerify();
+      } catch (error) {
+        restoreError = error;
+      }
+      const primary = buildError instanceof Error ? buildError.message : String(buildError);
+      const restore = restoreError
+        ? ` Previous settings were restored, but restoring the prior dashboard package also failed: ${restoreError instanceof Error ? restoreError.message : String(restoreError)}`
+        : " Previous settings and dashboard packages were restored.";
+      throw new Error(`Forecast-end rebuild failed: ${primary}.${restore}`);
+    }
+  } finally {
+    releaseRunnerLock(lock);
+    pendingSettingsRebuild = null;
   }
 }
 
@@ -507,7 +620,7 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
     return;
   }
   if (pathname === "/api/settings" && request.method === "GET") {
-    writeJson(response, 200, { settings: publicSettings(readSettings()) });
+    writeJson(response, 200, { settings: publicSettings(committedSettings()), rebuildPending: pendingSettingsRebuild !== null });
     return;
   }
   if (pathname === "/api/health" && request.method === "GET") {
@@ -521,12 +634,22 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
       pid: process.pid,
       startedAt: SERVER_STARTED_AT,
       refreshReady: refreshToolsReady(),
+      settingsRebuild: pendingSettingsRebuild !== null,
       currentJob: publicJob(),
     });
     return;
   }
   if (pathname === "/api/settings" && request.method === "POST") {
     try {
+      if (pendingSettingsRebuild) {
+        request.resume();
+        writeJson(response, 409, {
+          error: "forecast-end rebuild in progress; wait for it to finish, then retry",
+          settings: publicSettings(committedSettings()),
+          rebuilt: false,
+        });
+        return;
+      }
       const body = JSON.parse(await readBody(request) || "{}") as {
         forecastEnd?: unknown;
         product?: unknown;
@@ -535,7 +658,16 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
         refineryCapacityAdjustments?: unknown;
         baseRevision?: unknown;
       };
+      if (pendingSettingsRebuild) {
+        writeJson(response, 409, {
+          error: "forecast-end rebuild in progress; wait for it to finish, then retry",
+          settings: publicSettings(committedSettings()),
+          rebuilt: false,
+        });
+        return;
+      }
       const settings = readSettings();
+      const previousSettings = JSON.parse(JSON.stringify(settings)) as DashboardSettings;
       const currentRevision = settingsRevision(settings);
       const baseRevision = typeof body.baseRevision === "string" ? body.baseRevision.trim() : "";
       if (baseRevision && baseRevision !== currentRevision) {
@@ -556,21 +688,41 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
         );
       }
       settings.updatedAt = new Date().toISOString();
+      const forecastEndChanged = settings.forecastEnd !== previousSettings.forecastEnd;
+      if (forecastEndChanged) {
+        try {
+          await rebuildForForecastEnd(previousSettings, settings);
+          writeJson(response, 200, { settings: publicSettings(readSettings()), rebuilt: true });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          const busy = message.includes("already running") || message.includes("Another update runner appears to be active");
+          writeJson(response, busy ? 409 : 500, {
+            error: message,
+            settings: publicSettings(readSettings()),
+            rebuilt: false,
+          });
+        }
+        return;
+      }
       writeSettings(settings);
-      writeJson(response, 200, { settings: publicSettings(readSettings()) });
+      writeJson(response, 200, { settings: publicSettings(readSettings()), rebuilt: false });
     } catch (error) {
       writeJson(response, 400, { error: error instanceof Error ? error.message : "invalid settings payload" });
     }
     return;
   }
   if (pathname === "/api/update/status" && request.method === "GET") {
-    writeJson(response, 200, { job: publicJob() });
+    writeJson(response, 200, {
+      job: publicJob(),
+      refreshReady: refreshToolsReady(),
+      settingsRebuild: pendingSettingsRebuild !== null,
+    });
     return;
   }
   if (pathname === "/api/update/start" && request.method === "POST") {
     if (!refreshToolsReady()) {
       writeJson(response, 503, {
-        error: "First-run refresh setup is still finishing. The launcher will start the refresh automatically when it is ready.",
+        error: "Refresh tools are still being prepared. Wait until ready, then click a refresh button.",
         job: publicJob(),
       });
       return;
@@ -584,6 +736,14 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
     } catch {
       group = null;
       product = null;
+    }
+    if (pendingSettingsRebuild) {
+      writeJson(response, 409, {
+        error: "Forecast settings are rebuilding and verifying both dashboards. Wait for that rebuild to finish, then retry.",
+        job: publicJob(),
+        settingsRebuild: true,
+      });
+      return;
     }
     if (!group) {
       writeJson(response, 400, {
@@ -702,12 +862,5 @@ server.on("error", (error: NodeJS.ErrnoException) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`Balance dashboard update server: http://${HOST}:${PORT}/`);
-  if (process.env.DASHBOARD_POWER_DFO_STARTUP_REFRESH !== "1") {
-    console.log("Power DFO startup refresh disabled; set DASHBOARD_POWER_DFO_STARTUP_REFRESH=1 to enable it.");
-    return;
-  }
-  setTimeout(() => {
-    const job = startJob("power-dfo");
-    appendJobLine(job, "stdout", "background startup refresh requested for power DFO daily/hourly data and dashboard rebuild");
-  }, 250);
+  console.log("No refresh starts automatically; use a dashboard refresh button when an update is needed.");
 });

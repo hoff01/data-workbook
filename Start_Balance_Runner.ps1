@@ -1,7 +1,6 @@
 param(
     [string]$Route = "/",
     [switch]$NoOpen,
-    [switch]$NoRefresh,
     [switch]$ForceSetup,
     [switch]$SkipPythonSetup,
     [int]$Port = 0
@@ -200,46 +199,6 @@ function Open-DashboardUrl {
     }
 }
 
-function Start-DashboardRefresh {
-    param([string]$DashboardUrl)
-
-    $dashboardUri = [System.Uri]$DashboardUrl
-    $baseUrl = $dashboardUri.GetLeftPart([System.UriPartial]::Authority)
-    $startUrl = "$baseUrl/api/update/start"
-    $payload = @{ group = "all"; force = $true; launcher = "windows-one-click" } | ConvertTo-Json -Compress
-    $probePath = $env:US_BALANCES_REFRESH_START_PROBE
-    if ($probePath) {
-        $probeDirectory = Split-Path -Parent $probePath
-        if ($probeDirectory) {
-            New-Directory $probeDirectory
-        }
-        Set-Content -Path $probePath -Value (@{ url = $startUrl; group = "all"; force = $true } | ConvertTo-Json -Compress) -Encoding UTF8
-        Write-Host "[US Balances] Refresh-start probe recorded $startUrl"
-        return
-    }
-
-    try {
-        $response = Invoke-RestMethod -Method Post -Uri $startUrl -ContentType "application/json" -Body $payload
-        if ($response.job -and $response.job.id) {
-            Write-Host "[US Balances] Forced All refresh started as $($response.job.id). Progress is visible in the dashboard."
-        }
-        else {
-            Write-Host "[US Balances] Forced All refresh started. Progress is visible in the dashboard."
-        }
-    }
-    catch {
-        $statusCode = 0
-        if ($_.Exception.Response) {
-            try { $statusCode = [int]$_.Exception.Response.StatusCode } catch { $statusCode = 0 }
-        }
-        if ($statusCode -eq 409) {
-            Write-Host "[US Balances] A refresh is already running. The dashboard will reload when it finishes."
-            return
-        }
-        throw "The dashboard opened, but the forced refresh could not start. $($_.Exception.Message)"
-    }
-}
-
 New-Directory $LocalRoot
 New-Directory $CacheRoot
 New-Directory (Join-Path $CacheRoot "npm")
@@ -310,14 +269,8 @@ elseif (Test-Path $LocalPython) {
     $env:US_BALANCES_PYTHON = $LocalPython
     Set-Content -Path $RefreshReadyFile -Value (Get-Date).ToUniversalTime().ToString("o") -Encoding UTF8
 }
-elseif (!$NoRefresh) {
+else {
     throw "Python refresh tools are not installed. Rerun without -SkipPythonSetup so first-run setup can complete."
 }
 
-if (!$NoRefresh) {
-    Write-Host "[US Balances] Starting a forced All refresh"
-    Start-DashboardRefresh $dashboardUrl
-}
-else {
-    Write-Host "[US Balances] Refresh was explicitly disabled with -NoRefresh"
-}
+Write-Host "[US Balances] Dashboard and refresh tools are ready. No data refresh has started; use a dashboard refresh button."

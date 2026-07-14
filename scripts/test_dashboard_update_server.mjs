@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
@@ -52,10 +52,32 @@ async function waitForTerminalJob(baseUrl, timeoutMs = 12_000) {
   throw new Error("fake dashboard update did not finish");
 }
 
+async function waitForSettingsRebuild(baseUrl, expected = true, timeoutMs = 12_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const { response, body } = await fetchJson(`${baseUrl}/api/update/status`);
+    assert.equal(response.status, 200);
+    if (body.settingsRebuild === expected) return body;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 25));
+  }
+  throw new Error(`settings rebuild did not reach expected=${expected}`);
+}
+
 const port = await openPort();
 const baseUrl = `http://127.0.0.1:${port}`;
 const readyFile = join(tmpdir(), `us-balances-refresh-ready-${process.pid}-${Date.now()}`);
 const silentNoopFile = join(tmpdir(), `us-balances-silent-noop-${process.pid}-${Date.now()}`);
+const settingsDir = mkdtempSync(join(tmpdir(), "us-balances-settings-test-"));
+const settingsPath = join(settingsDir, "balance_dashboard_settings.json");
+const settingsRebuildLog = join(settingsDir, "rebuild.log");
+const settingsRebuildFailFile = join(settingsDir, "fail-once");
+writeFileSync(settingsPath, JSON.stringify({
+  forecastEnd: "2027-06-01",
+  adjustments: { diesel: [], jet: [] },
+  crudeOutages: [],
+  refineryCapacityAdjustments: [],
+  updatedAt: new Date().toISOString(),
+}, null, 2));
 const output = [];
 const child = spawn(process.execPath, ["--import", "tsx", "src/dashboard_update_server.ts"], {
   cwd: ROOT,
@@ -68,6 +90,12 @@ const child = spawn(process.execPath, ["--import", "tsx", "src/dashboard_update_
     US_BALANCES_TSX_CLI: join(ROOT, "scripts", "fake_update_cli.mjs"),
     US_BALANCES_WEEKLY_OUTPUT_SCRIPT: join(ROOT, "scripts", "fake_update_cli.mjs"),
     US_BALANCES_FAKE_NO_START_FILE: silentNoopFile,
+    US_BALANCES_FAKE_UPDATE_DELAY_MS: "250",
+    US_BALANCES_SETTINGS_PATH: settingsPath,
+    US_BALANCES_SETTINGS_REBUILD_SCRIPT: join(ROOT, "scripts", "fake_update_cli.mjs"),
+    US_BALANCES_FAKE_SETTINGS_REBUILD_LOG: settingsRebuildLog,
+    US_BALANCES_FAKE_SETTINGS_REBUILD_FAIL_FILE: settingsRebuildFailFile,
+    DASHBOARD_POWER_DFO_STARTUP_REFRESH: "1",
   },
   stdio: ["ignore", "pipe", "pipe"],
 });
@@ -80,6 +108,11 @@ try {
   assert.equal(typeof initialHealth.buildId, "string");
   assert.ok(initialHealth.buildId.length >= 8);
   assert.equal(initialHealth.refreshReady, false);
+  await new Promise((resolveWait) => setTimeout(resolveWait, 400));
+  const initialStatus = await fetchJson(`${baseUrl}/api/update/status`);
+  assert.equal(initialStatus.response.status, 200);
+  assert.equal(initialStatus.body.job, null, "server startup must remain idle even when the removed startup-refresh env is set");
+  assert.equal(initialStatus.body.refreshReady, false);
 
   const blocked = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",
@@ -87,11 +120,70 @@ try {
     body: JSON.stringify({ group: "all", force: true }),
   });
   assert.equal(blocked.response.status, 503);
-  assert.match(blocked.body.error, /First-run refresh setup is still finishing/);
+  assert.match(blocked.body.error, /Refresh tools are still being prepared/);
 
   writeFileSync(readyFile, new Date().toISOString());
   const readyHealth = await waitForHealth(baseUrl);
   assert.equal(readyHealth.refreshReady, true);
+
+  const initialSettings = await fetchJson(`${baseUrl}/api/settings`);
+  assert.equal(initialSettings.response.status, 200);
+  const shortenedRequest = fetchJson(`${baseUrl}/api/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ forecastEnd: "2026-12-31", baseRevision: initialSettings.body.settings.revision }),
+  });
+  await waitForSettingsRebuild(baseUrl, true);
+  const settingsDuringRebuild = await fetchJson(`${baseUrl}/api/settings`);
+  assert.equal(settingsDuringRebuild.response.status, 200);
+  assert.equal(settingsDuringRebuild.body.rebuildPending, true);
+  assert.equal(settingsDuringRebuild.body.settings.forecastEnd, "2027-06-01", "GET must expose only the last committed settings during a rebuild");
+  assert.equal(settingsDuringRebuild.body.settings.revision, initialSettings.body.settings.revision);
+
+  const blockedSettingsWrite = await fetchJson(`${baseUrl}/api/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      forecastEnd: "2027-06-01",
+      product: "diesel",
+      adjustments: [{ frequency: "monthly", period: "2026-10", regionKey: "padd1", lineId: "imports", valueKbd: 1 }],
+      baseRevision: initialSettings.body.settings.revision,
+    }),
+  });
+  assert.equal(blockedSettingsWrite.response.status, 409);
+  assert.match(blockedSettingsWrite.body.error, /rebuild in progress/);
+  assert.equal(blockedSettingsWrite.body.settings.forecastEnd, "2027-06-01");
+
+  const blockedRefreshDuringSettingsRebuild = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "all", force: true }),
+  });
+  assert.equal(blockedRefreshDuringSettingsRebuild.response.status, 409);
+  assert.equal(blockedRefreshDuringSettingsRebuild.body.settingsRebuild, true);
+  assert.match(blockedRefreshDuringSettingsRebuild.body.error, /Forecast settings are rebuilding/);
+
+  const shortened = await shortenedRequest;
+  assert.equal(shortened.response.status, 200);
+  assert.equal(shortened.body.rebuilt, true);
+  assert.equal(shortened.body.settings.forecastEnd, "2026-12-31");
+  assert.equal(readFileSync(settingsRebuildLog, "utf8").trim().split(/\r?\n/).length, 1);
+  const settledSettingsStatus = await waitForSettingsRebuild(baseUrl, false);
+  assert.equal(settledSettingsStatus.settingsRebuild, false);
+
+  writeFileSync(settingsRebuildFailFile, "fail once\n");
+  const failedRevision = shortened.body.settings.revision;
+  const failedRebuild = await fetchJson(`${baseUrl}/api/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ forecastEnd: "2027-03-31", baseRevision: failedRevision }),
+  });
+  assert.equal(failedRebuild.response.status, 500);
+  assert.equal(failedRebuild.body.rebuilt, false);
+  assert.equal(failedRebuild.body.settings.forecastEnd, "2026-12-31");
+  assert.match(failedRebuild.body.error, /Previous settings and dashboard packages were restored/);
+  assert.equal(JSON.parse(readFileSync(settingsPath, "utf8")).forecastEnd, "2026-12-31");
+  assert.equal(readFileSync(settingsRebuildLog, "utf8").trim().split(/\r?\n/).length, 3, "failed build plus rollback must both run");
 
   const started = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",
@@ -101,6 +193,15 @@ try {
   assert.equal(started.response.status, 202);
   assert.equal(started.body.job.status, "running");
   assert.ok(Number.isInteger(started.body.job.pid) && started.body.job.pid > 0);
+
+  const settingsWhileRunning = await fetchJson(`${baseUrl}/api/settings`);
+  const concurrentForecastSave = await fetchJson(`${baseUrl}/api/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ forecastEnd: "2027-01-31", baseRevision: settingsWhileRunning.body.settings.revision }),
+  });
+  assert.equal(concurrentForecastSave.response.status, 409);
+  assert.equal(concurrentForecastSave.body.settings.forecastEnd, "2026-12-31");
 
   const job = await waitForTerminalJob(baseUrl);
   assert.equal(job.status, "succeeded");
@@ -192,4 +293,5 @@ try {
   child.kill();
   rmSync(readyFile, { force: true });
   rmSync(silentNoopFile, { force: true });
+  rmSync(settingsDir, { recursive: true, force: true });
 }

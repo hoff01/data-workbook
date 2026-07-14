@@ -11,8 +11,8 @@ if not exist "%~dp0package.json" goto :incomplete_checkout
 if not exist "%~dp0src\open_dashboard.ts" goto :incomplete_checkout
 
 echo [US Balances] Starting the local dashboard...
-echo [US Balances] First launch prepares Node and Python, then starts a forced All refresh.
-echo [US Balances] Keep this window open until it confirms that the refresh started.
+echo [US Balances] First launch prepares Node and Python.
+echo [US Balances] Data refreshes run only when you click a dashboard refresh button.
 echo.
 
 "%POWERSHELL_EXE%" -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%RUNNER%" %*

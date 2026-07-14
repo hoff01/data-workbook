@@ -4,3 +4,4 @@ PyYAML==6.0.3
 polars==1.38.1
 requests==2.33.0
 matplotlib==3.10.8
+pip-system-certs==5.3

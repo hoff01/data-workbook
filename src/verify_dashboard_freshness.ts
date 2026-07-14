@@ -306,7 +306,12 @@ function verifyBalanceSmartWindowScroll(indexHtml: string, config: ProductConfig
   assertIncludes(`${config.key} mobile workbook disables page-wide viewport tracking`, indexHtml, "function viewportTrackingActive(){ return (state.sheet === 'charts' || state.sheet === 'crude') && !matchMedia('(max-width: 760px)').matches; }");
   assertIncludes(`${config.key} mobile crude table limits its rasterized period window`, indexHtml, "function crudeTableDisplayPeriods(allPeriods=crudeDisplayPeriods())");
   assertIncludes(`${config.key} crude table distinguishes mobile and desktop windows`, indexHtml, "const actualLookback = mobile ? 12 : 104;");
-  assertIncludes(`${config.key} desktop weekly crude window keeps full forecast horizon`, indexHtml, "return mobile ? allPeriods.slice(start, Math.min(allPeriods.length, start + 64)) : allPeriods.slice(start);");
+  assertIncludes(`${config.key} desktop weekly crude window keeps all periods inside the selected display cap`, indexHtml, "return mobile ? allPeriods.slice(start, Math.min(allPeriods.length, start + 64)) : allPeriods.slice(start);");
+  assertIncludes(`${config.key} weekly display window defaults to 18 forecast weeks`, indexHtml, "const DEFAULT_WEEKLY_FORECAST_WEEKS = 18;");
+  assertIncludes(`${config.key} weekly forecast count is clamped`, indexHtml, "Math.max(0, Math.min(MAX_WEEKLY_FORECAST_WEEKS, parsed))");
+  assertIncludes(`${config.key} weekly crude display ends at the shared forecast display end`, indexHtml, "function crudeDisplayPeriods(frequency=state.frequency){ const key = calcCacheKey('crudeDisplayPeriods', frequency, forecastDisplayEnd(frequency));");
+  assertIncludes(`${config.key} crude CSV export keeps the full modeled horizon`, indexHtml, "function currentCrudeRowsForExport(){ const periods = crudeAllPeriods();");
+  assertIncludes(`${config.key} weekly display input explains exports remain full`, indexHtml, "Display only; the full forecast remains available for exports.");
   assertIncludes(`${config.key} mobile crude window tells users exports keep full history`, indexHtml, "period columns; exports keep full history");
   assertIncludes(`${config.key} crude table retains its visible enclosure`, indexHtml, "border:2px solid #5f6d80;border-radius:9px;box-shadow:inset 0 0 0 1px #dce3ec,0 8px 20px rgba(15,23,42,.12)");
 }
@@ -318,10 +323,11 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} row focus state is forced off`, indexHtml, "state.balanceFocus = 'all'; state.balanceSearch = '';");
   assertIncludes(`${config.key} table layout state uses production defaults`, indexHtml, "state.labelWidth = TABLE_LAYOUT_DEFAULTS.labelWidth; state.labelSize = TABLE_LAYOUT_DEFAULTS.labelSize;");
   assertIncludes(`${config.key} balance sheets declare shared crude context`, indexHtml, "const needsBalanceContext = sheet === 'balance' || sheet === 'charts';");
-  assertIncludes(`${config.key} weekly outages load weekly balance scaffold`, indexHtml, "if (frequency === 'weekly' && (needsBalanceContext || sheet === 'outages')) await ensureWeeklyData();");
+  assertIncludes(`${config.key} weekly balance and charts load balance plus crude context`, indexHtml, "if (frequency === 'weekly' && needsBalanceContext) await Promise.all([ensureWeeklyData(), ensureCrudeWeeklyData()]);");
+  assertIncludes(`${config.key} weekly outages load weekly balance scaffold`, indexHtml, "if (frequency === 'weekly' && sheet === 'outages') await ensureWeeklyData();");
   assertIncludes(`${config.key} outages tab uses shared data loader`, indexHtml, "outagesSheetBtn').addEventListener('click', async () => { const changed = state.sheet !== 'outages'; try { await ensureDataForState({...state,sheet:'outages'}); }");
   assertIncludes(`${config.key} crude outage launcher uses shared data loader`, indexHtml, "openOutagesFromCrudeBtn').addEventListener('click', async () => { const nextRegion = validBaseCrudeRegion(state.crudeRegion) ? state.crudeRegion : 'padd1'; try { await ensureDataForState({...state,sheet:'outages',crudeRegion:nextRegion}); }");
-  assertIncludes(`${config.key} weekly crude payload stays deferred until crude runs opens`, indexHtml, "if (frequency === 'weekly' && sheet === 'crude') await ensureCrudeWeeklyData();");
+  assertIncludes(`${config.key} weekly crude charts load product balance and crude contexts`, indexHtml, "if (frequency === 'weekly' && sheet === 'crude') await Promise.all([ensureWeeklyData(), ensureCrudeWeeklyData()]);");
   assertIncludes(`${config.key} balance loads reference context before rendering crude-derived rows`, indexHtml, "if (needsBalanceContext || sheet === 'reference' || sheet === 'outages' || sheet === 'crude') await ensureReferenceData();");
   assertIncludes(`${config.key} frequency switches use shared data loader`, indexHtml, "try { await ensureDataForState({...state,frequency:nextFrequency}); }");
   assertIncludes(`${config.key} refresh button starts the forced full upstream data pull`, indexHtml, "document.getElementById('refreshBtn').addEventListener('click', () => { startDashboardUpdate('all'); });");
@@ -343,13 +349,24 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} failed update does not imply fresh data`, indexHtml, "Refresh failed; dashboard data was not reloaded");
   assertIncludes(`${config.key} update completion is shared across workbook tabs`, indexHtml, "const UPDATE_COMPLETION_STORAGE_KEY = 'us-balances:update-complete';");
   assertIncludes(`${config.key} reload loops are blocked per browser tab`, indexHtml, "const UPDATE_RELOAD_SESSION_KEY = 'us-balances:update-reloaded';");
-  assertIncludes(`${config.key} launcher-started updates are observed`, indexHtml, "observedRunningUpdateJobId = lastUpdateJob.id");
+  assertIncludes(`${config.key} button-started updates are observed across tabs`, indexHtml, "observedRunningUpdateJobId = lastUpdateJob.id");
   assertIncludes(`${config.key} landing-page updates reload open workbook tabs`, indexHtml, "Refresh completed; loading the latest dashboard data");
-  assertIncludes(`${config.key} every workbook tab polls for launcher refreshes`, indexHtml, "      pollUpdateStatus();");
+  assertIncludes(`${config.key} every workbook tab polls for button refresh completion`, indexHtml, "      pollUpdateStatus();");
+  assertIncludes(`${config.key} idle refresh message is button-only`, indexHtml, "No refresh is running. Choose a refresh button above to begin; each data refresh rebuilds and verifies both dashboards.");
+  assertIncludes(`${config.key} refresh readiness blocks early clicks`, indexHtml, "if (!refreshToolsReady) { showToast('Refresh tools are still being prepared. Try the button again when Ready.'); return; }");
+  assertNotIncludes(`${config.key} old launcher auto-refresh message removed`, indexHtml, "A normal launcher click starts a forced Complete refresh");
   assertIncludes(`${config.key} F9 is routed through safe dashboard refresh`, indexHtml, "const isF9 = e.key === 'F9' || e.keyCode === 120;");
   assertIncludes(`${config.key} F9 recalculation loads dependencies first`, indexHtml, "refreshDashboardData('Dashboard recalculated');");
   assertIncludes(`${config.key} balance bootstrap refreshes server settings after data load`, indexHtml, "else if (state.sheet === 'balance' || state.sheet === 'charts' || state.sheet === 'outages' || state.sheet === 'crude') { refreshWorkbookSettings(); }");
   assertIncludes(`${config.key} shared settings save sends base revision`, indexHtml, "baseRevision:workbookSettings.revision || ''");
+  assertIncludes(`${config.key} embedded rebuild horizon outranks stale browser storage`, indexHtml, "forecastEnd:normalizeForecastEnd(embedded.forecastEnd || stored.forecastEnd)");
+  assertIncludes(`${config.key} forecast save waits for verified rebuild`, indexHtml, "if (!payload.rebuilt) throw new Error('Forecast end was saved without a verified dashboard rebuild.')");
+  assertIncludes(`${config.key} forecast save reloads verified packages`, indexHtml, "Forecast end rebuilt through '+nextForecastEnd+'; loading verified dashboards");
+  assertIncludes(`${config.key} server adjustment maps preserve the active product`, indexHtml, "Array.isArray(nextSettings.adjustments?.[D.product.key]) ? nextSettings.adjustments[D.product.key]");
+  assertIncludes(`${config.key} refresh controls lock during forecast rebuilds`, indexHtml, "if (settingsRebuildRunning) { showToast('Forecast settings are rebuilding. Wait until that verified rebuild finishes.'); return; }");
+  assertIncludes(`${config.key} forecast rows are horizon filtered`, indexHtml, "function rowWithinForecastEnd(row, frequency=state.frequency)");
+  assertIncludes(`${config.key} year toggle uses the visible forecast window`, indexHtml, "const rows = forecastDisplayRows(rawRowsForFrequency(frequency), frequency);");
+  assertNotIncludes(`${config.key} old separate refresh instruction removed`, indexHtml, "Forecast end saved; run a refresh to rebuild through");
   assertIncludes(`${config.key} shared settings conflict is explicit`, indexHtml, "Shared settings changed; latest file loaded. Re-enter the edit and save again.");
   assertIncludes(`${config.key} shared settings offline message is explicit`, indexHtml, "saved in this browser only; shared settings server offline");
 }
@@ -361,6 +378,11 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} chart band years exclude pre-2017`, indexHtml, "context.years.filter(year => year >= MIN_CHART_HISTORY_YEAR && year < context.currentYear)");
   assertIncludes(`${config.key} chart row filter excludes pre-2017`, indexHtml, "chartRowPeriodYear(row) >= MIN_CHART_HISTORY_YEAR");
   assertIncludes(`${config.key} requested derived chart metrics`, indexHtml, "'periodBuildDrawKb','netLengthKbd'");
+  assertIncludes(`${config.key} Yield metric is registered as percent`, indexHtml, "{key:'yieldPct',label:'Yield',unit:'%',digits:1}");
+  assertIncludes(`${config.key} Yield appears in normal chart metrics`, indexHtml, "'demandKbd','productionKbd','yieldPct'");
+  assertIncludes(`${config.key} Yield appears in crude chart metrics`, indexHtml, "...CRUDE_BASE_METRICS,{key:'yieldPct',label:'Yield',unit:'%',digits:1}");
+  assertIncludes(`${config.key} crude yield joins product balance rows`, indexHtml, "function crudeChartRowsForRegion(regionKey=state.crudeRegion, frequency=state.frequency)");
+  assertIncludes(`${config.key} split PADD 1 Yield combines P1 A/B and P1 C production`, indexHtml, "['padd1ab','padd1c'].forEach(memberKey");
   assertIncludes(`${config.key} requested receipts chart metric`, indexHtml, "'receiptsKbd'");
   assertIncludes(`${config.key} requested PADD3 shipment chart metric`, indexHtml, "'padd3ShipmentsToPadd1Kbd'");
   assertIncludes(`${config.key} Kpler chart metrics registered`, indexHtml, "const KPLER_CHART_METRICS = new Set(['kplerImportsKbd'");
@@ -369,10 +391,11 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} coking utilization chart label`, indexHtml, "label:'Coking Utilization'");
   assertIncludes(`${config.key} hydrocracking utilization chart label`, indexHtml, "label:'Hydrocracking Utilization'");
   assertIncludes(`${config.key} chart missing values are not coerced to zero`, indexHtml, "function finiteNumberOrNull(value){ if (value === null || value === undefined || value === '') return null; const n = Number(value); return Number.isFinite(n) ? n : null; }");
-  assertIncludes(`${config.key} secondary unit utilization charts use tight percent scale`, indexHtml, "chartScale(raw, 5, {percent:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey),tight:SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey),nonNegative:isOutageSeasonChart})");
+  assertIncludes(`${config.key} all percent charts use tight percent scale`, indexHtml, "chartScale(raw, 5, {percent:percentMetric,tight:percentMetric,nonNegative:isOutageSeasonChart})");
+  assertIncludes(`${config.key} percent scale preserves real negative observations`, indexHtml, "const hasNegativePercent = Boolean(options.percent && valid.some(value => value < 0));");
   assertIncludes(`${config.key} percent chart axis labels include percent sign`, indexHtml, "const axisValueLabel = value => metric.unit === '%' ? fmt(value, metric.digits) + '%' : fmt(value, outageAxisDigits);");
   assertIncludes(`${config.key} Kpler periods are completed only`, indexHtml, "function completedKplerPeriod(period, frequency=state.frequency)");
-  assertIncludes(`${config.key} actual-only chart metric registry`, indexHtml, "function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey) || OUTAGE_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }");
+  assertIncludes(`${config.key} actual-only chart metric registry excludes forecast-capable outages`, indexHtml, "function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }");
   assertIncludes(`${config.key} secondary unit charts are monthly-only`, indexHtml, "if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return [];");
   assertIncludes(`${config.key} Kpler charts disable forecast path`, indexHtml, "const nextYearPath = !actualOnly && state.showNextYearForecast && state.showForecast");
   assertIncludes(`${config.key} Kpler legend disables forecast`, indexHtml, "if (!actualOnly && state.showNextYearForecast && nextYearForecast && state.showForecast && available.has(nextYearForecast))");
@@ -420,7 +443,7 @@ function verifyChartScenarioPropagation(indexHtml: string, config: ProductConfig
 
 function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} outage chart metric registry`, indexHtml, "const OUTAGE_CHART_METRICS = new Set(['knownProductionOfflinePlannedKbd'");
-  assertIncludes(`${config.key} outage product metrics follow production`, indexHtml, "'productionKbd','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd'");
+  assertIncludes(`${config.key} Yield and outage product metrics follow production`, indexHtml, "'productionKbd','yieldPct','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd'");
   assertIncludes(`${config.key} crude runs outage unit is atmospheric distillation only`, indexHtml, "const CRUDE_RUN_OUTAGE_UNIT_KEY = 'atmos_distillation';");
   assertIncludes(`${config.key} crude runs reads only atmospheric distillation outage totals`, indexHtml, "addOutageTotals(totals, byRegion[key]?.units?.[CRUDE_RUN_OUTAGE_UNIT_KEY])");
   assertNotIncludes(`${config.key} crude runs does not read broad all-unit outage totals`, indexHtml, "outageSourceKeys(regionKey).forEach(key => addOutageTotals(totals, byRegion[key]));");
@@ -445,11 +468,12 @@ function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig)
   assertIncludes(`${config.key} outage balance values retain visible decimal precision`, indexHtml, "target === 'daysForwardCover' || OUTAGE_CHART_METRICS.has(target) ? 1 : 0");
   assertIncludes(`${config.key} outage charts render all outage metrics`, indexHtml, "function orderedOutageChartMetrics(){ return Array.from(OUTAGE_CHART_METRICS); }");
   assertIncludes(`${config.key} outage charts use crude outage regions`, indexHtml, "function renderOutageChartRegionOptions()");
-  assertIncludes(`${config.key} outage charts include scheduled periods through the forecast end`, indexHtml, "function outageChartSourceRows(frequency=state.frequency){ const forecastEnd = forecastEndForFrequency(frequency); return rawRowsForFrequency(frequency).filter(row => row?.period && row.period <= forecastEnd); }");
+  assertIncludes(`${config.key} outage charts preserve actual history while clipping forecast rows`, indexHtml, "function outageChartSourceRows(frequency=state.frequency){ return rawRowsForFrequency(frequency).filter(row => row?.period && rowWithinForecastEnd(row, frequency)); }");
+  assertIncludes(`${config.key} outage charts preserve forecast status for next-year periods`, indexHtml, "index.set(row.period, row.status === 'forecast' ? 'forecast' : 'actual');");
   assertIncludes(`${config.key} outage charts use custom rows`, indexHtml, "function outageChartRowsForMetric(regionKey, metricKey, frequency=state.frequency)");
   assertIncludes(`${config.key} outage charts use selected band years with default fallback`, indexHtml, "function outageBandYears(frequency=state?.frequency || 'monthly'){ const selected = normalizeBandYears(state?.bandYears, frequency, false); return selected.length ? selected : defaultOutageBandYears(frequency); }");
   assertIncludes(`${config.key} outage charts expose shared chart options`, indexHtml, "document.getElementById('chartOptions').hidden = !(state.sheet === 'charts' || state.sheet === 'outages');");
-  assertIncludes(`${config.key} outage charts hide disabled forecast control`, indexHtml, "document.getElementById('showForecastChip').hidden = state.sheet === 'outages';");
+  assertIncludes(`${config.key} outage charts expose forecast control`, indexHtml, "document.getElementById('showForecastChip').hidden = false;");
   assertIncludes(`${config.key} outage charts hide disabled smoothing control`, indexHtml, "document.getElementById('fourWeekAverageChip').hidden = state.sheet === 'outages';");
   assertIncludes(`${config.key} outage chart legends filter unavailable years per card`, indexHtml, "const lineLegend = chartLineLegendEntries(bundle, metricKey, state.frequency).map(entry =>");
   assertIncludes(`${config.key} outage chart cache scope tracks outage settings`, indexHtml, "function outageChartCacheScope(regionKey, metricKey, rows)");
@@ -458,7 +482,8 @@ function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig)
   assertIncludes(`${config.key} zero-only outage charts do not render negative zero ticks`, indexHtml, "outageZeroScale ? {min:0,max:1,ticks:[0,1],step:1}");
   assertIncludes(`${config.key} nonzero outage charts keep their axis nonnegative`, indexHtml, "if (options.nonNegative) min = Math.max(0, min);");
   assertIncludes(`${config.key} small outage values keep readable decimal ticks`, indexHtml, "const outageAxisDigits = isOutageSeasonChart && scale.step < 1 ? Math.max(metric.digits, 1) : 0;");
-  assertIncludes(`${config.key} outage history chips hide unavailable next forecast`, indexHtml, "if (!outageActualOnly && nextYearForecast) chips.push");
+  assertIncludes(`${config.key} outage history chips expose next-year forecast toggle`, indexHtml, "if (nextYearForecast) chips.push");
+  assertIncludes(`${config.key} outage next-year forecast toggle updates chart state`, indexHtml, "else if (key === 'next') state.showNextYearForecast = lineInput.checked;");
   assertIncludes(`${config.key} outage chart render signature tracks forecast visibility`, indexHtml, "state.showForecast ? 'forecast' : 'actual-only'");
   assertIncludes(`${config.key} outage chart render signature tracks next-year visibility`, indexHtml, "state.showNextYearForecast ? 'next' : 'no-next'");
   assertIncludes(`${config.key} outage chart SVG class`, indexHtml, "outageSeasonChart");
@@ -571,7 +596,7 @@ function verifyCrudeRunsRowFormatting(indexHtml: string, config: ProductConfig):
   assertIncludes(`${config.key} capacity ledger shows exact crude override period`, indexHtml, "if (isCrudeCellAdjustment(adj)) return (adj.frequency === 'weekly' ? 'Week ending ' : 'Month ') + adj.period + ' only';");
   assertNotIncludes(`${config.key} crude cell lookup is not month-wide`, indexHtml, "latestRegionalCapacityAdjustment(point.regionKey, crudeAdjustmentTargetLineId(lineId), periodMonthValue(point.period))");
   assertIncludes(`${config.key} settings saves are serialized to avoid revision races`, indexHtml, "let settingsSaveChain = Promise.resolve();");
-  assertIncludes(`${config.key} settings saves survive an immediate reload`, indexHtml, "body:JSON.stringify(settingsPayload()),keepalive:true");
+  assertIncludes(`${config.key} settings saves survive an immediate reload`, indexHtml, "body:JSON.stringify(settingsPayload(overrides)),keepalive:true");
   assertIncludes(`${config.key} balance cell saves start immediately`, indexHtml, "function queueBalanceAdjustmentsToServer(options=null){ void saveBalanceAdjustmentsToServer(options || {}); }");
   assertIncludes(`${config.key} crude cell saves start immediately`, indexHtml, "function queueCapacityAdjustmentsToServer(){ void saveCapacityAdjustmentsToServer(); }");
   assertIncludes(`${config.key} historical crude outage estimate starts in 2022`, indexHtml, "function useHistoricalCrudeOutageEstimate(period){ return periodMonthValue(period) >= '2022-01'; }");
