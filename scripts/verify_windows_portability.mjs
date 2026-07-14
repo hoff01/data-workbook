@@ -148,7 +148,8 @@ requireText(".github/workflows/windows-production.yml", "actions/setup-node@v6",
 requireText(".github/workflows/windows-production.yml", "actions/setup-python@v6", "Node 24 setup-python action");
 requireText(".github/workflows/windows-production.yml", "Open_Diesel_Dashboard.bat -Port", "native Windows batch launcher and Python refresh setup smoke test");
 requireText(".github/workflows/windows-production.yml", "US_BALANCES_BROWSER_OPEN_PROBE", "native Windows browser-open probe");
-requireText(".github/workflows/windows-production.yml", 'Where-Object { $_.Name -eq "pip" }', "native Windows missing-pip recovery fixture preserves stale metadata");
+requireText(".github/workflows/windows-production.yml", 'import pip; print(pip.__path__[0])', "native Windows missing-pip recovery fixture locates the real module directory");
+requireText(".github/workflows/windows-production.yml", 'Remove-Item -LiteralPath $pipPackagePath -Recurse -Force', "native Windows missing-pip recovery fixture preserves stale metadata");
 requireText(".github/workflows/windows-production.yml", "Start_Balance_Runner.bat -NoOpen -Port", "native Windows 5.1 damaged-environment recovery rerun");
 requireText(".github/workflows/windows-production.yml", "The launcher did not restore pip", "native Windows pip restoration assertion");
 rejectText(".github/workflows/windows-production.yml", "US_BALANCES_REFRESH_START_PROBE", "native Windows launcher must remain refresh-idle");
