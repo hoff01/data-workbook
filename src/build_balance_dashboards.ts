@@ -4120,6 +4120,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     const STORAGE_KEY = D.product.key + ':regional-balance-v2';
     const UPDATE_COMPLETION_STORAGE_KEY = 'us-balances:update-complete';
     const UPDATE_RELOAD_SESSION_KEY = 'us-balances:update-reloaded';
+    const MANUAL_REFRESH_SESSION_KEY = 'us-balances:manual-refresh';
     const CHART_SCENARIO_STORAGE_KEY = STORAGE_KEY + ':chart-scenarios';
     const CHART_SCENARIO_DRAFT_STORAGE_KEY = STORAGE_KEY + ':chart-scenario-draft';
     const BAND_YEARS = ${JSON.stringify(BAND_YEARS)};
@@ -4602,15 +4603,14 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     async function refreshWorkbookSettings(options={}){ const force = Boolean(options.force); if (!force && settingsRefreshPromise) return settingsRefreshPromise; if (!force && lastSettingsRefreshAt && (Date.now() - lastSettingsRefreshAt) < SETTINGS_REFRESH_TTL_MS) return false; settingsRefreshPromise = (async () => { try { const response = await fetch(updateBaseUrl() + '/api/settings', {cache:'no-store'}); if (!response.ok) throw new Error('settings '+response.status); const payload = await response.json(); const nextSettings = {forecastEnd:payload.settings?.forecastEnd,revision:payload.settings?.revision,adjustments:Array.isArray(payload.settings?.adjustments?.[D.product.key]) ? payload.settings.adjustments[D.product.key] : workbookSettings.adjustments,crudeOutages:Array.isArray(payload.settings?.crudeOutages) ? payload.settings.crudeOutages : workbookSettings.crudeOutages,refineryCapacityAdjustments:Array.isArray(payload.settings?.refineryCapacityAdjustments) ? payload.settings.refineryCapacityAdjustments : workbookSettings.refineryCapacityAdjustments}; const changed = applyWorkbookSettingsSnapshot(nextSettings); if (Array.isArray(payload.settings?.crudeOutages)) localStorage.setItem(OUTAGE_STORAGE_KEY, JSON.stringify(workbookSettings.crudeOutages)); if (Array.isArray(payload.settings?.refineryCapacityAdjustments)) localStorage.setItem(CAPACITY_ADJ_STORAGE_KEY, JSON.stringify(workbookSettings.refineryCapacityAdjustments)); saveWorkbookSettingsLocal(); lastSettingsRefreshAt = Date.now(); return changed; } catch { renderSettingsPanel(); if (state.sheet === 'reference') renderCapacityAdjustmentPanel(); return false; } finally { settingsRefreshPromise = null; } })(); return settingsRefreshPromise; }
     async function refreshDashboardData(message='Dashboard refreshed'){
       try {
-        await ensureDataForState(state);
         await refreshWorkbookSettings({force:true});
       } catch {
         showToast('Unable to load workbook data');
         return false;
       }
-      tableScrollSignatures = {};
-      queueRender();
-      showToast(message);
+      try { sessionStorage.setItem(MANUAL_REFRESH_SESSION_KEY, message); } catch {}
+      showToast('Refreshing dashboard and reloading packaged data');
+      setTimeout(() => location.reload(), 120);
       return true;
     }
     async function saveForecastEnd(){ const input = document.getElementById('forecastEndInput'); const nextForecastEnd = normalizeForecastEnd(input?.value); const changed = workbookSettings.forecastEnd !== nextForecastEnd; if (changed) { workbookSettings.forecastEnd = nextForecastEnd; invalidateCalculationCaches(); tableScrollSignatures = {}; } saveWorkbookSettingsLocal(); renderSettingsPanel(); if (changed) queueRender(); try { const payload = await postSettingsPayload(); if (payload.settings) applyWorkbookSettingsSnapshot(payload.settings); saveWorkbookSettingsLocal(); showToast('Forecast end saved; run a refresh to rebuild through '+workbookSettings.forecastEnd); } catch (error) { showToast(error instanceof Error ? error.message : sharedSaveOfflineMessage('Forecast end')); } }
@@ -7113,8 +7113,8 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function updateBaseUrl(){ return /^https?:$/.test(location.protocol) ? location.origin : 'http://127.0.0.1:8787'; }
     function updateGroupMeta(group){ return UPDATE_GROUPS[group] || UPDATE_GROUPS.all; }
     function workbookProductLabel(product=D.product?.key){ return product === 'jet' ? 'Jet' : 'Diesel'; }
-    function updateStatusText(job){ if (!updateApiAvailable) return 'Runner offline'; if (!job) return 'Ready — waiting to refresh'; const productLabel = workbookProductLabel(job.product); if (job.status === 'running' && job.group === 'weekly-call-outputs') return 'Saving '+productLabel+' weekly call outputs'; if (job.status === 'running') return 'Refreshing '+updateGroupMeta(job.group).label; if (job.status === 'succeeded' && job.result === 'saved') return 'Saved — '+productLabel+' weekly call outputs ready'; if (job.status === 'succeeded' && job.result === 'updated') return 'Updated — new data loaded'; if (job.status === 'succeeded' && job.result === 'current') return 'Checked — already current'; if (job.status === 'succeeded') return 'Refresh complete'; if (job.status === 'partial' && job.result === 'updated') return 'Updated with warnings'; if (job.status === 'partial' && job.result === 'current') return 'Current with warnings'; if (job.status === 'partial') return 'Refresh complete with warnings'; return job?.group === 'weekly-call-outputs' ? productLabel+' weekly call output save failed' : 'Refresh failed'; }
-    function updateLogText(job){ if (!updateApiAvailable) return 'The local runner is unavailable. Reopen the dashboard with the one-click launcher.'; if (!job) return 'Refresh tools are ready. A normal launcher click starts a forced Complete refresh.'; const meta = updateGroupMeta(job.group); const productLabel = workbookProductLabel(job.product); const elapsed = job.durationMs ? 'duration '+Math.round(job.durationMs/1000)+'s' : 'started '+new Date(job.startedAt).toLocaleString(); const lines = (job.lines || []).slice(-80).join('\\n'); const statusLabel = job.status === 'succeeded' && job.result === 'saved' ? 'SAVED — '+productLabel.toUpperCase()+' WEEKLY CALL OUTPUTS' : job.status === 'succeeded' && job.result === 'updated' ? 'UPDATED — NEW DATA' : job.status === 'succeeded' && job.result === 'current' ? 'CHECKED — ALREADY CURRENT' : job.status === 'succeeded' ? 'REFRESH COMPLETE' : job.status === 'partial' && job.result === 'updated' ? 'UPDATED WITH WARNINGS' : job.status === 'partial' && job.result === 'current' ? 'CURRENT WITH WARNINGS' : job.status === 'partial' ? 'REFRESH COMPLETE WITH WARNINGS' : job.status.toUpperCase(); const actionLabel = job.group === 'weekly-call-outputs' ? productLabel+' weekly call outputs save' : meta.label+' refresh'; return '['+statusLabel+'] '+actionLabel+' | '+elapsed+'\\n'+(lines || 'Waiting for output...'); }
+    function updateStatusText(job){ if (!updateApiAvailable) return 'Runner offline'; if (!job) return 'Ready — waiting to refresh'; const productLabel = workbookProductLabel(job.product); if (job.status === 'running' && job.group === 'weekly-call-outputs') return 'Saving '+productLabel+' weekly call outputs'; if (job.status === 'running') return 'Refreshing '+updateGroupMeta(job.group).label; if (job.status === 'succeeded' && job.result === 'saved') return 'Saved — '+productLabel+' weekly call outputs ready'; if (job.status === 'succeeded' && job.result === 'updated') return 'Updated — new data loaded'; if (job.status === 'succeeded' && job.result === 'current') return 'Refreshed — data unchanged'; if (job.status === 'succeeded') return 'Refresh complete'; if (job.status === 'partial' && job.result === 'updated') return 'Updated with warnings'; if (job.status === 'partial' && job.result === 'current') return 'Refreshed with warnings — data unchanged'; if (job.status === 'partial') return 'Refresh complete with warnings'; return job?.group === 'weekly-call-outputs' ? productLabel+' weekly call output save failed' : 'Refresh failed'; }
+    function updateLogText(job){ if (!updateApiAvailable) return 'The local runner is unavailable. Reopen the dashboard with the one-click launcher.'; if (!job) return 'Refresh tools are ready. A normal launcher click starts a forced Complete refresh.'; const meta = updateGroupMeta(job.group); const productLabel = workbookProductLabel(job.product); const elapsed = job.durationMs ? 'duration '+Math.round(job.durationMs/1000)+'s' : 'started '+new Date(job.startedAt).toLocaleString(); const lines = (job.lines || []).slice(-80).join('\\n'); const statusLabel = job.status === 'succeeded' && job.result === 'saved' ? 'SAVED — '+productLabel.toUpperCase()+' WEEKLY CALL OUTPUTS' : job.status === 'succeeded' && job.result === 'updated' ? 'UPDATED — NEW DATA' : job.status === 'succeeded' && job.result === 'current' ? 'REFRESHED — DATA UNCHANGED' : job.status === 'succeeded' ? 'REFRESH COMPLETE' : job.status === 'partial' && job.result === 'updated' ? 'UPDATED WITH WARNINGS' : job.status === 'partial' && job.result === 'current' ? 'REFRESHED WITH WARNINGS — DATA UNCHANGED' : job.status === 'partial' ? 'REFRESH COMPLETE WITH WARNINGS' : job.status.toUpperCase(); const actionLabel = job.group === 'weekly-call-outputs' ? productLabel+' weekly call outputs save' : meta.label+' refresh'; return '['+statusLabel+'] '+actionLabel+' | '+elapsed+'\\n'+(lines || 'Waiting for output...'); }
     function renderReferenceUpdates(){ const job = lastUpdateJob; const group = job?.group || document.getElementById('referenceUpdatePanel')?.dataset.group || 'all'; const meta = updateGroupMeta(group); const pill = document.getElementById('updateStatusPill'); if (!pill) return; pill.textContent = updateStatusText(job); pill.className = 'pill updateStatus '+(!updateApiAvailable ? 'unavailable' : (job?.status || 'idle')); document.querySelectorAll('[data-update-group]').forEach(btn => { btn.classList.toggle('active', btn.dataset.updateGroup === group); btn.disabled = Boolean(job && job.status === 'running'); }); document.getElementById('updateSteps').innerHTML = meta.steps.map((step, idx) => '<div class="updateStep"><b>'+(idx+1)+'. '+esc(step)+'</b><span>'+esc(meta.label)+' sequence</span></div>').join(''); document.getElementById('updateLog').textContent = updateLogText(job); }
     function scheduleUpdatePoll(delay=2000){ clearTimeout(updatePollTimer); updatePollTimer = setTimeout(pollUpdateStatus, delay); }
     async function pollUpdateStatus(){
@@ -7139,7 +7139,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
             if (completed) {
               if (lastUpdateJob.result === 'saved') { showToast(workbookProductLabel(lastUpdateJob.product)+' weekly call outputs saved in weekly_call_ouputs/outputs'); scheduleUpdatePoll(8000); return; }
               try { if (localStorage.getItem(UPDATE_COMPLETION_STORAGE_KEY) !== lastUpdateJob.id) localStorage.setItem(UPDATE_COMPLETION_STORAGE_KEY, lastUpdateJob.id); } catch {}
-              const message = lastUpdateJob.result === 'updated' ? 'New source data loaded; reloading dashboard' : lastUpdateJob.result === 'current' ? 'Refresh complete; dashboard source data was already current' : 'Refresh complete; reloading dashboard';
+              const message = lastUpdateJob.result === 'updated' ? 'New source data loaded; reloading dashboard' : lastUpdateJob.result === 'current' ? 'Refresh and rebuild complete; data unchanged; reloading dashboard' : 'Refresh complete; reloading dashboard';
               showToast(message);
               setTimeout(() => location.reload(), 900);
               return;
@@ -7259,6 +7259,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
         resetPageHorizontalScroll();
         renderBalanceTable();
       } else if (state.sheet === 'charts') {
+        resetPageHorizontalScroll();
         renderCharts();
       } else if (state.sheet === 'crude') {
         renderCrudeRunsSheet();
@@ -7386,6 +7387,9 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	      }
       renderHistoryChips();
       render();
+      let manualRefreshMessage = '';
+      try { manualRefreshMessage = sessionStorage.getItem(MANUAL_REFRESH_SESSION_KEY) || ''; sessionStorage.removeItem(MANUAL_REFRESH_SESSION_KEY); } catch {}
+      if (manualRefreshMessage) showToast(manualRefreshMessage + ' — latest packaged data loaded');
       if (state.sheet === 'charts') setTimeout(() => refreshBalanceChartHydration(true), 80);
       if (state.sheet === 'reference') { refreshWorkbookSettings(); }
       else if (state.sheet === 'balance' || state.sheet === 'charts' || state.sheet === 'outages' || state.sheet === 'crude') { refreshWorkbookSettings(); }

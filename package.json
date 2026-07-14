@@ -15,6 +15,7 @@
     "kpler": "python3 src/kpler_pull.py",
     "kpler:dry-run": "python3 src/kpler_pull.py --dry-run",
     "kpler:preflight": "python3 src/kpler_pull.py --preflight",
+    "kpler:auth-check": "python3 src/kpler_pull.py --check-auth",
     "kpler:padd1:eia": "python3 src/kpler_padd1_eia_split.py",
     "kpler:padd1:eia:preflight": "python3 src/kpler_padd1_eia_split.py --preflight",
     "padd1": "python3 src/padd_1_distillate.py",

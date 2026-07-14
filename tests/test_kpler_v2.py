@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from kpler_config import PullSpec, RuntimeConfig, kpler_api_key, kpler_authorization_header  # noqa: E402
 from kpler_http import KplerHttpClient  # noqa: E402
-from kpler_pull import spec_to_kpler_params  # noqa: E402
+from kpler_pull import parse_args, run, spec_to_kpler_params  # noqa: E402
 from kpler_transform import kpler_content_to_long  # noqa: E402
 
 
@@ -116,6 +116,16 @@ class KplerV2Tests(unittest.TestCase):
         self.assertEqual(params["products"], "Gasoil/Diesel")
         self.assertEqual(params["withForecast"], "false")
         self.assertLess(params["startDate"], params["endDate"])
+
+    def test_auth_check_uses_configured_key_without_running_full_pull(self) -> None:
+        client = Mock()
+        with (
+            patch.dict(os.environ, {"KPLER_API_KEY": "sample-key", "KPLER_API_V2_BASIC_AUTH": ""}),
+            patch("kpler_pull.KplerHttpClient", return_value=client),
+        ):
+            exit_code = run(parse_args(["--check-auth"]))
+        self.assertEqual(exit_code, 0)
+        client.validate_auth.assert_called_once()
 
 
 if __name__ == "__main__":

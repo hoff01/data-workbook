@@ -31,6 +31,22 @@ npm run validate
 npm run verify:dashboard
 ```
 
+## Kpler API Key
+
+On Windows, double-click `Configure_Kpler_Auth.bat`. It creates the ignored
+root `.env.local` file from `.env.example` and opens it in Notepad. Paste the
+value after `Basic ` here, then save:
+
+```dotenv
+KPLER_API_KEY=your-key-value
+```
+
+On macOS/Linux, run `cp .env.example .env.local` and edit the same line. Check
+the file without calling Kpler using `npm run kpler:preflight`; the output must
+say `auth_configured=true`. Validate the key with one small API request using
+`npm run kpler:auth-check` (or `Kpler\run.ps1 -CheckAuth` on Windows). Never
+commit `.env.local` or a real key.
+
 The `update:*` commands rebuild `Diesel_Balance/index.html` and `Jet_Balance/index.html` after data changes, then run the dashboard freshness check. `npm run update:all` includes the live Kpler pull and fails visibly if a required Kpler step fails. Set `US_BALANCES_SKIP_KPLER_REFRESH=1` only when you intentionally want a warning-labeled run that keeps the existing local `Kpler/output/` files.
 
 ## Documentation

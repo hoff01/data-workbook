@@ -324,7 +324,7 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} frequency switches use shared data loader`, indexHtml, "try { await ensureDataForState({...state,frequency:nextFrequency}); }");
   assertIncludes(`${config.key} refresh button reloads dashboard data before rerender`, indexHtml, "document.getElementById('refreshBtn').addEventListener('click', () => { refreshDashboardData('Dashboard refreshed'); });");
   assertIncludes(`${config.key} changed-data update status is explicit`, indexHtml, "Updated — new data loaded");
-  assertIncludes(`${config.key} already-current update status is explicit`, indexHtml, "Checked — already current");
+  assertIncludes(`${config.key} unchanged-data refresh status is explicit`, indexHtml, "Refreshed — data unchanged");
   const productLabel = config.key === "jet" ? "Jet" : "Diesel";
   assertIncludes(`${config.key} Reference has product-specific weekly call output save button`, indexHtml, `Save ${productLabel} weekly call outputs`);
   assertIncludes(`${config.key} weekly call output request sends active workbook product`, indexHtml, "product:D.product?.key");
@@ -332,7 +332,7 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} weekly call output path is explicit`, indexHtml, "weekly_call_ouputs/outputs");
   assertIncludes(`${config.key} weekly call output save does not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(workbookProductLabel(lastUpdateJob.product)+' weekly call outputs saved in weekly_call_ouputs/outputs');");
   assertIncludes(`${config.key} changed-data update log is explicit`, indexHtml, "UPDATED — NEW DATA");
-  assertIncludes(`${config.key} already-current update log is explicit`, indexHtml, "CHECKED — ALREADY CURRENT");
+  assertIncludes(`${config.key} unchanged-data refresh log is explicit`, indexHtml, "REFRESHED — DATA UNCHANGED");
   assertIncludes(`${config.key} partial update status is explicit`, indexHtml, "Updated with warnings");
   assertIncludes(`${config.key} partial update log is explicit`, indexHtml, "REFRESH COMPLETE WITH WARNINGS");
   assertIncludes(`${config.key} changed-data update reload toast is explicit`, indexHtml, "New source data loaded; reloading dashboard");

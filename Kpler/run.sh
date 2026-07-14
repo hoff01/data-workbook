@@ -35,6 +35,13 @@ case "${1:-setup-preflight}" in
     load_local_env
     "$PYTHON" "$REPO_DIR/src/kpler_pull.py" --preflight
     ;;
+  auth-check)
+    if [[ ! -x "$PYTHON" ]]; then
+      setup
+    fi
+    load_local_env
+    "$PYTHON" "$REPO_DIR/src/kpler_pull.py" --check-auth
+    ;;
   run)
     if [[ ! -x "$PYTHON" ]]; then
       setup
@@ -48,7 +55,7 @@ case "${1:-setup-preflight}" in
     "$PYTHON" "$REPO_DIR/src/kpler_pull.py" --preflight
     ;;
   *)
-    echo "Usage: ./run.sh [setup|preflight|run|setup-preflight]" >&2
+    echo "Usage: ./run.sh [setup|preflight|auth-check|run|setup-preflight]" >&2
     exit 1
     ;;
 esac

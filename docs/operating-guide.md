@@ -29,7 +29,26 @@ The runner serves the dashboard over plain local HTTP at `http://127.0.0.1:8787`
    git clone https://github.com/hoff01/data-workbook.git US_Balances
    cd US_Balances
    ```
-5. Double-click `Open_Balance_Dashboards.bat` from the fully extracted repo folder. The launcher prepares Node, starts the current local server, and opens the exact local URL with the Windows default-browser shell. On first run it then creates the Python environment and automatically starts a forced `All` refresh. The page shows setup readiness, live progress, and whether new source data was loaded or the dashboard source data was already current.
+5. Double-click `Open_Balance_Dashboards.bat` from the fully extracted repo folder. The launcher prepares Node, starts the current local server, and opens the exact local URL with the Windows default-browser shell. On first run it then creates the Python environment and automatically starts a forced `All` refresh. The page shows setup readiness, live progress, and whether new source data was loaded or the source data was unchanged while the workbooks were still rebuilt.
+
+### Add The Kpler API Key
+
+1. Double-click `Configure_Kpler_Auth.bat` in the repo root.
+2. In the `.env.local` file that opens, set `KPLER_API_KEY` to the value after
+   `Basic `, then save and close Notepad. The file is ignored by git.
+3. Confirm the repo can see the key without an API call:
+   ```powershell
+   .\Kpler\run.ps1 -Preflight
+   ```
+   The output must include `auth_configured=true`.
+4. Validate the credential with one small Kpler Flows request:
+   ```powershell
+   .\Kpler\run.ps1 -CheckAuth
+   ```
+
+Do not paste a real key into source code, `.env.example`, a commit, or a GitHub
+issue. For macOS/Linux, copy `.env.example` to `.env.local`, edit the same key,
+then run `./Kpler/run.sh preflight` and `./Kpler/run.sh auth-check`.
 
 Keep Git certificate verification enabled. GitHub uses a publicly trusted
 certificate, so a normal Git for Windows installation should push without a
@@ -184,9 +203,9 @@ The final status should show `## main...origin/main` and no modified or untracke
 
 The launcher deliberately bypasses any inherited `DASHBOARD_OPEN_BROWSER=0` value and delegates the final URL to Windows ShellExecute, which uses the configured default browser.
 
-The final result distinguishes `Updated — new data loaded` from `Checked — already current`; it never uses a generic success message to imply that a source published a newer observation. An explicit operator skip is labeled with warnings in amber. Any Kpler or other required-source failure is labeled `Failed`, reports a nonzero exit code, remains visible in red, and does not reload the workbook as though new data were available.
+The final result distinguishes `Updated — new data loaded` from `Refreshed — data unchanged`; it never uses a generic success message to imply that a source published a newer observation. Both outcomes rebuild and reload the workbooks. An explicit operator skip is labeled with warnings in amber. Any Kpler or other required-source failure is labeled `Failed`, reports a nonzero exit code, remains visible in red, and does not reload the workbook as though new data were available.
 
-When a launcher or dashboard refresh completes, already-open Diesel and Jet workbook tabs automatically reload the newly built dashboard files. If the source published no newer observation, the result says `Checked — already current` and the displayed latest date remains unchanged.
+When a launcher or dashboard refresh completes, already-open Diesel and Jet workbook tabs automatically reload the newly built dashboard files. If the source published no newer observation, the result says `Refreshed — data unchanged`, the workbooks are still rebuilt and reloaded, and the displayed latest source date correctly remains unchanged. The top `Refresh dashboard` button also performs a full page reload so packaged data files are read again instead of only rerendering the current in-memory copy.
 
 For an intentional open-only diagnostic run, use `Start_Balance_Runner.ps1 -NoRefresh`. Normal `.bat` clicks do not use this escape hatch.
 

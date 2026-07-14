@@ -17,6 +17,11 @@ Required Kpler API v2 key:
 .\run.ps1 -Run
 ```
 
+From the repo root, the simplest Windows setup is to double-click
+`Configure_Kpler_Auth.bat`, paste the key into `.env.local`, and save. Confirm
+that the file is detected with `.\Kpler\run.ps1 -Preflight`, then validate the
+credential with one small Flows request using `.\Kpler\run.ps1 -CheckAuth`.
+
 You can also copy and edit the PowerShell environment template:
 
 ```powershell
@@ -60,6 +65,7 @@ macOS/Linux:
 chmod +x ./run.sh
 ./run.sh setup-preflight
 export KPLER_API_KEY="..."
+./run.sh auth-check
 ./run.sh run
 ```
 

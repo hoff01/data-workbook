@@ -259,7 +259,7 @@ function setStatus(job){
   const state = job?.status || 'idle';
   const result = job?.result;
   const productLabel = job?.product === 'jet' ? 'Jet' : job?.product === 'diesel' ? 'Diesel' : '';
-  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly call outputs saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' checked — already current' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' current with warnings' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly call outputs' : job.group + ' refresh running';
+  statusEl.textContent = state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly call outputs saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' refreshed — data unchanged' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' refreshed with warnings — data unchanged' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly call outputs' : job.group + ' refresh running';
   statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
   buttons.forEach(button => button.disabled = state === 'running' || !refreshReady);
   logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : refreshReady ? 'Refresh tools are ready. The one-click launcher starts an All refresh automatically.' : 'First-run setup is installing the local refresh tools. The launcher will start an All refresh automatically when setup finishes.';
@@ -448,7 +448,7 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
             ? `Refresh completed with warnings; dashboard source data is ${job.dataChanged ? "updated" : "already current"}. Review skipped steps.`
             : job.dataChanged
               ? "Refresh completed; new dashboard source data was loaded and the workbooks were rebuilt."
-              : "Refresh completed; upstream source data was already current and the workbooks were rebuilt."
+              : "Refresh completed; upstream source data was unchanged, and the workbooks were rebuilt anyway."
       : `Update failed (exit code ${code ?? "n/a"}${signal ? `, signal ${signal}` : ""}).`;
     appendJobLine(job, code === 0 ? "stdout" : "stderr", completionMessage);
     currentProcess = null;

@@ -105,7 +105,19 @@ try {
   assert.equal(job.signal, null);
   assert.equal(job.result, "current");
   assert.equal(job.dataChanged, false);
-  assert.match(job.lines.join("\n"), /upstream source data was already current/);
+  assert.match(job.lines.join("\n"), /source data was unchanged, and the workbooks were rebuilt anyway/);
+
+  const repeated = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "all", force: true }),
+  });
+  assert.equal(repeated.response.status, 202);
+  assert.notEqual(repeated.body.job.id, job.id, "a repeated forced refresh must start a new job");
+  const repeatedJob = await waitForTerminalJob(baseUrl);
+  assert.equal(repeatedJob.status, "succeeded");
+  assert.equal(repeatedJob.result, "current");
+  assert.match(repeatedJob.lines.join("\n"), /source data was unchanged, and the workbooks were rebuilt anyway/);
 
   const missingWeeklyOutputProduct = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",

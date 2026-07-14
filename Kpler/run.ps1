@@ -1,6 +1,7 @@
 param(
     [switch]$Setup,
     [switch]$Preflight,
+    [switch]$CheckAuth,
     [switch]$Run,
     [switch]$Force
 )
@@ -88,7 +89,7 @@ function Test-Environment {
     }
 }
 
-if (!$Setup -and !$Preflight -and !$Run) {
+if (!$Setup -and !$Preflight -and !$CheckAuth -and !$Run) {
     $Setup = $true
     $Preflight = $true
 }
@@ -102,6 +103,13 @@ if ($Preflight) {
     Test-Environment
     & $Python (Join-Path $RepoRoot "src\kpler_pull.py") --preflight
     Assert-NativeSuccess "Kpler preflight"
+}
+
+if ($CheckAuth) {
+    Set-RuntimeEnvironment
+    Test-Environment
+    & $Python (Join-Path $RepoRoot "src\kpler_pull.py") --check-auth
+    Assert-NativeSuccess "Kpler auth check"
 }
 
 if ($Run) {

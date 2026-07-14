@@ -443,6 +443,13 @@ def run(args: argparse.Namespace) -> int:
     ensure_directories()
     config = runtime_config()
     specs = filter_pull_specs(build_pull_specs(config))
+    if args.check_auth:
+        if not has_kpler_credentials():
+            raise RuntimeError("Missing Kpler API v2 key. Run Configure_Kpler_Auth.bat or set KPLER_API_KEY in .env.local.")
+        client = KplerHttpClient(config)
+        client.validate_auth(spec_to_kpler_params(specs[0], config.snapshot_date))
+        print(f"kpler auth check ok api=v2 base_url={api_base_url()} pull={specs[0].name}")
+        return 0
     if args.dry_run or args.preflight:
         payload = dry_run_manifest(specs)
         payload["runtime_config"] = {
@@ -517,6 +524,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Pull Kpler flows and build balance-ready outputs.")
     parser.add_argument("--dry-run", action="store_true", help="Build pull specs and manifest without importing/calling Kpler.")
     parser.add_argument("--preflight", action="store_true", help="Show dynamic runtime settings and write a manifest without calling Kpler.")
+    parser.add_argument("--check-auth", action="store_true", help="Validate the configured Kpler API v2 key with one small Flows request.")
     return parser.parse_args(argv)
 
 

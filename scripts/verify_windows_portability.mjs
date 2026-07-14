@@ -46,7 +46,8 @@ requireText("Start_Balance_Runner.ps1", 'Kpler\\config\\local.env.ps1', "optiona
 requireText("src/open_dashboard.ts", "function dashboardServerInvocation()", "portable dashboard server invocation");
 requireText("src/open_dashboard.ts", "EXPECTED_SERVER_BUILD_ID", "stale local server rejection");
 requireText("src/dashboard_update_server.ts", "const tsxCli = process.env.US_BALANCES_TSX_CLI;", "portable update-job invocation");
-requireText("src/dashboard_update_server.ts", "upstream source data was already current", "truthful already-current result");
+requireText("src/dashboard_update_server.ts", "source data was unchanged, and the workbooks were rebuilt anyway", "forced refresh rebuilds unchanged source data");
+requireText("scripts/test_dashboard_update_server.mjs", "a repeated forced refresh must start a new job", "repeated unchanged refresh contract test");
 requireText("src/dashboard_update_server.ts", "new dashboard source data was loaded", "truthful changed-data result");
 requireText("src/update_data_fingerprint.ts", "VOLATILE_CSV_COLUMNS", "volatile metadata is excluded from change detection");
 requireText("scripts/test_update_data_fingerprint.ts", "volatile-only refresh must remain current", "truthful current-data regression test");
@@ -81,6 +82,8 @@ requireText(".gitattributes", "*.bat text eol=crlf", "Windows batch line endings
 requireText(".gitattributes", "*.ps1 text eol=crlf", "Windows PowerShell line endings");
 requireText(".gitignore", "Kpler/config/local.env", "Kpler secret exclusion");
 requireText(".gitignore", "Kpler/config/local.env.ps1", "Kpler PowerShell secret exclusion");
+requireText(".env.example", "KPLER_API_KEY=", "root Kpler credential template");
+requireText("Configure_Kpler_Auth.bat", 'copy /Y "%EXAMPLE%" "%LOCAL_ENV%"', "one-click ignored Kpler credential file setup");
 
 if (failures.length) {
   console.error(failures.join("\n"));
