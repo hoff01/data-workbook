@@ -123,6 +123,42 @@ jobs:
             & .\Kpler\run.ps1 -Preflight
             $python = Join-Path $env:USERPROFILE "US_Balances\python\.venv\Scripts\python.exe"
             & $python -m unittest tests.test_kpler_v2 tests.test_kpler_padd1_eia_split
+            if ($LASTEXITCODE -ne 0) {
+              throw "Windows Python unit tests failed."
+            }
+
+            $sitePackages = (& $python -c "import site; print(site.getsitepackages()[0])").Trim()
+            Get-ChildItem $sitePackages -Directory |
+              Where-Object { $_.Name -eq "pip" } |
+              Remove-Item -Recurse -Force
+            $missingPipExitCode = 0
+            try {
+              & $python -m pip --version 2>$null | Out-Null
+              $missingPipExitCode = $LASTEXITCODE
+            }
+            catch {
+              $missingPipExitCode = 1
+            }
+            if ($missingPipExitCode -eq 0) {
+              throw "The damaged-environment fixture still contains pip."
+            }
+
+            & .\Start_Balance_Runner.bat -NoOpen -Port $port
+            if ($LASTEXITCODE -ne 0) {
+              throw "The Windows 5.1 launcher failed to recover the damaged Python environment."
+            }
+            & $python -m pip --version
+            if ($LASTEXITCODE -ne 0) {
+              throw "The launcher did not restore pip through the selected Python interpreter."
+            }
+            & $python -m pip check
+            if ($LASTEXITCODE -ne 0) {
+              throw "The repaired Windows environment failed Python -m pip check."
+            }
+            $recoveredHealth = Invoke-RestMethod "http://127.0.0.1:$port/api/health"
+            if (!$recoveredHealth.refreshReady) {
+              throw "Refresh tools were not marked ready after pip recovery."
+            }
           }
           finally {
             Remove-Item Env:\US_BALANCES_BROWSER_OPEN_PROBE -ErrorAction SilentlyContinue
