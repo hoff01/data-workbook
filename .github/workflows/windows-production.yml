@@ -73,10 +73,8 @@ jobs:
           $port = 8797
           $health = $null
           $browserProbe = Join-Path $env:RUNNER_TEMP "us-balances-opened-url.txt"
-          $refreshProbe = Join-Path $env:RUNNER_TEMP "us-balances-refresh-start.json"
           try {
             $env:US_BALANCES_BROWSER_OPEN_PROBE = $browserProbe
-            $env:US_BALANCES_REFRESH_START_PROBE = $refreshProbe
             $env:DASHBOARD_OPEN_BROWSER = "0"
             & .\Open_Diesel_Dashboard.bat -Port $port
             if ($LASTEXITCODE -ne 0) {
@@ -89,13 +87,6 @@ jobs:
             $expectedUrl = "http://127.0.0.1:$port/Diesel_Balance/index.html"
             if ($openedUrl -ne $expectedUrl) {
               throw "Windows browser handoff mismatch: expected $expectedUrl, received $openedUrl"
-            }
-            if (!(Test-Path $refreshProbe)) {
-              throw "Normal Windows .bat click did not request its automatic refresh."
-            }
-            $refreshStart = Get-Content -Raw $refreshProbe | ConvertFrom-Json
-            if ($refreshStart.url -ne "http://127.0.0.1:$port/api/update/start" -or $refreshStart.group -ne "all" -or !$refreshStart.force) {
-              throw "Windows automatic refresh contract mismatch: $($refreshStart | ConvertTo-Json -Compress)"
             }
             for ($attempt = 0; $attempt -lt 30; $attempt += 1) {
               try {
@@ -111,6 +102,10 @@ jobs:
             }
             if (!$health.buildId -or !$health.refreshReady) {
               throw "Windows dashboard server did not report the current build and refresh readiness."
+            }
+            $idleStatus = Invoke-RestMethod "http://127.0.0.1:$port/api/update/status"
+            if ($null -ne $idleStatus.job) {
+              throw "Windows launcher started an update without a dashboard button click."
             }
             $expectedRoot = (Resolve-Path ".").Path.TrimEnd("\")
             $actualRoot = [System.IO.Path]::GetFullPath([string]$health.root).TrimEnd("\")
@@ -131,7 +126,6 @@ jobs:
           }
           finally {
             Remove-Item Env:\US_BALANCES_BROWSER_OPEN_PROBE -ErrorAction SilentlyContinue
-            Remove-Item Env:\US_BALANCES_REFRESH_START_PROBE -ErrorAction SilentlyContinue
             Remove-Item Env:\DASHBOARD_OPEN_BROWSER -ErrorAction SilentlyContinue
             if ($health -and $health.pid) {
               Stop-Process -Id ([int]$health.pid) -Force -ErrorAction SilentlyContinue
