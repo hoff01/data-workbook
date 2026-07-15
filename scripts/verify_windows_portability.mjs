@@ -23,7 +23,7 @@ const pipPolicyFiles = [
   "Start_Balance_Runner.command",
   "Kpler/run.ps1",
   "Kpler/run.sh",
-  "weekly_call_ouputs/run_weekly_images.bat",
+  "weekly_call_outputs/run_weekly_images.bat",
   "docs/operating-guide.md",
 ];
 const directPipCommand = /(?:^|[\s;&|])["']?(?:pip|pip3)(?:\.exe)?["']?\s+(?:--version|install|uninstall|download|wheel|check|list|show|freeze|config|cache|debug|inspect|index|hash)\b/im;
@@ -105,8 +105,8 @@ requireText("src/dashboard_update_server.ts", "Refresh tools are still being pre
 rejectText("src/dashboard_update_server.ts", "DASHBOARD_POWER_DFO_STARTUP_REFRESH", "server startup refresh path removed");
 requireText("src/dashboard_update_server.ts", 'process.env.US_BALANCES_PYTHON', "weekly call outputs reuse the installed local Python runtime");
 requireText("src/dashboard_update_server.ts", '"weekly-call-outputs"', "weekly call output server action");
-requireText("weekly_call_ouputs/generate_weekly_images.py", 'env.get("US_BALANCES_NODE_COMMAND"', "weekly output builder reuses the local Node runtime");
-requireText("weekly_call_ouputs/generate_weekly_images.py", 'env.get("US_BALANCES_TSX_CLI"', "weekly output builder reuses the local tsx CLI");
+requireText("weekly_call_outputs/generate_weekly_images.py", 'env.get("US_BALANCES_NODE_COMMAND"', "weekly output builder reuses the local Node runtime");
+requireText("weekly_call_outputs/generate_weekly_images.py", 'env.get("US_BALANCES_TSX_CLI"', "weekly output builder reuses the local tsx CLI");
 requireText("package.json", '"test:dashboard-runner"', "dashboard runner contract test");
 const lockedEsbuildVersion = packageLock.packages?.["node_modules/esbuild"]?.version;
 if (!lockedEsbuildVersion || packageJson.allowScripts?.[`esbuild@${lockedEsbuildVersion}`] !== true) {
@@ -137,8 +137,13 @@ requireText("Kpler/run.ps1", '$venvWasCreated = $true', "Kpler environment recre
 requireText("Start_Balance_Runner.command", "-m ensurepip --upgrade", "macOS setup repairs missing pip through Python");
 requireText("Start_Balance_Runner.command", "VENV_WAS_CREATED", "new macOS virtual environments cannot trust an old dependency stamp");
 requireText("Kpler/run.sh", "-m ensurepip --upgrade", "Kpler shell setup repairs missing pip through Python");
-requireText("weekly_call_ouputs/run_weekly_images.bat", "-m ensurepip --upgrade", "weekly image setup repairs missing pip through Python");
-for (const path of ["Start_Balance_Runner.command", "Kpler/run.ps1", "Kpler/run.sh", "weekly_call_ouputs/run_weekly_images.bat"]) {
+requireText("weekly_call_outputs/run_weekly_images.bat", "-m ensurepip --upgrade", "weekly image setup repairs missing pip through Python");
+requireText("weekly_call_outputs/run_weekly_images.bat", "US_BALANCES_RUNTIME_ROOT", "weekly image environment honors the shared US Balances runtime root");
+requireText("weekly_call_outputs/run_weekly_images.bat", "%USERPROFILE%\\US_Balances", "weekly image environment defaults beside the other user-local US Balances environments");
+requireText("weekly_call_outputs/run_weekly_images.bat", 'set "PYTHON_ROOT=%RUNTIME_ROOT%\\weekly_call_outputs"', "weekly image runtime has an explicit managed folder");
+requireText("weekly_call_outputs/run_weekly_images.bat", 'set "VENV_DIR=%PYTHON_ROOT%\\.venv"', "weekly image environment stays under its managed runtime folder");
+rejectText("weekly_call_outputs/run_weekly_images.bat", "%~dp0.venv", "weekly image environment must not live inside the portable code and output package");
+for (const path of ["Start_Balance_Runner.command", "Kpler/run.ps1", "Kpler/run.sh", "weekly_call_outputs/run_weekly_images.bat"]) {
   requireText(path, "rebuilding", "stale pip metadata triggers a managed-environment rebuild");
 }
 requireText("Kpler/run.ps1", "$cmd = @(Resolve-SystemPython)", "Kpler single-command Python resolution remains an array");
@@ -163,7 +168,7 @@ requireText(".gitignore", "Kpler/config/local.env", "Kpler secret exclusion");
 requireText(".gitignore", "Kpler/config/local.env.ps1", "Kpler PowerShell secret exclusion");
 requireText(".env.example", "KPLER_API_KEY=", "root Kpler credential template");
 requireText("Configure_Kpler_Auth.bat", 'copy /Y "%EXAMPLE%" "%LOCAL_ENV%"', "one-click ignored Kpler credential file setup");
-for (const requirements of ["requirements.txt", "Kpler/requirements.txt", "weekly_call_ouputs/requirements.txt"]) {
+for (const requirements of ["requirements.txt", "Kpler/requirements.txt", "weekly_call_outputs/requirements.txt"]) {
   requireText(requirements, "pip-system-certs==5.3", "system certificate support in every Python environment");
 }
 

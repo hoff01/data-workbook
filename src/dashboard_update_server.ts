@@ -119,7 +119,7 @@ const settingsRebuildScript = process.env.US_BALANCES_SETTINGS_REBUILD_SCRIPT
   : "";
 const weeklyCallOutputScript = process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT
   ? resolve(process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT)
-  : join(ROOT, "weekly_call_ouputs", "generate_weekly_images.py");
+  : join(ROOT, "weekly_call_outputs", "generate_weekly_images.py");
 const validGroups = new Set<DashboardJobGroup>([
   "weekly",
   "monthly",
@@ -272,7 +272,7 @@ function setStatus(job){
   const state = job?.status || 'idle';
   const result = job?.result;
   const productLabel = job?.product === 'jet' ? 'Jet' : job?.product === 'diesel' ? 'Diesel' : '';
-  statusEl.textContent = state === 'idle' && settingsRebuildRunning ? 'Rebuilding forecast horizon…' : state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly table image saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' refreshed — data unchanged' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' refreshed with warnings — data unchanged' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly table image' : job.group + ' refresh running';
+  statusEl.textContent = state === 'idle' && settingsRebuildRunning ? 'Rebuilding forecast horizon…' : state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly table and bar charts saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' refreshed — data unchanged' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' refreshed with warnings — data unchanged' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly table and bar charts' : job.group + ' refresh running';
   statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
   buttons.forEach(button => button.disabled = state === 'running' || settingsRebuildRunning || !refreshReady);
   logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : settingsRebuildRunning ? 'The forecast horizon is rebuilding and verifying both dashboards. Refresh buttons will unlock when it commits.' : refreshReady ? 'No refresh is running. Choose a refresh button to begin.' : 'First-run setup is installing the local refresh tools. No refresh will start automatically.';
@@ -592,7 +592,7 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
       ? "Update process exited without reporting pipeline startup; no update steps were confirmed. Reopen the dashboard with the current launcher and retry."
       : code === 0
       ? job.result === "saved"
-        ? `${outputProduct === "jet" ? "Jet" : "Diesel"} weekly table image was saved to weekly_call_ouputs/outputs in the latest actual-week archive.`
+        ? `${outputProduct === "jet" ? "Jet" : "Diesel"} weekly table and bar charts were saved to weekly_call_outputs/outputs in the latest actual-week archive.`
         : job.result === null
           ? "Refresh completed and the workbooks were rebuilt, but the source change comparison was unavailable."
           : hasWarnings

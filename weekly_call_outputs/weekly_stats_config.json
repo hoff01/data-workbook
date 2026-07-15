@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-07-13T20:22:07-04:00",
-  "actual_week_ending": "2026-07-03",
-  "product": "jet",
-  "weekly_json": "jet_weekly_stats.json",
+  "product": "diesel",
+  "forecast_weeks": 5,
   "dpi": 180,
+  "run_balance_json_builder": true,
+  "output_folder": "outputs",
   "format": {
     "font_scale": 1.0,
     "colors": {
@@ -14,6 +14,7 @@
       "forecast_highlight": "#e2cf39",
       "region_fill": "#d7cdb8",
       "section_fill": "#e5e7e9",
+      "positive": "#17823b",
       "negative": "#d52317",
       "white": "#ffffff"
     },
@@ -31,13 +32,21 @@
       "body_font_size": 6.7,
       "us_section_gap_rows": 0.65,
       "repeat_header_before_us": true
+    },
+    "chart": {
+      "width_in": 4.25,
+      "height_in": 2.55,
+      "left": 0.16,
+      "right": 0.985,
+      "bottom": 0.23,
+      "top": 0.76,
+      "bar_width": 0.82,
+      "title_font_size": 13.5,
+      "x_font_size": 8.2,
+      "y_font_size": 7.6,
+      "value_font_size": 8.0,
+      "title_pad": 12.0,
+      "value_label_offset_points": 4.0
     }
-  },
-  "images": [
-    {
-      "file": "jet_weekly_balance_table.png",
-      "width_px": 1323,
-      "height_px": 1269
-    }
-  ]
+  }
 }

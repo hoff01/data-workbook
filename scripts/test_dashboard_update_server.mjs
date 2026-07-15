@@ -270,7 +270,7 @@ try {
   assert.equal(weeklyOutputsJob.signal, null);
   assert.equal(weeklyOutputsJob.result, "saved");
   assert.equal(weeklyOutputsJob.dataChanged, true);
-  assert.match(weeklyOutputsJob.lines.join("\n"), /Jet weekly table image was saved/);
+  assert.match(weeklyOutputsJob.lines.join("\n"), /Jet weekly table and bar charts were saved/);
 
   writeFileSync(silentNoopFile, "trigger\n");
   const silentNoopStarted = await fetchJson(`${baseUrl}/api/update/start`, {

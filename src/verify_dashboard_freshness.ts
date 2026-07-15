@@ -102,6 +102,7 @@ type WeeklyCallCatalogEntry = {
   weekly_json: string;
   manifest: string;
   table_image: string;
+  bar_chart_images: string[];
   generated_at: string;
 };
 
@@ -115,6 +116,24 @@ type WeeklyCallManifest = {
   product: ProductKey;
   weekly_json: string;
   images: Array<{ file: string; width_px: number; height_px: number }>;
+};
+
+type WeeklyCallInventoryChart = {
+  week_ending: string;
+  status: "actual" | "forecast";
+  labels: string[];
+  region_keys: string[];
+  values_mb: number[];
+};
+
+type WeeklyCallPayload = {
+  schema_version: number;
+  product?: { key?: string; stats_title?: string };
+  inventory_changes?: {
+    unit?: string;
+    actual?: WeeklyCallInventoryChart;
+    forecasts?: WeeklyCallInventoryChart[];
+  };
 };
 
 type ProductConfig = {
@@ -338,11 +357,12 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} changed-data update status is explicit`, indexHtml, "Updated — new data loaded");
   assertIncludes(`${config.key} unchanged-data refresh status is explicit`, indexHtml, "Refreshed — data unchanged");
   const productLabel = config.key === "jet" ? "Jet" : "Diesel";
-  assertIncludes(`${config.key} Reference has product-specific weekly table image save button`, indexHtml, `Save ${productLabel} weekly table image`);
+  assertIncludes(`${config.key} Reference has product-specific weekly image save button`, indexHtml, `Save ${productLabel} weekly table and bar charts`);
   assertIncludes(`${config.key} weekly call output request sends active workbook product`, indexHtml, "product:D.product?.key");
-  assertIncludes(`${config.key} weekly table image save status is product-specific`, indexHtml, "Saved — '+productLabel+' weekly table image ready");
-  assertIncludes(`${config.key} weekly call output path is explicit`, indexHtml, "weekly_call_ouputs/outputs");
-  assertIncludes(`${config.key} weekly table image save does not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(workbookProductLabel(lastUpdateJob.product)+' weekly table image saved in weekly_call_ouputs/outputs');");
+  assertIncludes(`${config.key} weekly image save status is product-specific`, indexHtml, "Saved — '+productLabel+' weekly table and bar charts ready");
+  assertIncludes(`${config.key} weekly call output path is explicit`, indexHtml, "weekly_call_outputs/outputs");
+  assertIncludes(`${config.key} weekly call output steps include all bar charts`, indexHtml, "Render latest EIA Actuals and first two Forecast bar charts");
+  assertIncludes(`${config.key} weekly image save does not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(workbookProductLabel(lastUpdateJob.product)+' weekly table and bar charts saved in weekly_call_outputs/outputs');");
   assertIncludes(`${config.key} changed-data update log is explicit`, indexHtml, "UPDATED — NEW DATA");
   assertIncludes(`${config.key} unchanged-data refresh log is explicit`, indexHtml, "REFRESHED — DATA UNCHANGED");
   assertIncludes(`${config.key} partial update status is explicit`, indexHtml, "Updated with warnings");
@@ -698,9 +718,9 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
 }
 
 async function verifyWeeklyCallArchives(): Promise<string[]> {
-  const outputRoot = join("weekly_call_ouputs", "outputs");
+  const outputRoot = join("weekly_call_outputs", "outputs");
   const catalog = await readJson<WeeklyCallCatalog>(join(outputRoot, "index.json"));
-  if (catalog.schema_version !== 3) throw new Error(`weekly call catalog schema must be 3, received ${catalog.schema_version}`);
+  if (catalog.schema_version !== 4) throw new Error(`weekly call catalog schema must be 4, received ${catalog.schema_version}`);
   const results: string[] = [];
   for (const config of PRODUCTS) {
     const latestWeekly = await latestCsvDate(config.weeklyCsv);
@@ -712,19 +732,50 @@ async function verifyWeeklyCallArchives(): Promise<string[]> {
     assertEqual(`${config.key} weekly call archive latest week`, entry.actual_week_ending, latestWeekly);
     assertEqual(`${config.key} weekly call archive manifest name`, entry.manifest, `${config.key}_manifest.json`);
     assertEqual(`${config.key} weekly call archive table image name`, entry.table_image, `${config.key}_weekly_balance_table.png`);
+    const expectedBarCharts = [
+      `${config.key}_eia_actuals.png`,
+      `${config.key}_forecast_week_1.png`,
+      `${config.key}_forecast_week_2.png`,
+    ];
+    assertEqual(`${config.key} weekly call archive bar chart names`, entry.bar_chart_images.join("|"), expectedBarCharts.join("|"));
     const archiveDir = join(outputRoot, entry.folder);
     const manifest = await readJson<WeeklyCallManifest>(join(archiveDir, entry.manifest));
     assertEqual(`${config.key} weekly call manifest product`, manifest.product, config.key);
     assertEqual(`${config.key} weekly call manifest latest week`, manifest.actual_week_ending, latestWeekly);
     assertEqual(`${config.key} weekly call manifest JSON`, manifest.weekly_json, entry.weekly_json);
-    if (manifest.images.length !== 1) throw new Error(`${config.key} weekly call manifest expected 1 image, received ${manifest.images.length}`);
-    const tableImage = manifest.images[0];
+    if (manifest.images.length !== 4) throw new Error(`${config.key} weekly call manifest expected 4 images, received ${manifest.images.length}`);
+    const tableImage = manifest.images.find((image) => image.file === entry.table_image);
+    if (!tableImage) throw new Error(`${config.key} weekly call manifest is missing its table image`);
     if (tableImage.file !== entry.table_image || tableImage.width_px !== 1323 || tableImage.height_px !== 1269) {
-      throw new Error(`${config.key} weekly call table image must be the only 1323 x 1269 PNG`);
+      throw new Error(`${config.key} weekly call table image must be a 1323 x 1269 PNG`);
     }
-    const payload = await readJson<{ product?: { key?: string; stats_title?: string } }>(join(archiveDir, entry.weekly_json));
+    for (const chartName of expectedBarCharts) {
+      const chartImage = manifest.images.find((image) => image.file === chartName);
+      if (!chartImage || chartImage.width_px !== 765 || chartImage.height_px !== 458) {
+        throw new Error(`${config.key} weekly call bar chart ${chartName} must be a 765 x 458 PNG`);
+      }
+    }
+    const payload = await readJson<WeeklyCallPayload>(join(archiveDir, entry.weekly_json));
+    if (payload.schema_version !== 3) throw new Error(`${config.key} weekly call JSON schema must be 3`);
     assertEqual(`${config.key} weekly call JSON product`, payload.product?.key ?? "", config.key);
     if (payload.product?.stats_title) throw new Error(`${config.key} weekly call JSON still contains a stats title`);
+    const actualChart = payload.inventory_changes?.actual;
+    const forecastCharts = payload.inventory_changes?.forecasts ?? [];
+    if (payload.inventory_changes?.unit !== "million barrels" || !actualChart || forecastCharts.length !== 2) {
+      throw new Error(`${config.key} weekly call JSON must contain one actual and two forecast inventory charts in million barrels`);
+    }
+    if (actualChart.status !== "actual" || forecastCharts.some((chart) => chart.status !== "forecast")) {
+      throw new Error(`${config.key} weekly call JSON inventory chart statuses are incorrect`);
+    }
+    const expectedBars = config.key === "diesel" ? 7 : 6;
+    for (const chart of [actualChart, ...forecastCharts]) {
+      if (chart.labels.length !== expectedBars || chart.region_keys.length !== expectedBars || chart.values_mb.length !== expectedBars) {
+        throw new Error(`${config.key} weekly call chart ${chart.week_ending} expected ${expectedBars} regional bars`);
+      }
+      if (chart.values_mb.some((value) => !Number.isFinite(value))) {
+        throw new Error(`${config.key} weekly call chart ${chart.week_ending} contains a non-finite value`);
+      }
+    }
     for (const image of manifest.images) {
       const content = await readFile(join(archiveDir, image.file));
       if (content.byteLength < 1_000) throw new Error(`${config.key} weekly call image ${image.file} is unexpectedly small`);

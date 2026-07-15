@@ -113,11 +113,13 @@ If a browser shows a certificate warning, the URL is wrong for this local runner
    - `Power DFO` for Northeast diesel power-generation context
    - `Other` for supporting exports/context
    - `All`, `Complete`, or the workbook's top `Refresh dashboard` button for a forced full pipeline run
-4. To create the weekly table images, open each workbook's `Reference` tab and
+4. To create the weekly call images, open each workbook's `Reference` tab and
    select its product-specific save button. Wait for `Saved — Diesel weekly
-   table image ready` and `Saved — Jet weekly table image ready`; both dated
-   product packages are written under
-   `weekly_call_ouputs\outputs` without overwriting each other.
+   table and bar charts ready` and `Saved — Jet weekly table and bar charts
+   ready`; both dated product packages are written under
+   `weekly_call_outputs\outputs` without overwriting each other. Each set has
+   one title-free table, the latest EIA Actuals bar chart, and the first two
+   Forecast bar charts.
 5. Review `Diesel Balance` and `Jet Balance`.
 6. Commit and push refreshed outputs when the checks pass:
    ```powershell
@@ -312,9 +314,9 @@ Use this before tomorrow-morning or shared-drive use:
 4. Switch Balance, Charts, Crude Runs, Outages, and Reference.
 5. Toggle Monthly/Weekly.
 6. Confirm shared saves do not show the offline/local-only message.
-7. In each Reference tab, save the product's weekly table image and confirm the
-   product-specific status, current actual-week folder, single untitled table
-   PNG, and manifest for both Diesel and Jet.
+7. In each Reference tab, save the product's weekly call images and confirm the
+   product-specific status, current actual-week folder, one untitled table PNG,
+   three inventory-change bar-chart PNGs, and manifest for both Diesel and Jet.
 8. Run:
    ```bash
    npm run typecheck

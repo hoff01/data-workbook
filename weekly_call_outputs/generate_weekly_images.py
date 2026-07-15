@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Generate a weekly balance table image.
+"""Generate weekly balance table and inventory-change bar-chart images.
 
 The normal workflow is:
 1. Run the balance repository's existing full-bundle JSON generator.
 2. Build a compact weekly-only JSON contract from that bundle.
-3. Render the table PNG exclusively from the compact weekly JSON.
+3. Render the table and bar-chart PNGs exclusively from the compact weekly JSON.
 
-The package is intentionally relocatable.  Put ``weekly_call_ouputs`` directly
+The package is intentionally relocatable.  Put ``weekly_call_outputs`` directly
 inside another compatible balance repository and run the Windows launcher.
 """
 
@@ -33,6 +33,7 @@ matplotlib.use("Agg")
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+from matplotlib.ticker import FuncFormatter, MaxNLocator
 
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -45,6 +46,7 @@ ACTUAL_FILL = "#eef0f2"
 FORECAST_HIGHLIGHT = "#e2cf39"
 REGION_FILL = "#d7cdb8"
 SECTION_FILL = "#e5e7e9"
+POSITIVE = "#17823b"
 NEGATIVE = "#d52317"
 WHITE = "#ffffff"
 
@@ -58,6 +60,7 @@ DEFAULT_FORMAT: dict[str, Any] = {
         "forecast_highlight": FORECAST_HIGHLIGHT,
         "region_fill": REGION_FILL,
         "section_fill": SECTION_FILL,
+        "positive": POSITIVE,
         "negative": NEGATIVE,
         "white": WHITE,
     },
@@ -75,6 +78,21 @@ DEFAULT_FORMAT: dict[str, Any] = {
         "body_font_size": 6.7,
         "us_section_gap_rows": 0.65,
         "repeat_header_before_us": True,
+    },
+    "chart": {
+        "width_in": 4.25,
+        "height_in": 2.55,
+        "left": 0.16,
+        "right": 0.985,
+        "bottom": 0.23,
+        "top": 0.76,
+        "bar_width": 0.82,
+        "title_font_size": 13.5,
+        "x_font_size": 8.2,
+        "y_font_size": 7.6,
+        "value_font_size": 8.0,
+        "title_pad": 12.0,
+        "value_label_offset_points": 4.0,
     },
 }
 
@@ -157,6 +175,7 @@ PRODUCT_LAYOUTS: dict[str, dict[str, Any]] = {
             "padd5": "padd5",
             "us": "us",
         },
+        "chart_labels": ["P1\nA/B", "P1 C", "P2", "P3", "P4", "P5", "Total"],
     },
     "jet": {
         "base_regions": ["padd1", "padd2", "padd3", "padd4", "padd5"],
@@ -226,6 +245,7 @@ PRODUCT_LAYOUTS: dict[str, dict[str, Any]] = {
             "padd5": "padd5",
             "us": "us",
         },
+        "chart_labels": ["P1", "P2", "P3", "P4", "P5", "Total"],
     },
 }
 
@@ -676,13 +696,36 @@ def build_weekly_payload(
             }
         )
 
+    chart_regions = [*layout["base_regions"], "us"]
+
+    def inventory_change(period: str) -> dict[str, Any]:
+        bucket = regional_index[period]
+        values_mb: list[float] = []
+        for region_key in chart_regions:
+            point = bucket.get(region_key)
+            if not point:
+                raise ExportError(f"Missing inventory-change row {region_key} for {period}.")
+            daily_change_kbd = finite_number(
+                point.get("stockChangeKbd")
+                if point.get("status") == "actual"
+                else point.get("balanceKbd")
+            )
+            values_mb.append(rounded(daily_change_kbd * 7.0 / 1000.0, 2))
+        return {
+            "week_ending": period,
+            "status": "actual" if period == latest_actual else "forecast",
+            "labels": layout["chart_labels"],
+            "region_keys": chart_regions,
+            "values_mb": values_mb,
+        }
+
     product_meta = bundle.get("product", {})
     try:
         portable_bundle_path = str(source_bundle.relative_to(source_bundle.parents[2]))
     except (IndexError, ValueError):
         portable_bundle_path = source_bundle.name
     payload = {
-        "schema_version": 2,
+        "schema_version": 3,
         "generated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "source": {
             "bundle_json": portable_bundle_path,
@@ -707,6 +750,11 @@ def build_weekly_payload(
             "frequency": "weekly",
             "regions": table_regions,
         },
+        "inventory_changes": {
+            "unit": "million barrels",
+            "actual": inventory_change(latest_actual),
+            "forecasts": [inventory_change(period) for period in forecast_periods[:2]],
+        },
     }
     validate_payload(payload)
     return payload
@@ -726,10 +774,23 @@ def validate_payload(payload: dict[str, Any]) -> None:
     table_regions = payload.get("table", {}).get("regions", [])
     if len(table_regions) != 4:
         raise ExportError(f"Expected four table sections; found {len(table_regions)}.")
+    actual_chart = payload.get("inventory_changes", {}).get("actual", {})
+    forecast_charts = payload.get("inventory_changes", {}).get("forecasts", [])
+    if len(forecast_charts) != 2:
+        raise ExportError("The weekly JSON must contain the first two forecast inventory charts.")
+    for chart in [actual_chart, *forecast_charts]:
+        if len(chart.get("labels", [])) != len(chart.get("values_mb", [])):
+            raise ExportError(f"Chart labels and values do not align for {chart.get('week_ending')}.")
+        if not chart.get("values_mb"):
+            raise ExportError(f"Chart {chart.get('week_ending')} contains no values.")
 
 
 def display_week(period: str) -> str:
     return parse_date(period).strftime("%d-%b")
+
+
+def title_week(period: str) -> str:
+    return parse_date(period).strftime("%m/%d/%y")
 
 
 def format_table_value(value: Any, unit: str) -> str:
@@ -959,6 +1020,110 @@ def render_weekly_table(
     plt.close(fig)
 
 
+def chart_axis_limits(values: list[float]) -> tuple[float, float]:
+    data_min = min([0.0, *values])
+    data_max = max([0.0, *values])
+    magnitude = max(abs(data_min), abs(data_max), 0.25)
+    span = max(data_max - data_min, magnitude)
+    pad = max(span * 0.22, magnitude * 0.14, 0.18)
+    lower = data_min - pad
+    upper = data_max + pad
+    if data_min >= 0:
+        lower = -pad * 0.12
+    if data_max <= 0:
+        upper = pad * 0.12
+    return lower, upper
+
+
+def signed_tick(value: float, _position: int) -> str:
+    if abs(value) < 0.005:
+        return "0.00"
+    return f"({abs(value):.2f})" if value < 0 else f"{value:.2f}"
+
+
+def render_inventory_chart(
+    chart: dict[str, Any],
+    output_path: Path,
+    dpi: int,
+    format_config: dict[str, Any],
+) -> None:
+    chart_format = format_config["chart"]
+    colors_config = format_config["colors"]
+    values = [finite_number(value) for value in chart["values_mb"]]
+    bar_colors = [
+        colors_config["positive"] if value >= 0 else colors_config["negative"]
+        for value in values
+    ]
+    fig, ax = plt.subplots(
+        figsize=(setting(chart_format, "width_in"), setting(chart_format, "height_in")),
+        facecolor=colors_config["white"],
+    )
+    fig.subplots_adjust(
+        left=setting(chart_format, "left"),
+        right=setting(chart_format, "right"),
+        bottom=setting(chart_format, "bottom"),
+        top=setting(chart_format, "top"),
+    )
+    positions = list(range(len(values)))
+    bars = ax.bar(
+        positions,
+        values,
+        width=setting(chart_format, "bar_width"),
+        color=bar_colors,
+        edgecolor=bar_colors,
+        linewidth=0.8,
+        zorder=3,
+    )
+    lower, upper = chart_axis_limits(values)
+    ax.set_ylim(lower, upper)
+    ax.set_xlim(-0.62, len(values) - 0.38)
+    ax.axhline(0, color="#8b9097", linewidth=0.85, zorder=2)
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
+    ax.yaxis.set_major_formatter(FuncFormatter(signed_tick))
+    ax.yaxis.grid(True, color=colors_config["grid"], linewidth=0.65, zorder=0)
+    ax.set_xticks(
+        positions,
+        chart["labels"],
+        fontsize=font_size(format_config, chart_format, "x_font_size"),
+    )
+    ax.tick_params(axis="x", length=0, pad=7)
+    ax.tick_params(
+        axis="y",
+        labelsize=font_size(format_config, chart_format, "y_font_size"),
+        length=0,
+        pad=4,
+    )
+    for spine in ("top", "right"):
+        ax.spines[spine].set_visible(False)
+    ax.spines["left"].set_color("#b6bbc2")
+    ax.spines["bottom"].set_visible(False)
+    status = "EIA Actuals" if chart["status"] == "actual" else "Forecast"
+    ax.set_title(
+        f"{status} W/E {title_week(chart['week_ending'])} (MB)",
+        fontsize=font_size(format_config, chart_format, "title_font_size"),
+        color=colors_config["ink"],
+        pad=setting(chart_format, "title_pad"),
+        fontweight="bold",
+    )
+
+    label_offset = setting(chart_format, "value_label_offset_points")
+    for bar, value in zip(bars, values):
+        ax.annotate(
+            f"{value:.2f}",
+            xy=(bar.get_x() + bar.get_width() / 2, value),
+            xytext=(0, label_offset if value >= 0 else -label_offset),
+            textcoords="offset points",
+            ha="center",
+            va="bottom" if value >= 0 else "top",
+            fontsize=font_size(format_config, chart_format, "value_font_size"),
+            color=colors_config["ink"],
+            fontweight="bold",
+            clip_on=False,
+        )
+    fig.savefig(output_path, dpi=dpi, facecolor=colors_config["white"])
+    plt.close(fig)
+
+
 def render_outputs(
     payload_path: Path,
     output_dir: Path,
@@ -970,12 +1135,14 @@ def render_outputs(
     product = payload["product"]["key"]
     individual_dir = output_dir / "individual_outputs"
     table_path = output_dir / f"{product}_weekly_balance_table.png"
+    actual_path = output_dir / f"{product}_eia_actuals.png"
+    forecast_paths = [
+        output_dir / f"{product}_forecast_week_1.png",
+        output_dir / f"{product}_forecast_week_2.png",
+    ]
 
     obsolete_paths = [
         output_dir / f"{product}_weekly_stats_slide.png",
-        output_dir / f"{product}_eia_actuals.png",
-        output_dir / f"{product}_forecast_week_1.png",
-        output_dir / f"{product}_forecast_week_2.png",
         individual_dir / f"{product}_weekly_balance_table.png",
         individual_dir / f"{product}_eia_actuals.png",
         individual_dir / f"{product}_forecast_week_1.png",
@@ -988,7 +1155,10 @@ def render_outputs(
         individual_dir.rmdir()
 
     render_weekly_table(payload, table_path, dpi, format_config)
-    return [table_path]
+    render_inventory_chart(payload["inventory_changes"]["actual"], actual_path, dpi, format_config)
+    for chart, path in zip(payload["inventory_changes"]["forecasts"], forecast_paths):
+        render_inventory_chart(chart, path, dpi, format_config)
+    return [table_path, actual_path, *forecast_paths]
 
 
 def image_dimensions(path: Path) -> tuple[int, int]:
@@ -1076,6 +1246,15 @@ def update_output_catalog(output_root: Path) -> Path:
                 if table_path.is_file() or not legacy_table_path.is_file()
                 else legacy_table_path.relative_to(archive_dir).as_posix()
             )
+            bar_chart_images = [
+                name
+                for name in [
+                    f"{product}_eia_actuals.png",
+                    f"{product}_forecast_week_1.png",
+                    f"{product}_forecast_week_2.png",
+                ]
+                if (archive_dir / name).is_file()
+            ]
             entries.append(
                 {
                     "actual_week_ending": payload["periods"][0]["week_ending"],
@@ -1084,12 +1263,13 @@ def update_output_catalog(output_root: Path) -> Path:
                     "weekly_json": payload_path.name,
                     "manifest": f"{product}_manifest.json",
                     "table_image": table_image,
+                    "bar_chart_images": bar_chart_images,
                     "generated_at": payload.get("generated_at"),
                 }
             )
     catalog_path = output_root / "index.json"
     catalog = {
-        "schema_version": 3,
+        "schema_version": 4,
         "updated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "weeks": entries,
     }
@@ -1099,7 +1279,7 @@ def update_output_catalog(output_root: Path) -> Path:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate a weekly balance table PNG."
+        description="Generate a weekly balance table PNG and three inventory bar-chart PNGs."
     )
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH)
     parser.add_argument("--balance-root", type=Path)
@@ -1137,7 +1317,7 @@ def main() -> int:
     forecast_weeks = args.forecast_weeks or int(config.get("forecast_weeks", 5))
     dpi = args.dpi or int(config.get("dpi", 180))
     if dpi < 96:
-        raise ExportError("DPI must be at least 96 for a readable table image.")
+        raise ExportError("DPI must be at least 96 for readable weekly images.")
     output_root = (
         args.output_dir.resolve()
         if args.output_dir
