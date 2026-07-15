@@ -7103,10 +7103,19 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function toCsv(rows){ const cols = Object.keys(rows[0] || {}); const clean = v => /[",\\n\\r]/.test(String(v ?? '')) ? '"' + String(v ?? '').replaceAll('"','""') + '"' : String(v ?? ''); return [cols.join(','),...rows.map(r=>cols.map(c=>clean(r[c])).join(','))].join('\\n') + '\\n'; }
     function toExcelTable(rows){ const cols = Object.keys(rows[0] || {}); const cell = value => '<td>'+esc(value ?? '')+'</td>'; return '<html><head><meta charset="utf-8"></head><body><table><thead><tr>'+cols.map(col => '<th>'+esc(col)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row => '<tr>'+cols.map(col => cell(row[col])).join('')+'</tr>').join('')+'</tbody></table></body></html>'; }
     function downloadBlob(filename, type, content){ const blob = content instanceof Blob ? content : new Blob([content],{type}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(url), 250); }
-    function inlineSvgStyles(source, clone){ if (!source || !clone || source.nodeType !== 1 || clone.nodeType !== 1) return; const computed = getComputedStyle(source); ['font-family','font-size','font-weight','fill','stroke','stroke-width','stroke-dasharray','opacity','text-anchor'].forEach(prop => { const value = computed.getPropertyValue(prop); if (value && value !== 'normal' && value !== 'none') clone.style.setProperty(prop, value); }); Array.from(source.children || []).forEach((child, index) => inlineSvgStyles(child, clone.children[index])); }
+    function inlineSvgStyles(source, clone){ if (!source || !clone || source.nodeType !== 1 || clone.nodeType !== 1) return; const computed = getComputedStyle(source); ['font-family','font-size','font-style','font-weight','fill','stroke','stroke-width','stroke-dasharray','stroke-linecap','stroke-linejoin','opacity','text-anchor','dominant-baseline','paint-order','display','visibility'].forEach(prop => { const value = computed.getPropertyValue(prop); if (value && value !== 'normal') clone.style.setProperty(prop, value); }); Array.from(source.children || []).forEach((child, index) => inlineSvgStyles(child, clone.children[index])); }
     function liveChartSvg(card){ return card?.querySelector?.('svg.seasonChart,svg.crudeSeasonChart'); }
     function chartPngFilename(kind, metricKey, regionKey, title=''){ const clean = value => String(value || '').replace(/[^a-z0-9_-]+/gi, '_').replace(/^_+|_+$/g, '').toLowerCase(); return [D.product.key,state.frequency,clean(regionKey),clean(title || metricKey),kind].filter(Boolean).join('_') + '.png'; }
-    function drawCanvasTitle(ctx, title, width, y, maxWidth){ const text = String(title || '').trim(); if (!text) return y; let size = Math.min(30, Math.max(18, Math.round(width / 58))); while (size > 14) { ctx.font = '800 ' + size + 'px Inter, Arial, sans-serif'; if (ctx.measureText(text).width <= maxWidth) break; size -= 1; } ctx.fillStyle = '#202838'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(text, width / 2, y); return y + Math.ceil(size * 1.34); }
+    function nextAnimationFrame(){ return new Promise(resolve => requestAnimationFrame(() => resolve())); }
+    function cssPixel(value, fallback=0){ const number = Number.parseFloat(String(value || '')); return Number.isFinite(number) ? number : fallback; }
+    function exportElementVisible(element){ if (!element || element.hidden || !element.getClientRects().length) return false; const style = getComputedStyle(element); return style.display !== 'none' && style.visibility !== 'hidden' && cssPixel(style.opacity,1) > 0; }
+    function exportCanvasFont(style, fallbackSize='10px'){ const fontStyle = style?.fontStyle && style.fontStyle !== 'normal' ? style.fontStyle : ''; const weight = style?.fontWeight || '400'; const size = style?.fontSize || fallbackSize; const family = style?.fontFamily || 'Inter, Arial, sans-serif'; return [fontStyle,weight,size,family].filter(Boolean).join(' '); }
+    function liveChartTitleSnapshot(card, options={}){ const element = card?.querySelector?.('.chartTitle'); if (!exportElementVisible(element)) return null; const hasOverride = Object.prototype.hasOwnProperty.call(options,'title'); const text = String(hasOverride ? options.title : element.textContent || '').trim(); if (!text) return null; const style = getComputedStyle(element); const rect = element.getBoundingClientRect(); const fontSize = cssPixel(style.fontSize,17); const lineHeight = cssPixel(style.lineHeight,fontSize * 1.15); return {text,font:exportCanvasFont(style,'17px'),color:style.color || '#202838',fontSize,lineHeight,height:Math.max(lineHeight,rect.height || lineHeight),marginTop:cssPixel(style.marginTop,0),marginBottom:cssPixel(style.marginBottom,0),paddingLeft:cssPixel(style.paddingLeft,0),paddingRight:cssPixel(style.paddingRight,0)}; }
+    function liveChartLegendSnapshot(card){ const element = card?.querySelector?.('.legend'); if (!exportElementVisible(element)) return null; const rect = element.getBoundingClientRect(); const entries = Array.from(element.querySelectorAll(':scope > span')).filter(exportElementVisible).map(entry => { const entryRect = entry.getBoundingClientRect(); const entryStyle = getComputedStyle(entry); const swatch = entry.querySelector('.swatch'); const swatchRect = swatch?.getBoundingClientRect?.(); const swatchStyle = swatch ? getComputedStyle(swatch) : null; return {label:String(entry.textContent || '').trim(),x:entryRect.left - rect.left,y:entryRect.top - rect.top,height:entryRect.height,font:exportCanvasFont(entryStyle,getComputedStyle(element).fontSize || '10px'),color:entryStyle.color || getComputedStyle(element).color || '#3f4d61',swatchX:swatchRect ? swatchRect.left - rect.left : entryRect.left - rect.left,swatchY:swatchRect ? swatchRect.top - rect.top : entryRect.top - rect.top,swatchWidth:swatchRect?.width || 0,swatchHeight:swatchRect?.height || 0,textX:swatchRect ? swatchRect.right - rect.left + cssPixel(swatchStyle?.marginRight,5) : entryRect.left - rect.left,dashed:Boolean(swatch?.classList?.contains('dashed')),swatchColor:swatchStyle?.backgroundColor && swatchStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' ? swatchStyle.backgroundColor : swatchStyle?.color || entryStyle.color || '#3f4d61'}; }).filter(entry => entry.label); return entries.length ? {width:rect.width,height:rect.height,entries} : null; }
+    function canvasTitleLines(ctx, text, maxWidth){ const words = String(text || '').trim().split(/\\s+/).filter(Boolean); if (!words.length) return []; const lines = []; let line = words.shift(); words.forEach(word => { const candidate = line + ' ' + word; if (ctx.measureText(candidate).width <= maxWidth) line = candidate; else { lines.push(line); line = word; } }); lines.push(line); return lines; }
+    function drawLiveCanvasTitle(ctx, snapshot, width, y){ if (!snapshot) return; ctx.save(); ctx.font = snapshot.font; ctx.fillStyle = snapshot.color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const maxWidth = Math.max(1,width - snapshot.paddingLeft - snapshot.paddingRight - 16); const lines = canvasTitleLines(ctx,snapshot.text,maxWidth); const totalHeight = lines.length * snapshot.lineHeight; const centerY = y + snapshot.marginTop + snapshot.height / 2; const firstY = centerY - totalHeight / 2 + snapshot.lineHeight / 2; lines.forEach((line,index) => ctx.fillText(line,width / 2,firstY + index * snapshot.lineHeight,maxWidth)); ctx.restore(); }
+    function drawLiveCanvasLegend(ctx, snapshot, width, y){ if (!snapshot) return; const offsetX = (width - snapshot.width) / 2; snapshot.entries.forEach(entry => { const swatchX = offsetX + entry.swatchX; const swatchY = y + entry.swatchY; if (entry.swatchWidth > 0) { ctx.save(); if (entry.dashed) { ctx.strokeStyle = entry.swatchColor; ctx.lineWidth = Math.max(1,entry.swatchHeight); ctx.setLineDash([7,5]); ctx.beginPath(); ctx.moveTo(swatchX,swatchY + entry.swatchHeight / 2); ctx.lineTo(swatchX + entry.swatchWidth,swatchY + entry.swatchHeight / 2); ctx.stroke(); } else { ctx.fillStyle = entry.swatchColor; ctx.fillRect(swatchX,swatchY,entry.swatchWidth,entry.swatchHeight); } ctx.restore(); } ctx.save(); ctx.font = entry.font; ctx.fillStyle = entry.color; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(entry.label,offsetX + entry.textX,y + entry.y + entry.height / 2); ctx.restore(); }); }
+    async function liveChartPngBlob(card, options={}){ await nextAnimationFrame(); return chartSvgPngBlob(liveChartSvg(card), {...options,titleSnapshot:liveChartTitleSnapshot(card,options),legendSnapshot:liveChartLegendSnapshot(card)}); }
     async function chartSvgPngBlob(svg, options={}){
       if (!svg) throw new Error('missing chart');
       const rect = svg.getBoundingClientRect();
@@ -7131,37 +7140,36 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
         image.decoding = 'async';
         image.src = url;
         await loaded;
-        const targetWidth = options.width ? clampZoomDimension(options.width,640,4000,width) : width;
-        const targetHeight = options.height ? clampZoomDimension(options.height,360,3000,height) : height;
+        const titleSnapshot = options.titleSnapshot || null;
+        const legendSnapshot = options.legendSnapshot || null;
+        const titleHeight = titleSnapshot ? Math.ceil(titleSnapshot.marginTop + titleSnapshot.height + titleSnapshot.marginBottom) : 0;
+        const legendHeight = legendSnapshot ? Math.ceil(legendSnapshot.height) : 0;
+        const naturalWidth = width;
+        const naturalHeight = titleHeight + height + legendHeight;
+        const targetWidth = options.width ? clampZoomDimension(options.width,640,4000,naturalWidth) : naturalWidth;
+        const targetHeight = options.height ? clampZoomDimension(options.height,360,3000,naturalHeight) : naturalHeight;
+        const fitScale = options.width || options.height ? Math.min(targetWidth / naturalWidth,targetHeight / naturalHeight) : 1;
+        const offsetX = (targetWidth - naturalWidth * fitScale) / 2;
+        const offsetY = (targetHeight - naturalHeight * fitScale) / 2;
         const scale = Math.max(2, Math.min(4, window.devicePixelRatio || 2));
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(targetWidth * scale);
         canvas.height = Math.round(targetHeight * scale);
         const ctx = canvas.getContext('2d');
-        ctx.setTransform(scale,0,0,scale,0,0);
         ctx.fillStyle = '#fff';
-        ctx.fillRect(0,0,targetWidth,targetHeight);
-        const title = String(options.title || '').trim();
-        const outerPad = title ? 34 : 0;
-        const titleBottom = title ? drawCanvasTitle(ctx, title, targetWidth, 26, targetWidth - 68) + 18 : 0;
-        const padX = title ? 34 : 0;
-        const padBottom = title ? 26 : 0;
-        const availableWidth = Math.max(1, targetWidth - padX * 2);
-        const availableHeight = Math.max(1, targetHeight - titleBottom - padBottom);
-        const aspect = width / Math.max(height, 1);
-        const drawWidth = title ? Math.min(availableWidth, availableHeight * aspect) : targetWidth;
-        const drawHeight = title ? Math.min(availableHeight, drawWidth / aspect) : targetHeight;
-        const drawX = title ? (targetWidth - drawWidth) / 2 : 0;
-        const drawY = title ? titleBottom + Math.max(0, (availableHeight - drawHeight) / 2) - outerPad / 3 : 0;
-        ctx.drawImage(image,drawX,drawY,drawWidth,drawHeight);
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.setTransform(scale * fitScale,0,0,scale * fitScale,scale * offsetX,scale * offsetY);
+        drawLiveCanvasTitle(ctx,titleSnapshot,naturalWidth,0);
+        ctx.drawImage(image,0,titleHeight,width,height);
+        drawLiveCanvasLegend(ctx,legendSnapshot,naturalWidth,titleHeight + height);
         return await new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('png export failed')), 'image/png', 1));
       } finally {
         URL.revokeObjectURL(url);
       }
     }
-    async function copyChartPng(card, metricKey, regionKey){ const blob = await chartSvgPngBlob(liveChartSvg(card)); if (navigator.clipboard?.write && window.ClipboardItem) { await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); showToast('Chart PNG copied'); return; } downloadBlob(chartPngFilename('copy', metricKey, regionKey), 'image/png', blob); showToast('Image clipboard unavailable; PNG downloaded'); }
-    async function saveChartPng(card, metricKey, regionKey){ const blob = await chartSvgPngBlob(liveChartSvg(card)); downloadBlob(chartPngFilename('chart', metricKey, regionKey), 'image/png', blob); showToast('Chart PNG saved'); }
-    async function saveZoomChartPng(card){ const title = zoomCardTitle(card); setZoomCardTitle(card, title); const size = zoomExportSize(card); const metricKey = card?.dataset?.chartMetric || card?.dataset?.outageChartMetric || 'chart'; const regionKey = card?.dataset?.chartRegion || card?.dataset?.outageChartRegion || state.chartRegion || state.crudeRegion || 'region'; const blob = await chartSvgPngBlob(liveChartSvg(card), {title,width:size.width,height:size.height}); downloadBlob(chartPngFilename('custom', metricKey, regionKey, title), 'image/png', blob); showToast('Custom PNG saved'); }
+    async function copyChartPng(card, metricKey, regionKey){ const blob = await liveChartPngBlob(card); if (navigator.clipboard?.write && window.ClipboardItem) { await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); showToast('Chart PNG copied'); return; } downloadBlob(chartPngFilename('copy', metricKey, regionKey), 'image/png', blob); showToast('Image clipboard unavailable; PNG downloaded'); }
+    async function saveChartPng(card, metricKey, regionKey){ const blob = await liveChartPngBlob(card); downloadBlob(chartPngFilename('chart', metricKey, regionKey), 'image/png', blob); showToast('Chart PNG saved'); }
+    async function saveZoomChartPng(card){ const title = zoomCardTitle(card); setZoomCardTitle(card, title); const size = zoomExportSize(card); const metricKey = card?.dataset?.chartMetric || card?.dataset?.outageChartMetric || 'chart'; const regionKey = card?.dataset?.chartRegion || card?.dataset?.outageChartRegion || state.chartRegion || state.crudeRegion || 'region'; const blob = await liveChartPngBlob(card, {title,width:size.width,height:size.height}); downloadBlob(chartPngFilename('custom', metricKey, regionKey, title), 'image/png', blob); showToast('Custom PNG saved'); }
 	    function chartRows(metricKey, regionKey=state.chartRegion === CHART_ALL_REGION_KEY ? preferredChartScenarioRegion() : state.chartRegion){ return chartRowsForMetric(regionKey, metricKey, state.frequency).map(row => { const value = Number(row[metricKey]); return {frequency:state.frequency, region:balanceRegionDisplayLabel(regionKey), metric:metricByKey(metricKey).label, period:row.period, status:row.status, value:Number.isFinite(value) ? round2(value) : NaN}; }); }
     function crudeChartRows(metricKey){ const regionKey = activeCrudeRegionKey(); return regionKey ? crudeChartRowsForRegion(regionKey).map(row => { const value = Number(row[metricKey]); return {frequency:state.frequency, region:crudeRegionDisplayLabel(regionKey), metric:crudeMetricByKey(metricKey).label, period:row.period, status:row.status, value:Number.isFinite(value) ? round2(value) : NaN}; }) : []; }
     function statusLabel(status){ return String(status || 'missing').replace('_',' '); }
