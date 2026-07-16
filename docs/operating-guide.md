@@ -148,10 +148,16 @@ Useful verification commands:
 ```bash
 npm run typecheck
 npm run verify:dashboard
+npm run verify:weekly-call-outputs
 npm run verify:weekly
 npm run verify:monthly
 npm run trace:dashboard:optimize
 ```
+
+`verify:dashboard` intentionally ignores `weekly_call_outputs`. Those images are
+optional, on-demand exports and can never block a dashboard refresh, forecast-end
+save, rebuild, or rollback. Use `verify:weekly-call-outputs` when generating or
+auditing the image archive itself.
 
 `npm run update:all` attempts the live Kpler pull. If Kpler credentials are unavailable, use:
 

@@ -30,6 +30,7 @@
     "verify:weekly": "node --import tsx src/verify_weekly_freshness.ts",
     "verify:monthly": "node --import tsx src/verify_monthly_freshness.ts",
     "verify:dashboard": "node --import tsx src/verify_dashboard_freshness.ts",
+    "verify:weekly-call-outputs": "node --import tsx src/verify_weekly_call_outputs.ts",
     "validate": "python3 src/validate_outputs.py",
     "data:check": "python3 src/data_health_check.py",
     "build:all": "npm run update:all",
