@@ -142,7 +142,7 @@
     </header>
     <section class="balanceToolbar" id="balanceOptions">
       <div class="balanceToolbarMain">
-        <div class="panel pad"><div class="caption">Balance options</div><div class="chiprow"><span class="chip">Actual headers: blue</span><span class="chip">Forecast headers: yellow</span><span class="chip">Forecast starts 2026-05</span><span class="chip">Last pull 7/15/2026, 2:02:06 PM</span></div></div>
+        <div class="panel pad"><div class="caption">Balance options</div><div class="chiprow"><span class="chip">Actual headers: blue</span><span class="chip">Forecast headers: yellow</span><span class="chip">Forecast starts 2026-05</span><span class="chip">Last pull 7/16/2026, 1:09:42 PM</span></div></div>
         <section class="controlbar balanceControlbar" id="balanceControls">
           <div class="panel pad"><div class="caption">View</div><div class="seg"><button class="toggle active" data-frequency="monthly" type="button">Monthly</button><button class="toggle" data-frequency="weekly" type="button">Weekly</button></div></div>
           <div class="panel pad"><div class="caption">Period focus</div><select id="periodWindowSelect" class="select" aria-label="Period window"><option value="smart">Smart window</option><option value="latest">Latest actual</option><option value="forecast">Forecast runway</option><option value="full">Full history</option></select><div class="periodActionGrid"><button class="btn" id="jumpLatestActualBtn" type="button">Latest actual</button><button class="btn" id="jumpFirstForecastBtn" type="button">First forecast</button></div></div>
@@ -151,7 +151,7 @@
       <div class="panel pad"><div class="caption">Refresh / saved views</div><div class="quickActionGrid"><button class="btn primary full" id="refreshBtn" type="button">Refresh dashboard</button><button class="btn primary full" id="saveViewBtn" type="button">Save view</button></div><div class="viewPresetGrid"><select id="savedViewSelect" class="select" aria-label="Saved views"></select><div class="viewPresetActions"><button class="btn" id="loadViewBtn" type="button">Load</button><button class="btn" id="deleteViewBtn" type="button">Delete</button><button class="btn" id="resetViewBtn" type="button">Reset</button></div></div></div>
     </section>
     <section class="options" id="chartOptions" hidden>
-	      <div class="panel pad"><div class="caption">Chart options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip" id="showForecastChip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><label class="chip" id="fourWeekAverageChip"><input id="showFourWeekAverage" type="checkbox">4-week avg</label><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull 7/15/2026, 2:02:06 PM</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Historical band years</div><div class="chiprow" id="historyChips"></div></div>
+	      <div class="panel pad"><div class="caption">Chart options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip" id="showForecastChip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><label class="chip" id="fourWeekAverageChip"><input id="showFourWeekAverage" type="checkbox">4-week avg</label><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull 7/16/2026, 1:09:42 PM</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Historical band years</div><div class="chiprow" id="historyChips"></div></div>
       <div class="panel pad"><div class="caption">Chart workspace</div><p class="small">Use chart cards for zoom, export, copy, and saved-forecast overlays. Imports and exports save raw kbd adjustments; operating utilization ex-planned saves as a net-capacity utilization target.</p></div>
     </section>
     <section class="controlbar" id="chartControls" hidden>
@@ -170,7 +170,7 @@
   <section class="chartScenarioWorkbench" id="outageCollisionModal" hidden></section>
   <section class="chartZoomModal" id="chartZoomModal" hidden></section>
   <div class="toast" id="toast"></div>
-  <script src="data/diesel_balance_runtime_base.js?v=2026-07-15T18%3A02%3A06.516Z"></script>
+  <script src="data/diesel_balance_runtime_base.js?v=2026-07-16T17%3A09%3A42.098Z"></script>
   <script>
     const D = window.BALANCE_DATA || {};
     const weeklyTableImageButton = document.querySelector('.weeklyCallOutputBtn');

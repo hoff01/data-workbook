@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-16T17:09:41.970Z",
+  "source": {
+    "file": "balance_dashboard_settings.json",
+    "updatedAt": "2026-07-12T12:00:00.000Z"
+  },
+  "sharedProducts": [
+    "diesel",
+    "jet"
+  ],
+  "capacityUnit": "thousand barrels per day",
+  "outageCount": 0,
+  "outages": []
+}

@@ -69,6 +69,7 @@ const readyFile = join(tmpdir(), `us-balances-refresh-ready-${process.pid}-${Dat
 const silentNoopFile = join(tmpdir(), `us-balances-silent-noop-${process.pid}-${Date.now()}`);
 const settingsDir = mkdtempSync(join(tmpdir(), "us-balances-settings-test-"));
 const settingsPath = join(settingsDir, "balance_dashboard_settings.json");
+const outagesExportPath = join(settingsDir, "outages.json");
 const settingsRebuildLog = join(settingsDir, "rebuild.log");
 const settingsRebuildFailFile = join(settingsDir, "fail-once");
 writeFileSync(settingsPath, JSON.stringify({
@@ -108,6 +109,10 @@ try {
   assert.equal(typeof initialHealth.buildId, "string");
   assert.ok(initialHealth.buildId.length >= 8);
   assert.equal(initialHealth.refreshReady, false);
+  const publicOutages = await fetchJson(`${baseUrl}/outages.json`);
+  assert.equal(publicOutages.response.status, 200);
+  assert.equal(publicOutages.body.schemaVersion, 1);
+  assert.deepEqual(publicOutages.body.sharedProducts, ["diesel", "jet"]);
   await new Promise((resolveWait) => setTimeout(resolveWait, 400));
   const initialStatus = await fetchJson(`${baseUrl}/api/update/status`);
   assert.equal(initialStatus.response.status, 200);
@@ -171,8 +176,36 @@ try {
   const settledSettingsStatus = await waitForSettingsRebuild(baseUrl, false);
   assert.equal(settledSettingsStatus.settingsRebuild, false);
 
+  const sharedOutage = {
+    id: "outage-test",
+    regionKey: "padd3",
+    refineryId: "refinery-test",
+    refineryName: "Test Refinery",
+    unitKey: "atmospheric-distillation",
+    unitLabel: "Atmospheric Distillation",
+    refinery: "Test Refinery",
+    capacityOfflineKbd: 42.26,
+    startDate: "2026-08-01",
+    endDate: "2026-08-05",
+    type: "Planned",
+    note: "Server export contract",
+  };
+  const outageSave = await fetchJson(`${baseUrl}/api/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ crudeOutages: [sharedOutage], baseRevision: shortened.body.settings.revision }),
+  });
+  assert.equal(outageSave.response.status, 200);
+  assert.equal(outageSave.body.rebuilt, false);
+  const exportedOutages = JSON.parse(readFileSync(outagesExportPath, "utf8"));
+  assert.equal(exportedOutages.schemaVersion, 1);
+  assert.deepEqual(exportedOutages.sharedProducts, ["diesel", "jet"]);
+  assert.equal(exportedOutages.outageCount, 1);
+  assert.equal(exportedOutages.outages[0].id, sharedOutage.id);
+  assert.equal(exportedOutages.outages[0].capacityOfflineKbd, 42.3);
+
   writeFileSync(settingsRebuildFailFile, "fail once\n");
-  const failedRevision = shortened.body.settings.revision;
+  const failedRevision = outageSave.body.settings.revision;
   const failedRebuild = await fetchJson(`${baseUrl}/api/settings`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -183,6 +216,7 @@ try {
   assert.equal(failedRebuild.body.settings.forecastEnd, "2026-12-31");
   assert.match(failedRebuild.body.error, /Previous settings and dashboard packages were restored/);
   assert.equal(JSON.parse(readFileSync(settingsPath, "utf8")).forecastEnd, "2026-12-31");
+  assert.equal(JSON.parse(readFileSync(outagesExportPath, "utf8")).outageCount, 1);
   assert.equal(readFileSync(settingsRebuildLog, "utf8").trim().split(/\r?\n/).length, 3, "failed build plus rollback must both run");
 
   const started = await fetchJson(`${baseUrl}/api/update/start`, {

@@ -46,7 +46,7 @@
     "dashboard:open:jet": "node --import tsx src/open_dashboard.ts jet",
     "trace:dashboard:performance": "node scripts/dashboard_performance_trace.mjs",
     "trace:dashboard:optimize": "node scripts/dashboard_performance_trace.mjs --product=all",
-    "test:dashboard-runner": "node --import tsx scripts/test_weekly_call_archive_freshness.ts && node --import tsx scripts/test_update_data_fingerprint.ts && node scripts/test_update_pipeline_entrypoint.mjs && node scripts/test_dashboard_update_server.mjs",
+    "test:dashboard-runner": "node --import tsx scripts/test_shared_outages.ts && node --import tsx scripts/test_weekly_call_archive_freshness.ts && node --import tsx scripts/test_update_data_fingerprint.ts && node scripts/test_update_pipeline_entrypoint.mjs && node scripts/test_dashboard_update_server.mjs",
     "verify:windows": "node scripts/verify_windows_portability.mjs",
     "typecheck": "tsc --noEmit"
   },

@@ -18,6 +18,7 @@ import { fileURLToPath } from "node:url";
 import { createGzip } from "node:zlib";
 import { createHash } from "node:crypto";
 import { DASHBOARD_SERVER_APP_ID, dashboardServerBuildId } from "./dashboard_server_contract.js";
+import { writeSharedOutageExport } from "./shared_outages.js";
 import { updateDataFingerprint, type UpdateGroup } from "./update_data_fingerprint.js";
 
 type JobStatus = "running" | "succeeded" | "partial" | "failed";
@@ -132,6 +133,9 @@ const maxLines = 600;
 const settingsPath = process.env.US_BALANCES_SETTINGS_PATH
   ? resolve(ROOT, process.env.US_BALANCES_SETTINGS_PATH)
   : join(ROOT, "balance_dashboard_settings.json");
+const outagesExportPath = process.env.US_BALANCES_OUTAGES_PATH
+  ? resolve(ROOT, process.env.US_BALANCES_OUTAGES_PATH)
+  : join(dirname(settingsPath), "outages.json");
 const runnerLockPath = join(ROOT, "logs", "update_runner.lock");
 const runnerLockStaleMs = 12 * 60 * 60 * 1000;
 const refreshReadyFile = String(process.env.US_BALANCES_REFRESH_READY_FILE || "").trim();
@@ -253,6 +257,7 @@ function writeSettings(settings: DashboardSettings): void {
   const tempPath = join(dirname(settingsPath), `.balance_dashboard_settings.${process.pid}.${Date.now()}.tmp`);
   writeFileSync(tempPath, JSON.stringify(settings, null, 2) + "\n");
   renameSync(tempPath, settingsPath);
+  writeSharedOutageExport(outagesExportPath, settings.crudeOutages, settings.updatedAt);
 }
 
 function landingPage(): string {

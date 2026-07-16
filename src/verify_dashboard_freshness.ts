@@ -1,6 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { sha256 } from "./common.js";
+import {
+  canonicalSharedOutages,
+  type SharedOutage,
+  type SharedOutageExport,
+} from "./shared_outages.js";
 
 type ProductKey = "diesel" | "jet";
 
@@ -53,6 +58,9 @@ type RuntimeBase = {
     lazyChunks?: unknown[];
     recommendations?: unknown[];
   };
+  settings?: {
+    crudeOutages?: SharedOutage[];
+  };
 };
 
 type RuntimeWeekly = {
@@ -93,6 +101,11 @@ type BalanceManifest = {
   generatedAt: string;
   latestMonthly: string;
   latestWeekly: string;
+};
+
+type DashboardOutageSettings = {
+  updatedAt?: string;
+  crudeOutages?: SharedOutage[];
 };
 
 type ProductConfig = {
@@ -618,7 +631,7 @@ async function readAssignedJson<T>(path: string, marker: string): Promise<T> {
   return assignedJson<T>(await readFile(path, "utf8"), marker);
 }
 
-async function verifyProduct(config: ProductConfig): Promise<string> {
+async function verifyProduct(config: ProductConfig, sharedOutages: SharedOutage[]): Promise<string> {
   const [manifest, monthlyLatest, weeklyLatest, indexHtml, runtimeBase, runtimeWeekly, runtimeCrudeWeekly, runtimePowerDfo, runtimeReference] = await Promise.all([
     readJson<BalanceManifest>(config.manifestPath),
     latestCsvDate(config.monthlyCsv),
@@ -637,6 +650,11 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
   assertEqual(`${config.key} sourceHub weekly latest`, sourceLatest(runtimeReference, "eia_petroleum_weekly"), weeklyLatest);
   assertEqual(`${config.key} runtime base generatedAt`, runtimeBase.generatedAt ?? "", manifest.generatedAt);
   assertEqual(`${config.key} runtime base product`, runtimeBase.product?.key ?? "", config.key);
+  assertEqual(
+    `${config.key} embedded outages match shared outage export`,
+    JSON.stringify(canonicalSharedOutages(runtimeBase.settings?.crudeOutages ?? [])),
+    JSON.stringify(sharedOutages),
+  );
   assertEqual(`${config.key} runtime base monthly freshness`, runtimeBase.freshness?.latestMonthly ?? "", monthlyLatest);
   assertEqual(`${config.key} runtime base weekly freshness`, runtimeBase.freshness?.latestWeekly ?? "", weeklyLatest);
   if ((runtimeBase.optimization?.runtimePlan?.baseRows ?? 0) <= 0) throw new Error(`${config.key} runtime optimization base rows are missing`);
@@ -676,6 +694,25 @@ async function verifyProduct(config: ProductConfig): Promise<string> {
   return `${config.key}:weekly=${weeklyLatest}:monthly=${monthlyLatest}`;
 }
 
+async function verifySharedOutageExport(): Promise<SharedOutage[]> {
+  const [settings, exported] = await Promise.all([
+    readJson<DashboardOutageSettings>("balance_dashboard_settings.json"),
+    readJson<SharedOutageExport>("outages.json"),
+  ]);
+  const expectedOutages = canonicalSharedOutages(settings.crudeOutages ?? []);
+  if (exported.schemaVersion !== 1) throw new Error(`outages.json schema must be 1, received ${exported.schemaVersion}`);
+  if (!Number.isFinite(Date.parse(exported.generatedAt))) throw new Error("outages.json generatedAt is invalid");
+  assertEqual("outages.json source file", exported.source?.file ?? "", "balance_dashboard_settings.json");
+  assertEqual("outages.json source timestamp", exported.source?.updatedAt ?? "", settings.updatedAt ?? "");
+  assertEqual("outages.json shared products", exported.sharedProducts?.join("|") ?? "", "diesel|jet");
+  assertEqual("outages.json capacity unit", exported.capacityUnit ?? "", "thousand barrels per day");
+  if (exported.outageCount !== expectedOutages.length) {
+    throw new Error(`outages.json count mismatch: expected=${expectedOutages.length} actual=${exported.outageCount}`);
+  }
+  assertEqual("outages.json rows", JSON.stringify(exported.outages), JSON.stringify(expectedOutages));
+  return expectedOutages;
+}
+
 const updatePipelineSource = await readFile("src/update_pipeline.ts", "utf8");
 assertNotIncludes("Kpler failures are not optional", updatePipelineSource, "continueOnFailure");
 assertNotIncludes("Kpler steps do not use the removed optional wrapper", updatePipelineSource, "optionalStep(");
@@ -692,5 +729,6 @@ assertIncludes("runner requires a weekly call output product", updateServerSourc
 assertIncludes("runner forwards the selected product to the generator", updateServerSource, '"--product", outputProduct');
 assertNotIncludes("runner no longer emits misleading raw child status", updateServerSource, "finished status=");
 
-const results = await Promise.all(PRODUCTS.map((config) => verifyProduct(config)));
-console.log(`dashboard freshness ok ${results.join(" ")}`);
+const sharedOutages = await verifySharedOutageExport();
+const results = await Promise.all(PRODUCTS.map((config) => verifyProduct(config, sharedOutages)));
+console.log(`dashboard freshness ok outages=${sharedOutages.length} ${results.join(" ")}`);

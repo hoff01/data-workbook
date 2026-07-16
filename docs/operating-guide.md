@@ -172,6 +172,15 @@ That keeps the latest local Kpler files and still rebuilds the dashboards.
 
 Shared dashboard edits use `balance_dashboard_settings.json` through the local dashboard server.
 
+The same shared outage schedule is also published as root `outages.json`. Every
+outage save updates it immediately, and every dashboard build or data refresh
+regenerates it. Diesel and Jet therefore expose one canonical outage dataset
+instead of separate product copies. It is available from a running local
+dashboard server at `http://127.0.0.1:8787/outages.json`; downstream users can
+also read the file directly from the checkout. The payload includes its schema
+version, generation and source timestamps, units, outage count, and all outage
+rows.
+
 - Edits are durable only when the dashboard is opened from `http://127.0.0.1:8787/`.
 - A raw `file://` tab can display the dashboard, but browser-only saves are local to that machine and are not a shared edit channel.
 - The settings API returns a revision token. If another user saved first, stale writes return HTTP `409`, reload the latest settings, and ask the user to re-enter the edit.

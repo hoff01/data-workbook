@@ -1,6 +1,7 @@
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { createHash } from "node:crypto";
+import { writeSharedOutageExport } from "./shared_outages.js";
 
 const CSV_HEADER_LOOKUP: unique symbol = Symbol("csvHeaderLookup");
 
@@ -610,6 +611,7 @@ const PRODUCTS: ProductConfig[] = [
 ];
 
 const SETTINGS_PATH = "balance_dashboard_settings.json";
+const OUTAGES_EXPORT_PATH = "outages.json";
 const DEFAULT_FORECAST_END = "2026-12-31";
 const REFINERY_CAPACITY_PATH = "eia_capacity/refinery_unit_capacities_2025.csv";
 const REFINERY_CAPACITY_MANIFEST_PATH = "eia_capacity/refinery_unit_capacities_manifest.json";
@@ -7710,6 +7712,12 @@ monthly balance through ${DASHBOARD_SETTINGS.forecastEnd}.
   );
   return bundle;
 }
+
+writeSharedOutageExport(
+  OUTAGES_EXPORT_PATH,
+  DASHBOARD_SETTINGS.crudeOutages,
+  DASHBOARD_SETTINGS.updatedAt,
+);
 
 const sharedRefineryCapacity = buildRefineryCapacityBundle();
 const productInputs = new Map<ProductKey, ProductInputRows>(PRODUCTS.map((product) => [product.key, readProductInputRows(product)]));

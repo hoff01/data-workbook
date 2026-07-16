@@ -7,6 +7,7 @@ export const DASHBOARD_SERVER_APP_ID = "balance-dashboard-update-server";
 const DASHBOARD_SERVER_BUILD_INPUTS = [
   "src/dashboard_server_contract.ts",
   "src/dashboard_update_server.ts",
+  "src/shared_outages.ts",
   "src/update_data_fingerprint.ts",
   "src/update_pipeline.ts",
   "weekly_call_outputs/generate_weekly_images.py",
