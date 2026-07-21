@@ -397,13 +397,17 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} chart legend entries use newest-first year order`, indexHtml, "return entries.sort((a,b)=>b.year-a.year || a.order-b.order);");
   assertIncludes(`${config.key} chart history chips use newest-first order`, indexHtml, "chips.sort((a,b)=>b.year-a.year || a.order-b.order).map(chip => chip.html).join('')");
   assertIncludes(`${config.key} chart hydration preserves legend host`, indexHtml, "if (legendHost) legendHost.innerHTML = legendHtml; else { const legacyLegend = card.querySelector('.legend'); if (legacyLegend) legacyLegend.outerHTML = legendHtml; }");
-  assertIncludes(`${config.key} optional all-zero charts are suppressed`, indexHtml, "if (OPTIONAL_NONZERO_CHART_METRICS.has(metricKey)) return values.some(value => Math.abs(value) > .0001);");
+  assertIncludes(`${config.key} optional all-zero charts are suppressed`, indexHtml, "if (!OPTIONAL_NONZERO_CHART_METRICS.has(metricKey) || Math.abs(value) > .0001) return true;");
   assertIncludes(`${config.key} PADD3 shipment chart is PADD3-only`, indexHtml, "if (metricKey === 'padd3ShipmentsToPadd1Kbd' && regionKey !== 'padd3') return false;");
   assertIncludes(`${config.key} chart metric availability is region-specific`, indexHtml, "function orderedChartMetrics(regionKey=state.chartRegion){ return CHART_METRICS.filter(metricKey => chartMetricHasVisibleData(regionKey, metricKey, state.frequency)); }");
   assertIncludes(`${config.key} chart shell signature includes metric and power availability`, indexHtml, "chartMetricsSignature(chartRegions), powerDfoChartsSignature(), localDateText()");
   assertIncludes(`${config.key} chart hydration signature includes active scenario preview`, indexHtml, "chartScenarioOverlaySignature(), chartScenarioCalculationSignature(), chartMetricsSignature(chartRegions)");
   assertIncludes(`${config.key} chart hydration uses derived metric rows`, indexHtml, "const rows = chartRowsForMetric(regionKey, metricKey, state.frequency, baseRows);");
   assertIncludes(`${config.key} chart export uses derived metric rows`, indexHtml, "return chartRowsForMetric(regionKey, metricKey, state.frequency).map(row =>");
+  assertIncludes(`${config.key} derived chart rows retain only chart fields`, indexHtml, "return {period:row.period,status:row.status,regionKey:row.regionKey,[metricKey]:");
+  assertIncludes(`${config.key} ISO week calculations are cached`, indexHtml, "if (isoWeekInfoCache.has(key)) return isoWeekInfoCache.get(key);");
+  assertIncludes(`${config.key} latest weekly actual uses an identity cache`, indexHtml, "if (latestWeeklyActualCache.rows === rows) return latestWeeklyActualCache.value;");
+  assertIncludes(`${config.key} scenario changes release obsolete chart caches`, indexHtml, "function clearChartRenderCaches(){ chartScenarioOverlaySeriesCache.clear(); chartRowsForMetricCache.clear(); chartSeriesCache.clear();");
   assertIncludes(`${config.key} chart zoom modal container`, indexHtml, "id=\"chartZoomModal\"");
   assertIncludes(`${config.key} chart zoom opens balance modal`, indexHtml, "function openBalanceChartZoom(card, zoomKey)");
   assertIncludes(`${config.key} chart zoom opens crude modal`, indexHtml, "function openCrudeChartZoom(card, metricKey)");
@@ -440,6 +444,8 @@ function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig)
   assertIncludes(`${config.key} Yield and outage product metrics follow production`, indexHtml, "'productionKbd','yieldPct','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd'");
   assertIncludes(`${config.key} crude runs outage unit is atmospheric distillation only`, indexHtml, "const CRUDE_RUN_OUTAGE_UNIT_KEY = 'atmos_distillation';");
   assertIncludes(`${config.key} crude runs reads only atmospheric distillation outage totals`, indexHtml, "addOutageTotals(totals, byRegion[key]?.units?.[CRUDE_RUN_OUTAGE_UNIT_KEY])");
+  assertIncludes(`${config.key} empty outage schedules skip date scans`, indexHtml, "if (!days.size) return roundedOutageTotals(totals, range.days);");
+  assertIncludes(`${config.key} outage source keys are resolved once per range`, indexHtml, "const sourceKeys = outageSourceKeys(regionKey); for (let ms = range.start");
   assertNotIncludes(`${config.key} crude runs does not read broad all-unit outage totals`, indexHtml, "outageSourceKeys(regionKey).forEach(key => addOutageTotals(totals, byRegion[key]));");
   assertIncludes(`${config.key} concurrent different-unit outages are documented`, indexHtml, "different units may be offline at the same time");
   assertIncludes(`${config.key} outage collisions are scoped to canonical unit`, indexHtml, "outageUnitCollisionKey(outage) === entryUnitKey && outageRangesOverlap");
