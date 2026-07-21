@@ -1,22 +1,22 @@
 # weekly_call_outputs
 
 This portable, standalone folder creates a weekly balance table image and three
-inventory-change bar charts
-from the balance repository's own generated JSON. It is separate from the
-dashboard: it calls the existing balance JSON builder as an upstream source,
-creates its own compact weekly JSON, and renders every PNG from that compact
-JSON.
+inventory-change bar charts from the dashboard's exact saved state. The weekly
+JSON and every PNG are rendered from the same materialized monthly and weekly
+rows that the user saved, including all manual adjustments and the exact total
+period build/draw values.
 
 ## One-click Windows run
 
 Double-click `run_weekly_images.bat`.
 
-When the main dashboard is opened with its one-click launcher, the same workflow
-is available in either workbook's **Reference** tab. **Save Diesel weekly call
+When the main dashboard is opened with its one-click launcher, the workflow is
+available in either workbook's **Reference** tab. **Save Diesel weekly call
 images** creates the Diesel set, while **Save Jet weekly call images** creates
-the Jet set. Both buttons run in the background, use the launcher's user-local
-Python and Node runtimes, and report the product-specific saved or failed status
-in the Reference panel.
+the Jet set. Each button first saves the exact current dashboard state into the
+product folder and then runs the formatter from that state. Both buttons run in
+the background, use the launcher's user-local Python and Node runtimes, and
+report the product-specific saved or failed status in the Reference panel.
 
 The launcher:
 
@@ -26,10 +26,12 @@ The launcher:
    the Git checkout.
 2. Installs the required plotting package.
 3. Runs the parent balance repository's existing `build:balances` command with
-   `BALANCE_WRITE_FULL_BUNDLE=1` to activate its complete JSON output.
-4. Creates a weekly-only JSON containing the latest EIA actual and the next
-   five forecast weeks.
-5. Renders the title-free weekly balance table plus the latest EIA Actuals bar
+   `BALANCE_WRITE_FULL_BUNDLE=1` to activate its complete source bundle.
+4. Loads the product's saved `dashboard_state.json` and verifies that it belongs
+   to the product and current settings revision.
+5. Creates a weekly-only JSON containing the latest EIA actual, the next five
+   forecast weeks, and the portable dashboard state used for the run.
+6. Renders the title-free weekly balance table plus the latest EIA Actuals bar
    chart and the first two Forecast bar charts.
 
 New intermediate full-bundle files are removed after the weekly JSON is
@@ -43,12 +45,14 @@ Every EIA actual week has its own self-contained folder:
 outputs/
   index.json
   2026-07-03/
+    diesel_dashboard_state.json
     diesel_weekly_stats.json
     diesel_weekly_balance_table.png
     diesel_eia_actuals.png
     diesel_forecast_week_1.png
     diesel_forecast_week_2.png
     diesel_manifest.json
+    jet_dashboard_state.json
     jet_weekly_stats.json
     jet_weekly_balance_table.png
     jet_eia_actuals.png
@@ -89,6 +93,25 @@ All presentation controls are in `weekly_stats_config.json` under `format`:
 
 The effective settings used for a run are copied into that week's
 product manifest, making every archived image reproducible.
+
+## Forecast and adjustment rules
+
+- Weekly actual exports remain the solved/source weekly total. Destination
+  values do not recalculate that actual total.
+- Forward weekly forecast exports are built from the adjusted monthly forecast.
+  PADD 3 is the sum of Latin America, Europe, Africa, and Other; the other PADD
+  export rows use their adjusted monthly total.
+- Monthly forecast edits step-hold into every forecast week in that month.
+  An exact weekly edit takes precedence for only that week and never
+  recalibrates its neighboring weeks.
+- Total weekly build/draw is exported from the saved materialized row. The
+  formatter does not redistribute or solve weekly values to force a monthly
+  build/draw target.
+
+Use **Save dashboard** to download a portable JSON copy and persist the same
+state in the product folder. Another user can open the dashboard through the
+launcher and choose **Import dashboard JSON** to restore the settings,
+adjustments, scenarios, and view without relying on browser storage.
 
 ## Moving this package
 

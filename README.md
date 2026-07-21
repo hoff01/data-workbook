@@ -56,6 +56,9 @@ Durable plans, architecture notes, and chart-recreation guides live under `docs/
 For day-to-day Windows/Mac launch, refresh, shared-edit, GitHub push, and
 certificate-warning avoidance steps, use `docs/operating-guide.md`.
 
+For copying the dashboards to another user or importing an exact saved
+dashboard JSON, use `docs/transfer-guide.md`.
+
 ## Local Files
 
 Local credentials and runtime caches are intentionally ignored:

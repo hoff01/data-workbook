@@ -17,10 +17,10 @@
     {
       "added_columns": 4,
       "date_column": "week_ending",
-      "latest": "2026-07-03",
+      "latest": "2026-07-10",
       "oldest": "2016-01-01",
       "path": "eia_weekly/diesel.csv",
-      "rows": 549,
+      "rows": 550,
       "split_source_columns": [
         "weekly East Coast (PADD 1) Imports of Distillate Fuel Oil"
       ]
@@ -42,10 +42,10 @@
     {
       "added_columns": 4,
       "date_column": "week_ending",
-      "latest": "2026-07-03",
+      "latest": "2026-07-10",
       "oldest": "2016-01-01",
       "path": "eia_weekly/jet.csv",
-      "rows": 549,
+      "rows": 550,
       "split_source_columns": [
         "weekly East Coast (PADD 1) Imports of Kerosene-Type Jet Fuel"
       ]
@@ -61,7 +61,7 @@
       "added_columns": 0,
       "path": "eia_weekly/gasoline.csv",
       "removed_stale_kpler_split_columns": 0,
-      "rows": 549,
+      "rows": 550,
       "split_source_columns": []
     }
   ],
@@ -71,11 +71,11 @@
     "padd1c_share": 0.0,
     "reason": ""
   },
-  "generated_at": "2026-07-14T03:24:32.899634+00:00",
+  "generated_at": "2026-07-21T02:31:34.532777+00:00",
   "mode": "live",
   "normalized_long": {
-    "path": "/private/tmp/us-balances-refresh-repull/Kpler/output/padd1_split/padd1_import_export_normalized_long.csv",
-    "rows": 12621
+    "path": "/Users/alexhoffmann/US_Balances/Kpler/output/padd1_split/padd1_import_export_normalized_long.csv",
+    "rows": 12668
   },
   "pipeline_name": "kpler_padd1_eia_split",
   "pull_count": 4,
@@ -83,7 +83,7 @@
     "padd1_split_diesel_exports": {
       "attempts": 1,
       "params": {
-        "endDate": "2026-08-27",
+        "endDate": "2026-09-03",
         "flowDirection": "Export",
         "fromZones": "United States",
         "granularity": "daily",
@@ -97,17 +97,17 @@
         "withProductEstimation": "false"
       },
       "raw": {
-        "bytes": 110663,
-        "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/padd1_split/padd1_split_diesel_exports.csv",
-        "rows": 4336
+        "bytes": 111123,
+        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_diesel_exports.csv",
+        "rows": 4354
       },
       "status": "ok",
-      "url": "https://api.kpler.com/v2/cargo/flows?flowDirection=Export&split=originPadds&granularity=daily&startDate=2018-01-01&endDate=2026-08-27&fromZones=United+States&products=Gasoil%2FDiesel&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withProductEstimation=false"
+      "url": "https://api.kpler.com/v2/cargo/flows?flowDirection=Export&split=originPadds&granularity=daily&startDate=2018-01-01&endDate=2026-09-03&fromZones=United+States&products=Gasoil%2FDiesel&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withProductEstimation=false"
     },
     "padd1_split_diesel_imports": {
       "attempts": 1,
       "params": {
-        "endDate": "2026-08-27",
+        "endDate": "2026-09-03",
         "flowDirection": "Import",
         "granularity": "daily",
         "products": "Gasoil/Diesel",
@@ -121,17 +121,17 @@
         "withProductEstimation": "false"
       },
       "raw": {
-        "bytes": 97415,
-        "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/padd1_split/padd1_split_diesel_imports.csv",
-        "rows": 3479
+        "bytes": 97640,
+        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_diesel_imports.csv",
+        "rows": 3487
       },
       "status": "ok",
-      "url": "https://api.kpler.com/v2/cargo/flows?flowDirection=Import&split=destinationPadds&granularity=daily&startDate=2018-01-01&endDate=2026-08-27&toZones=United+States&products=Gasoil%2FDiesel&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withProductEstimation=false"
+      "url": "https://api.kpler.com/v2/cargo/flows?flowDirection=Import&split=destinationPadds&granularity=daily&startDate=2018-01-01&endDate=2026-09-03&toZones=United+States&products=Gasoil%2FDiesel&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withProductEstimation=false"
     },
     "padd1_split_jet_exports": {
       "attempts": 1,
       "params": {
-        "endDate": "2026-08-27",
+        "endDate": "2026-09-03",
         "flowDirection": "Export",
         "fromZones": "United States",
         "granularity": "daily",
@@ -145,17 +145,17 @@
         "withProductEstimation": "false"
       },
       "raw": {
-        "bytes": 63051,
-        "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/padd1_split/padd1_split_jet_exports.csv",
-        "rows": 2541
+        "bytes": 63353,
+        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_jet_exports.csv",
+        "rows": 2553
       },
       "status": "ok",
-      "url": "https://api.kpler.com/v2/cargo/flows?flowDirection=Export&split=originPadds&granularity=daily&startDate=2018-01-01&endDate=2026-08-27&fromZones=United+States&products=Kero%2FJet&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withProductEstimation=false"
+      "url": "https://api.kpler.com/v2/cargo/flows?flowDirection=Export&split=originPadds&granularity=daily&startDate=2018-01-01&endDate=2026-09-03&fromZones=United+States&products=Kero%2FJet&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withProductEstimation=false"
     },
     "padd1_split_jet_imports": {
       "attempts": 1,
       "params": {
-        "endDate": "2026-08-27",
+        "endDate": "2026-09-03",
         "flowDirection": "Import",
         "granularity": "daily",
         "products": "Kero/Jet",
@@ -169,18 +169,18 @@
         "withProductEstimation": "false"
       },
       "raw": {
-        "bytes": 60172,
-        "path": "/private/tmp/us-balances-refresh-repull/Kpler/raw/daily/padd1_split/padd1_split_jet_imports.csv",
-        "rows": 2261
+        "bytes": 60409,
+        "path": "/Users/alexhoffmann/US_Balances/Kpler/raw/daily/padd1_split/padd1_split_jet_imports.csv",
+        "rows": 2270
       },
       "status": "ok",
-      "url": "https://api.kpler.com/v2/cargo/flows?flowDirection=Import&split=destinationPadds&granularity=daily&startDate=2018-01-01&endDate=2026-08-27&toZones=United+States&products=Kero%2FJet&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withProductEstimation=false"
+      "url": "https://api.kpler.com/v2/cargo/flows?flowDirection=Import&split=destinationPadds&granularity=daily&startDate=2018-01-01&endDate=2026-09-03&toZones=United+States&products=Kero%2FJet&unit=kbd&withIntraCountry=false&withIntraRegion=true&withForecast=true&withProductEstimation=false"
     }
   },
   "pulls": [
     {
       "commodity": "diesel",
-      "end_date": "2026-08-27",
+      "end_date": "2026-09-03",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -206,7 +206,7 @@
     },
     {
       "commodity": "diesel",
-      "end_date": "2026-08-27",
+      "end_date": "2026-09-03",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -232,7 +232,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-27",
+      "end_date": "2026-09-03",
       "family": "padd1_split",
       "flow_direction": "import",
       "from_zones": null,
@@ -258,7 +258,7 @@
     },
     {
       "commodity": "jet",
-      "end_date": "2026-08-27",
+      "end_date": "2026-09-03",
       "family": "padd1_split",
       "flow_direction": "export",
       "from_zones": [
@@ -285,7 +285,7 @@
   ],
   "runtime_config": {
     "concurrency": 2,
-    "end_date": "2026-08-27",
+    "end_date": "2026-09-03",
     "granularity": "daily",
     "only_realized": false,
     "retry_backoff_seconds": 2.0,
@@ -300,8 +300,8 @@
     "with_product_estimation": false
   },
   "share_outputs": {
-    "daily": "/private/tmp/us-balances-refresh-repull/Kpler/output/padd1_split/padd1_import_export_shares_daily.csv",
-    "monthly": "/private/tmp/us-balances-refresh-repull/Kpler/output/padd1_split/padd1_import_export_shares_monthly.csv",
-    "weekly": "/private/tmp/us-balances-refresh-repull/Kpler/output/padd1_split/padd1_import_export_shares_weekly.csv"
+    "daily": "/Users/alexhoffmann/US_Balances/Kpler/output/padd1_split/padd1_import_export_shares_daily.csv",
+    "monthly": "/Users/alexhoffmann/US_Balances/Kpler/output/padd1_split/padd1_import_export_shares_monthly.csv",
+    "weekly": "/Users/alexhoffmann/US_Balances/Kpler/output/padd1_split/padd1_import_export_shares_weekly.csv"
   }
 }

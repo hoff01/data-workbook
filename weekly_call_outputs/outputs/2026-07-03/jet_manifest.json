@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T18:24:36-04:00",
+  "generated_at": "2026-07-20T22:26:15-04:00",
   "actual_week_ending": "2026-07-03",
   "product": "jet",
   "weekly_json": "jet_weekly_stats.json",
@@ -70,5 +70,7 @@
       "width_px": 765,
       "height_px": 458
     }
-  ]
+  ],
+  "dashboard_state_json": "jet_dashboard_state.json",
+  "dashboard_state_fingerprint": "fbd7514094f6eec1f746fa0fb001b4402835a1ba66d11a86aa4ba229bdbc473c"
 }

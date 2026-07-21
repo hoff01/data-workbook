@@ -17,6 +17,8 @@ logs/
 /.env
 _not_pushed_junk/
 vendor/headroom/
+Diesel_Balance/dashboard_state.json
+Jet_Balance/dashboard_state.json
 **/.matplotlib-cache/
 plan.me
 email_recipients.txt

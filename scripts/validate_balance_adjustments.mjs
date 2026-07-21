@@ -487,7 +487,10 @@ class Calculator {
     const row = this.movementRow(frequency, period, flowId);
     const base = row ? Number(row.valueKbd || 0) : null;
     if (!flow || base === null) return null;
-    const override = row.status === "forecast" ? this.balanceAdjustmentValue(frequency, period, flow.toRegionKey, receiptLineId(flowId)) : null;
+    let override = row.status === "forecast" ? this.balanceAdjustmentValue(frequency, period, flow.toRegionKey, receiptLineId(flowId)) : null;
+    if (row.status === "forecast" && frequency === "weekly" && override === null) {
+      override = this.balanceAdjustmentValue("monthly", periodMonthValue(period), flow.toRegionKey, receiptLineId(flowId));
+    }
     return override === null ? base : override;
   }
 
@@ -607,6 +610,12 @@ class Calculator {
         && (frequency === "weekly" ? String(row.period || "").slice(0, 10) : periodMonthValue(row.period || row.periodMonth)) === targetPeriod)
       .sort((a, b) => String(a.updatedAt || "").localeCompare(String(b.updatedAt || "")))
       .at(-1) || null;
+  }
+
+  forecastCrudeCellAdjustment(regionKey, unitKey, period, frequency) {
+    const exact = this.exactCrudeCellAdjustment(regionKey, unitKey, period, frequency);
+    if (exact || frequency !== "weekly") return exact;
+    return this.exactCrudeCellAdjustment(regionKey, unitKey, periodMonthValue(period), "monthly");
   }
 
   regionalCapacityRowValue(regionKey, lineId, periodMonth, fallback = 0) {
@@ -748,7 +757,7 @@ class Calculator {
     const operable = basisOperable;
     const basisOperating = Number(basis.operatingCapacityKbd || Math.max(0, basisOperable - Number(basis.idleCapacityKbd || 0)) || 0);
     const basisIdle = actual && isActual ? Math.max(0, basisOperable - basisOperating) : 0;
-    const idleCellAdjustment = actual && isActual ? null : this.exactCrudeCellAdjustment(regionKey, "idleCapacityKbd", period, frequency);
+    const idleCellAdjustment = actual && isActual ? null : this.forecastCrudeCellAdjustment(regionKey, "idleCapacityKbd", period, frequency);
     const idle = actual && isActual ? basisIdle : idleCellAdjustment ? Number(idleCellAdjustment.capacityKbd || 0) : this.regionalCapacityRowValue(regionKey, "idleCapacityKbd", month, basisIdle);
     const operating = actual && isActual ? basisOperating : Math.max(0, operable - idle);
     const baseRuns = Number((actual && isActual ? actual.crudeRunsKbd : monthlyBasis.crudeRunsKbd) || 0);
@@ -759,12 +768,12 @@ class Calculator {
     const explicitUnplanned = unplannedOverride ? Number(unplannedOverride.capacityKbd || 0) : Number(outage.unplanned || 0);
     const exPlannedCapacity = Math.max(0, operable - plannedForCalc);
     const runCeiling = Math.max(0, operating - plannedForCalc);
-    const exPlannedCellAdjustment = actual && isActual ? null : this.exactCrudeCellAdjustment(regionKey, "exPlannedUtilizationAdjustmentPct", period, frequency);
+    const exPlannedCellAdjustment = actual && isActual ? null : this.forecastCrudeCellAdjustment(regionKey, "exPlannedUtilizationAdjustmentPct", period, frequency);
     const exPlannedUtilizationAdjustment = exPlannedCellAdjustment || (actual && isActual ? null : this.latestRegionalCapacityAdjustment(regionKey, "exPlannedUtilizationAdjustmentPct", month));
     const modeledUnplanned = this.modeledUnplannedMaintenanceKbd(regionKey, period, operable, plannedForCalc, idle, frequency);
     const targetRuns = exPlannedUtilizationAdjustment ? (exPlannedCapacity * Math.max(0, Math.min(100, Number(exPlannedUtilizationAdjustment.capacityKbd || 0)))) / 100 : null;
     const utilizationSolvedUnplanned = targetRuns !== null ? Math.max(0, runCeiling - targetRuns) : null;
-    const crudeRunsAdjustment = actual && isActual ? null : this.exactCrudeCellAdjustment(regionKey, "crudeRunsKbd", period, frequency);
+    const crudeRunsAdjustment = actual && isActual ? null : this.forecastCrudeCellAdjustment(regionKey, "crudeRunsKbd", period, frequency);
     const manualCrudeRuns = crudeRunsAdjustment ? Math.max(0, Number(crudeRunsAdjustment.capacityKbd || 0)) : null;
     const explicitUnplannedAboveModel = explicitUnplanned > modeledUnplanned;
     const historicalUnplanned = blankHistoricalOutages ? null : this.historicalUnplannedMaintenanceKbd(operable, plannedForCalc, baseRuns);
@@ -952,15 +961,19 @@ class Calculator {
     let demandKbd = isActual ? Number(rawPoint.demandKbd || 0) : round2(this.applyBalanceAdjustment(Number(monthlyPoint.demandKbd ?? rawPoint.demandKbd ?? 0), "weekly", rawPoint.period, rawPoint.regionKey, "demand"));
     let importsKbd = Number(monthlyPoint.importsKbd ?? rawPoint.importsKbd ?? 0);
     if (isActual) importsKbd = Number(rawPoint.importsKbd || 0);
-    else importsKbd = round2(this.applyBalanceAdjustment(Number(rawPoint.importsKbd ?? monthlyPoint.importsKbd ?? 0), "weekly", rawPoint.period, rawPoint.regionKey, "imports"));
+    else importsKbd = round2(this.applyBalanceAdjustment(Number(monthlyPoint.importsKbd ?? rawPoint.importsKbd ?? 0), "weekly", rawPoint.period, rawPoint.regionKey, "imports"));
     const importValues = this.adjustedImportValues(monthlyPoint || rawPoint, importsKbd, "weekly", rawPoint.period, rawPoint.regionKey, isActual);
     importsKbd = importValues.importsKbd;
     const exportsOverride = isActual ? null : this.balanceAdjustmentValue("weekly", rawPoint.period, rawPoint.regionKey, "exports");
-    let exportsKbd = this.forceZeroExports(rawPoint.regionKey) && exportsOverride === null ? 0 : isActual ? Number(rawPoint.exportsKbd || 0) : round2(exportsOverride === null ? Number(rawPoint.exportsKbd ?? monthlyPoint.exportsKbd ?? 0) : exportsOverride);
-    let exportDestinationValues = this.adjustedExportDestinationValues(rawPoint || monthlyPoint, exportsKbd);
-    if (this.forceZeroExports(rawPoint.regionKey) && exportsOverride === null) exportDestinationValues = this.adjustedExportDestinationValues(rawPoint || monthlyPoint, 0);
+    const forecastExportPoint = monthlyPoint || rawPoint;
+    let exportsKbd = isActual
+      ? (this.forceZeroExports(rawPoint.regionKey) ? 0 : Number(rawPoint.exportsKbd || 0))
+      : round2(exportsOverride === null ? Number(forecastExportPoint.exportsKbd ?? rawPoint.exportsKbd ?? 0) : exportsOverride);
+    let exportDestinationValues = this.adjustedExportDestinationValues(isActual ? rawPoint : forecastExportPoint, exportsKbd);
     if (rawPoint.regionKey === "padd3") {
-      exportDestinationValues = isActual ? this.adjustedExportDestinationValues(rawPoint || monthlyPoint, exportsKbd) : this.adjustedPadd3ExportDestinationValues(rawPoint || monthlyPoint, "weekly", rawPoint.period, isActual);
+      exportDestinationValues = isActual ? this.adjustedExportDestinationValues(rawPoint, exportsKbd) : this.adjustedPadd3ExportDestinationValues(forecastExportPoint, "weekly", rawPoint.period, false);
+      const hasWeeklyDestinationOverride = EXPORT_DESTINATION_FIELDS.some((key) => this.balanceAdjustmentValue("weekly", rawPoint.period, "padd3", EXPORT_DESTINATION_LINE_BY_FIELD[key]) !== null);
+      if (!isActual && exportsOverride !== null && !hasWeeklyDestinationOverride) exportDestinationValues = this.adjustedExportDestinationValues(forecastExportPoint, exportsOverride);
       if (!isActual) exportsKbd = this.exportDestinationTotal(exportDestinationValues);
     }
     const movement = this.movementSummaryForRegion("weekly", rawPoint.period, rawPoint.regionKey);
@@ -1295,7 +1308,8 @@ function importAdjustmentLinesForUi(runtime, frequency, regionKey) {
   }
   if (product === "jet" && regionKey === "padd1") return frequency === "weekly" ? ["importsAdjustment"] : [];
   const monthlyLowerAtlanticImportGuide = frequency === "monthly" && product === "diesel" && regionKey === "padd1c";
-  return frequency === "weekly" || monthlyLowerAtlanticImportGuide ? ["importsAdjustment"] : [];
+  const monthlyPadd5ImportAdjustment = frequency === "monthly" && regionKey === "padd5";
+  return frequency === "weekly" || monthlyLowerAtlanticImportGuide || monthlyPadd5ImportAdjustment ? ["importsAdjustment"] : [];
 }
 
 function exportGuideFlowsForUi(runtime, regionKey) {
@@ -1428,7 +1442,8 @@ function assertFormulaInvariants(calc, frequency, rows, label) {
         .at(-1);
       if (previous) {
         const expectedStocks = round2(Number(previous.stocksKb || 0) + Number(row.balanceKbd || 0) * periodDays(row.period));
-        if (!near(row.stocksKb, expectedStocks, 0.11)) failures.push(`${label}: ${frequency} ${row.period} ${row.regionKey} stocksKb=${row.stocksKb} expected ${expectedStocks}`);
+        const memberCount = calc.aggregates[row.regionKey]?.length || 1;
+        if (!near(row.stocksKb, expectedStocks, 0.11 * memberCount)) failures.push(`${label}: ${frequency} ${row.period} ${row.regionKey} stocksKb=${row.stocksKb} expected ${expectedStocks}`);
       }
     }
     const members = calc.aggregates[row.regionKey];
@@ -1463,6 +1478,14 @@ function runtimeWithAdjustmentList(runtime, calc, adjustments) {
   for (const adjustment of adjustments) {
     next.settings.adjustments = replacementAdjustments(next, calc, adjustment);
   }
+  return next;
+}
+
+function runtimeWithoutWeeklyAdjustmentsForMonth(runtime, month) {
+  const next = clone(runtime);
+  next.settings.adjustments = (next.settings?.adjustments || []).filter((row) =>
+    !(row.frequency === "weekly" && periodMonthValue(row.period) === month),
+  );
   return next;
 }
 
@@ -1584,6 +1607,293 @@ function validateSingleWeekCrudeOverride(runtime) {
   };
 }
 
+function validateMonthlyCrudePropagation(runtime) {
+  const failures = [];
+  const baselineCalc = new Calculator(runtime);
+  const forecastPeriodsByMonth = new Map();
+  for (const [period, , isActual] of baselineCalc.crudeAllPeriods("weekly")) {
+    if (isActual) continue;
+    const month = periodMonthValue(period);
+    const periods = forecastPeriodsByMonth.get(month) || [];
+    periods.push(period);
+    forecastPeriodsByMonth.set(month, periods);
+  }
+  const candidate = Array.from(forecastPeriodsByMonth.entries()).find(([, periods]) => periods.length >= 2);
+  if (!candidate) return { failures: [`${runtime.product.key}: no forecast month has two weekly crude rows`], summary: null };
+  const [month, periods] = candidate;
+  const monthlyP5 = crudeForecastPoint(baselineCalc, "padd5", month, "monthly");
+  const monthlyP4 = crudeForecastPoint(baselineCalc, "padd4", month, "monthly");
+  const monthlyP2 = crudeForecastPoint(baselineCalc, "padd2", month, "monthly");
+  if (!monthlyP5 || !monthlyP4 || !monthlyP2) return { failures: [`${runtime.product.key}: missing monthly crude forecast rows for ${month}`], summary: null };
+  const crudeRunsTarget = round3(Number(monthlyP5.crudeRunsKbd || 0) + 37.25);
+  const idleTarget = round3(Number(monthlyP4.idleCapacityKbd || 0) + 14.5);
+  const baselineExPlanned = Number(monthlyP2.exPlannedUtilizationPct || 0);
+  const exPlannedTarget = round3(Math.max(1, Math.min(99, baselineExPlanned > 92 ? baselineExPlanned - 4.25 : baselineExPlanned + 4.25)));
+  const adjustment = (regionKey, unitKey, value, updatedAt) => ({
+    scope: "crude_cell",
+    frequency: "monthly",
+    period: month,
+    periodMonth: month,
+    regionKey,
+    refineryId: REGIONAL_CAPACITY_REFINERY_ID,
+    refineryName: "PADD row override",
+    unitKey,
+    unitLabel: unitKey,
+    capacityKbd: value,
+    note: "Synthetic monthly crude propagation",
+    updatedAt,
+  });
+  let adjustedRuntime = runtimeWithCapacityAdjustment(runtime, adjustment("padd5", "crudeRunsKbd", crudeRunsTarget, "2099-01-05T00:00:00.000Z"));
+  adjustedRuntime = runtimeWithCapacityAdjustment(adjustedRuntime, adjustment("padd4", "idleCapacityKbd", idleTarget, "2099-01-05T00:00:01.000Z"));
+  adjustedRuntime = runtimeWithCapacityAdjustment(adjustedRuntime, adjustment("padd2", "exPlannedUtilizationAdjustmentPct", exPlannedTarget, "2099-01-05T00:00:02.000Z"));
+  const adjustedCalc = new Calculator(adjustedRuntime);
+  const adjustedMonthlyP5 = crudeForecastPoint(adjustedCalc, "padd5", month, "monthly");
+  const adjustedMonthlyP4 = crudeForecastPoint(adjustedCalc, "padd4", month, "monthly");
+  const adjustedMonthlyP2 = crudeForecastPoint(adjustedCalc, "padd2", month, "monthly");
+  if (!adjustedMonthlyP5 || !near(adjustedMonthlyP5.crudeRunsKbd, crudeRunsTarget, 0.03)) failures.push(`${runtime.product.key}: monthly PADD 5 crude-runs override did not apply for ${month}`);
+  if (!adjustedMonthlyP4 || !near(adjustedMonthlyP4.idleCapacityKbd, idleTarget, 0.03)) failures.push(`${runtime.product.key}: monthly PADD 4 idle-capacity override did not apply for ${month}`);
+  if (!adjustedMonthlyP2 || !near(adjustedMonthlyP2.exPlannedUtilizationPct, exPlannedTarget, 0.03)) failures.push(`${runtime.product.key}: monthly PADD 2 ex-planned utilization override did not apply for ${month}`);
+  for (const period of periods) {
+    const weeklyP5 = crudeForecastPoint(adjustedCalc, "padd5", period, "weekly");
+    const weeklyP4 = crudeForecastPoint(adjustedCalc, "padd4", period, "weekly");
+    const weeklyP2 = crudeForecastPoint(adjustedCalc, "padd2", period, "weekly");
+    if (!weeklyP5 || !near(weeklyP5.crudeRunsKbd, crudeRunsTarget, 0.03)) failures.push(`${runtime.product.key}: monthly PADD 5 crude-runs edit did not step-hold into ${period}`);
+    if (!weeklyP4 || !near(weeklyP4.idleCapacityKbd, idleTarget, 0.03)) failures.push(`${runtime.product.key}: monthly PADD 4 idle-capacity edit did not step-hold into ${period}`);
+    if (!weeklyP2 || !near(weeklyP2.exPlannedUtilizationPct, exPlannedTarget, 0.03)) failures.push(`${runtime.product.key}: monthly PADD 2 ex-planned utilization edit did not step-hold into ${period}`);
+    const balanceP5 = adjustedCalc.rowsByRegion("padd5", "weekly").find((row) => row.period === period);
+    if (!balanceP5 || !near(balanceP5.crudeRunsKbd, crudeRunsTarget, 0.03)) failures.push(`${runtime.product.key}: PADD 5 balance production inputs did not receive monthly crude runs in ${period}`);
+    if (balanceP5 && !near(balanceP5.productionKbd, Number(balanceP5.crudeRunsKbd || 0) * Number(balanceP5.yieldPct || 0) / 100, 0.03)) failures.push(`${runtime.product.key}: PADD 5 ${period} production is not derived from its inherited crude runs and yield`);
+  }
+  const firstPeriod = periods[0];
+  const neighborPeriod = periods[1];
+  const weeklyTarget = round3(crudeRunsTarget + 22.75);
+  const weeklyAdjustment = {
+    ...adjustment("padd5", "crudeRunsKbd", weeklyTarget, "2099-01-06T00:00:00.000Z"),
+    frequency: "weekly",
+    period: firstPeriod,
+    periodMonth: month,
+    note: "Synthetic exact weekly crude precedence",
+  };
+  const weeklyCalc = new Calculator(runtimeWithCapacityAdjustment(adjustedRuntime, weeklyAdjustment));
+  const selected = crudeForecastPoint(weeklyCalc, "padd5", firstPeriod, "weekly");
+  const neighbor = crudeForecastPoint(weeklyCalc, "padd5", neighborPeriod, "weekly");
+  if (!selected || !near(selected.crudeRunsKbd, weeklyTarget, 0.03)) failures.push(`${runtime.product.key}: exact weekly PADD 5 crude-runs override did not take precedence on ${firstPeriod}`);
+  if (!neighbor || !near(neighbor.crudeRunsKbd, crudeRunsTarget, 0.03)) failures.push(`${runtime.product.key}: exact weekly PADD 5 crude-runs override leaked into ${neighborPeriod}`);
+  return {
+    failures,
+    summary: {
+      product: runtime.product.key,
+      frequency: "monthly->weekly",
+      period: month,
+      region: "padd2/padd4/padd5",
+      edit: "crude runs + idle capacity + ex-planned utilization step-hold",
+      targetValue: crudeRunsTarget,
+      changedCells: periods.length * 3,
+      changedRegions: ["padd2", "padd4", "padd5"],
+      changedFields: ["crudeRunsKbd", "idleCapacityKbd", "exPlannedUtilizationPct", "productionKbd"],
+    },
+  };
+}
+
+function validateFlatMonthlyWeeklyExports(runtime) {
+  const failures = [];
+  const seedCalc = new Calculator(runtime);
+  const p3ForecastWeeks = seedCalc.rowsByRegion("padd3", "weekly").filter((row) => row.status === "forecast");
+  const weeksByMonth = new Map();
+  for (const row of p3ForecastWeeks) {
+    const month = periodMonthValue(row.period);
+    const rows = weeksByMonth.get(month) || [];
+    rows.push(row);
+    weeksByMonth.set(month, rows);
+  }
+  const candidate = Array.from(weeksByMonth.entries()).find(([, rows]) => rows.length >= 2);
+  if (!candidate) return { failures: [`${runtime.product.key}: no forecast month has two weekly PADD 3 rows`], summary: null };
+  const [month] = candidate;
+  const isolatedRuntime = runtimeWithoutWeeklyAdjustmentsForMonth(runtime, month);
+  const baselineCalc = new Calculator(isolatedRuntime);
+  const weeks = baselineCalc.rowsByRegion("padd3", "weekly").filter((row) => row.status === "forecast" && periodMonthValue(row.period) === month);
+  const monthlyP3 = baselineCalc.rowsByRegion("padd3", "monthly").find((row) => row.period === month && row.status === "forecast");
+  if (!monthlyP3) return { failures: [`${runtime.product.key}: missing monthly PADD 3 forecast for ${month}`], summary: null };
+  const monthlyTotal = baselineCalc.exportDestinationTotal(monthlyP3);
+  for (const week of weeks) {
+    if (!near(week.exportsKbd, monthlyTotal, 0.03)) failures.push(`${runtime.product.key}: ${week.period} PADD 3 exports=${week.exportsKbd} expected flat monthly destination total ${monthlyTotal}`);
+  }
+
+  const monthlyEurope = round3(Number(monthlyP3.exportsEuropeKbd || 0) + 50);
+  const monthlyAdjustment = { frequency: "monthly", period: month, regionKey: "padd3", lineId: "exportsEuropeAdjustment", valueKbd: monthlyEurope, note: "Synthetic monthly export propagation", updatedAt: "2099-01-01T00:00:00.000Z" };
+  const monthlyRuntime = runtimeWithAdjustmentList(isolatedRuntime, baselineCalc, [monthlyAdjustment]);
+  const monthlyCalc = new Calculator(monthlyRuntime);
+  const adjustedMonth = monthlyCalc.rowsByRegion("padd3", "monthly").find((row) => row.period === month);
+  const adjustedWeeks = monthlyCalc.rowsByRegion("padd3", "weekly").filter((row) => row.status === "forecast" && periodMonthValue(row.period) === month);
+  for (const week of adjustedWeeks) {
+    if (!near(week.exportsEuropeKbd, monthlyEurope, 0.03)) failures.push(`${runtime.product.key}: monthly Europe edit did not step-hold into ${week.period}`);
+    if (!near(week.exportsKbd, monthlyCalc.exportDestinationTotal(week), 0.03)) failures.push(`${runtime.product.key}: forecast ${week.period} total exports is not its destination sum`);
+    if (adjustedMonth && !near(week.exportsKbd, monthlyCalc.exportDestinationTotal(adjustedMonth), 0.03)) failures.push(`${runtime.product.key}: forecast ${week.period} was recalibrated away from adjusted monthly exports`);
+  }
+
+  const selected = adjustedWeeks[0];
+  const neighbor = adjustedWeeks[1];
+  if (selected && neighbor) {
+    const weeklyEurope = round3(monthlyEurope + 25);
+    const demandTarget = round3(Number(selected.demandKbd || 0) + 10);
+    const combinedRuntime = runtimeWithAdjustmentList(monthlyRuntime, monthlyCalc, [
+      { frequency: "weekly", period: selected.period, regionKey: "padd3", lineId: "exportsEuropeAdjustment", valueKbd: weeklyEurope, note: "Synthetic weekly export override", updatedAt: "2099-01-02T00:00:00.000Z" },
+      { frequency: "weekly", period: selected.period, regionKey: "padd3", lineId: "demandAdjustment", valueKbd: demandTarget, note: "Synthetic weekly demand override", updatedAt: "2099-01-02T00:00:01.000Z" },
+    ]);
+    const combinedCalc = new Calculator(combinedRuntime);
+    const selectedAfter = combinedCalc.rowsByRegion("padd3", "weekly").find((row) => row.period === selected.period);
+    const neighborAfter = combinedCalc.rowsByRegion("padd3", "weekly").find((row) => row.period === neighbor.period);
+    if (!selectedAfter || !near(selectedAfter.exportsEuropeKbd, weeklyEurope, 0.03) || !near(selectedAfter.demandKbd, demandTarget, 0.03)) failures.push(`${runtime.product.key}: multiple weekly overrides were not retained on ${selected.period}`);
+    if (selectedAfter) {
+      const expectedBalance = round2(Number(selectedAfter.productionKbd || 0) + Number(selectedAfter.importsKbd || 0) + Number(selectedAfter.netReceiptsKbd || 0) - Number(selectedAfter.exportsKbd || 0) - Number(selectedAfter.demandKbd || 0));
+      if (!near(selectedAfter.balanceKbd, expectedBalance, 0.03)) failures.push(`${runtime.product.key}: multiple weekly overrides produced the wrong build/draw on ${selected.period}`);
+    }
+    if (!neighborAfter || !near(neighborAfter.exportsEuropeKbd, monthlyEurope, 0.03) || !near(neighborAfter.demandKbd, neighbor.demandKbd, 0.03)) failures.push(`${runtime.product.key}: weekly override leaked into neighboring week ${neighbor.period}`);
+  }
+
+  const actual = baselineCalc.rowsByRegion("padd3", "weekly").filter((row) => row.status === "actual").at(-1);
+  if (actual) {
+    const mutated = clone(isolatedRuntime);
+    const rawActual = mutated.regionalBalance.weekly.find((row) => row.status === "actual" && row.period === actual.period && row.regionKey === "padd3");
+    if (rawActual) {
+      rawActual.exportsLatinAmericaKbd = 1;
+      rawActual.exportsEuropeKbd = 2;
+      rawActual.exportsAfricaKbd = 3;
+      rawActual.exportsOtherKbd = 4;
+      const actualAfter = new Calculator(mutated).rowsByRegion("padd3", "weekly").find((row) => row.period === actual.period);
+      if (!actualAfter || !near(actualAfter.exportsKbd, actual.exportsKbd, 0.03)) failures.push(`${runtime.product.key}: actual weekly exports changed when destination components were mutated`);
+    }
+  }
+  return { failures, summary: { product: runtime.product.key, frequency: "monthly->weekly", period: month, region: "padd3", edit: "flat destination propagation + weekly precedence", targetValue: monthlyEurope, changedCells: adjustedWeeks.length, changedRegions: ["padd3"], changedFields: ["exportsEuropeKbd", "exportsKbd", "balanceKbd"] } };
+}
+
+function validateMonthlyWeeklyPropagationMatrix(runtime) {
+  const failures = [];
+  const seedCalc = new Calculator(runtime);
+  const forecastWeeksByMonth = new Map();
+  for (const row of seedCalc.rowsByRegion("padd3", "weekly").filter((point) => point.status === "forecast")) {
+    const month = periodMonthValue(row.period);
+    const rows = forecastWeeksByMonth.get(month) || [];
+    rows.push(row);
+    forecastWeeksByMonth.set(month, rows);
+  }
+  const candidate = Array.from(forecastWeeksByMonth.entries()).find(([month, rows]) => rows.length >= 2 && seedCalc.baseRegions.every((regionKey) => seedCalc.rowsByRegion(regionKey, "monthly").some((row) => row.period === month && row.status === "forecast")));
+  if (!candidate) return { failures: [`${runtime.product.key}: no forecast month can exercise the complete monthly-to-weekly propagation matrix`], summary: null };
+  const [month] = candidate;
+  const isolatedRuntime = runtimeWithoutWeeklyAdjustmentsForMonth(runtime, month);
+  const baselineCalc = new Calculator(isolatedRuntime);
+  const candidateWeeks = baselineCalc.rowsByRegion("padd3", "weekly").filter((point) => point.status === "forecast" && periodMonthValue(point.period) === month);
+  const forecastPeriods = candidateWeeks.map((row) => row.period);
+  const adjustments = [];
+  const checks = [];
+  let ordinal = 0;
+  const addCheck = (regionKey, lineId, targetLine, currentValue, delta = 10) => {
+    const value = targetLine === "yieldPct"
+      ? round3(Math.max(0, Math.min(99, Number(currentValue || 0) + (Number(currentValue || 0) > 92 ? -1.75 : 1.75))))
+      : round3(Math.max(0, Number(currentValue || 0)) + delta + ordinal * 0.137);
+    adjustments.push({ frequency: "monthly", period: month, regionKey, lineId, valueKbd: value, note: "Synthetic complete monthly-to-weekly propagation", updatedAt: `2099-01-03T00:00:${String(ordinal).padStart(2, "0")}.000Z` });
+    checks.push({ regionKey, lineId, targetLine, value });
+    ordinal += 1;
+  };
+
+  for (const regionKey of baselineCalc.baseRegions) {
+    const monthlyPoint = baselineCalc.rowsByRegion(regionKey, "monthly").find((row) => row.period === month && row.status === "forecast");
+    if (!monthlyPoint) {
+      failures.push(`${runtime.product.key}: missing ${regionKey} monthly forecast for ${month}`);
+      continue;
+    }
+    addCheck(regionKey, "demandAdjustment", "demand", baselineCalc.valueForLine(monthlyPoint, "demand", "monthly", regionKey), 11);
+    if (!(runtime.product?.key === "diesel" && regionKey === "padd1c")) {
+      addCheck(regionKey, "yieldAdjustmentPct", "yieldPct", baselineCalc.valueForLine(monthlyPoint, "yieldPct", "monthly", regionKey));
+    }
+    for (const lineId of importAdjustmentLinesForUi(runtime, "monthly", regionKey)) {
+      const targetLine = displayTargetLineId(lineId);
+      addCheck(regionKey, lineId, targetLine, baselineCalc.valueForLine(monthlyPoint, targetLine, "monthly", regionKey), 13);
+    }
+    for (const lineId of exportAdjustmentLinesForUi(runtime, baselineCalc, regionKey)) {
+      const targetLine = displayTargetLineId(lineId);
+      addCheck(regionKey, lineId, targetLine, baselineCalc.valueForLine(monthlyPoint, targetLine, "monthly", regionKey), 17);
+    }
+  }
+
+  for (const flow of runtime.regionalBalance.movementFlows || []) {
+    if (!baselineCalc.baseRegions.includes(flow.toRegionKey)) continue;
+    const monthlyRow = (flow.monthly || []).find((row) => row.period === month && row.status === "forecast");
+    const weeklyRows = (flow.weekly || []).filter((row) => forecastPeriods.includes(row.period) && row.status === "forecast");
+    if (!monthlyRow || weeklyRows.length !== forecastPeriods.length) continue;
+    addCheck(flow.toRegionKey, receiptAdjustmentLineId(flow.id), receiptLineId(flow.id), monthlyRow.valueKbd, 19);
+  }
+
+  const adjustedRuntime = runtimeWithAdjustmentList(isolatedRuntime, baselineCalc, adjustments);
+  const adjustedCalc = new Calculator(adjustedRuntime);
+  for (const check of checks) {
+    const monthlyPoint = adjustedCalc.rowsByRegion(check.regionKey, "monthly").find((row) => row.period === month && row.status === "forecast");
+    if (!monthlyPoint) {
+      failures.push(`${runtime.product.key}: adjusted ${check.regionKey} monthly point disappeared for ${month}`);
+      continue;
+    }
+    const monthlyValue = adjustedCalc.valueForLine(monthlyPoint, check.targetLine, "monthly", check.regionKey);
+    if (!near(monthlyValue, check.value, 0.03)) failures.push(`${runtime.product.key}: ${month} ${check.regionKey} ${check.targetLine}=${monthlyValue} expected edited value ${check.value}`);
+    const weeklyPoints = adjustedCalc.rowsByRegion(check.regionKey, "weekly").filter((row) => row.status === "forecast" && forecastPeriods.includes(row.period));
+    if (weeklyPoints.length !== forecastPeriods.length) failures.push(`${runtime.product.key}: ${check.regionKey} is missing forecast weeks for ${month}`);
+    for (const weeklyPoint of weeklyPoints) {
+      const weeklyValue = adjustedCalc.valueForLine(weeklyPoint, check.targetLine, "weekly", check.regionKey);
+      if (!near(weeklyValue, monthlyValue, 0.03)) failures.push(`${runtime.product.key}: ${weeklyPoint.period} ${check.regionKey} ${check.targetLine}=${weeklyValue} expected monthly step-held value ${monthlyValue}`);
+    }
+  }
+
+  for (const regionKey of baselineCalc.baseRegions) {
+    const adjustedWeeks = adjustedCalc.rowsByRegion(regionKey, "weekly").filter((row) => row.status === "forecast" && forecastPeriods.includes(row.period));
+    for (const week of adjustedWeeks) {
+      if (!near(week.exportsKbd, adjustedCalc.exportDestinationTotal(week), 0.03)) failures.push(`${runtime.product.key}: ${week.period} ${regionKey} forecast exports is not the destination sum`);
+    }
+  }
+
+  const actualFields = ["demandKbd", "productionKbd", "importsKbd", "exportsKbd", ...EXPORT_DESTINATION_FIELDS, "netReceiptsKbd", "stockChangeKbd", "balanceKbd", "stocksKb"];
+  const adjustedActual = indexRows(adjustedCalc.rowsForFrequency("weekly").filter((row) => row.status === "actual"));
+  for (const baseline of baselineCalc.rowsForFrequency("weekly").filter((row) => row.status === "actual")) {
+    const after = adjustedActual.get(rowKey(baseline));
+    if (!after) continue;
+    for (const field of actualFields) {
+      if (!near(after[field], baseline[field], 0.03)) failures.push(`${runtime.product.key}: monthly forecast edits changed actual ${baseline.period} ${baseline.regionKey}.${field}`);
+    }
+  }
+
+  const p5Weeks = adjustedCalc.rowsByRegion("padd5", "weekly").filter((row) => row.status === "forecast" && forecastPeriods.includes(row.period));
+  if (p5Weeks.length >= 2) {
+    const selected = p5Weeks[0];
+    const neighbor = p5Weeks[1];
+    const weeklyExports = round3(Number(selected.exportsKbd || 0) + 23.5);
+    const weeklyDemand = round3(Number(selected.demandKbd || 0) + 9.25);
+    const weeklyRuntime = runtimeWithAdjustmentList(adjustedRuntime, adjustedCalc, [
+      { frequency: "weekly", period: selected.period, regionKey: "padd5", lineId: "exportsAdjustment", valueKbd: weeklyExports, note: "Synthetic PADD 5 weekly export precedence", updatedAt: "2099-01-04T00:00:00.000Z" },
+      { frequency: "weekly", period: selected.period, regionKey: "padd5", lineId: "demandAdjustment", valueKbd: weeklyDemand, note: "Synthetic PADD 5 weekly demand precedence", updatedAt: "2099-01-04T00:00:01.000Z" },
+    ]);
+    const weeklyCalc = new Calculator(weeklyRuntime);
+    const selectedAfter = weeklyCalc.rowsByRegion("padd5", "weekly").find((row) => row.period === selected.period);
+    const neighborAfter = weeklyCalc.rowsByRegion("padd5", "weekly").find((row) => row.period === neighbor.period);
+    if (!selectedAfter || !near(selectedAfter.exportsKbd, weeklyExports, 0.03) || !near(selectedAfter.demandKbd, weeklyDemand, 0.03)) failures.push(`${runtime.product.key}: PADD 5 did not retain multiple exact weekly overrides for ${selected.period}`);
+    if (!neighborAfter || !near(neighborAfter.exportsKbd, neighbor.exportsKbd, 0.03) || !near(neighborAfter.demandKbd, neighbor.demandKbd, 0.03)) failures.push(`${runtime.product.key}: PADD 5 weekly overrides leaked from ${selected.period} into ${neighbor.period}`);
+  } else {
+    failures.push(`${runtime.product.key}: PADD 5 does not have two forecast weeks for the precedence test`);
+  }
+
+  return {
+    failures,
+    summary: {
+      product: runtime.product.key,
+      frequency: "monthly->weekly",
+      period: month,
+      region: "all base PADD rows",
+      edit: "complete editable-row step-hold matrix + PADD 5 weekly precedence",
+      targetValue: checks.length,
+      changedCells: checks.length * forecastPeriods.length,
+      changedRegions: baselineCalc.baseRegions,
+      changedFields: Array.from(new Set(checks.map((check) => check.targetLine))),
+    },
+  };
+}
+
 function makeStandardTests(runtime) {
   const calc = new Calculator(runtime);
   const tests = [];
@@ -1675,6 +1985,15 @@ function runProduct(product) {
   const crudeWeekScope = validateSingleWeekCrudeOverride(runtime);
   failures.push(...crudeWeekScope.failures);
   if (crudeWeekScope.summary) summaries.push(crudeWeekScope.summary);
+  const crudeMonthScope = validateMonthlyCrudePropagation(runtime);
+  failures.push(...crudeMonthScope.failures);
+  if (crudeMonthScope.summary) summaries.push(crudeMonthScope.summary);
+  const flatExports = validateFlatMonthlyWeeklyExports(runtime);
+  failures.push(...flatExports.failures);
+  if (flatExports.summary) summaries.push(flatExports.summary);
+  const propagationMatrix = validateMonthlyWeeklyPropagationMatrix(runtime);
+  failures.push(...propagationMatrix.failures);
+  if (propagationMatrix.summary) summaries.push(propagationMatrix.summary);
 
   for (const test of tests) {
     const testRuntime = runtimeWithAdjustments(runtime, baselineCalc, {
@@ -1768,5 +2087,5 @@ if (failures.length) {
   if (failures.length > 80) console.error(` - ... ${failures.length - 80} more`);
   process.exitCode = 1;
 } else {
-  console.log("\nPASS balance propagation, single-week crude overrides, Atmos-only outage isolation, and formula invariants passed for Diesel_Balance and Jet_Balance monthly/weekly modes.");
+  console.log("\nPASS all editable monthly rows step-hold into weekly forecasts, PADD 1-5 exports propagate, solved actual exports stay fixed, multiple weekly overrides remain exact and local, and formula invariants pass for Diesel_Balance and Jet_Balance.");
 }

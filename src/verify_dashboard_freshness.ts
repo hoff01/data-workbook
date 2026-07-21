@@ -713,6 +713,12 @@ async function verifySharedOutageExport(): Promise<SharedOutage[]> {
   return expectedOutages;
 }
 
+const dashboardBuilderSource = await readFile("src/build_balance_dashboards.ts", "utf8");
+assertIncludes("active dashboard generator remains explicit", dashboardBuilderSource, "function regionalDashboardHtml(");
+assertIncludes("dashboard build uses the active generator", dashboardBuilderSource, "regionalDashboardHtml(bundle)");
+assertNotIncludes("unused legacy dashboard generator is removed", dashboardBuilderSource, "function dashboardHtml(");
+assertNotIncludes("versioned legacy regional generator is removed", dashboardBuilderSource, "regionalDashboardHtmlV2");
+
 const updatePipelineSource = await readFile("src/update_pipeline.ts", "utf8");
 assertNotIncludes("Kpler failures are not optional", updatePipelineSource, "continueOnFailure");
 assertNotIncludes("Kpler steps do not use the removed optional wrapper", updatePipelineSource, "optionalStep(");

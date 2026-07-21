@@ -24,8 +24,35 @@ type WeeklyCallManifest = {
   actual_week_ending: string;
   product: ProductKey;
   weekly_json: string;
+  dashboard_state_json: string;
+  dashboard_state_fingerprint: string;
   images: Array<{ file: string; width_px: number; height_px: number }>;
 };
+
+type DashboardStateRow = {
+  period: string;
+  status: "actual" | "forecast";
+  regionKey: string;
+  demandKbd?: number;
+  exportsKbd?: number;
+  exportsLatinAmericaKbd?: number;
+  exportsEuropeKbd?: number;
+  exportsAfricaKbd?: number;
+  exportsOtherKbd?: number;
+  periodBuildDrawKb?: number;
+};
+
+type PortableDashboardState = {
+  schema?: string;
+  schemaVersion?: number;
+  product?: string;
+  fingerprint?: string;
+  settings?: { revision?: string };
+  materialized?: { regionalBalance?: { weekly?: DashboardStateRow[] } };
+};
+
+type WeeklyCallTableRow = { key?: string; values?: Record<string, number | null> };
+type WeeklyCallTableRegion = { key?: string; region_key?: string; rows?: WeeklyCallTableRow[] };
 
 type WeeklyCallInventoryChart = {
   week_ending: string;
@@ -38,6 +65,9 @@ type WeeklyCallInventoryChart = {
 type WeeklyCallPayload = {
   schema_version: number;
   product?: { key?: string; stats_title?: string };
+  periods?: Array<{ week_ending?: string; status?: "actual" | "forecast" }>;
+  table?: { frequency?: string; regions?: WeeklyCallTableRegion[] };
+  dashboard_state?: PortableDashboardState;
   inventory_changes?: {
     unit?: string;
     actual?: WeeklyCallInventoryChart;
@@ -71,6 +101,18 @@ function assertEqual(label: string, actual: string, expected: string): void {
   if (actual !== expected) throw new Error(`${label} mismatch: expected=${expected} actual=${actual}`);
 }
 
+function assertNear(label: string, actual: number | null | undefined, expected: number, tolerance: number): void {
+  if (!Number.isFinite(Number(actual)) || Math.abs(Number(actual) - expected) > tolerance) {
+    throw new Error(`${label} mismatch: expected=${expected} actual=${actual}`);
+  }
+}
+
+function roundHalfUp(value: number, digits: number): number {
+  const factor = 10 ** digits;
+  const sign = value < 0 ? -1 : 1;
+  return sign * Math.floor(Math.abs(value) * factor + 0.500000001) / factor;
+}
+
 async function verifyWeeklyCallArchives(): Promise<string[]> {
   const outputRoot = join("weekly_call_outputs", "outputs");
   const catalog = await readJson<WeeklyCallCatalog>(join(outputRoot, "index.json"));
@@ -98,6 +140,8 @@ async function verifyWeeklyCallArchives(): Promise<string[]> {
     assertEqual(`${config.key} weekly call manifest product`, manifest.product, config.key);
     assertEqual(`${config.key} weekly call manifest latest week`, manifest.actual_week_ending, entry.actual_week_ending);
     assertEqual(`${config.key} weekly call manifest JSON`, manifest.weekly_json, entry.weekly_json);
+    assertEqual(`${config.key} weekly call dashboard-state name`, manifest.dashboard_state_json, `${config.key}_dashboard_state.json`);
+    if (!/^[a-f0-9]{64}$/.test(manifest.dashboard_state_fingerprint)) throw new Error(`${config.key} weekly call manifest has an invalid dashboard-state fingerprint`);
     if (manifest.images.length !== 4) throw new Error(`${config.key} weekly call manifest expected 4 images, received ${manifest.images.length}`);
     const tableImage = manifest.images.find((image) => image.file === entry.table_image);
     if (!tableImage || tableImage.width_px !== 1323 || tableImage.height_px !== 1269) {
@@ -121,6 +165,43 @@ async function verifyWeeklyCallArchives(): Promise<string[]> {
     assertEqual(`${config.key} weekly call JSON actual week`, actualChart.week_ending, entry.actual_week_ending);
     if (actualChart.status !== "actual" || forecastCharts.some((chart) => chart.status !== "forecast")) {
       throw new Error(`${config.key} weekly call JSON inventory chart statuses are incorrect`);
+    }
+    const dashboardState = await readJson<PortableDashboardState>(join(archiveDir, manifest.dashboard_state_json));
+    if (dashboardState.schema !== "us-balances.dashboard-state" || dashboardState.schemaVersion !== 1) throw new Error(`${config.key} archived dashboard state has an invalid schema`);
+    assertEqual(`${config.key} archived dashboard-state product`, dashboardState.product ?? "", config.key);
+    assertEqual(`${config.key} archived dashboard-state fingerprint`, dashboardState.fingerprint ?? "", manifest.dashboard_state_fingerprint);
+    assertEqual(`${config.key} embedded dashboard-state fingerprint`, payload.dashboard_state?.fingerprint ?? "", manifest.dashboard_state_fingerprint);
+    assertEqual(`${config.key} embedded dashboard-state settings revision`, payload.dashboard_state?.settings?.revision ?? "", dashboardState.settings?.revision ?? "");
+    const stateRows = dashboardState.materialized?.regionalBalance?.weekly ?? [];
+    if (!stateRows.length) throw new Error(`${config.key} archived dashboard state contains no materialized weekly rows`);
+    const outputPeriods = payload.periods ?? [];
+    if (outputPeriods.length !== 6 || outputPeriods[0]?.status !== "actual" || outputPeriods.slice(1).some((period) => period.status !== "forecast")) {
+      throw new Error(`${config.key} weekly call JSON must place one current actual before five forecast weeks`);
+    }
+    assertEqual(`${config.key} weekly call first period`, outputPeriods[0]?.week_ending ?? "", entry.actual_week_ending);
+    const stateByKey = new Map(stateRows.map((row) => [`${row.period}|${row.regionKey}`, row]));
+    for (const chart of [actualChart, ...forecastCharts]) {
+      chart.region_keys.forEach((regionKey, index) => {
+        const stateRow = stateByKey.get(`${chart.week_ending}|${regionKey}`);
+        if (!stateRow) throw new Error(`${config.key} dashboard state is missing ${chart.week_ending} ${regionKey}`);
+        assertNear(`${config.key} ${chart.week_ending} ${regionKey} inventory change`, chart.values_mb[index], roundHalfUp(Number(stateRow.periodBuildDrawKb || 0) / 1_000, 2), 0.001);
+      });
+    }
+    for (const region of payload.table?.regions ?? []) {
+      const regionKey = region.region_key ?? region.key ?? "";
+      const rowsByKey = new Map((region.rows ?? []).map((row) => [row.key, row]));
+      for (const period of outputPeriods) {
+        const week = period.week_ending ?? "";
+        const stateRow = stateByKey.get(`${week}|${regionKey}`);
+        if (!stateRow) throw new Error(`${config.key} table dashboard state is missing ${week} ${regionKey}`);
+        assertNear(`${config.key} ${week} ${regionKey} table exports`, rowsByKey.get("exports")?.values?.[week], roundHalfUp(Number(stateRow.exportsKbd || 0), 1), 0.001);
+        assertNear(`${config.key} ${week} ${regionKey} table demand`, rowsByKey.get("demand")?.values?.[week], roundHalfUp(Number(stateRow.demandKbd || 0), 1), 0.001);
+        assertNear(`${config.key} ${week} ${regionKey} table build/draw`, rowsByKey.get("net_kb")?.values?.[week], roundHalfUp(Number(stateRow.periodBuildDrawKb || 0), 0), 0.001);
+      }
+    }
+    for (const row of stateRows.filter((point) => point.status === "forecast" && point.regionKey === "padd3")) {
+      const destinationTotal = Number(row.exportsLatinAmericaKbd || 0) + Number(row.exportsEuropeKbd || 0) + Number(row.exportsAfricaKbd || 0) + Number(row.exportsOtherKbd || 0);
+      assertNear(`${config.key} ${row.period} PADD 3 forecast destination sum`, row.exportsKbd, destinationTotal, 0.03);
     }
     const expectedBars = config.key === "diesel" ? 7 : 6;
     for (const chart of [actualChart, ...forecastCharts]) {

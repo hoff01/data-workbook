@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
@@ -93,6 +93,7 @@ const child = spawn(process.execPath, ["--import", "tsx", "src/dashboard_update_
     US_BALANCES_FAKE_NO_START_FILE: silentNoopFile,
     US_BALANCES_FAKE_UPDATE_DELAY_MS: "250",
     US_BALANCES_SETTINGS_PATH: settingsPath,
+    US_BALANCES_DASHBOARD_STATE_ROOT: settingsDir,
     US_BALANCES_SETTINGS_REBUILD_SCRIPT: join(ROOT, "scripts", "fake_update_cli.mjs"),
     US_BALANCES_FAKE_SETTINGS_REBUILD_LOG: settingsRebuildLog,
     US_BALANCES_FAKE_SETTINGS_REBUILD_FAIL_FILE: settingsRebuildFailFile,
@@ -285,6 +286,127 @@ try {
   assert.equal(missingWeeklyOutputProduct.response.status, 400);
   assert.match(missingWeeklyOutputProduct.body.error, /requires product=diesel or product=jet/);
 
+  const missingDashboardState = await fetchJson(`${baseUrl}/api/dashboard-state?product=jet`);
+  assert.equal(missingDashboardState.response.status, 404);
+  const currentSettings = await fetchJson(`${baseUrl}/api/settings`);
+  const portableState = {
+    schema: "us-balances.dashboard-state",
+    schemaVersion: 1,
+    id: "test-jet-state",
+    product: "jet",
+    savedAt: new Date().toISOString(),
+    provenance: { latestWeekly: "2026-07-17", sourceChecksums: { eia_weekly: "synthetic" } },
+    settings: {
+      forecastEnd: currentSettings.body.settings.forecastEnd,
+      revision: currentSettings.body.settings.revision,
+      adjustments: currentSettings.body.settings.adjustments.jet,
+      crudeOutages: currentSettings.body.settings.crudeOutages,
+      refineryCapacityAdjustments: currentSettings.body.settings.refineryCapacityAdjustments,
+    },
+    materialized: {
+      regionalBalance: {
+        monthly: [{ period: "2026-07", status: "forecast", regionKey: "padd3", exportsKbd: 10 }],
+        weekly: [{ period: "2026-07-24", status: "forecast", regionKey: "padd3", exportsKbd: 10 }],
+      },
+    },
+  };
+  const wrongProductState = await fetchJson(`${baseUrl}/api/dashboard-state`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ product: "diesel", state: portableState }),
+  });
+  assert.equal(wrongProductState.response.status, 400);
+  assert.match(wrongProductState.body.error, /does not match diesel/);
+  const savedDashboardState = await fetchJson(`${baseUrl}/api/dashboard-state`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ product: "jet", state: portableState }),
+  });
+  assert.equal(savedDashboardState.response.status, 200);
+  assert.equal(savedDashboardState.body.state.product, "jet");
+  assert.match(savedDashboardState.body.fingerprint, /^[a-f0-9]{64}$/);
+  const savedDashboardStatePath = join(settingsDir, "Jet_Balance", "dashboard_state.json");
+  assert.equal(existsSync(savedDashboardStatePath), true);
+  assert.equal(JSON.parse(readFileSync(savedDashboardStatePath, "utf8")).fingerprint, savedDashboardState.body.fingerprint);
+  const loadedDashboardState = await fetchJson(`${baseUrl}/api/dashboard-state?product=jet`);
+  assert.equal(loadedDashboardState.response.status, 200);
+  assert.equal(loadedDashboardState.body.state.id, portableState.id);
+
+  const dieselPortableState = {
+    ...portableState,
+    id: "test-diesel-state",
+    product: "diesel",
+    settings: {
+      ...portableState.settings,
+      adjustments: currentSettings.body.settings.adjustments.diesel,
+    },
+  };
+  const savedDieselState = await fetchJson(`${baseUrl}/api/dashboard-state`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ product: "diesel", state: dieselPortableState }),
+  });
+  assert.equal(savedDieselState.response.status, 200);
+  const savedDieselStatePath = join(settingsDir, "Diesel_Balance", "dashboard_state.json");
+  assert.equal(existsSync(savedDieselStatePath), true);
+
+  const noOpJetSettingsSave = await fetchJson(`${baseUrl}/api/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      forecastEnd: currentSettings.body.settings.forecastEnd,
+      product: "jet",
+      adjustments: currentSettings.body.settings.adjustments.jet,
+      crudeOutages: currentSettings.body.settings.crudeOutages,
+      refineryCapacityAdjustments: currentSettings.body.settings.refineryCapacityAdjustments,
+      baseRevision: currentSettings.body.settings.revision,
+    }),
+  });
+  assert.equal(noOpJetSettingsSave.response.status, 200);
+  assert.equal(noOpJetSettingsSave.body.settings.revision, currentSettings.body.settings.revision, "no-op saves must not change the semantic settings revision");
+
+  const jetAdjustment = { frequency: "monthly", period: "2026-10", regionKey: "padd5", lineId: "exports", valueKbd: 123.4 };
+  const changedJetSettings = await fetchJson(`${baseUrl}/api/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      product: "jet",
+      adjustments: [jetAdjustment],
+      baseRevision: noOpJetSettingsSave.body.settings.revision,
+    }),
+  });
+  assert.equal(changedJetSettings.response.status, 200);
+  assert.notEqual(changedJetSettings.body.settings.revision, currentSettings.body.settings.revision);
+  const updatedJetState = {
+    ...portableState,
+    id: "test-jet-state-updated",
+    savedAt: new Date().toISOString(),
+    settings: {
+      forecastEnd: changedJetSettings.body.settings.forecastEnd,
+      revision: changedJetSettings.body.settings.revision,
+      adjustments: changedJetSettings.body.settings.adjustments.jet,
+      crudeOutages: changedJetSettings.body.settings.crudeOutages,
+      refineryCapacityAdjustments: changedJetSettings.body.settings.refineryCapacityAdjustments,
+    },
+  };
+  const resavedJetState = await fetchJson(`${baseUrl}/api/dashboard-state`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ product: "jet", state: updatedJetState }),
+  });
+  assert.equal(resavedJetState.response.status, 200);
+
+  const dieselOutputsStarted = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "weekly-call-outputs", product: "diesel" }),
+  });
+  assert.equal(dieselOutputsStarted.response.status, 202, "saving Jet must not invalidate the saved Diesel state");
+  assert.deepEqual(dieselOutputsStarted.body.job.args.slice(-4), ["--product", "diesel", "--dashboard-state", savedDieselStatePath]);
+  const dieselOutputsJob = await waitForTerminalJob(baseUrl);
+  assert.equal(dieselOutputsJob.status, "succeeded");
+  assert.equal(dieselOutputsJob.result, "saved");
+
   const weeklyOutputsStarted = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -293,7 +415,7 @@ try {
   assert.equal(weeklyOutputsStarted.response.status, 202);
   assert.equal(weeklyOutputsStarted.body.job.group, "weekly-call-outputs");
   assert.equal(weeklyOutputsStarted.body.job.product, "jet");
-  assert.deepEqual(weeklyOutputsStarted.body.job.args.slice(-2), ["--product", "jet"]);
+  assert.deepEqual(weeklyOutputsStarted.body.job.args.slice(-4), ["--product", "jet", "--dashboard-state", savedDashboardStatePath]);
   assert.equal(weeklyOutputsStarted.body.job.status, "running");
 
   const weeklyOutputsJob = await waitForTerminalJob(baseUrl);

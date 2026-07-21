@@ -1,0 +1,76 @@
+{
+  "generated_at": "2026-07-20T22:59:25-04:00",
+  "actual_week_ending": "2026-07-10",
+  "product": "jet",
+  "weekly_json": "jet_weekly_stats.json",
+  "dpi": 180,
+  "format": {
+    "font_scale": 1.0,
+    "colors": {
+      "ink": "#16181d",
+      "grid": "#d8dde3",
+      "header": "#24272d",
+      "actual_fill": "#eef0f2",
+      "forecast_highlight": "#e2cf39",
+      "region_fill": "#d7cdb8",
+      "section_fill": "#e5e7e9",
+      "positive": "#17823b",
+      "negative": "#d52317",
+      "white": "#ffffff"
+    },
+    "table": {
+      "width_in": 7.35,
+      "height_in": 7.05,
+      "left": 0.012,
+      "right": 0.992,
+      "top": 0.982,
+      "bottom": 0.018,
+      "region_column_share": 0.125,
+      "metric_column_share": 0.21,
+      "header_font_size": 7.5,
+      "region_font_size": 7.0,
+      "body_font_size": 6.7,
+      "us_section_gap_rows": 0.65,
+      "repeat_header_before_us": true
+    },
+    "chart": {
+      "width_in": 4.25,
+      "height_in": 2.55,
+      "left": 0.16,
+      "right": 0.985,
+      "bottom": 0.23,
+      "top": 0.76,
+      "bar_width": 0.82,
+      "title_font_size": 13.5,
+      "x_font_size": 8.2,
+      "y_font_size": 7.6,
+      "value_font_size": 8.0,
+      "title_pad": 12.0,
+      "value_label_offset_points": 4.0
+    }
+  },
+  "images": [
+    {
+      "file": "jet_weekly_balance_table.png",
+      "width_px": 1323,
+      "height_px": 1269
+    },
+    {
+      "file": "jet_eia_actuals.png",
+      "width_px": 765,
+      "height_px": 458
+    },
+    {
+      "file": "jet_forecast_week_1.png",
+      "width_px": 765,
+      "height_px": 458
+    },
+    {
+      "file": "jet_forecast_week_2.png",
+      "width_px": 765,
+      "height_px": 458
+    }
+  ],
+  "dashboard_state_json": "jet_dashboard_state.json",
+  "dashboard_state_fingerprint": "7627e26c8e4524a003ebb96a50bc54713dd514f07c2153a9ca0af2f3311f9528"
+}

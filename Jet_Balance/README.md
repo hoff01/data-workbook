@@ -58,14 +58,15 @@ Local app workflow:
   prior-period change, largest regional draw, and lowest stock-cover region.
 - Heatmap mode shades balance-table cells by row-level magnitude so large
   moves are easier to scan without changing the displayed values.
-- Saved View presets let users save, load, delete, and reset product-specific
-  workbook states in browser storage.
+- Save Dashboard writes a portable product-local dashboard state when the local
+  launcher is running and downloads the same JSON for sharing or re-import.
 - View state is encoded into the URL, so duplicate or manually edited tabs can
   hold independent workbook views.
-- `CSV` exports the active balance statement or Crude runs table, `JSON`
-  exports the regional balance/crude-runs bundle and view state, and `HTML`
+- `CSV` exports the active adjusted balance statement or Crude runs table,
+  `JSON` exports the exact adjusted portable dashboard state, and `HTML`
   exports a standalone copy.
 
 Forecast method: monthly balance anchored to a 3-year seasonal average from
-2023, 2024, and 2025, with weekly EIA forecast values reconciled back to the
-monthly balance through 2027-06-01.
+2023, 2024, and 2025. Forward weekly drivers are held flat at the month value
+through 2027-06-01; explicit weekly edits then change only
+their selected week and are not recalibrated to a monthly build/draw target.

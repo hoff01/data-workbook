@@ -104,6 +104,21 @@ type DashboardSettingsResponse = DashboardSettings & {
   revision: string;
 };
 
+type DashboardStateSnapshot = Record<string, unknown> & {
+  schema: "us-balances.dashboard-state";
+  schemaVersion: 1;
+  product: ProductKey;
+  savedAt: string;
+  settings: Record<string, unknown>;
+  materialized: {
+    regionalBalance: {
+      monthly: unknown[];
+      weekly: unknown[];
+    };
+  };
+  fingerprint: string;
+};
+
 const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
 const HOST = process.env.DASHBOARD_UPDATE_HOST || "127.0.0.1";
@@ -133,6 +148,9 @@ const maxLines = 600;
 const settingsPath = process.env.US_BALANCES_SETTINGS_PATH
   ? resolve(ROOT, process.env.US_BALANCES_SETTINGS_PATH)
   : join(ROOT, "balance_dashboard_settings.json");
+const dashboardStateRoot = process.env.US_BALANCES_DASHBOARD_STATE_ROOT
+  ? resolve(process.env.US_BALANCES_DASHBOARD_STATE_ROOT)
+  : ROOT;
 const outagesExportPath = process.env.US_BALANCES_OUTAGES_PATH
   ? resolve(ROOT, process.env.US_BALANCES_OUTAGES_PATH)
   : join(dirname(settingsPath), "outages.json");
@@ -175,7 +193,8 @@ function writeJson(response: ServerResponse, statusCode: number, payload: unknow
 }
 
 function settingsRevision(settings: DashboardSettings): string {
-  return createHash("sha256").update(JSON.stringify(settings)).digest("hex").slice(0, 16);
+  const { updatedAt: _updatedAt, ...semanticSettings } = settings;
+  return createHash("sha256").update(JSON.stringify(semanticSettings)).digest("hex").slice(0, 16);
 }
 
 function publicSettings(settings: DashboardSettings): DashboardSettingsResponse {
@@ -258,6 +277,105 @@ function writeSettings(settings: DashboardSettings): void {
   writeFileSync(tempPath, JSON.stringify(settings, null, 2) + "\n");
   renameSync(tempPath, settingsPath);
   writeSharedOutageExport(outagesExportPath, settings.crudeOutages, settings.updatedAt);
+}
+
+function dashboardStatePath(product: ProductKey): string {
+  return join(dashboardStateRoot, product === "diesel" ? "Diesel_Balance" : "Jet_Balance", "dashboard_state.json");
+}
+
+function dashboardStateFingerprint(value: Record<string, unknown>): string {
+  const withoutFingerprint = { ...value };
+  delete withoutFingerprint.fingerprint;
+  return createHash("sha256").update(JSON.stringify(withoutFingerprint)).digest("hex");
+}
+
+function dashboardStateSettingsValue(snapshot: DashboardStateSnapshot): Record<string, unknown> {
+  return {
+    forecastEnd: snapshot.settings.forecastEnd,
+    adjustments: Array.isArray(snapshot.settings.adjustments) ? snapshot.settings.adjustments : [],
+    crudeOutages: Array.isArray(snapshot.settings.crudeOutages) ? snapshot.settings.crudeOutages : [],
+    refineryCapacityAdjustments: Array.isArray(snapshot.settings.refineryCapacityAdjustments)
+      ? snapshot.settings.refineryCapacityAdjustments
+      : [],
+  };
+}
+
+function currentProductSettingsValue(settings: DashboardSettings, product: ProductKey): Record<string, unknown> {
+  return {
+    forecastEnd: settings.forecastEnd,
+    adjustments: settings.adjustments[product],
+    crudeOutages: settings.crudeOutages,
+    refineryCapacityAdjustments: settings.refineryCapacityAdjustments,
+  };
+}
+
+function dashboardStateMatchesSettings(snapshot: DashboardStateSnapshot, settings: DashboardSettings): boolean {
+  return JSON.stringify(dashboardStateSettingsValue(snapshot)) === JSON.stringify(currentProductSettingsValue(settings, snapshot.product));
+}
+
+function normalizeDashboardState(value: unknown, expectedProduct?: ProductKey): DashboardStateSnapshot {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("dashboard state must be an object");
+  const input = value as Record<string, unknown>;
+  if (input.schema !== "us-balances.dashboard-state" || input.schemaVersion !== 1) {
+    throw new Error("unsupported dashboard state schema");
+  }
+  const product = parseProduct(input.product);
+  if (!product) throw new Error("dashboard state product must be diesel or jet");
+  if (expectedProduct && product !== expectedProduct) throw new Error(`dashboard state product ${product} does not match ${expectedProduct}`);
+  const savedAt = String(input.savedAt || "").trim();
+  if (!savedAt || !Number.isFinite(Date.parse(savedAt))) throw new Error("dashboard state savedAt must be an ISO timestamp");
+  const settings = input.settings;
+  if (!settings || typeof settings !== "object" || Array.isArray(settings)) throw new Error("dashboard state settings are required");
+  const provenance = input.provenance;
+  if (!provenance || typeof provenance !== "object" || Array.isArray(provenance)) throw new Error("dashboard state provenance is required");
+  const sourceChecksums = (provenance as Record<string, unknown>).sourceChecksums;
+  if (!sourceChecksums || typeof sourceChecksums !== "object" || Array.isArray(sourceChecksums) || !Object.keys(sourceChecksums).length) {
+    throw new Error("dashboard state source checksums are required");
+  }
+  const materialized = input.materialized;
+  if (!materialized || typeof materialized !== "object" || Array.isArray(materialized)) throw new Error("dashboard state materialized rows are required");
+  const regionalBalance = (materialized as Record<string, unknown>).regionalBalance;
+  if (!regionalBalance || typeof regionalBalance !== "object" || Array.isArray(regionalBalance)) throw new Error("dashboard state regional balance is required");
+  const monthly = (regionalBalance as Record<string, unknown>).monthly;
+  const weekly = (regionalBalance as Record<string, unknown>).weekly;
+  if (!Array.isArray(monthly) || !monthly.length || !Array.isArray(weekly) || !weekly.length) {
+    throw new Error("dashboard state must include adjusted monthly and weekly rows");
+  }
+  const stateWithoutFingerprint: Record<string, unknown> = {
+    ...input,
+    schema: "us-balances.dashboard-state",
+    schemaVersion: 1,
+    product,
+    savedAt,
+    settings: settings as Record<string, unknown>,
+    materialized: {
+      ...(materialized as Record<string, unknown>),
+      regionalBalance: {
+        ...(regionalBalance as Record<string, unknown>),
+        monthly,
+        weekly,
+      },
+    },
+  };
+  delete stateWithoutFingerprint.fingerprint;
+  return {
+    ...(stateWithoutFingerprint as DashboardStateSnapshot),
+    fingerprint: dashboardStateFingerprint(stateWithoutFingerprint),
+  };
+}
+
+function readDashboardState(product: ProductKey): DashboardStateSnapshot | null {
+  const path = dashboardStatePath(product);
+  if (!existsSync(path)) return null;
+  return normalizeDashboardState(JSON.parse(readFileSync(path, "utf8")), product);
+}
+
+function writeDashboardState(snapshot: DashboardStateSnapshot): void {
+  const path = dashboardStatePath(snapshot.product);
+  mkdirSync(dirname(path), { recursive: true });
+  const tempPath = join(dirname(path), `.dashboard_state.${process.pid}.${Date.now()}.tmp`);
+  writeFileSync(tempPath, JSON.stringify(snapshot, null, 2) + "\n");
+  renameSync(tempPath, path);
 }
 
 function landingPage(): string {
@@ -490,12 +608,21 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
   if (savesWeeklyCallOutputs && !outputProduct) {
     throw new Error("Weekly call outputs require product=diesel or product=jet.");
   }
+  const dashboardState = savesWeeklyCallOutputs && outputProduct ? readDashboardState(outputProduct) : null;
+  if (savesWeeklyCallOutputs && !dashboardState) {
+    throw new Error("Save the dashboard state before creating weekly call outputs.");
+  }
+  if (dashboardState) {
+    if (!dashboardStateMatchesSettings(dashboardState, readSettings())) {
+      throw new Error("The saved dashboard state is older than the current workbook settings. Save the dashboard again.");
+    }
+  }
   const updateGroup: UpdateGroup | null = group === "weekly-call-outputs" ? null : group;
   const dataFingerprintBefore = updateGroup ? updateDataFingerprint(ROOT, updateGroup) : null;
   const lock = acquireRunnerLock(group);
   const updateScript = join(ROOT, "src", "update_pipeline.ts");
   const invocation = savesWeeklyCallOutputs
-    ? { command: pythonCommand, args: [weeklyCallOutputScript, "--product", outputProduct as ProductKey] }
+    ? { command: pythonCommand, args: [weeklyCallOutputScript, "--product", outputProduct as ProductKey, "--dashboard-state", dashboardStatePath(outputProduct as ProductKey)] }
     : tsxCli
       ? { command: nodeCommand, args: [tsxCli, updateScript, group] }
       : tsxCommand && !(process.platform === "win32" && /\.(?:cmd|bat)$/i.test(tsxCommand))
@@ -613,15 +740,66 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
   return job;
 }
 
-async function readBody(request: IncomingMessage): Promise<string> {
+async function readBody(request: IncomingMessage, maxBytes = 32 * 1024 * 1024): Promise<string> {
   const chunks: Buffer[] = [];
-  for await (const chunk of request) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  let total = 0;
+  for await (const chunk of request) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    total += buffer.length;
+    if (total > maxBytes) throw new Error("request body is too large");
+    chunks.push(buffer);
+  }
   return Buffer.concat(chunks).toString("utf8");
 }
 
 async function handleApi(request: IncomingMessage, response: ServerResponse, pathname: string): Promise<void> {
   if (request.method === "OPTIONS") {
     writeJson(response, 204, {});
+    return;
+  }
+  if (pathname === "/api/dashboard-state" && request.method === "GET") {
+    const requestUrl = new URL(request.url || "/api/dashboard-state", `http://${HOST}:${PORT}`);
+    const product = parseProduct(requestUrl.searchParams.get("product"));
+    if (!product) {
+      writeJson(response, 400, { error: "dashboard state requires product=diesel or product=jet" });
+      return;
+    }
+    try {
+      const state = readDashboardState(product);
+      if (!state) {
+        writeJson(response, 404, { error: `no saved ${product} dashboard state`, state: null });
+        return;
+      }
+      writeJson(response, 200, { state, fingerprint: state.fingerprint });
+    } catch (error) {
+      writeJson(response, 500, { error: error instanceof Error ? error.message : "saved dashboard state is invalid" });
+    }
+    return;
+  }
+  if (pathname === "/api/dashboard-state" && request.method === "POST") {
+    try {
+      if (pendingSettingsRebuild) {
+        request.resume();
+        writeJson(response, 409, { error: "forecast-end rebuild in progress; wait for it to finish, then retry" });
+        return;
+      }
+      const body = JSON.parse(await readBody(request) || "{}") as { product?: unknown; state?: unknown };
+      const product = parseProduct(body.product);
+      if (!product) {
+        writeJson(response, 400, { error: "dashboard state requires product=diesel or product=jet" });
+        return;
+      }
+      const state = normalizeDashboardState(body.state, product);
+      const currentSettings = readSettings();
+      if (!dashboardStateMatchesSettings(state, currentSettings)) {
+        writeJson(response, 409, { error: "dashboard state settings are stale", currentRevision: settingsRevision(currentSettings) });
+        return;
+      }
+      writeDashboardState(state);
+      writeJson(response, 200, { state, fingerprint: state.fingerprint });
+    } catch (error) {
+      writeJson(response, 400, { error: error instanceof Error ? error.message : "invalid dashboard state payload" });
+    }
     return;
   }
   if (pathname === "/api/settings" && request.method === "GET") {
@@ -692,8 +870,13 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
           body.refineryCapacityAdjustments as RefineryCapacityAdjustment[],
         );
       }
-      settings.updatedAt = new Date().toISOString();
       const forecastEndChanged = settings.forecastEnd !== previousSettings.forecastEnd;
+      const semanticSettingsChanged = settingsRevision(settings) !== currentRevision;
+      if (!semanticSettingsChanged) {
+        writeJson(response, 200, { settings: publicSettings(previousSettings), rebuilt: false });
+        return;
+      }
+      settings.updatedAt = new Date().toISOString();
       if (forecastEndChanged) {
         try {
           await rebuildForForecastEnd(previousSettings, settings);

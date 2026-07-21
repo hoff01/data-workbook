@@ -22,6 +22,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from datetime import date, datetime
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from statistics import fmean
 from typing import Any, Iterable
@@ -375,100 +376,118 @@ def finite_number(value: Any, default: float = 0.0) -> float:
 
 
 def rounded(value: float, digits: int = 2) -> float:
-    return round(finite_number(value), digits)
+    number = Decimal(str(finite_number(value)))
+    quantum = Decimal("1").scaleb(-digits)
+    return float(number.quantize(quantum, rounding=ROUND_HALF_UP))
 
 
 def mean_or_none(values: Iterable[float]) -> float | None:
     finite = [finite_number(value, math.nan) for value in values]
     finite = [value for value in finite if math.isfinite(value)]
     return fmean(finite) if finite else None
-
-
-def latest_by_key(rows: Iterable[dict[str, Any]], key_fields: list[str]) -> dict[tuple[str, ...], dict[str, Any]]:
-    result: dict[tuple[str, ...], dict[str, Any]] = {}
-    for row in rows:
-        key = tuple(str(row.get(field, "")) for field in key_fields)
-        existing = result.get(key)
-        if existing is None or str(row.get("updatedAt", "")) >= str(existing.get("updatedAt", "")):
-            result[key] = row
-    return result
-
-
-def apply_weekly_adjustments(
-    bundle: dict[str, Any],
-    regional_index: dict[str, dict[str, dict[str, Any]]],
+def validate_dashboard_state(
+    value: dict[str, Any],
     product: str,
-) -> None:
-    layout = PRODUCT_LAYOUTS[product]
-    base_regions = set(layout["base_regions"])
-    aliases = {
-        "demandAdjustment": "demand",
-        "importsAdjustment": "imports",
-        "exportsAdjustment": "exports",
-        "yieldAdjustmentPct": "yieldPct",
-    }
-    field_for_line = {
-        "demand": "demandKbd",
-        "imports": "importsKbd",
-        "exports": "exportsKbd",
-        "production": "productionKbd",
-    }
-    adjustments = latest_by_key(
-        (
-            row
-            for row in bundle.get("settings", {}).get("adjustments", [])
-            if row.get("frequency") == "weekly"
-        ),
-        ["period", "regionKey", "lineId"],
-    )
-    changed: set[tuple[str, str]] = set()
-    for adjustment in adjustments.values():
-        period = str(adjustment.get("period", ""))
-        region = str(adjustment.get("regionKey", ""))
-        if region not in base_regions or period not in regional_index:
-            continue
-        point = regional_index[period].get(region)
-        if not point or point.get("status") != "forecast":
-            continue
-        line = aliases.get(str(adjustment.get("lineId", "")), str(adjustment.get("lineId", "")))
-        if line == "yieldPct":
-            point["yieldOverridePct"] = finite_number(adjustment.get("valueKbd"))
-            changed.add((period, region))
-            continue
-        field = field_for_line.get(line)
-        if field:
-            point[field] = finite_number(adjustment.get("valueKbd"))
-            changed.add((period, region))
-
-    for period, region in changed:
-        point = regional_index[period][region]
-        point["balanceKbd"] = rounded(
-            finite_number(point.get("productionKbd"))
-            + finite_number(point.get("importsKbd"))
-            + finite_number(point.get("netReceiptsKbd"))
-            - finite_number(point.get("exportsKbd"))
-            - finite_number(point.get("demandKbd"))
+    bundle: dict[str, Any],
+) -> dict[str, Any]:
+    if value.get("schema") != "us-balances.dashboard-state" or value.get("schemaVersion") != 1:
+        raise ExportError("The dashboard-state JSON uses an unsupported schema.")
+    if str(value.get("product", "")).lower() != product:
+        raise ExportError(
+            f"Dashboard-state product {value.get('product')!r} does not match {product}."
         )
-
-    # Aggregate rows are calculated, never manually entered.
-    for period, bucket in regional_index.items():
-        if not any((period, region) in changed for region in base_regions):
-            continue
-        parts = [bucket.get(region) for region in layout["base_regions"]]
-        if not all(parts):
-            continue
-        us = bucket.get("us")
-        if not us:
-            continue
-        for field in (
-            "productionKbd",
-            "importsKbd",
-            "exportsKbd",
-            "demandKbd",
-            "netReceiptsKbd",
-            "balanceKbd",
-        ):
-            us[field] = rounded(sum(finite_number(part.get(field)) for part in parts if part))
+    settings = value.get("settings")
+    if not isinstance(settings, dict) or not str(settings.get("revision", "")):
+        raise ExportError("The dashboard state is missing its settings revision.")
+    bundle_settings = bundle.get("settings", {})
+    saved_settings = {
+        "forecastEnd": settings.get("forecastEnd"),
+        "adjustments": settings.get("adjustments", []),
+        "crudeOutages": settings.get("crudeOutages", []),
+        "refineryCapacityAdjustments": settings.get("refineryCapacityAdjustments", []),
+    }
+    current_settings = {
+        "forecastEnd": bundle_settings.get("forecastEnd"),
+        "adjustments": bundle_settings.get("adjustments", []),
+        "crudeOutages": bundle_settings.get("crudeOutages", []),
+        "refineryCapacityAdjustments": bundle_settings.get("refineryCapacityAdjustments", []),
+    }
+    if json.dumps(saved_settings, sort_keys=True, separators=(",", ":")) != json.dumps(
+        current_settings, sort_keys=True, separators=(",", ":")
+    ):
+        raise ExportError(
+            "The dashboard state does not match the settings used to build this workbook. "
+            "Save the dashboard again before creating weekly outputs."
+        )
+    provenance = value.get("provenance")
+    source_checksums = provenance.get("sourceChecksums") if isinstance(provenance, dict) else None
+    bundle_checksums = bundle.get("checksums")
+    if not isinstance(source_checksums, dict) or not source_checksums:
+        raise ExportError("The dashboard state is missing source checksums. Save the dashboard again.")
+    if source_checksums != bundle_checksums:
+        raise ExportError(
+            "The dashboard source files changed after this state was saved. "
+            "Reload and save the dashboard again before creating weekly outputs."
+        )
+    rows = (
+        value.get("materialized", {})
+        .get("regionalBalance", {})
+        .get("weekly")
+    )
+    if not isinstance(rows, list) or not rows:
+        raise ExportError("The dashboard state has no adjusted weekly balance rows.")
+    required_numbers = (
+        "productionKbd",
+        "importsKbd",
+        "exportsKbd",
+        "demandKbd",
+        "netReceiptsKbd",
+        "stockChangeKbd",
+        "balanceKbd",
+        "dailyBuildDrawKbd",
+        "periodBuildDrawKb",
+    )
+    for row in rows:
+        period = str(row.get("period", ""))
+        region = str(row.get("regionKey", ""))
+        status = str(row.get("status", ""))
+        if not period or not region or status not in {"actual", "forecast"}:
+            raise ExportError("The dashboard state contains an invalid weekly row identity.")
+        if any(not math.isfinite(finite_number(row.get(field), math.nan)) for field in required_numbers):
+            raise ExportError(f"Dashboard state row {period} {region} is missing a required numeric value.")
+        if status == "forecast":
+            expected_balance = (
+                finite_number(row.get("productionKbd"))
+                + finite_number(row.get("importsKbd"))
+                + finite_number(row.get("netReceiptsKbd"))
+                - finite_number(row.get("exportsKbd"))
+                - finite_number(row.get("demandKbd"))
+            )
+            if abs(finite_number(row.get("balanceKbd")) - expected_balance) > 0.05:
+                raise ExportError(f"Dashboard state row {period} {region} has an inconsistent forecast balance.")
+            if abs(finite_number(row.get("periodBuildDrawKb")) - finite_number(row.get("dailyBuildDrawKbd")) * 7.0) > 0.05:
+                raise ExportError(f"Dashboard state row {period} {region} has an inconsistent forecast build/draw.")
+            if region == "padd3":
+                destinations = sum(
+                    finite_number(row.get(field))
+                    for field in (
+                        "exportsLatinAmericaKbd",
+                        "exportsEuropeKbd",
+                        "exportsAfricaKbd",
+                        "exportsOtherKbd",
+                    )
+                )
+                if abs(finite_number(row.get("exportsKbd")) - destinations) > 0.05:
+                    raise ExportError(f"Dashboard state row {period} PADD 3 exports do not equal its destination sum.")
+        elif abs(finite_number(row.get("periodBuildDrawKb")) - finite_number(row.get("stockChangeKbd")) * 7.0) > 0.05:
+            raise ExportError(f"Dashboard state row {period} {region} has an inconsistent solved actual build/draw.")
+    latest_weekly = str(value.get("provenance", {}).get("latestWeekly", ""))
+    bundle_latest_weekly = str(bundle.get("freshness", {}).get("latestWeekly", ""))
+    if latest_weekly and bundle_latest_weekly and latest_weekly != bundle_latest_weekly:
+        raise ExportError(
+            f"Dashboard state latest week {latest_weekly} does not match workbook latest week {bundle_latest_weekly}."
+        )
+    return value
 
 
 def movement_totals(bundle: dict[str, Any]) -> dict[tuple[str, str], dict[str, float]]:
@@ -553,26 +572,6 @@ def crude_metrics_for_period(
     return crude_forecast_context(crude, crude_region, period, latest_actual)
 
 
-def region_label(bundle: dict[str, Any], key: str) -> str:
-    for region in bundle.get("regionalBalance", {}).get("regions", []):
-        if region.get("key") == key:
-            return str(region.get("label", key))
-    return key.upper()
-
-
-def chart_label_for_region(key: str) -> str:
-    return {
-        "padd1": "P1",
-        "padd1ab": "P1 A/B",
-        "padd1c": "P1 C",
-        "padd2": "P2",
-        "padd3": "P3",
-        "padd4": "P4",
-        "padd5": "P5",
-        "us": "Total",
-    }.get(key, key.upper())
-
-
 def table_row_values(
     point: dict[str, Any],
     period: str,
@@ -581,35 +580,47 @@ def table_row_values(
     crude_region: str,
     movement: dict[tuple[str, str], dict[str, float]],
 ) -> list[dict[str, Any]]:
-    utilization, crude_runs = crude_metrics_for_period(
+    fallback_utilization, fallback_crude_runs = crude_metrics_for_period(
         crude, crude_region, period, latest_actual
     )
+    utilization = finite_number(
+        point.get("operatingUtilizationPct"), fallback_utilization
+    )
+    crude_runs = finite_number(point.get("crudeRunsKbd"), fallback_crude_runs)
     production = finite_number(point.get("productionKbd"))
     yield_pct = (
-        finite_number(point.get("yieldOverridePct"))
-        if point.get("yieldOverridePct") is not None
-        else (production / crude_runs * 100.0 if crude_runs > 0 else 0.0)
+        finite_number(point.get("yieldPct"))
+        if point.get("yieldPct") is not None
+        else (
+            finite_number(point.get("yieldOverridePct"))
+            if point.get("yieldOverridePct") is not None
+            else (production / crude_runs * 100.0 if crude_runs > 0 else 0.0)
+        )
     )
     movements = movement.get((period, str(point.get("regionKey", ""))), {})
+    receipts = finite_number(point.get("receiptsKbd"), finite_number(movements.get("receiptsKbd")))
+    shipments = finite_number(point.get("shipmentsKbd"), finite_number(movements.get("shipmentsKbd")))
     demand = finite_number(point.get("demandKbd"))
     exports = finite_number(point.get("exportsKbd"))
+    period_build_draw = point.get("periodBuildDrawKb")
     daily_balance = finite_number(
         point.get("stockChangeKbd")
         if point.get("status") == "actual"
         else point.get("balanceKbd")
     )
+    net_kb = finite_number(period_build_draw, daily_balance * 7.0)
     return [
         {"key": "utilization", "label": "Utilization", "unit": "percent", "value": rounded(utilization, 1)},
         {"key": "yield", "label": "Yield", "unit": "percent", "value": rounded(yield_pct, 1)},
         {"key": "production", "label": "Production", "unit": "kbd", "value": rounded(production, 1)},
         {"key": "imports", "label": "Imports", "unit": "kbd", "value": rounded(point.get("importsKbd"), 1)},
-        {"key": "domestic_imports", "label": "Domestic Imports", "unit": "kbd", "value": rounded(movements.get("receiptsKbd", 0), 1)},
+        {"key": "domestic_imports", "label": "Domestic Imports", "unit": "kbd", "value": rounded(receipts, 1)},
         {"key": "separator", "label": "", "unit": "separator", "value": None},
-        {"key": "domestic_exports", "label": "Domestic Exports", "unit": "kbd", "value": rounded(movements.get("shipmentsKbd", 0), 1)},
+        {"key": "domestic_exports", "label": "Domestic Exports", "unit": "kbd", "value": rounded(shipments, 1)},
         {"key": "exports", "label": "Exports", "unit": "kbd", "value": rounded(exports, 1)},
         {"key": "demand", "label": "Demand", "unit": "kbd", "value": rounded(demand, 1)},
         {"key": "demand_exports", "label": "Demand + Exports", "unit": "kbd", "value": rounded(demand + exports, 1)},
-        {"key": "net_kb", "label": "Net (KB)", "unit": "kb", "value": rounded(daily_balance * 7.0, 0)},
+        {"key": "net_kb", "label": "Net (KB)", "unit": "kb", "value": rounded(net_kb, 0)},
     ]
 
 
@@ -617,6 +628,7 @@ def build_weekly_payload(
     bundle: dict[str, Any],
     source_bundle: Path,
     forecast_weeks: int,
+    dashboard_state: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     product = str(bundle.get("product", {}).get("key", "")).lower()
     if product not in PRODUCT_LAYOUTS:
@@ -624,12 +636,21 @@ def build_weekly_payload(
     if forecast_weeks != 5:
         raise ExportError("The weekly table requires exactly five forecast weeks.")
 
+    if dashboard_state is None:
+        raise ExportError(
+            "A portable dashboard state is required. Use Save dashboard or "
+            "Save weekly output from the opened dashboard first."
+        )
+    resolved_rows = (
+        dashboard_state.get("materialized", {})
+        .get("regionalBalance", {})
+        .get("weekly", [])
+    )
     regional_index: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
-    for row in bundle.get("regionalBalance", {}).get("weekly", []):
+    for row in resolved_rows:
         regional_index[str(row.get("period", ""))][str(row.get("regionKey", ""))] = copy.deepcopy(row)
     if not regional_index:
         raise ExportError("The full bundle does not contain regionalBalance.weekly rows.")
-    apply_weekly_adjustments(bundle, regional_index, product)
 
     actual_periods = sorted(
         period
@@ -710,7 +731,10 @@ def build_weekly_payload(
                 if point.get("status") == "actual"
                 else point.get("balanceKbd")
             )
-            values_mb.append(rounded(daily_change_kbd * 7.0 / 1000.0, 2))
+            period_change_kb = finite_number(
+                point.get("periodBuildDrawKb"), daily_change_kbd * 7.0
+            )
+            values_mb.append(rounded(period_change_kb / 1000.0, 2))
         return {
             "week_ending": period,
             "status": "actual" if period == latest_actual else "forecast",
@@ -756,6 +780,10 @@ def build_weekly_payload(
             "forecasts": [inventory_change(period) for period in forecast_periods[:2]],
         },
     }
+    if dashboard_state:
+        payload["dashboard_state"] = dashboard_state
+        payload["source"]["dashboard_state_fingerprint"] = dashboard_state.get("fingerprint")
+        payload["source"]["settings_revision"] = dashboard_state.get("settings", {}).get("revision")
     validate_payload(payload)
     return payload
 
@@ -1190,6 +1218,12 @@ def write_manifest(
             for image in images
         ],
     }
+    dashboard_state_path = output_path.parent / f"{payload['product']['key']}_dashboard_state.json"
+    if dashboard_state_path.is_file():
+        manifest["dashboard_state_json"] = dashboard_state_path.name
+        manifest["dashboard_state_fingerprint"] = payload.get("source", {}).get(
+            "dashboard_state_fingerprint"
+        )
     output_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
 
@@ -1284,6 +1318,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH)
     parser.add_argument("--balance-root", type=Path)
     parser.add_argument("--product", choices=["diesel", "jet"])
+    parser.add_argument(
+        "--dashboard-state",
+        type=Path,
+        help="Portable dashboard-state JSON containing the exact adjusted weekly rows.",
+    )
     parser.add_argument("--forecast-weeks", type=int)
     parser.add_argument("--dpi", type=int)
     parser.add_argument(
@@ -1341,7 +1380,23 @@ def main() -> int:
                 run_balance_json_builder(balance_root)
             source_bundle = bundle_path(balance_root, product)
             bundle = load_json(source_bundle)
-            payload = build_weekly_payload(bundle, source_bundle, forecast_weeks)
+            dashboard_state_path = (
+                args.dashboard_state.resolve()
+                if args.dashboard_state
+                else source_bundle.parent.parent / "dashboard_state.json"
+            )
+            dashboard_state = None
+            if not dashboard_state_path.is_file():
+                raise ExportError(
+                    f"Dashboard state not found: {dashboard_state_path}. "
+                    "Use Save dashboard or Save weekly output from the opened dashboard first."
+                )
+            dashboard_state = validate_dashboard_state(
+                load_json(dashboard_state_path), product, bundle
+            )
+            payload = build_weekly_payload(
+                bundle, source_bundle, forecast_weeks, dashboard_state
+            )
         finally:
             if should_build:
                 # Full dashboard bundles are intermediate. Keep the durable weekly
@@ -1354,6 +1409,13 @@ def main() -> int:
         output_dir.mkdir(parents=True, exist_ok=True)
         payload_path = output_dir / f"{product}_weekly_stats.json"
         payload_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        if payload.get("dashboard_state"):
+            archived_state_path = output_dir / f"{product}_dashboard_state.json"
+            archived_state_path.write_text(
+                json.dumps(payload["dashboard_state"], indent=2) + "\n",
+                encoding="utf-8",
+            )
+            print(f"Archived dashboard state: {archived_state_path}")
         print(f"Created weekly JSON: {payload_path}")
     else:
         output_dir, payload_path = find_archive_payload(output_root, product, args.week)

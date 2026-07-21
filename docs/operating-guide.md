@@ -113,15 +113,22 @@ If a browser shows a certificate warning, the URL is wrong for this local runner
    - `Power DFO` for Northeast diesel power-generation context
    - `Other` for supporting exports/context
    - `All`, `Complete`, or the workbook's top `Refresh dashboard` button for a forced full pipeline run
-4. To create the weekly call images, open each workbook's `Reference` tab and
-   select its product-specific save button. Wait for `Saved — Diesel weekly
+4. Use `Save dashboard` in each workbook after making forecast adjustments.
+   This writes the exact state into the Diesel or Jet product folder and also
+   downloads a portable JSON that another user can restore with `Import
+   dashboard JSON`.
+5. To create the weekly call images, open each workbook's `Reference` tab and
+   select its product-specific save button. The button saves the current
+   dashboard state again before formatting, so the JSON, table, and charts all
+   use the same adjustments. Wait for `Saved — Diesel weekly
    table and bar charts ready` and `Saved — Jet weekly table and bar charts
    ready`; both dated product packages are written under
    `weekly_call_outputs\outputs` without overwriting each other. Each set has
-   one title-free table, the latest EIA Actuals bar chart, and the first two
+   one portable dashboard-state JSON, one weekly statistics JSON, one
+   title-free table, the latest EIA Actuals bar chart, and the first two
    Forecast bar charts.
-5. Review `Diesel Balance` and `Jet Balance`.
-6. Commit and push refreshed outputs when the checks pass:
+6. Review `Diesel Balance` and `Jet Balance`.
+7. Commit and push refreshed outputs when the checks pass:
    ```powershell
    git status --short
    git add .
@@ -171,6 +178,20 @@ That keeps the latest local Kpler files and still rebuilds the dashboards.
 ## Shared Edits And Collaboration
 
 Shared dashboard edits use `balance_dashboard_settings.json` through the local dashboard server.
+
+`Save dashboard` also writes a product-specific `dashboard_state.json` by an
+atomic local save and downloads the same portable JSON. That snapshot contains
+the effective settings and adjustments, scenarios, selected view, and exact
+adjusted monthly and weekly rows. `Load saved dashboard` restores the local
+product-folder copy; `Import dashboard JSON` restores a copy received from
+another user. Browser storage is retained only as a legacy convenience and is
+not the durable source for these saves.
+
+Monthly forecast edits are inherited by all forward weekly rows in that month.
+Exports are flat within each forecast month for every PADD. Weekly actual
+exports remain the solved/source total, while only forward PADD 3 forecast
+exports are calculated by adding the destination rows. Exact weekly edits take
+precedence for that week and are exported without monthly-total recalibration.
 
 The same shared outage schedule is also published as root `outages.json`. Every
 outage save updates it immediately, and every dashboard build or data refresh
@@ -329,10 +350,13 @@ Use this before tomorrow-morning or shared-drive use:
 4. Switch Balance, Charts, Crude Runs, Outages, and Reference.
 5. Toggle Monthly/Weekly.
 6. Confirm shared saves do not show the offline/local-only message.
-7. In each Reference tab, save the product's weekly call images and confirm the
+7. In each workbook, use `Save dashboard`, then import or reload the saved JSON
+   once to confirm portable restoration.
+8. In each Reference tab, save the product's weekly call images and confirm the
    product-specific status, current actual-week folder, one untitled table PNG,
-   three inventory-change bar-chart PNGs, and manifest for both Diesel and Jet.
-8. Run:
+   three inventory-change bar-chart PNGs, dashboard-state JSON, and manifest for
+   both Diesel and Jet.
+9. Run:
    ```bash
    npm run typecheck
    npm run verify:dashboard

@@ -677,7 +677,8 @@ function readDashboardSettings(): BalanceDashboardSettings {
 }
 
 function dashboardSettingsRevision(settings: BalanceDashboardSettings): string {
-  return createHash("sha256").update(JSON.stringify(settings)).digest("hex").slice(0, 16);
+  const { updatedAt: _updatedAt, ...semanticSettings } = settings;
+  return createHash("sha256").update(JSON.stringify(semanticSettings)).digest("hex").slice(0, 16);
 }
 
 const DASHBOARD_SETTINGS = readDashboardSettings();
@@ -888,10 +889,6 @@ function yearOf(period: string): number {
 
 function monthOf(period: string): number {
   return Number(period.slice(5, 7));
-}
-
-function weekOfMonth(dateText: string): number {
-  return Math.floor((Number(dateText.slice(8, 10)) - 1) / 7) + 1;
 }
 
 function daysInMonth(period: string): number {
@@ -1646,24 +1643,12 @@ function weeklyForecast(actual: WeeklyPoint[], monthly: BalancePoint[]): WeeklyP
   const monthlyByPeriod = new Map(monthly.map((point) => [point.period, point]));
   const historical = actual.filter((point) => SEASON_YEARS.includes(yearOf(point.weekEnding)));
   const peersByMonth = new Map<number, WeeklyPoint[]>();
-  const peersByMonthWeek = new Map<string, WeeklyPoint[]>();
   historical.forEach((point) => {
     const month = monthOf(point.weekEnding);
     const monthList = peersByMonth.get(month) ?? [];
     monthList.push(point);
     peersByMonth.set(month, monthList);
-
-    const weekKey = `${month}|${weekOfMonth(point.weekEnding)}`;
-    const weekList = peersByMonthWeek.get(weekKey) ?? [];
-    weekList.push(point);
-    peersByMonthWeek.set(weekKey, weekList);
   });
-  const metrics: Array<keyof Pick<WeeklyPoint, "demandKbd" | "productionKbd" | "importsKbd" | "exportsKbd">> = [
-    "demandKbd",
-    "productionKbd",
-    "importsKbd",
-    "exportsKbd",
-  ];
   const out: WeeklyPoint[] = [];
 
   for (const weekEnding of forecastWeeks) {
@@ -1671,53 +1656,26 @@ function weeklyForecast(actual: WeeklyPoint[], monthly: BalancePoint[]): WeeklyP
     const monthNumber = monthOf(weekEnding);
     const monthPoint = monthlyByPeriod.get(month);
     const monthPeers = peersByMonth.get(monthNumber) ?? [];
-    const weekPeers = peersByMonthWeek.get(`${monthNumber}|${weekOfMonth(weekEnding)}`) ?? [];
     const point: WeeklyPoint = {
       weekEnding,
       month,
       status: "forecast",
-      demandKbd: monthPoint?.demandKbd ?? 0,
-      productionKbd: monthPoint?.productionKbd ?? 0,
-      importsKbd: monthPoint?.importsKbd ?? 0,
-      exportsKbd: monthPoint?.exportsKbd ?? 0,
+      // Forward weekly drivers are a step-held view of the month. Do not
+      // redistribute a monthly target with a historical week-of-month shape:
+      // explicit weekly adjustments are applied later by the workbook model.
+      demandKbd: round(monthPoint?.demandKbd ?? 0),
+      productionKbd: round(monthPoint?.productionKbd ?? 0),
+      importsKbd: round(monthPoint?.importsKbd ?? 0),
+      exportsKbd: round(monthPoint?.exportsKbd ?? 0),
       stocksKb: monthPoint?.stocksKb ?? 0,
       impliedBalanceKbd: 0,
       padd1ProductionKbd: average(monthPeers.map((p) => p.padd1ProductionKbd)),
       padd1ImportsKbd: monthPoint?.padd1ImportsKbd ?? average(monthPeers.map((p) => p.padd1ImportsKbd)),
       padd1StocksKb: monthPoint?.padd1StocksKb ?? average(monthPeers.map((p) => p.padd1StocksKb)),
     };
-    for (const metric of metrics) {
-      const peersAvg = average((weekPeers.length ? weekPeers : monthPeers).map((p) => p[metric]));
-      const peersMonthAvg = average(monthPeers.map((p) => p[metric]));
-      const target = monthPoint?.[metric as keyof BalancePoint];
-      point[metric] = round(typeof target === "number" ? (peersMonthAvg > 0 ? peersAvg * (target / peersMonthAvg) : target) : peersAvg);
-    }
     point.impliedBalanceKbd = round(point.productionKbd + point.importsKbd - point.exportsKbd - point.demandKbd);
     out.push(point);
   }
-
-  const byMonth = new Map<string, WeeklyPoint[]>();
-  out.forEach((point) => {
-    const list = byMonth.get(point.month) ?? [];
-    list.push(point);
-    byMonth.set(point.month, list);
-  });
-
-  byMonth.forEach((points, month) => {
-    const monthPoint = monthlyByPeriod.get(month);
-    if (!monthPoint) return;
-    for (const metric of metrics) {
-      const avg = average(points.map((p) => p[metric]));
-      const target = monthPoint[metric as keyof BalancePoint];
-      const factor = typeof target === "number" && avg !== 0 ? target / avg : 1;
-      points.forEach((point) => {
-        point[metric] = round(point[metric] * factor);
-      });
-    }
-    points.forEach((point) => {
-      point.impliedBalanceKbd = round(point.productionKbd + point.importsKbd - point.exportsKbd - point.demandKbd);
-    });
-  });
 
   return out;
 }
@@ -1992,6 +1950,9 @@ function regionalMonthlyMap(points: RegionalBalancePoint[]): Map<string, Map<str
 
 function weeklyPadd3ExportsKbd(config: ProductConfig, weekPoint: WeeklyPoint, monthlyPoints: Map<string, RegionalBalancePoint> | undefined): number {
   const monthlyP3 = monthlyPoints?.get("padd3");
+  // Weekly actual exports are the solved/source total. Only forward forecast
+  // weeks are built from the monthly PADD 3 destination forecast.
+  if (weekPoint.status === "forecast") return monthlyP3?.exportsKbd ?? 0;
   if (!config.weeklyColumns.exports) return monthlyP3?.exportsKbd ?? 0;
   const nonP3ExportsKbd = baseRegionKeys(config)
     .filter((key) => key !== "padd3")
@@ -2203,10 +2164,6 @@ const MOVEMENT_MODES: Array<{ key: MovementModeKey; label: string }> = [
 function receiptColumn(config: ProductConfig, toLabel: string, fromLabel: string, mode: MovementModeKey): string {
   const modeText = mode === "pipeline" ? "Pipeline" : "Tanker and Barge";
   return `${toLabel} Receipts by ${modeText} from ${fromLabel} of ${config.fuelLabel} (Thousand Barrels per Day)`;
-}
-
-function regionLabelForKey(regionKey: string): string {
-  return REGION_DEFS.find((region) => region.key === regionKey)?.label ?? regionKey;
 }
 
 function p1SplitShareForPeriod(regionalByPeriod: Map<string, Map<string, RegionalBalancePoint>>, period: string, regionKey: (typeof PADD1_KEYS)[number]): number {
@@ -2851,12 +2808,24 @@ function readKplerManifest(): KplerManifest {
   return jsonFile<KplerManifest>("Kpler/manifest.json", {});
 }
 
+function firstExistingKplerPath(paths: Array<string | undefined>, fallback: string): string {
+  return paths.find((path): path is string => Boolean(path && fileExists(path))) || fallback;
+}
+
 function productKplerGuidePaths(config: ProductConfig, manifest: KplerManifest = readKplerManifest()): { monthly: string; weekly: string } {
   const key = `us_${config.key}_balance_guides`;
   const legacyKey = `us_${config.key}`;
+  const monthlyPath = `Kpler/output/monthly/${key}_monthly.csv`;
+  const weeklyPath = `Kpler/output/weekly/${key}_weekly.csv`;
   return {
-    monthly: manifest.outputs?.[key]?.monthly_path || (fileExists(`Kpler/output/monthly/${key}_monthly.csv`) ? `Kpler/output/monthly/${key}_monthly.csv` : manifest.outputs?.[legacyKey]?.monthly_path || `Kpler/output/monthly/${legacyKey}_monthly.csv`),
-    weekly: manifest.outputs?.[key]?.weekly_path || (fileExists(`Kpler/output/weekly/${key}_weekly.csv`) ? `Kpler/output/weekly/${key}_weekly.csv` : manifest.outputs?.[legacyKey]?.weekly_path || `Kpler/output/weekly/${legacyKey}_weekly.csv`),
+    monthly: firstExistingKplerPath(
+      [manifest.outputs?.[key]?.monthly_path, monthlyPath, manifest.outputs?.[legacyKey]?.monthly_path],
+      monthlyPath,
+    ),
+    weekly: firstExistingKplerPath(
+      [manifest.outputs?.[key]?.weekly_path, weeklyPath, manifest.outputs?.[legacyKey]?.weekly_path],
+      weeklyPath,
+    ),
   };
 }
 
@@ -3494,455 +3463,7 @@ function writeSourceCopies(config: ProductConfig, bundle: DashboardBundle): void
     optimization: bundle.optimization,
   }, null, 2));
 }
-
-function dashboardHtml(bundle: DashboardBundle): string {
-  const data = JSON.stringify(bundle).replaceAll("</", "<\\/");
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <title>${bundle.product.title}</title>
-  <style>
-    :root{--bg:#f4f6f9;--panel:#fff;--ink:#0c1728;--muted:#657184;--line:#d8dee8;--grid:#cbd3df;--grid-soft:#d7dde7;--navy:#18365d;--teal:#0f9488;--amber:#b7791f;--red:#b42318;--blue:#2f68b7;--green:#16835f;--shadow:0 16px 42px rgba(24,54,93,.08);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-size:14px;letter-spacing:0}button,select,input{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #7db7ff;outline-offset:2px}
-    .app{min-height:100vh;display:grid;grid-template-columns:236px minmax(0,1fr)}.rail{background:#0e1b2f;color:#dce6f4;padding:22px 16px;position:sticky;top:0;height:100vh}.brand{font-size:20px;font-weight:760;margin-bottom:4px}.sub{color:#9fb0c8;font-size:12px;line-height:1.5}.nav{margin-top:28px;display:grid;gap:6px}.nav a{color:#dce6f4;text-decoration:none;padding:10px 12px;border-radius:6px;display:flex;justify-content:space-between}.nav a.active,.nav a:hover{background:#18365d}.source{position:absolute;left:16px;right:16px;bottom:20px;color:#9fb0c8;font-size:12px;line-height:1.55}
-    main{padding:18px 22px 34px;min-width:0}.bar{min-height:62px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.title h1{font-size:23px;line-height:1.1;margin:0}.title p{margin:6px 0 0;color:var(--muted);font-size:12px;max-width:960px}.actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}.btn,.select,.nameInput{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:6px;padding:8px 10px;font-weight:650;font-size:12px;min-height:34px}.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}.btn.good{background:var(--green);color:#fff;border-color:var(--green)}.btn.danger{color:var(--red)}.select{min-width:132px}.nameInput{font-weight:500;min-width:180px}
-    .kpis{display:grid;grid-template-columns:repeat(6,minmax(118px,1fr));gap:10px;margin:12px 0 16px}.kpi{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:13px 14px;box-shadow:var(--shadow);min-width:0}.kpi .label{color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:760}.kpi .value{font-size:24px;font-weight:780;margin-top:6px;line-height:1.1}.kpi .note{font-size:12px;color:var(--muted);margin-top:4px}
-    .grid{display:grid;grid-template-columns:minmax(0,1.58fr) minmax(360px,.92fr);gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow);min-width:0}.panel .head{padding:13px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}.panel h2{font-size:14px;margin:0}.panel .body{padding:14px}.chart{width:100%;height:318px;display:block}.chart.small{height:218px}.tabs{display:flex;gap:6px;flex-wrap:wrap}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:700}.tab.active{background:#e8f4f2;color:#0c6b63;border-color:#a8d8d1}.rowgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{border:1px solid var(--line);border-radius:6px;padding:10px;background:#fbfcfe}.metric b{display:block;font-size:16px;margin-top:4px}.metric span{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:760}.quality{display:grid;gap:9px}.q{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #edf1f6;padding-bottom:9px}.q:last-child{border-bottom:0}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:760;white-space:nowrap}.ok{background:#e8f4f2;color:#0c6b63}.warn{background:#fff6df;color:#805300}.bad{background:#fee4e2;color:#981b1b}
-    .tables{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.tablewrap{overflow:auto;max-height:360px}.table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}.table th,.table td{border-bottom:1px solid var(--grid);padding:8px 9px;text-align:right}.table th:first-child,.table td:first-child{text-align:left}.table th{position:sticky;top:0;background:#f8fafc;color:#475569;font-size:11px;text-transform:uppercase;z-index:1}.scenario{display:grid;gap:12px}.sliderline{display:grid;grid-template-columns:116px 1fr 54px;gap:10px;align-items:center}.sliderline input{width:100%}.sliderline output{text-align:right;font-weight:750;color:#21324a}.snapshots{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px}.footnote{font-size:12px;color:var(--muted);line-height:1.55}.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px}.swatch{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px}.hint{border-left:3px solid #bdd6f7;background:#f7fbff;padding:9px 10px;color:#41516a}.mobileOnly{display:none}
-    @media(max-width:1080px){.app{grid-template-columns:1fr}.rail{position:relative;height:auto}.source{position:static;margin-top:20px}.grid,.tables{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}@media(max-width:640px){main{padding:12px}.bar{height:auto;align-items:flex-start;flex-direction:column}.actions{width:100%;justify-content:flex-start}.kpis{grid-template-columns:1fr}.chart{height:250px}.sliderline{grid-template-columns:1fr 1fr}.sliderline input{grid-column:1 / -1;grid-row:2}.snapshots{grid-template-columns:1fr}.mobileOnly{display:block}}
-  </style>
-</head>
-<body>
-  <div class="app">
-    <aside class="rail">
-      <div class="brand">${bundle.product.shortTitle} Balance</div>
-      <div class="sub">Monthly balance anchor<br>Weekly EIA forecast through 2026</div>
-      <nav class="nav">
-        <a class="active" href="#overview">Overview <span>01</span></a>
-        <a href="#balance">Balance <span>02</span></a>
-        <a href="#forecast">Forecast <span>03</span></a>
-        <a href="#quality">Quality <span>04</span></a>
-      </nav>
-      <div class="source">Latest weekly: ${bundle.freshness.latestWeekly}<br>Latest monthly: ${bundle.freshness.latestMonthly}<br>Kpler: ${bundle.kpler.mode}</div>
-    </aside>
-    <main>
-      <header class="bar" id="overview">
-        <div class="title">
-          <h1>${bundle.product.title}</h1>
-          <p>${bundle.forecast.method}. Built ${new Date(bundle.generatedAt).toLocaleString()}. Scenario values live in the URL so separate tabs can hold separate balances.</p>
-        </div>
-        <div class="actions">
-          <select id="metric" class="select" aria-label="Metric">
-            <option value="demandKbd">Demand</option>
-            <option value="productionKbd">Production</option>
-            <option value="importsKbd">Imports</option>
-            <option value="exportsKbd">Exports</option>
-            <option value="impliedBalanceKbd">Implied balance</option>
-          </select>
-          <button class="btn" id="newTabBtn" type="button">New tab</button>
-          <button class="btn" id="resetBtn" type="button">Reset</button>
-          <button class="btn good" id="saveBtn" type="button">Save view</button>
-          <button class="btn primary" id="downloadBtn" type="button">CSV</button>
-          <button class="btn" id="jsonBtn" type="button">JSON</button>
-          <button class="btn" id="htmlBtn" type="button">HTML</button>
-        </div>
-      </header>
-      <section class="kpis" id="kpis"></section>
-      <section class="grid">
-        <article class="panel" id="balance">
-          <div class="head">
-            <h2>Monthly Balance And 2026 Seasonal Forecast</h2>
-            <div class="legend"><span><i class="swatch" style="background:var(--blue)"></i>Actual</span><span><i class="swatch" style="background:var(--teal)"></i>Forecast</span><span><i class="swatch" style="background:var(--amber)"></i>Scenario</span></div>
-          </div>
-          <div class="body"><svg id="mainChart" class="chart" role="img" aria-label="Monthly balance chart"></svg></div>
-        </article>
-        <aside class="panel">
-          <div class="head"><h2>Scenario Controls</h2><span class="pill ok">Tab scoped</span></div>
-          <div class="body scenario">
-            <input id="scenarioName" class="nameInput" type="text" maxlength="48" aria-label="Scenario name">
-            <div class="sliderline"><label for="scenarioDemand">Demand</label><input id="scenarioDemand" data-scenario="demandPct" type="range" min="-15" max="15" value="0" step="0.25"><output id="demandPctLabel">0.00%</output></div>
-            <div class="sliderline"><label for="scenarioProduction">Production</label><input id="scenarioProduction" data-scenario="productionPct" type="range" min="-15" max="15" value="0" step="0.25"><output id="productionPctLabel">0.00%</output></div>
-            <div class="sliderline"><label for="scenarioImports">Imports</label><input id="scenarioImports" data-scenario="importsPct" type="range" min="-35" max="35" value="0" step="0.5"><output id="importsPctLabel">0.00%</output></div>
-            <div class="sliderline"><label for="scenarioExports">Exports</label><input id="scenarioExports" data-scenario="exportsPct" type="range" min="-35" max="35" value="0" step="0.5"><output id="exportsPctLabel">0.00%</output></div>
-            <div class="sliderline"><label for="scenarioStock">Stock delta</label><input id="scenarioStock" data-scenario="stockChangeKbd" type="range" min="-250" max="250" value="0" step="5"><output id="stockChangeKbdLabel">0 kbd</output></div>
-            <div class="rowgrid" id="scenarioMetrics"></div>
-            <div class="snapshots">
-              <select id="snapshotSelect" class="select" aria-label="Saved scenarios"></select>
-              <button class="btn" id="loadSnapshotBtn" type="button">Load</button>
-              <button class="btn danger" id="deleteSnapshotBtn" type="button">Delete</button>
-            </div>
-            <p class="footnote hint">Adjustments are applied locally to forecast months only. Baseline data stays unchanged; exports include the adjusted path for the current tab.</p>
-          </div>
-        </aside>
-      </section>
-      <section class="grid" id="forecast" style="margin-top:14px">
-        <article class="panel">
-          <div class="head"><h2>Monthly-Derived Weekly Forecast</h2><div class="tabs"><button class="tab active" data-weekmetric="demandKbd">Demand</button><button class="tab" data-weekmetric="productionKbd">Production</button><button class="tab" data-weekmetric="importsKbd">Imports</button></div></div>
-          <div class="body"><svg id="weeklyChart" class="chart small" role="img" aria-label="Weekly forecast chart"></svg></div>
-        </article>
-        <article class="panel">
-          <div class="head"><h2>Data Quality</h2><span class="pill ${bundle.kpler.available ? "ok" : "warn"}">${bundle.kpler.available ? "Kpler packaged" : "Kpler dry-run"}</span></div>
-          <div class="body quality" id="quality"></div>
-        </article>
-      </section>
-      <section class="tables" id="detailTables">
-        <article class="panel">
-          <div class="head"><h2>Reconciliation</h2><span class="pill ok">Monthly anchor</span></div>
-          <div class="body tablewrap"><table class="table" id="reconTable"></table></div>
-        </article>
-        <article class="panel">
-          <div class="head"><h2>PADD 1 / Kpler Package</h2><span class="pill ${bundle.padd1.available ? "ok" : "warn"}">${bundle.padd1.available ? "Available" : "Unavailable"}</span></div>
-          <div class="body tablewrap"><p class="footnote">${bundle.padd1.note}</p><table class="table" id="paddTable"></table></div>
-        </article>
-      </section>
-    </main>
-  </div>
-  <script>
-    window.__EXPORTED_SCENARIO__ = null;
-    window.BALANCE_DATA = ${data};
-    const D = window.BALANCE_DATA;
-    const STORAGE_KEY = D.product.key + ':balance-scenarios:v1';
-    const DEFAULT_SCENARIO = Object.freeze({name:'Base case',demandPct:0,productionPct:0,importsPct:0,exportsPct:0,stockChangeKbd:0});
-    const fmt = (n, d=0) => Number(n || 0).toLocaleString(navigator.language || 'en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
-    const clamp = (value, min, max) => Math.min(max, Math.max(min, Number.isFinite(value) ? value : 0));
-    const pct = (value) => (value >= 0 ? '+' : '') + value.toFixed(2) + '%';
-    const esc = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-    const monthDays = (period) => new Date(Number(period.slice(0,4)), Number(period.slice(5,7)), 0).getDate();
-    let metric = 'demandKbd';
-    let weekMetric = 'demandKbd';
-    let renderQueued = false;
-    let pendingEditableFocus = null;
-    let tablesRendered = false;
-    let scenario = readScenario();
-    const metricLabels = {demandKbd:'Demand',productionKbd:'Production',importsKbd:'Imports',exportsKbd:'Exports',stocksKb:'Stocks',impliedBalanceKbd:'Implied balance'};
-    function readScenario(){
-      const exported = window.__EXPORTED_SCENARIO__;
-      const params = new URLSearchParams(location.search);
-      const source = exported || {};
-      return {
-        name: String(source.name || params.get('name') || DEFAULT_SCENARIO.name).slice(0,48),
-        demandPct: clamp(Number(source.demandPct ?? params.get('d') ?? 0), -15, 15),
-        productionPct: clamp(Number(source.productionPct ?? params.get('p') ?? 0), -15, 15),
-        importsPct: clamp(Number(source.importsPct ?? params.get('i') ?? 0), -35, 35),
-        exportsPct: clamp(Number(source.exportsPct ?? params.get('e') ?? 0), -35, 35),
-        stockChangeKbd: clamp(Number(source.stockChangeKbd ?? params.get('s') ?? 0), -250, 250)
-      };
-    }
-    function writeScenarioUrl(){
-      const params = new URLSearchParams(location.search);
-      const pairs = [['name',scenario.name],['d',scenario.demandPct],['p',scenario.productionPct],['i',scenario.importsPct],['e',scenario.exportsPct],['s',scenario.stockChangeKbd]];
-      pairs.forEach(([key,value]) => {
-        const numeric = Number(value);
-        if ((key !== 'name' && numeric === 0) || (key === 'name' && value === DEFAULT_SCENARIO.name)) params.delete(key);
-        else params.set(key, String(value));
-      });
-      const next = location.pathname + (params.toString() ? '?' + params.toString() : '') + location.hash;
-      history.replaceState(null, '', next);
-    }
-    function adjustedMonthly(){
-      let cumulativeStockDelta = 0;
-      return D.monthly.map(p => {
-        if (p.status !== 'forecast') return p;
-        const demandKbd = p.demandKbd * (1 + scenario.demandPct / 100);
-        const productionKbd = p.productionKbd * (1 + scenario.productionPct / 100);
-        const importsKbd = p.importsKbd * (1 + scenario.importsPct / 100);
-        const exportsKbd = p.exportsKbd * (1 + scenario.exportsPct / 100);
-        const impliedBalanceKbd = productionKbd + importsKbd - exportsKbd - demandKbd + scenario.stockChangeKbd;
-        cumulativeStockDelta += scenario.stockChangeKbd * monthDays(p.period);
-        return {...p,demandKbd,productionKbd,importsKbd,exportsKbd,stockChangeKbd:impliedBalanceKbd,impliedBalanceKbd,stocksKb:p.stocksKb + cumulativeStockDelta};
-      });
-    }
-    function adjustedWeekly(){
-      return D.weekly.map(p => {
-        if (p.status !== 'forecast') return p;
-        const demandKbd = p.demandKbd * (1 + scenario.demandPct / 100);
-        const productionKbd = p.productionKbd * (1 + scenario.productionPct / 100);
-        const importsKbd = p.importsKbd * (1 + scenario.importsPct / 100);
-        const exportsKbd = p.exportsKbd * (1 + scenario.exportsPct / 100);
-        return {...p,demandKbd,productionKbd,importsKbd,exportsKbd,impliedBalanceKbd:productionKbd + importsKbd - exportsKbd - demandKbd + scenario.stockChangeKbd};
-      });
-    }
-    function drawLineChart(svg, rows, key, opts={}){
-      const w = svg.clientWidth || 800, h = svg.clientHeight || 280, pad = {l:52,r:18,t:18,b:34};
-      svg.setAttribute('viewBox', '0 0 '+w+' '+h);
-      const vals = rows.map(r=>Number(r[key]||0)); const min = Math.min(...vals,0); const max = Math.max(...vals,1); const span = max-min || 1;
-      const x = i => pad.l + (i/(Math.max(rows.length-1,1)))*(w-pad.l-pad.r);
-      const y = v => h-pad.b - ((v-min)/span)*(h-pad.t-pad.b);
-      const actualIdx = [], forecastIdx = [];
-      rows.forEach((r, i) => (r.status === 'actual' ? actualIdx : forecastIdx).push(i));
-      const path = (indexes) => indexes.map((idx,i)=> (i?'L':'M') + x(idx).toFixed(1)+' '+y(rows[idx][key]).toFixed(1)).join(' ');
-      const baselineForecast = opts.baseline ? D.monthly.map((r, i) => ({...r,[key]:D.monthly[i][key]})) : [];
-      const baselineIdx = baselineForecast.map((r, i) => r.status === 'forecast' ? i : -1).filter(i => i >= 0);
-      const grid = [0,.25,.5,.75,1].map(t=>{const gy=pad.t+t*(h-pad.t-pad.b); const val=max-t*span; return '<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+gy+'" y2="'+gy+'" stroke="#cbd3df"/><text x="8" y="'+(gy+4)+'" font-size="11" fill="#647083">'+fmt(val)+'</text>';}).join('');
-      const labelStep = Math.ceil(rows.length / 6);
-      const labels = rows.map((r,i)=>({r,i})).filter(({i})=>i%labelStep===0 || i===rows.length-1).map(({r,i})=>'<text x="'+x(i)+'" y="'+(h-10)+'" font-size="11" text-anchor="middle" fill="#647083">'+(r.period||r.weekEnding).slice(2,7)+'</text>').join('');
-      svg.innerHTML = grid + labels +
-        '<path d="'+path(actualIdx)+'" fill="none" stroke="#2f68b7" stroke-width="2.4"/>' +
-        (opts.baseline ? '<path d="'+baselineIdx.map((idx,i)=> (i?'L':'M') + x(idx).toFixed(1)+' '+y(baselineForecast[idx][key]).toFixed(1)).join(' ')+'" fill="none" stroke="#0f9488" stroke-width="2.2" stroke-dasharray="5 4"/>' : '') +
-        '<path d="'+path(forecastIdx)+'" fill="none" stroke="'+(opts.baseline ? '#b7791f' : '#0f9488')+'" stroke-width="2.4" stroke-dasharray="'+(opts.baseline ? '3 3' : '5 4')+'"/>';
-    }
-    function renderKpis(monthly){
-      const latestM = monthly[monthly.length-1], baselineM = D.monthly[D.monthly.length-1], latestActualM = [...D.monthly].reverse().find(p=>p.status==='actual');
-      const latestActualW = [...D.weekly].reverse().find(p=>p.status==='actual'), reconMax = Math.max(...D.reconciliation.map(r=>Math.abs(r.diffDemandKbd)));
-      document.getElementById('kpis').innerHTML = [
-        ['Scenario demand',fmt(latestM.demandKbd),'Dec 2026 adjusted'],
-        ['Scenario balance',fmt(latestM.impliedBalanceKbd),'kbd adjusted'],
-        ['Stock shift',fmt(latestM.stocksKb - baselineM.stocksKb),'kb vs base'],
-        ['Latest actual monthly',fmt(latestActualM.demandKbd),latestActualM.period],
-        ['Latest actual weekly',fmt(latestActualW.demandKbd),latestActualW.weekEnding],
-        ['Max recon diff',fmt(reconMax,2),'kbd demand']
-      ].map(k=>'<div class="kpi"><div class="label">'+k[0]+'</div><div class="value">'+k[1]+'</div><div class="note">'+k[2]+'</div></div>').join('');
-    }
-    function renderScenarioMetrics(monthly){
-      const latest = monthly.at(-1), base = D.monthly.at(-1);
-      document.getElementById('scenarioMetrics').innerHTML = [
-        ['Demand',latest.demandKbd,latest.demandKbd - base.demandKbd],
-        ['Production',latest.productionKbd,latest.productionKbd - base.productionKbd],
-        ['Imports',latest.importsKbd,latest.importsKbd - base.importsKbd],
-        ['Exports',latest.exportsKbd,latest.exportsKbd - base.exportsKbd]
-      ].map(r=>'<div class="metric"><span>'+r[0]+'</span><b>'+fmt(r[1])+'</b><div class="footnote">'+(r[2]>=0?'+':'')+fmt(r[2])+' vs base</div></div>').join('');
-    }
-    function renderQuality(){
-      const q = [
-        ['Monthly source',D.freshness.latestMonthly+' / '+D.freshness.monthlyRows+' rows','ok'],
-        ['Weekly source',D.freshness.latestWeekly+' / '+D.freshness.weeklyRows+' rows','ok'],
-        ['Forecast method','3-year seasonal monthly average, weekly reconciliation','ok'],
-        ['Kpler',D.kpler.note,D.kpler.available?'ok':'warn'],
-        ['Packaged folder','EIA monthly, EIA weekly, Kpler, PADD 1, data bundle','ok']
-      ];
-      document.getElementById('quality').innerHTML = q.map(r=>'<div class="q"><div><strong>'+r[0]+'</strong><div class="footnote">'+r[1]+'</div></div><span class="pill '+r[2]+'">'+r[2]+'</span></div>').join('');
-    }
-    function renderTable(el, rows, cols){
-      document.getElementById(el).innerHTML = '<thead><tr>'+cols.map(c=>'<th>'+c.label+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr>'+cols.map(c=>'<td>'+((typeof row[c.key]==='number')?fmt(row[c.key],c.d||0):(row[c.key]??''))+'</td>').join('')+'</tr>').join('')+'</tbody>';
-    }
-    function adjustedRowsForExport(){
-      return adjustedMonthly().map((r, idx) => {
-        const b = D.monthly[idx];
-        return {period:r.period,status:r.status,scenario_name:scenario.name,demand_kbd:round2(r.demandKbd),production_kbd:round2(r.productionKbd),imports_kbd:round2(r.importsKbd),exports_kbd:round2(r.exportsKbd),stocks_kb:round2(r.stocksKb),implied_balance_kbd:round2(r.impliedBalanceKbd),baseline_demand_kbd:b.demandKbd,baseline_production_kbd:b.productionKbd,baseline_imports_kbd:b.importsKbd,baseline_exports_kbd:b.exportsKbd,baseline_stocks_kb:b.stocksKb,baseline_implied_balance_kbd:b.impliedBalanceKbd};
-      });
-    }
-    function round2(n){return Math.round(Number(n || 0) * 100) / 100;}
-    function downloadBlob(filename, type, content){
-      const url = URL.createObjectURL(new Blob([content],{type}));
-      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 250);
-    }
-    function toCsv(rows){
-      const cols = Object.keys(rows[0] || {});
-      const clean = v => /[",\\n\\r]/.test(String(v ?? '')) ? '"' + String(v ?? '').replaceAll('"','""') + '"' : String(v ?? '');
-      return [cols.join(','),...rows.map(r=>cols.map(c=>clean(r[c])).join(','))].join('\\n') + '\\n';
-    }
-    function downloadCsv(){
-      downloadBlob(D.product.key+'_scenario_monthly_balance.csv','text/csv',toCsv(adjustedRowsForExport()));
-    }
-    function downloadJson(){
-      downloadBlob(D.product.key+'_scenario.json','application/json',JSON.stringify({product:D.product,generatedAt:D.generatedAt,scenario,forecast:D.forecast,monthly:adjustedRowsForExport()}, null, 2));
-    }
-    function downloadHtml(){
-      const html = '<!doctype html>\\n' + document.documentElement.outerHTML.replace('window.__EXPORTED_SCENARIO__ = null;', 'window.__EXPORTED_SCENARIO__ = ' + JSON.stringify(scenario).replaceAll('</','<\\\\/') + ';');
-      downloadBlob(D.product.key+'_scenario_app.html','text/html',html);
-    }
-    function loadSnapshots(){
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
-    }
-    function saveSnapshots(rows){ localStorage.setItem(STORAGE_KEY, JSON.stringify(rows.slice(-40))); }
-    function renderSnapshots(){
-      const select = document.getElementById('snapshotSelect');
-      const rows = loadSnapshots();
-      select.innerHTML = rows.length ? rows.map(s => '<option value="'+esc(s.id)+'">'+esc(s.scenario.name)+' / '+esc(new Date(s.savedAt).toLocaleString())+'</option>').join('') : '<option value="">No saved scenarios</option>';
-    }
-    function saveSnapshot(){
-      const rows = loadSnapshots();
-      rows.push({id:String(Date.now()),savedAt:new Date().toISOString(),scenario:{...scenario}});
-      saveSnapshots(rows);
-      renderSnapshots();
-    }
-    function loadSnapshot(){
-      const id = document.getElementById('snapshotSelect').value;
-      const found = loadSnapshots().find(s => s.id === id);
-      if (!found) return;
-      scenario = {...DEFAULT_SCENARIO,...found.scenario};
-      syncControls();
-      writeScenarioUrl();
-      queueRender();
-    }
-    function deleteSnapshot(){
-      const id = document.getElementById('snapshotSelect').value;
-      if (!id) return;
-      saveSnapshots(loadSnapshots().filter(s => s.id !== id));
-      renderSnapshots();
-    }
-    function syncControls(){
-      document.getElementById('scenarioName').value = scenario.name;
-      [['scenarioDemand','demandPct'],['scenarioProduction','productionPct'],['scenarioImports','importsPct'],['scenarioExports','exportsPct'],['scenarioStock','stockChangeKbd']].forEach(([id,key]) => { document.getElementById(id).value = String(scenario[key]); });
-      document.getElementById('demandPctLabel').textContent = pct(scenario.demandPct);
-      document.getElementById('productionPctLabel').textContent = pct(scenario.productionPct);
-      document.getElementById('importsPctLabel').textContent = pct(scenario.importsPct);
-      document.getElementById('exportsPctLabel').textContent = pct(scenario.exportsPct);
-      document.getElementById('stockChangeKbdLabel').textContent = (scenario.stockChangeKbd >= 0 ? '+' : '') + fmt(scenario.stockChangeKbd) + ' kbd';
-    }
-    function queueRender(){
-      if (renderQueued) return;
-      renderQueued = true;
-      requestAnimationFrame(() => { renderQueued = false; render(); });
-    }
-    function renderStaticTables(){
-      if (tablesRendered) return;
-      tablesRendered = true;
-      renderTable('reconTable', D.reconciliation, [
-        {key:'month',label:'Month'},{key:'weeklyWeeks',label:'Weeks'},{key:'monthlyDemandKbd',label:'Monthly demand'},{key:'weeklyDemandKbd',label:'Weekly demand'},{key:'diffDemandKbd',label:'Diff',d:2},
-        {key:'monthlyProductionKbd',label:'Monthly prod'},{key:'weeklyProductionKbd',label:'Weekly prod'},{key:'diffProductionKbd',label:'Diff',d:2}
-      ]);
-      renderTable('paddTable', D.padd1.rows.slice(0,22), Object.keys(D.padd1.rows[0]||{note:'No rows'}).slice(0,7).map(k=>({key:k,label:k.replaceAll('_',' '),d:typeof (D.padd1.rows[0]||{})[k]==='number'?2:0})));
-    }
-    function render(){
-      syncControls();
-      const monthly = adjustedMonthly();
-      const weekly = adjustedWeekly();
-      renderKpis(monthly); renderScenarioMetrics(monthly); renderQuality();
-      drawLineChart(document.getElementById('mainChart'), monthly, metric, {baseline:true});
-      drawLineChart(document.getElementById('weeklyChart'), weekly.slice(-80), weekMetric);
-      renderStaticTables();
-    }
-    document.getElementById('metric').addEventListener('change', e=>{metric=e.target.value;queueRender();});
-    document.querySelectorAll('[data-scenario]').forEach(input=>input.addEventListener('input', e=>{scenario[e.target.dataset.scenario]=Number(e.target.value);writeScenarioUrl();syncControls();queueRender();}));
-    document.getElementById('scenarioName').addEventListener('input', e=>{scenario.name=e.target.value.slice(0,48)||DEFAULT_SCENARIO.name;writeScenarioUrl();});
-    document.getElementById('resetBtn').addEventListener('click',()=>{scenario={...DEFAULT_SCENARIO};writeScenarioUrl();syncControls();queueRender();});
-    document.getElementById('newTabBtn').addEventListener('click',()=>{writeScenarioUrl();window.open(location.href,'_blank','noopener');});
-    document.getElementById('saveBtn').addEventListener('click',saveSnapshot);
-    document.getElementById('loadSnapshotBtn').addEventListener('click',loadSnapshot);
-    document.getElementById('deleteSnapshotBtn').addEventListener('click',deleteSnapshot);
-    document.getElementById('downloadBtn').addEventListener('click',downloadCsv);
-    document.getElementById('jsonBtn').addEventListener('click',downloadJson);
-    document.getElementById('htmlBtn').addEventListener('click',downloadHtml);
-    document.querySelectorAll('[data-weekmetric]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-weekmetric]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');weekMetric=btn.dataset.weekmetric;queueRender();}));
-    addEventListener('resize',queueRender,{passive:true});
-    renderSnapshots();
-    writeScenarioUrl();
-    render();
-  </script>
-</body>
-</html>`;
-}
-
 function regionalDashboardHtml(bundle: DashboardBundle): string {
-  const data = JSON.stringify(bundle).replaceAll("</", "<\\/");
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <title>${bundle.product.shortTitle} Regional Balance Workbook</title>
-  <style>
-    :root{--bg:#eef2f6;--panel:#fff;--ink:#151c2c;--muted:#647084;--line:#d8dee8;--grid:#cbd3df;--grid-soft:#d7dde7;--soft:#f8fafc;--blue:#1d4ed8;--steel:#315b99;--red:#b42318;--green:#16835f;--band:#c4c8cf;--shadow:0 16px 36px rgba(26,39,65,.08);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-size:14px;letter-spacing:0}button,select,input{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible,a.btn:focus-visible{outline:2px solid #7db7ff;outline-offset:2px}.shell{max-width:1580px;margin:0 auto;padding:18px 18px 34px}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:12px}.title h1{font-size:24px;line-height:1.1;margin:0;font-weight:780}.title p{margin:6px 0 0;color:var(--muted);font-size:12px;max-width:980px}.actions,.chiprow,.seg{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.actions{justify-content:flex-end}.btn,.select,.chip,.toggle{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:720;min-height:32px}.btn{border-radius:7px}.actions a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}.btn.primary,.btn.active,.toggle.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 8px 18px rgba(29,78,216,.2)}.btn.full{width:100%;min-height:36px}.select{border-radius:8px;min-width:220px}.chip{display:inline-flex}.chip input{margin:0}.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);min-width:0}.options{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px;margin-bottom:14px}.pad{padding:14px 16px}.caption{font-size:11px;color:#566174;text-transform:uppercase;font-weight:800;margin-bottom:9px}.small{font-size:12px;color:var(--muted);line-height:1.45}.controlbar{display:grid;grid-template-columns:220px minmax(220px,1fr) minmax(220px,1fr) 286px;gap:12px;margin-bottom:10px}.statusline{display:flex;justify-content:space-between;gap:12px;align-items:center;color:#4b5566;font-size:12px;margin:8px 0 14px}.sheet[hidden]{display:none}.sheetHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:10px}.sheetHead h2{margin:0;font-size:22px;line-height:1.15}.sheetHead p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:960px}.pill{display:inline-flex;align-items:center;border-radius:999px;background:#edf3ff;color:#244a87;padding:5px 9px;font-size:11px;font-weight:800;white-space:nowrap}.tablewrap{overflow:auto;max-height:65vh;border-radius:8px;border:1px solid var(--grid);background:#fff}.table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;white-space:nowrap}.table th,.table td{border-bottom:1px solid var(--grid);border-right:1px solid var(--grid-soft);padding:8px 9px;text-align:right}.table th:first-child,.table td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:2}.table th{position:sticky;top:0;background:#f7f9fc;color:#475569;font-size:11px;text-transform:uppercase;z-index:3}.table th:first-child{z-index:4;background:#f7f9fc}.table tr.forecast td{background:#fffdf5}.table tr.forecast td:first-child{background:#fffdf5}.table td.status{text-align:left;color:#647084;text-transform:uppercase;font-size:10px;font-weight:800}.latestGrid{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:10px;margin:12px 0}.miniMetric{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 11px}.miniMetric span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;font-weight:800}.miniMetric b{display:block;font-size:19px;margin-top:5px}.miniMetric i{display:block;font-style:normal;color:var(--muted);font-size:11px;margin-top:2px}.chartGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.chartCard{background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);min-width:0;overflow:hidden}.chartCard.zoomed{grid-column:1 / -1}.cardTools{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:9px 10px 0}.toolGroup{display:flex;gap:6px;flex-wrap:wrap}.toolBtn{border:1px solid #dce2ec;background:#fff;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:780;color:#2c3748}.chartTitle{font-size:15px;text-align:center;margin:7px 12px 0;font-weight:780}.seasonChart{width:100%;height:286px;display:block}.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;color:#5f6b7e;font-size:11px;padding:0 10px 9px}.swatch{width:18px;height:3px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle}.miniWrap{overflow:auto;max-height:190px;border-top:1px solid var(--grid)}.miniTable{border-collapse:collapse;width:100%;font-size:10px;white-space:nowrap}.miniTable th,.miniTable td{border-bottom:1px solid var(--grid-soft);padding:5px 6px;text-align:right}.miniTable th:first-child,.miniTable td:first-child{text-align:left;position:sticky;left:0;background:#fff}.miniTable th{background:#f8fafc;color:#566174;text-transform:uppercase}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;border-radius:8px;padding:9px 12px;font-size:12px;box-shadow:0 14px 34px rgba(0,0,0,.24);opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s ease}.toast.show{opacity:1;transform:translateY(0)}
-    @media(max-width:1180px){.options,.controlbar{grid-template-columns:1fr 1fr}.chartGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.latestGrid{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.shell{padding:12px}.topbar,.sheetHead,.statusline{flex-direction:column;align-items:flex-start}.options,.controlbar,.chartGrid{grid-template-columns:1fr}.actions{justify-content:flex-start}.select{width:100%;min-width:0}.latestGrid{grid-template-columns:1fr 1fr}.seasonChart{height:250px}.tablewrap{max-height:58vh}}@media(max-width:460px){.latestGrid{grid-template-columns:1fr}.btn,.chip,.toggle{font-size:11px;padding:7px 9px}}
-  </style>
-</head>
-<body>
-  <main class="shell">
-    <header class="topbar">
-      <div class="title"><h1>${bundle.product.shortTitle} Regional Balance Workbook</h1><p>One sheet toggles monthly and weekly regional balances; the chart sheet follows the same selection and stays switchable. Built ${new Date(bundle.generatedAt).toLocaleString()}.</p></div>
-      <div class="actions"><button class="btn active" id="balanceSheetBtn" type="button">Balance sheet</button><button class="btn" id="chartsSheetBtn" type="button">Open charts</button><button class="btn" id="sourcesSheetBtn" type="button">Sources</button><button class="btn" id="newTabBtn" type="button">New tab</button><button class="btn primary" id="downloadBtn" type="button">CSV</button><button class="btn" id="jsonBtn" type="button">JSON</button><button class="btn" id="htmlBtn" type="button">HTML</button></div>
-    </header>
-    <section class="options">
-      <div class="panel pad"><div class="caption">Display options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><span class="chip">Forecast starts ${addMonths(bundle.freshness.latestMonthly, 1)}</span><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull ${new Date(bundle.generatedAt).toLocaleString()}</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Chart lines</div><div class="chiprow" id="historyChips"></div></div>
-      <div class="panel pad"><div class="caption">Refresh</div><button class="btn primary full" id="refreshBtn" type="button">Refresh dashboard</button><button class="btn primary full" id="saveViewBtn" type="button" style="margin-top:8px">Save forecast</button><p class="small">Views are saved in this browser. URL params carry the active sheet, frequency, region, and metric into a new tab.</p></div>
-    </section>
-    <section class="controlbar">
-      <div class="panel pad"><div class="caption">View</div><div class="seg"><button class="toggle active" data-frequency="monthly" type="button">Monthly</button><button class="toggle" data-frequency="weekly" type="button">Weekly</button></div></div>
-      <div class="panel pad"><div class="caption">Region</div><select id="regionSelect" class="select" aria-label="Region"></select></div>
-      <div class="panel pad"><div class="caption">Metric</div><select id="metricSelect" class="select" aria-label="Metric"></select></div>
-    </section>
-    <div class="statusline"><div id="loadedLine"></div><div>Latest weekly: ${bundle.freshness.latestWeekly} | Latest monthly: ${bundle.freshness.latestMonthly} | Kpler: ${bundle.kpler.mode}</div></div>
-    <section id="balanceSheet" class="sheet"><div class="sheetHead"><div><h2 id="balanceTitle">Monthly | Regional Balance</h2><p id="balanceSubtitle"></p></div><span class="pill">9 region columns</span></div><div class="latestGrid" id="latestGrid"></div><div class="tablewrap"><table class="table" id="balanceTable"></table></div></section>
-    <section id="chartsSheet" class="sheet" hidden><div class="sheetHead"><div><h2 id="chartsTitle">Monthly | U.S. Charts</h2><p>Cards use the five-year band logic: shaded min/max range for 2019 and 2022-2025, dashed five-year average, prior-year line, and current-year actual/forecast line.</p></div><span class="pill" id="chartCount">7 charts</span></div><div class="chartGrid" id="chartGrid"></div><section class="chartScenarioWorkbench" id="chartScenarioWorkbench" hidden></section></section>
-  </main>
-  <div class="toast" id="toast"></div>
-  <script>
-    window.__EXPORTED_SCENARIO__ = null;
-    window.BALANCE_DATA = ${data};
-    const D = window.BALANCE_DATA;
-    const STORAGE_KEY = D.product.key + ':regional-balance-views:v1';
-    const BAND_YEARS = ${JSON.stringify(BAND_YEARS)};
-    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const METRICS = [{key:'balanceKbd',label:'Balance',unit:'kbd',digits:0},{key:'demandKbd',label:'Demand',unit:'kbd',digits:0},{key:'productionKbd',label:'Production',unit:'kbd',digits:0},{key:'importsKbd',label:'Imports',unit:'kbd',digits:0},{key:'exportsKbd',label:'Exports',unit:'kbd',digits:0},{key:'netReceiptsKbd',label:'Net receipts',unit:'kbd',digits:0},{key:'stockChangeKbd',label:'Stock change',unit:'kbd',digits:0},{key:'stocksKb',label:'Stocks',unit:'kb',digits:0},{key:'daysForwardCover',label:'Days of Forward Cover',unit:'days',digits:1}];
-    const CHART_METRICS = ['balanceKbd','demandKbd','productionKbd','importsKbd','exportsKbd','netReceiptsKbd','stocksKb','daysForwardCover'];
-    const REGION_ORDER = D.regionalBalance.regions.map(r => r.key);
-    const fmt = (n, d=0) => Number(n || 0).toLocaleString(navigator.language || 'en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
-    const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-    const metricByKey = key => METRICS.find(m => m.key === key) || METRICS[0];
-    const regionByKey = key => D.regionalBalance.regions.find(r => r.key === key) || D.regionalBalance.regions[0];
-    const chartRegionLabel = key => (REGION_META[key] ? REGION_META[key][1] : regionByKey(key).label);
-    const yearOf = period => Number(period.slice(0,4));
-    const monthOf = period => Number(period.slice(5,7));
-    const average = values => { const valid = values.filter(v => Number.isFinite(v)); return valid.length ? valid.reduce((s,v)=>s+v,0)/valid.length : null; };
-    const OUTAGE_CAPACITY_DIGITS = 1;
-    const OUTAGE_RAMP_DOWN_DAYS = 3;
-    const round2 = n => Math.round(Number(n || 0) * 100) / 100;
-    let state = readState();
-    let renderQueued = false;
-    function readState(){ const params = new URLSearchParams(location.search); const frequency = params.get('f') === 'weekly' ? 'weekly' : 'monthly'; const region = D.regionalBalance.regions.some(r => r.key === params.get('r')) ? params.get('r') : 'us'; const metric = METRICS.some(m => m.key === params.get('m')) ? params.get('m') : 'balanceKbd'; const sheet = params.get('sheet') === 'charts' ? 'charts' : 'balance'; return {frequency, region, metric, sheet, showLegends:true, showForecast:true, showRegionTitles:true}; }
-    function writeStateUrl(){ const params = new URLSearchParams(location.search); params.set('f', state.frequency); params.set('r', state.region); params.set('m', state.metric); params.set('sheet', state.sheet); history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash); }
-    function dataset(){ return state.frequency === 'weekly' ? D.regionalBalance.weekly : D.regionalBalance.monthly; }
-    function rowsForRegion(regionKey, frequency){ const rows = frequency === 'weekly' ? D.regionalBalance.weekly : D.regionalBalance.monthly; return rows.filter(row => row.regionKey === regionKey); }
-    function showToast(message){ const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove('show'), 1800); }
-    function groupedByPeriod(){ const periods = new Map(); dataset().forEach(row => { const bucket = periods.get(row.period) || {}; bucket[row.regionKey] = row; periods.set(row.period, bucket); }); const entries = Array.from(periods.entries()).sort((a,b)=>b[0].localeCompare(a[0])); return state.frequency === 'weekly' ? entries.slice(0,130) : entries.filter(([period]) => period >= '2019-01'); }
-    function latestRowsByRegion(){ const rows = dataset(); const periods = Array.from(new Set(rows.map(row => row.period))).sort(); const latest = periods.at(-1); const prior = periods.at(-2); return {latest, prior, latestRows:new Map(rows.filter(row => row.period === latest).map(row => [row.regionKey, row])), priorRows:new Map(rows.filter(row => row.period === prior).map(row => [row.regionKey, row]))}; }
-    function renderControls(){ document.getElementById('regionSelect').innerHTML = D.regionalBalance.regions.map(r => '<option value="'+esc(r.key)+'">'+esc(r.label)+'</option>').join(''); document.getElementById('metricSelect').innerHTML = METRICS.map(m => '<option value="'+esc(m.key)+'">'+esc(m.label)+' ('+esc(m.unit)+')</option>').join(''); document.getElementById('regionSelect').value = state.region; document.getElementById('metricSelect').value = state.metric; document.querySelectorAll('[data-frequency]').forEach(btn => btn.classList.toggle('active', btn.dataset.frequency === state.frequency)); document.getElementById('balanceSheetBtn').classList.toggle('active', state.sheet === 'balance'); document.getElementById('chartsSheetBtn').classList.toggle('active', state.sheet === 'charts'); document.getElementById('balanceSheet').hidden = state.sheet !== 'balance'; document.getElementById('chartsSheet').hidden = state.sheet !== 'charts'; document.getElementById('showLegends').checked = state.showLegends; document.getElementById('showForecast').checked = state.showForecast; document.getElementById('showRegionTitles').checked = state.showRegionTitles; }
-    function renderHistoryChips(){ document.getElementById('historyChips').innerHTML = [2019,2020,2021,2022,2023,2024,2025].map(year => '<span class="chip"><input type="checkbox" '+(BAND_YEARS.includes(year)?'checked':'')+' disabled><span style="display:inline-block;width:22px;height:2px;background:#1f2937"></span>'+year+'</span>').join(''); }
-    function renderLatestGrid(){ const {latestRows, priorRows, latest} = latestRowsByRegion(); const row = latestRows.get(state.region); const prior = priorRows.get(state.region); document.getElementById('latestGrid').innerHTML = METRICS.filter(m => ['balanceKbd','demandKbd','productionKbd','importsKbd','exportsKbd','stocksKb'].includes(m.key)).map(metric => { const value = row ? row[metric.key] : 0; const diff = prior ? value - prior[metric.key] : 0; return '<div class="miniMetric"><span>'+esc(metric.label)+'</span><b>'+fmt(value, metric.digits)+'</b><i>'+(diff>=0?'+':'')+fmt(diff, metric.digits)+' vs prior period</i></div>'; }).join(''); document.getElementById('loadedLine').textContent = 'Loaded '+state.frequency.charAt(0).toUpperCase()+state.frequency.slice(1)+': '+groupedByPeriod().length+' periods, '+D.regionalBalance.regions.length+' regions. Latest selected period '+latest+'.'; }
-    function renderBalanceTable(){ const metric = metricByKey(state.metric); document.getElementById('balanceTitle').textContent = state.frequency.charAt(0).toUpperCase()+state.frequency.slice(1)+' | Regional '+metric.label; document.getElementById('balanceSubtitle').textContent = 'Columns match PADD 1 A/B, PADD 1-C, PADD 2, PADD 3, PADD 4, PADD 5, U.S., PADDs 1, 2, 3, and PADDs 1,3.'; const header = '<thead><tr><th>Period</th><th>Status</th>'+D.regionalBalance.regions.map(r => '<th>'+esc(r.label)+'</th>').join('')+'</tr></thead>'; const body = groupedByPeriod().map(([period, bucket]) => { const status = REGION_ORDER.map(key => bucket[key]?.status).find(Boolean) || ''; return '<tr class="'+esc(status)+'"><td>'+esc(period)+'</td><td class="status">'+esc(status)+'</td>'+REGION_ORDER.map(key => '<td>'+fmt(bucket[key]?.[state.metric] || 0, metric.digits)+'</td>').join('')+'</tr>'; }).join(''); document.getElementById('balanceTable').innerHTML = header + '<tbody>' + body + '</tbody>'; }
-    function isoWeekInfo(period){ const date = new Date(String(period || '').slice(0,10) + 'T00:00:00Z'); if (!Number.isFinite(date.getTime())) return {year:yearOf(String(period || '')),week:1}; const day = date.getUTCDay() || 7; const thursday = new Date(date); thursday.setUTCDate(date.getUTCDate() + 4 - day); const isoYear = thursday.getUTCFullYear(); const yearStart = new Date(Date.UTC(isoYear,0,1)); const week = Math.ceil((((thursday.getTime() - yearStart.getTime()) / 86400000) + 1) / 7); return {year:isoYear,week:Math.min(53, Math.max(1, week))}; }
-    function weekSlot(period){ return isoWeekInfo(period).week; }
-    function chartPeriodYear(period, frequency=state.frequency){ return frequency === 'weekly' ? isoWeekInfo(period).year : yearOf(period); }
-    function slotOf(period, frequency){ return frequency === 'weekly' ? weekSlot(period) : monthOf(period); }
-    function shortDateLabel(period){ const date = new Date(String(period || '').slice(0,10) + 'T00:00:00Z'); return Number.isFinite(date.getTime()) ? MONTHS[date.getUTCMonth()] + ' ' + String(date.getUTCDate()).padStart(2,'0') + ", '" + String(date.getUTCFullYear()).slice(2) : String(period || ''); }
-    function isoWeekEndPeriod(year, week){ const jan4 = new Date(Date.UTC(year, 0, 4)); const day = jan4.getUTCDay() || 7; jan4.setUTCDate(jan4.getUTCDate() - day + 1 + (Math.max(1, week) - 1) * 7 + 4); return jan4.toISOString().slice(0,10); }
-    function weeklySlotDateLabel(slot, year=2026){ return shortDateLabel(isoWeekEndPeriod(year, slot)); }
-    function weeklyAxisLabelEntries(_year=2026, slots=53){ return MONTHS.map((label, index) => ({slot:1 + index * (slots - 1) / Math.max(MONTHS.length - 1, 1),label})); }
-    function slotLabel(slot, frequency){ return frequency === 'monthly' ? (MONTHS[slot - 1] || '') : 'ISO W' + String(slot).padStart(2,'0'); }
-    function chartPeriodLabel(period, frequency=state.frequency){ if (!period) return ''; return frequency === 'weekly' ? shortDateLabel(period) : periodHeaderLabel(period, 'monthly'); }
-    function valueByYearSlot(rows, metric, frequency){ const map = new Map(); rows.forEach(row => { if (!state.showForecast && row.status === 'forecast') return; const value = Number(row[metric]); if (!Number.isFinite(value)) return; const key = chartPeriodYear(row.period, frequency) + ':' + slotOf(row.period, frequency); const list = map.get(key) || []; list.push(value); map.set(key, list); }); const out = new Map(); map.forEach((values, key) => out.set(key, average(values))); return out; }
-    function drawSeasonChart(svg, rows, metricKey, frequency){ const w = svg.clientWidth || 520, h = svg.clientHeight || 286, pad = {l:45,r:16,t:20,b:33}; const slots = frequency === 'weekly' ? 53 : 12; const values = valueByYearSlot(rows, metricKey, frequency); const years = Array.from(new Set(rows.map(row => chartPeriodYear(row.period, frequency)))).sort((a,b)=>a-b); const currentYear = years.at(-1), priorYear = currentYear - 1; const slotList = Array.from({length:slots}, (_,i)=>i+1); const x = slot => pad.l + ((slot - 1) / Math.max(slots - 1, 1)) * (w - pad.l - pad.r); const raw = []; const band = slotList.map(slot => { const yearValues = BAND_YEARS.map(year => values.get(year+':'+slot)).filter(v => Number.isFinite(v)); const min = yearValues.length ? Math.min(...yearValues) : null; const max = yearValues.length ? Math.max(...yearValues) : null; const avg = average(yearValues); if (min !== null) raw.push(min, max, avg); return {slot,min,max,avg}; }); [priorYear,currentYear].forEach(year => slotList.forEach(slot => { const value = values.get(year+':'+slot); if (Number.isFinite(value)) raw.push(value); })); const minRaw = Math.min(...raw,0), maxRaw = Math.max(...raw,1), spanRaw = maxRaw - minRaw || 1, min = minRaw - spanRaw*.08, max = maxRaw + spanRaw*.08; const y = value => h - pad.b - ((value - min) / (max - min || 1)) * (h - pad.t - pad.b); const line = points => points.map((point, idx) => (idx ? 'L' : 'M') + x(point.slot).toFixed(1) + ' ' + y(point.value).toFixed(1)).join(' '); const byYear = year => slotList.map(slot => ({slot,value:values.get(year+':'+slot)})).filter(point => Number.isFinite(point.value)); const currentActual = rows.filter(row => chartPeriodYear(row.period, frequency) === currentYear && row.status === 'actual').map(row => ({slot:slotOf(row.period, frequency), value:Number(row[metricKey])})).filter(point => Number.isFinite(point.value)); const currentForecast = state.showForecast ? rows.filter(row => chartPeriodYear(row.period, frequency) === currentYear && row.status === 'forecast').map(row => ({slot:slotOf(row.period, frequency), value:Number(row[metricKey])})).filter(point => Number.isFinite(point.value)) : []; const bandPoints = band.filter(point => point.min !== null && point.max !== null); const bandPath = bandPoints.length ? bandPoints.map((point, idx) => (idx ? 'L' : 'M') + x(point.slot).toFixed(1) + ' ' + y(point.max).toFixed(1)).join(' ') + ' ' + bandPoints.slice().reverse().map(point => 'L' + x(point.slot).toFixed(1) + ' ' + y(point.min).toFixed(1)).join(' ') + ' Z' : ''; const grid = [0,.25,.5,.75,1].map(t => { const gy = pad.t + t * (h - pad.t - pad.b); const val = max - t * (max - min); return '<line x1="'+pad.l+'" x2="'+(w-pad.r)+'" y1="'+gy+'" y2="'+gy+'" stroke="#cbd3df"/><text x="6" y="'+(gy+4)+'" font-size="10" fill="#647083">'+fmt(val)+'</text>'; }).join(''); const labelEntries = frequency === 'weekly' ? weeklyAxisLabelEntries(currentYear || 2026, slots) : slotList.map(slot => ({slot,label:slotLabel(slot, frequency)})); const labels = labelEntries.map(row => '<text x="'+x(row.slot)+'" y="'+(h-10)+'" font-size="10" text-anchor="middle" fill="#475569">'+esc(row.label)+'</text>').join(''); const avgLine = line(band.filter(point => Number.isFinite(point.avg)).map(point => ({slot:point.slot,value:point.avg}))); svg.setAttribute('viewBox','0 0 '+w+' '+h); svg.innerHTML = grid + (bandPath ? '<path d="'+bandPath+'" fill="var(--band)" opacity=".54"/>' : '') + labels + (avgLine ? '<path d="'+avgLine+'" fill="none" stroke="#1f2937" stroke-width="1.4" stroke-dasharray="5 5"/>' : '') + '<path d="'+line(byYear(priorYear))+'" fill="none" stroke="#315b99" stroke-width="2.2"/><path d="'+line(currentActual)+'" fill="none" stroke="#b42318" stroke-width="2.3"/><path d="'+line(currentForecast)+'" fill="none" stroke="#b42318" stroke-width="2.3" stroke-dasharray="5 5"/>'; }
-    function chartTableHtml(rows, metricKey){ const years = Array.from(new Set([...BAND_YEARS, ...rows.map(row => yearOf(row.period)).slice(-80)])).sort((a,b)=>a-b).filter(year => rows.some(row => yearOf(row.period) === year)); const monthValue = (year, month) => average(rows.filter(row => yearOf(row.period) === year && monthOf(row.period) === month && (state.showForecast || row.status !== 'forecast')).map(row => Number(row[metricKey])).filter(value => Number.isFinite(value))); const fyValue = year => average(MONTHS.map((_, idx) => monthValue(year, idx + 1)).filter(v => Number.isFinite(v))); const header = '<thead><tr><th>Year</th>'+MONTHS.map(m => '<th>'+m+'</th>').join('')+'<th>FY</th><th>+/-</th><th>+/-%</th></tr></thead>'; const body = years.map((year, idx) => { const fy = fyValue(year), prior = idx ? fyValue(years[idx-1]) : null; const diff = Number.isFinite(fy) && Number.isFinite(prior) ? fy - prior : null; const pct = diff !== null && prior ? diff / prior * 100 : null; return '<tr><td>'+year+'</td>'+MONTHS.map((_, m) => { const value = monthValue(year, m + 1); return '<td>'+(Number.isFinite(value) ? fmt(value) : '')+'</td>'; }).join('')+'<td>'+(Number.isFinite(fy) ? fmt(fy) : '')+'</td><td>'+(diff === null ? '' : (diff>=0?'+':'')+fmt(diff))+'</td><td>'+(pct === null ? '' : (pct>=0?'+':'')+fmt(pct,1)+'%')+'</td></tr>'; }).join(''); return '<table class="miniTable">'+header+'<tbody>'+body+'</tbody></table>'; }
-    function renderCharts(){ const region = regionByKey(state.region); document.getElementById('chartsTitle').textContent = state.frequency.charAt(0).toUpperCase()+state.frequency.slice(1)+' | '+region.label+' Charts'; document.getElementById('chartCount').textContent = CHART_METRICS.length + ' charts'; const rows = rowsForRegion(state.region, state.frequency); document.getElementById('chartGrid').innerHTML = CHART_METRICS.map(metricKey => { const metric = metricByKey(metricKey); const title = (state.showRegionTitles ? region.label + ' | ' : '') + metric.label; return '<article class="chartCard" data-chart-metric="'+esc(metricKey)+'"><div class="cardTools"><div class="toolGroup"><button class="toolBtn" data-zoom="'+esc(metricKey)+'" type="button">Zoom</button><button class="toolBtn" data-export-chart="'+esc(metricKey)+'" type="button">Export CSV</button></div><div class="toolGroup"><button class="toolBtn" data-copy-chart="'+esc(metricKey)+'" type="button">Copy</button><button class="toolBtn" data-save-chart="'+esc(metricKey)+'" type="button">Save</button></div></div><h3 class="chartTitle">'+esc(title)+'</h3><svg class="seasonChart" role="img" aria-label="'+esc(title)+' chart"></svg><div class="legend" '+(state.showLegends?'':'hidden')+'><span><i class="swatch" style="background:#315b99"></i>Prior year</span><span><i class="swatch" style="background:#b42318"></i>Current/forecast</span><span><i class="swatch" style="background:#d7d9d2;height:8px"></i>5-year range</span><span><i class="swatch" style="background:#1f2937"></i>5-year avg</span></div><div class="miniWrap">'+chartTableHtml(rows, metricKey)+'</div></article>'; }).join(''); document.querySelectorAll('.seasonChart').forEach(svg => drawSeasonChart(svg, rows, svg.closest('.chartCard').dataset.chartMetric, state.frequency)); }
-    function currentBalanceRowsForExport(){ return groupedByPeriod().map(([period, bucket]) => { const out = {frequency:state.frequency, metric:metricByKey(state.metric).label, period, status:REGION_ORDER.map(key => bucket[key]?.status).find(Boolean) || ''}; D.regionalBalance.regions.forEach(region => { const value = Number(bucket[region.key]?.[state.metric]); out[region.label.toLowerCase().replaceAll(' ','_').replaceAll('/','_').replaceAll('+','plus')] = Number.isFinite(value) ? round2(value) : NaN; }); return out; }); }
-    function toCsv(rows){ const cols = Object.keys(rows[0] || {}); const clean = v => /[",\\n\\r]/.test(String(v ?? '')) ? '"' + String(v ?? '').replaceAll('"','""') + '"' : String(v ?? ''); return [cols.join(','),...rows.map(r=>cols.map(c=>clean(r[c])).join(','))].join('\\n') + '\\n'; }
-    function downloadBlob(filename, type, content){ const url = URL.createObjectURL(new Blob([content],{type})); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(url), 250); }
-    function chartRows(metricKey){ return rowsForRegion(state.region, state.frequency).map(row => { const value = Number(row[metricKey]); return {frequency:state.frequency, region:regionByKey(state.region).label, metric:metricByKey(metricKey).label, period:row.period, status:row.status, value:Number.isFinite(value) ? round2(value) : NaN}; }); }
-    function queueRender(){ if (renderQueued) return; renderQueued = true; requestAnimationFrame(() => { renderQueued = false; render(); }); }
-    function render(){ renderControls(); renderLatestGrid(); renderBalanceTable(); renderCharts(); writeStateUrl(); }
-    document.getElementById('regionSelect').addEventListener('change', e => { if (state.sheet === 'charts') state.chartRegion = validChartRegionKey(e.target.value) ? e.target.value : state.chartRegion; else state.region = e.target.value; queueRender(); });
-    document.getElementById('metricSelect').addEventListener('change', e => { state.metric = e.target.value; queueRender(); });
-    document.querySelectorAll('[data-frequency]').forEach(btn => btn.addEventListener('click', () => { state.frequency = btn.dataset.frequency; queueRender(); }));
-    document.getElementById('balanceSheetBtn').addEventListener('click', () => { state.sheet = 'balance'; queueRender(); });
-    document.getElementById('chartsSheetBtn').addEventListener('click', () => { state.sheet = 'charts'; queueRender(); });
-    document.getElementById('expandGroupsBtn')?.addEventListener('click', () => showToast('All PADD groups expanded'));
-    document.getElementById('collapseGroupsBtn')?.addEventListener('click', () => showToast('All PADD groups collapsed'));
-    document.getElementById('showLegends').addEventListener('change', e => { state.showLegends = e.target.checked; queueRender(); });
-    document.getElementById('showForecast').addEventListener('change', e => { state.showForecast = e.target.checked; queueRender(); });
-    document.getElementById('showRegionTitles').addEventListener('change', e => { state.showRegionTitles = e.target.checked; queueRender(); });
-    document.getElementById('newTabBtn').addEventListener('click', () => { writeStateUrl(); window.open(location.href, '_blank', 'noopener'); });
-    document.getElementById('downloadBtn').addEventListener('click', () => downloadBlob(D.product.key + '_' + state.frequency + '_regional_' + state.metric + '.csv','text/csv',toCsv(currentBalanceRowsForExport())));
-    document.getElementById('jsonBtn').addEventListener('click', () => downloadBlob(D.product.key + '_regional_balance_view.json','application/json',JSON.stringify({product:D.product,generatedAt:D.generatedAt,state,regionalBalance:D.regionalBalance}, null, 2)));
-    document.getElementById('htmlBtn').addEventListener('click', () => downloadBlob(D.product.key + '_regional_balance_app.html','text/html','<!doctype html>\\n' + document.documentElement.outerHTML));
-    document.getElementById('refreshBtn').addEventListener('click', () => { queueRender(); showToast('Dashboard refreshed'); });
-    document.getElementById('saveViewBtn').addEventListener('click', () => { const rows = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); rows.push({savedAt:new Date().toISOString(), state:{...state}}); localStorage.setItem(STORAGE_KEY, JSON.stringify(rows.slice(-30))); showToast('Forecast view saved'); });
-    document.getElementById('chartGrid').addEventListener('click', async e => { const zoomMetric = e.target.dataset.zoom; const exportMetric = e.target.dataset.exportChart; const copyMetric = e.target.dataset.copyChart; const saveMetric = e.target.dataset.saveChart; if (zoomMetric) e.target.closest('.chartCard').classList.toggle('zoomed'); if (exportMetric) downloadBlob(D.product.key + '_' + state.frequency + '_' + state.region + '_' + exportMetric + '.csv','text/csv',toCsv(chartRows(exportMetric))); if (copyMetric) { try { await navigator.clipboard.writeText(toCsv(chartRows(copyMetric))); showToast('Chart CSV copied'); } catch { showToast('Clipboard unavailable'); } } if (saveMetric) { localStorage.setItem(STORAGE_KEY + ':chart', JSON.stringify({savedAt:new Date().toISOString(), state:{...state}, metric:saveMetric})); showToast('Chart saved'); } });
-    addEventListener('resize', queueRender, {passive:true});
-    renderHistoryChips();
-    render();
-  </script>
-</body>
-</html>`;
-}
-
-function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
   const runtimePaths = runtimeDataPaths(bundle.product.key);
   const runtimeVersion = encodeURIComponent(bundle.generatedAt);
   return `<!doctype html>
@@ -4095,7 +3616,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
           <div class="panel pad"><div class="caption">Period focus</div><select id="periodWindowSelect" class="select" aria-label="Period window"><option value="smart">Smart window</option><option value="latest">Latest actual</option><option value="forecast">Forecast runway</option><option value="full">Full history</option></select><div class="periodActionGrid"><button class="btn" id="jumpLatestActualBtn" type="button">Latest actual</button><button class="btn" id="jumpFirstForecastBtn" type="button">First forecast</button></div></div>
         </section>
       </div>
-      <div class="panel pad"><div class="caption">Refresh / saved views</div><div class="quickActionGrid"><button class="btn primary full" id="refreshBtn" type="button">Refresh dashboard</button><button class="btn primary full" id="saveViewBtn" type="button">Save view</button></div><div class="viewPresetGrid"><select id="savedViewSelect" class="select" aria-label="Saved views"></select><div class="viewPresetActions"><button class="btn" id="loadViewBtn" type="button">Load</button><button class="btn" id="deleteViewBtn" type="button">Delete</button><button class="btn" id="resetViewBtn" type="button">Reset</button></div></div></div>
+      <div class="panel pad"><div class="caption">Refresh / dashboard state</div><div class="quickActionGrid"><button class="btn primary full" id="refreshBtn" type="button">Refresh dashboard</button><button class="btn primary full" id="saveDashboardBtn" type="button">Save dashboard</button><button class="btn full" id="loadDashboardBtn" type="button">Load saved dashboard</button><button class="btn full" id="importDashboardBtn" type="button">Import dashboard JSON</button><input id="importDashboardInput" type="file" accept="application/json,.json" hidden></div><div class="viewPresetGrid"><select id="savedViewSelect" class="select" aria-label="Legacy browser views"></select><div class="viewPresetActions"><button class="btn" id="loadViewBtn" type="button">Load view</button><button class="btn" id="deleteViewBtn" type="button">Delete view</button><button class="btn" id="resetViewBtn" type="button">Reset</button></div></div><p class="small" style="margin:10px 0 0">Save dashboard writes a portable state file beside this workbook when the local launcher is running and downloads the same JSON for sharing.</p></div>
     </section>
     <section class="options" id="chartOptions" hidden>
 	      <div class="panel pad"><div class="caption">Chart options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip" id="showForecastChip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><label class="chip" id="fourWeekAverageChip"><input id="showFourWeekAverage" type="checkbox">4-week avg</label><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull ${new Date(bundle.generatedAt).toLocaleString()}</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Historical band years</div><div class="chiprow" id="historyChips"></div></div>
@@ -4589,7 +4110,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function mergeSharedRows(rows){ const byId = new Map(); rows.flat().filter(Boolean).forEach(row => { const sourceId = String(row.id || '').trim(); const key = sourceId && sourceId !== 'draft-outage' ? sourceId : JSON.stringify(row); byId.set(key, row); }); return Array.from(byId.values()); }
     function readSharedOutages(fallback=[]){ const rows = mergeSharedRows([storedJsonArray(OUTAGE_STORAGE_KEY), ...LEGACY_OUTAGE_STORAGE_KEYS.map(storedJsonArray), fallback]); const normalized = normalizeOutageList(rows); localStorage.setItem(OUTAGE_STORAGE_KEY, JSON.stringify(normalized)); return normalized; }
     function readSharedCapacityAdjustments(fallback=[]){ const rows = mergeSharedRows([storedJsonArray(CAPACITY_ADJ_STORAGE_KEY), ...LEGACY_CAPACITY_ADJ_STORAGE_KEYS.map(storedJsonArray), fallback]); const normalized = normalizeCapacityAdjustmentList(rows); localStorage.setItem(CAPACITY_ADJ_STORAGE_KEY, JSON.stringify(normalized)); return normalized; }
-	    function readWorkbookSettings(){ let stored = {}; try { stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) || '{}'); } catch { stored = {}; } const embedded = D.settings || {}; const embeddedOutages = Array.isArray(embedded.crudeOutages) ? embedded.crudeOutages : []; const embeddedCapacityAdjustments = Array.isArray(embedded.refineryCapacityAdjustments) ? embedded.refineryCapacityAdjustments : []; const storedOutages = Array.isArray(stored.crudeOutages) ? stored.crudeOutages : []; const storedCapacityAdjustments = Array.isArray(stored.refineryCapacityAdjustments) ? stored.refineryCapacityAdjustments : []; return {forecastEnd:normalizeForecastEnd(embedded.forecastEnd || stored.forecastEnd),revision:String(embedded.revision || stored.revision || ''),adjustments:Array.isArray(stored.adjustments) ? stored.adjustments : (Array.isArray(embedded.adjustments) ? embedded.adjustments : []),crudeOutages:readSharedOutages([...embeddedOutages, ...storedOutages]),refineryCapacityAdjustments:readSharedCapacityAdjustments([...embeddedCapacityAdjustments, ...storedCapacityAdjustments])}; }
+	    function readWorkbookSettings(){ let stored = {}; try { stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) || '{}'); } catch { stored = {}; } const embedded = D.settings || {}; const hasEmbeddedAdjustments = Array.isArray(embedded.adjustments); const hasEmbeddedOutages = Array.isArray(embedded.crudeOutages); const hasEmbeddedCapacityAdjustments = Array.isArray(embedded.refineryCapacityAdjustments); const adjustments = hasEmbeddedAdjustments ? embedded.adjustments : (Array.isArray(stored.adjustments) ? stored.adjustments : []); const crudeOutages = hasEmbeddedOutages ? normalizeOutageList(embedded.crudeOutages) : readSharedOutages(Array.isArray(stored.crudeOutages) ? stored.crudeOutages : []); const refineryCapacityAdjustments = hasEmbeddedCapacityAdjustments ? normalizeCapacityAdjustmentList(embedded.refineryCapacityAdjustments) : readSharedCapacityAdjustments(Array.isArray(stored.refineryCapacityAdjustments) ? stored.refineryCapacityAdjustments : []); return {forecastEnd:normalizeForecastEnd(embedded.forecastEnd || stored.forecastEnd),revision:String(embedded.revision || stored.revision || ''),adjustments,crudeOutages,refineryCapacityAdjustments}; }
     function saveWorkbookSettingsLocal(){ localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({...workbookSettings,savedAt:new Date().toISOString()})); }
     function readOutages(){ return readSharedOutages(workbookSettings?.crudeOutages || []); }
     function saveOutagesLocal(){ const before = stableSettingsRows(workbookSettings.crudeOutages); workbookSettings.crudeOutages = normalizeOutageList(outageEntries); outageEntries = workbookSettings.crudeOutages; localStorage.setItem(OUTAGE_STORAGE_KEY, JSON.stringify(workbookSettings.crudeOutages)); if (before !== stableSettingsRows(workbookSettings.crudeOutages)) invalidateCalculationCaches(); saveWorkbookSettingsLocal(); }
@@ -4743,7 +4264,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function movementRowsByPeriod(frequency, flowId){ const key = frequency + '|' + flowId; if (movementRowMapCache.has(key)) return movementRowMapCache.get(key); const flow = flowById(flowId); const map = new Map((Array.isArray(flow?.[frequency]) ? flow[frequency] : []).map(row => [row.period, row])); movementRowMapCache.set(key, map); return map; }
     function movementRow(frequency, period, flowId){ return movementRowsByPeriod(frequency, flowId).get(period) || null; }
     function movementBaseValue(frequency, period, flowId){ const row = movementRow(frequency, period, flowId); return row ? Number(row.valueKbd || 0) : null; }
-    function movementFlowValue(frequency, period, flowId){ const key = calcCacheKey('movementFlowValue', frequency, period, flowId); if (movementFlowValueCache.has(key)) return movementFlowValueCache.get(key); const flow = flowById(flowId); const row = movementRow(frequency, period, flowId); const base = row ? Number(row.valueKbd || 0) : null; if (!flow || base === null) { movementFlowValueCache.set(key, null); return null; } const override = row.status === 'forecast' ? balanceAdjustmentValue(frequency, period, flow.toRegionKey, receiptLineId(flowId)) : null; const value = override === null ? base : override; movementFlowValueCache.set(key, value); return value; }
+    function movementFlowValue(frequency, period, flowId){ const key = calcCacheKey('movementFlowValue', frequency, period, flowId); if (movementFlowValueCache.has(key)) return movementFlowValueCache.get(key); const flow = flowById(flowId); const row = movementRow(frequency, period, flowId); const base = row ? Number(row.valueKbd || 0) : null; if (!flow || base === null) { movementFlowValueCache.set(key, null); return null; } let override = row.status === 'forecast' ? balanceAdjustmentValue(frequency, period, flow.toRegionKey, receiptLineId(flowId)) : null; if (row.status === 'forecast' && frequency === 'weekly' && override === null) override = balanceAdjustmentValue('monthly', periodMonthValue(period), flow.toRegionKey, receiptLineId(flowId)); const value = override === null ? base : override; movementFlowValueCache.set(key, value); return value; }
     function movementSummaryForRegion(frequency, period, regionKey){ const key = calcCacheKey('movementSummaryForRegion', frequency, period, regionKey); if (movementSummaryCache.has(key)) return movementSummaryCache.get(key); const scope = movementFlowScope(regionKey); if (!scope.memberKeys.length || MOVEMENT_FLOWS.length === 0) { const empty = {hasFlows:false,receiptsKbd:0,shipmentsKbd:0,netReceiptsKbd:null}; movementSummaryCache.set(key, empty); return empty; } let receiptsKbd = 0; let shipmentsKbd = 0; let count = 0; scope.touchingFlows.forEach(flow => { const value = movementFlowValue(frequency, period, flow.id); if (value === null) return; count += 1; if (scope.members.has(flow.toRegionKey)) receiptsKbd += value; if (scope.members.has(flow.fromRegionKey)) shipmentsKbd += value; }); const summary = {hasFlows:count > 0,receiptsKbd:round2(receiptsKbd),shipmentsKbd:round2(shipmentsKbd),netReceiptsKbd:round2(receiptsKbd - shipmentsKbd)}; movementSummaryCache.set(key, summary); return summary; }
     function receiptAdjustmentLineId(flowId){ return 'receiptAdjustment:' + flowId; }
     function isReceiptAdjustmentLine(lineId){ return String(lineId || '').startsWith('receiptAdjustment:'); }
@@ -4834,6 +4355,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
 	    function addCapacityAdjustmentIndexRow(map, key, row){ if (!key || !row) return; const rows = map.get(key) || []; rows.push(row); map.set(key, rows); }
 	    function capacityAdjustmentIndex(){ const rows = effectiveRefineryCapacityAdjustments(); const signature = stableSettingsRows(rows); if (capacityAdjustmentIndexCache.key === signature && capacityAdjustmentIndexCache.index) return capacityAdjustmentIndexCache.index; const index = {byRefinery:new Map(),byRegional:new Map(),byCrudeCell:new Map()}; rows.forEach(row => { if (!row) return; if (isCrudeCellAdjustment(row)) { const key = crudeCellAdjustmentIndexKey(row.frequency, row.period, row.regionKey, row.unitKey); const current = index.byCrudeCell.get(key); if (!current || String(row.updatedAt || '').localeCompare(String(current.updatedAt || '')) >= 0) index.byCrudeCell.set(key, row); return; } addCapacityAdjustmentIndexRow(index.byRefinery, capacityAdjustmentGroupKey(row.refineryId, row.unitKey), row); if (row.refineryId === REGIONAL_CAPACITY_REFINERY_ID) addCapacityAdjustmentIndexRow(index.byRegional, capacityAdjustmentGroupKey(row.regionKey, row.unitKey), row); }); index.byRefinery.forEach(sortCapacityAdjustmentRows); index.byRegional.forEach(sortCapacityAdjustmentRows); capacityAdjustmentIndexCache = {key:signature,index}; return index; }
 	    function exactCrudeCellAdjustment(regionKey, unitKey, period, frequency=state.frequency){ return capacityAdjustmentIndex().byCrudeCell.get(crudeCellAdjustmentIndexKey(frequency, period, regionKey, unitKey)) || null; }
+	    function forecastCrudeCellAdjustment(regionKey, unitKey, period, frequency=state.frequency){ const exact = exactCrudeCellAdjustment(regionKey, unitKey, period, frequency); if (exact || frequency !== 'weekly') return exact; return exactCrudeCellAdjustment(regionKey, unitKey, periodMonthValue(period), 'monthly'); }
 	    function latestCapacityAdjustmentIn(rows, periodMonth){ const target = String(periodMonth || ''); for (let index = (rows?.length || 0) - 1; index >= 0; index -= 1) { if (String(rows[index]?.periodMonth || '') <= target) return rows[index]; } return null; }
 	    function exactCapacityAdjustmentIn(rows, periodMonth){ const target = String(periodMonth || ''); for (let index = (rows?.length || 0) - 1; index >= 0; index -= 1) { if (String(rows[index]?.periodMonth || '') === target) return rows[index]; } return null; }
 	    function regionalCapacityAdjustmentCarriesForward(lineId){ return lineId !== 'exPlannedUtilizationAdjustmentPct'; }
@@ -5144,15 +4666,19 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       let demandKbd = isActual ? Number(rawPoint.demandKbd || 0) : round2(applyBalanceAdjustment(Number(monthlyPoint.demandKbd ?? rawPoint.demandKbd ?? 0), 'weekly', rawPoint.period, rawPoint.regionKey, 'demand'));
       let importsKbd = Number(monthlyPoint.importsKbd ?? rawPoint.importsKbd ?? 0);
       if (isActual) importsKbd = Number(rawPoint.importsKbd || 0);
-      else importsKbd = round2(applyBalanceAdjustment(Number(rawPoint.importsKbd ?? monthlyPoint.importsKbd ?? 0), 'weekly', rawPoint.period, rawPoint.regionKey, 'imports'));
+      else importsKbd = round2(applyBalanceAdjustment(Number(monthlyPoint.importsKbd ?? rawPoint.importsKbd ?? 0), 'weekly', rawPoint.period, rawPoint.regionKey, 'imports'));
       const importValues = adjustedImportValues(monthlyPoint || rawPoint, importsKbd, 'weekly', rawPoint.period, rawPoint.regionKey, isActual);
       importsKbd = importValues.importsKbd;
       const exportsOverride = isActual ? null : balanceAdjustmentValue('weekly', rawPoint.period, rawPoint.regionKey, 'exports');
-      let exportsKbd = forceZeroExports(rawPoint.regionKey) && exportsOverride === null ? 0 : isActual ? Number(rawPoint.exportsKbd || 0) : round2(exportsOverride === null ? Number(rawPoint.exportsKbd ?? monthlyPoint.exportsKbd ?? 0) : exportsOverride);
-      let exportDestinationValues = adjustedExportDestinationValues(rawPoint || monthlyPoint, exportsKbd);
-      if (forceZeroExports(rawPoint.regionKey) && exportsOverride === null) exportDestinationValues = adjustedExportDestinationValues(rawPoint || monthlyPoint, 0);
+      const forecastExportPoint = monthlyPoint || rawPoint;
+      let exportsKbd = isActual
+        ? (forceZeroExports(rawPoint.regionKey) ? 0 : Number(rawPoint.exportsKbd || 0))
+        : round2(exportsOverride === null ? Number(forecastExportPoint.exportsKbd ?? rawPoint.exportsKbd ?? 0) : exportsOverride);
+      let exportDestinationValues = adjustedExportDestinationValues(isActual ? rawPoint : forecastExportPoint, exportsKbd);
       if (rawPoint.regionKey === 'padd3') {
-        exportDestinationValues = isActual ? adjustedExportDestinationValues(rawPoint || monthlyPoint, exportsKbd) : adjustedPadd3ExportDestinationValues(rawPoint || monthlyPoint, 'weekly', rawPoint.period, isActual);
+        exportDestinationValues = isActual ? adjustedExportDestinationValues(rawPoint, exportsKbd) : adjustedPadd3ExportDestinationValues(forecastExportPoint, 'weekly', rawPoint.period, false);
+        const hasWeeklyDestinationOverride = EXPORT_DESTINATION_FIELDS.some(key => balanceAdjustmentValue('weekly', rawPoint.period, 'padd3', EXPORT_DESTINATION_LINE_BY_FIELD[key]) !== null);
+        if (!isActual && exportsOverride !== null && !hasWeeklyDestinationOverride) exportDestinationValues = adjustedExportDestinationValues(forecastExportPoint, exportsOverride);
         if (!isActual) exportsKbd = exportDestinationTotal(exportDestinationValues);
       }
       const movement = movementSummaryForRegion('weekly', rawPoint.period, rawPoint.regionKey);
@@ -6725,7 +6251,7 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       const operable = basisOperable;
       const basisOperating = Number(basis.operatingCapacityKbd || Math.max(0, basisOperable - Number(basis.idleCapacityKbd || 0)) || 0);
       const basisIdle = actual && isActual ? Math.max(0, basisOperable - basisOperating) : 0;
-      const idleCellAdjustment = actual && isActual ? null : exactCrudeCellAdjustment(regionKey, 'idleCapacityKbd', period, frequency);
+      const idleCellAdjustment = actual && isActual ? null : forecastCrudeCellAdjustment(regionKey, 'idleCapacityKbd', period, frequency);
       const idle = actual && isActual ? basisIdle : (idleCellAdjustment ? Number(idleCellAdjustment.capacityKbd || 0) : regionalCapacityRowValue(regionKey, 'idleCapacityKbd', month, basisIdle));
       const operating = actual && isActual ? basisOperating : Math.max(0, operable - idle);
       const baseRuns = Number((actual && isActual ? actual.crudeRunsKbd : monthlyBasis.crudeRunsKbd) || 0);
@@ -6736,12 +6262,12 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
       const explicitUnplanned = unplannedOverride ? Number(unplannedOverride.capacityKbd || 0) : Number(outage.unplanned || 0);
       const exPlannedCapacity = Math.max(0, operable - plannedForCalc);
       const runCeiling = Math.max(0, operating - plannedForCalc);
-      const exPlannedCellAdjustment = actual && isActual ? null : exactCrudeCellAdjustment(regionKey, 'exPlannedUtilizationAdjustmentPct', period, frequency);
+      const exPlannedCellAdjustment = actual && isActual ? null : forecastCrudeCellAdjustment(regionKey, 'exPlannedUtilizationAdjustmentPct', period, frequency);
       const exPlannedUtilizationAdjustment = exPlannedCellAdjustment || (actual && isActual ? null : latestRegionalCapacityAdjustment(regionKey, 'exPlannedUtilizationAdjustmentPct', month));
       const modeledUnplanned = modeledUnplannedMaintenanceKbd(regionKey, period, operable, plannedForCalc, idle, frequency);
       const targetRuns = exPlannedUtilizationAdjustment ? exPlannedCapacity * Math.max(0, Math.min(100, Number(exPlannedUtilizationAdjustment.capacityKbd || 0))) / 100 : null;
       const utilizationSolvedUnplanned = targetRuns !== null ? Math.max(0, runCeiling - targetRuns) : null;
-      const crudeRunsAdjustment = actual && isActual ? null : exactCrudeCellAdjustment(regionKey, 'crudeRunsKbd', period, frequency);
+      const crudeRunsAdjustment = actual && isActual ? null : forecastCrudeCellAdjustment(regionKey, 'crudeRunsKbd', period, frequency);
       const manualCrudeRuns = crudeRunsAdjustment ? Math.max(0, Number(crudeRunsAdjustment.capacityKbd || 0)) : null;
       const explicitUnplannedAboveModel = explicitUnplanned > modeledUnplanned;
       const historicalUnplanned = blankHistoricalOutages ? null : historicalUnplannedMaintenanceKbd(operable, plannedForCalc, baseRuns);
@@ -7100,8 +6626,77 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     function addCapacityAdjustment(){ const refineryId = document.getElementById('capacityAdjRefinery').value; const unitKey = document.getElementById('capacityAdjUnit').value; const unit = refineryUnit(refineryId, unitKey); const periodMonth = periodMonthValue(document.getElementById('capacityAdjMonth').value); if (!isForecastMonth(periodMonth)) { document.getElementById('capacityAdjStatus').textContent = 'Capacity adjustments are forecast-only. Choose ' + firstForecastMonth() + ' or later.'; return; } const adjustment = normalizeCapacityAdjustment({regionKey:unit?.padd || document.getElementById('capacityAdjRegion').value,refineryId,refineryName:unit?.refineryName,unitKey,unitLabel:unit?.unitLabel,periodMonth,capacityKbd:document.getElementById('capacityAdjValue').value,note:document.getElementById('capacityAdjNote').value}); if (!adjustment) { document.getElementById('capacityAdjStatus').textContent = 'Choose a refinery, unit, forecast month, and capacity.'; return; } const beforeRows = stableSettingsRows(workbookSettings.refineryCapacityAdjustments); workbookSettings.refineryCapacityAdjustments = normalizeCapacityAdjustmentList([...(workbookSettings.refineryCapacityAdjustments || []).filter(row => !(row.refineryId === adjustment.refineryId && row.unitKey === adjustment.unitKey && row.periodMonth === adjustment.periodMonth)), adjustment]); saveCapacityAdjustmentsLocal(beforeRows); renderCapacityAdjustmentPanel(); tableScrollSignatures = {}; queueRender(); saveCapacityAdjustmentsToServer(); }
     function deleteCapacityAdjustment(id){ const beforeRows = stableSettingsRows(workbookSettings.refineryCapacityAdjustments); workbookSettings.refineryCapacityAdjustments = normalizeCapacityAdjustmentList((workbookSettings.refineryCapacityAdjustments || []).filter(adj => adj.id !== id)); saveCapacityAdjustmentsLocal(beforeRows); renderCapacityAdjustmentPanel(); tableScrollSignatures = {}; queueRender(); saveCapacityAdjustmentsToServer(); }
     function clearCapacityAdjustmentForm(){ ['capacityAdjValue','capacityAdjNote'].forEach(id => { const input = document.getElementById(id); if (input) input.value = ''; }); updateCapacityAdjustmentDefault(true); }
-    function currentCrudeRowsForExport(){ const periods = crudeAllPeriods(); const rows = []; D.crudeRuns.regions.forEach(region => { const lines = crudeLines(region.key).filter(line => line.kind !== 'section'); const entries = crudeScheduleEntriesForRegion(region.key, state.frequency, periods); lines.forEach(line => { const out = {frequency:state.frequency, region:crudeRegionDisplayLabel(region.key), line:crudeLineDisplayLabel(line)}; entries.forEach(entry => { const value = crudeLineValue(entry.point, line.id); const numeric = Number(value); out[entry.period] = value === null || value === undefined || !Number.isFinite(numeric) ? '' : round2(numeric); }); rows.push(out); }); }); return rows; }
-    function currentBalanceRowsForExport(){ const periods = periodEntriesForBalance(); const rows = []; D.regionalBalance.regions.forEach(region => { const lines = balanceLines(region.key).filter(line => line.kind !== 'section' && !line.kind.includes('divider')); lines.forEach(line => { const out = {frequency:state.frequency, region:balanceRegionDisplayLabel(region.key), line:balanceLineDisplayLabel(line)}; periods.forEach(([period,bucket]) => { const value = bucket[region.key] ? valueForLine(bucket[region.key], line.id) : null; const numeric = Number(value); out[period] = value === null || value === undefined || !Number.isFinite(numeric) ? '' : round2(numeric); }); rows.push(out); }); }); return rows; }
+    function materializedBalanceRows(frequency){ return rowsForFrequency(frequency).map(point => ({...point,dailyBuildDrawKbd:round2(Number(point.productionKbd || 0) + Number(point.importsKbd || 0) + pointReceiptTotal(point) - Number(point.demandKbd || 0) - Number(point.exportsKbd || 0) - pointShipmentTotal(point)),periodBuildDrawKb:round2(periodBuildDrawValue(point, frequency))})); }
+    async function portableDashboardState(reason='dashboard-save'){
+      await Promise.all([ensureWeeklyData(), ensureCrudeWeeklyData(), ensureReferenceData()]);
+      const savedAt = new Date().toISOString();
+      return {schema:'us-balances.dashboard-state',schemaVersion:1,id:D.product.key+'-'+Date.now(),product:D.product.key,name:(D.product.shortTitle || D.product.title || D.product.key)+' dashboard '+savedAt.slice(0,10),savedAt,reason,provenance:{dashboardGeneratedAt:D.generatedAt || '',settingsRevision:workbookSettings.revision || '',sourceChecksums:{...(D.checksums || {})},latestMonthly:D.freshness?.latestMonthly || '',latestWeekly:D.freshness?.latestWeekly || '',forecastMonthlyThrough:D.forecast?.monthlyThrough || '',forecastWeeklyThrough:D.forecast?.weeklyThrough || ''},view:{state:{...state},collapsedBalanceGroups:Array.from(collapsedGroups),expandedCrudeGroups:Array.from(expandedCrudeGroups)},settings:{forecastEnd:workbookSettings.forecastEnd,revision:workbookSettings.revision || '',adjustments:normalizeBalanceAdjustmentList(workbookSettings.adjustments),crudeOutages:normalizeOutageList(outageEntries),refineryCapacityAdjustments:normalizeCapacityAdjustmentList(workbookSettings.refineryCapacityAdjustments)},scenarios:{saved:normalizeChartScenarioList(chartScenarios),draft:normalizeChartScenario(chartScenarioDraft, {previewOnly:true})},materialized:{effectiveAdjustments:effectiveBalanceAdjustments(),effectiveRefineryCapacityAdjustments:effectiveRefineryCapacityAdjustments(),regionalBalance:{monthly:materializedBalanceRows('monthly'),weekly:materializedBalanceRows('weekly')},activeExport:{sheet:state.sheet,frequency:state.frequency,rows:state.sheet === 'crude' ? currentCrudeRowsForExport() : state.sheet === 'outages' ? currentOutageRowsForExport() : currentBalanceRowsForExport()}}};
+    }
+    function dashboardStateFilename(snapshot){ return D.product.key+'_dashboard_state_'+String(snapshot?.savedAt || new Date().toISOString()).replace(/[:.]/g,'-')+'.json'; }
+    async function flushDashboardEdits(){ const editor = document.activeElement?.classList?.contains('cellEditor') ? document.activeElement : null; if (editor) editor.blur(); await new Promise(resolve => setTimeout(resolve,0)); await settingsSaveChain.catch(() => {}); }
+    async function savePortableDashboardState(options={}){
+      const download = options.download !== false;
+      const requireServer = options.requireServer === true;
+      await flushDashboardEdits();
+      let settingsError = null;
+      try { const payload = await postSettingsPayload(); if (payload.settings) applyWorkbookSettingsSnapshot(payload.settings); saveWorkbookSettingsLocal(); }
+      catch (error) { settingsError = error; if (requireServer) throw error; }
+      const snapshot = await portableDashboardState(options.reason || 'dashboard-save');
+      let saved = snapshot;
+      let persisted = false;
+      try {
+        const response = await fetch(updateBaseUrl() + '/api/dashboard-state', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({product:D.product.key,state:snapshot})});
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || ('dashboard state save '+response.status));
+        saved = payload.state || snapshot;
+        persisted = true;
+      } catch (error) {
+        if (requireServer) throw error;
+        settingsError = settingsError || error;
+      }
+      if (download) downloadBlob(dashboardStateFilename(saved),'application/json',JSON.stringify(saved,null,2)+'\\n');
+      if (!options.quiet) showToast(persisted ? 'Dashboard saved locally and JSON downloaded' : 'Dashboard JSON downloaded; open with the launcher to also save beside the workbook');
+      return {state:saved,persisted,error:settingsError};
+    }
+    function dashboardStateCandidate(value){ if (value?.schema === 'us-balances.dashboard-state') return value; if (value?.dashboard_state?.schema === 'us-balances.dashboard-state') return value.dashboard_state; if (value?.state?.schema === 'us-balances.dashboard-state') return value.state; return null; }
+    function validatePortableDashboardState(value){ const snapshot = dashboardStateCandidate(value); if (!snapshot) throw new Error('This JSON is not a saved U.S. Balances dashboard state'); if (snapshot.product !== D.product.key) throw new Error('This '+snapshot.product+' state cannot be loaded into the '+D.product.key+' dashboard'); if (!snapshot.settings || !Array.isArray(snapshot.settings.adjustments)) throw new Error('Dashboard settings are missing from this JSON'); if (!Array.isArray(snapshot.materialized?.regionalBalance?.weekly)) throw new Error('Adjusted weekly rows are missing from this JSON'); return snapshot; }
+    async function applyPortableDashboardState(value){
+      const snapshot = validatePortableDashboardState(value);
+      const imported = snapshot.settings;
+      let serverSettings = null;
+      let serverAvailable = false;
+      try {
+        const currentResponse = await fetch(updateBaseUrl() + '/api/settings', {cache:'no-store'});
+        const currentPayload = await currentResponse.json();
+        if (!currentResponse.ok) throw new Error(currentPayload.error || 'settings unavailable');
+        const response = await fetch(updateBaseUrl() + '/api/settings', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({forecastEnd:imported.forecastEnd,baseRevision:currentPayload.settings?.revision || '',product:D.product.key,adjustments:imported.adjustments,crudeOutages:imported.crudeOutages,refineryCapacityAdjustments:imported.refineryCapacityAdjustments})});
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || ('settings import '+response.status));
+        serverSettings = payload.settings || null;
+        serverAvailable = true;
+      } catch {}
+      applyWorkbookSettingsSnapshot(serverSettings || imported);
+      chartScenarios = normalizeChartScenarioList(snapshot.scenarios?.saved || []);
+      chartScenarioDraft = normalizeChartScenario(snapshot.scenarios?.draft, {previewOnly:true}) || defaultChartScenarioDraft();
+      saveChartScenariosLocal();
+      saveChartScenarioDraftLocal();
+      collapsedGroups = new Set((snapshot.view?.collapsedBalanceGroups || []).filter(key => balanceGroupKeys().includes(key)));
+      expandedCrudeGroups = new Set((snapshot.view?.expandedCrudeGroups || []).filter(key => crudeGroupKeys().includes(key)));
+      saveCollapsedBalanceGroups();
+      saveExpandedCrudeGroups();
+      saveWorkbookSettingsLocal();
+      invalidateCalculationCaches();
+      if (snapshot.view?.state) await applyViewState(snapshot.view.state);
+      else queueRender();
+      if (serverAvailable) await savePortableDashboardState({download:false,requireServer:true,quiet:true,reason:'dashboard-import'});
+      const sourceChanged = snapshot.provenance?.dashboardGeneratedAt && snapshot.provenance.dashboardGeneratedAt !== D.generatedAt;
+      showToast(sourceChanged ? 'Dashboard adjustments loaded; source package differs from the saved file' : (serverAvailable ? 'Dashboard adjustments loaded and saved locally' : 'Dashboard adjustments loaded in this tab'));
+      return true;
+    }
+    async function loadSavedDashboardState(){ const response = await fetch(updateBaseUrl() + '/api/dashboard-state?product='+encodeURIComponent(D.product.key), {cache:'no-store'}); const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload.error || 'No locally saved dashboard state was found'); return applyPortableDashboardState(payload.state); }
+    async function importDashboardFile(file){ if (!file) return false; const value = JSON.parse(await file.text()); return applyPortableDashboardState(value); }
+    function currentCrudeRowsForExport(){ const periods = crudeAllPeriods(); const rows = []; D.crudeRuns.regions.forEach(region => { const lines = crudeLines(region.key).filter(line => line.kind !== 'section'); const entries = crudeScheduleEntriesForRegion(region.key, state.frequency, periods); lines.forEach(line => { const out = {frequency:state.frequency,regionKey:region.key,region:crudeRegionDisplayLabel(region.key),lineId:line.id,line:crudeLineDisplayLabel(line)}; entries.forEach(entry => { const value = crudeLineValue(entry.point, line.id); const numeric = Number(value); out[entry.period] = value === null || value === undefined || !Number.isFinite(numeric) ? '' : round2(numeric); }); rows.push(out); }); }); return rows; }
+    function currentBalanceRowsForExport(){ const periods = periodEntriesForBalance(); const rows = []; D.regionalBalance.regions.forEach(region => { const lines = balanceLines(region.key).filter(line => line.kind !== 'section' && !line.kind.includes('divider')); lines.forEach(line => { const out = {frequency:state.frequency,regionKey:region.key,region:balanceRegionDisplayLabel(region.key),lineId:line.id,line:balanceLineDisplayLabel(line)}; periods.forEach(([period,bucket]) => { const value = bucket[region.key] ? valueForLine(bucket[region.key], line.id) : null; const numeric = Number(value); out[period] = value === null || value === undefined || !Number.isFinite(numeric) ? '' : round2(numeric); }); rows.push(out); }); }); return rows; }
     function toCsv(rows){ const cols = Object.keys(rows[0] || {}); const clean = v => /[",\\n\\r]/.test(String(v ?? '')) ? '"' + String(v ?? '').replaceAll('"','""') + '"' : String(v ?? ''); return [cols.join(','),...rows.map(r=>cols.map(c=>clean(r[c])).join(','))].join('\\n') + '\\n'; }
     function toExcelTable(rows){ const cols = Object.keys(rows[0] || {}); const cell = value => '<td>'+esc(value ?? '')+'</td>'; return '<html><head><meta charset="utf-8"></head><body><table><thead><tr>'+cols.map(col => '<th>'+esc(col)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row => '<tr>'+cols.map(col => cell(row[col])).join('')+'</tr>').join('')+'</tbody></table></body></html>'; }
     function downloadBlob(filename, type, content){ const blob = content instanceof Blob ? content : new Blob([content],{type}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(url), 250); }
@@ -7227,6 +6822,15 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     async function startDashboardUpdate(group){
 	      if (settingsRebuildRunning) { showToast('Forecast settings are rebuilding. Wait until that verified rebuild finishes.'); return; }
 	      if (!refreshToolsReady) { showToast('Refresh tools are still being prepared. Try the button again when Ready.'); return; }
+      if (group === 'weekly-call-outputs') {
+        try {
+          showToast('Saving the exact adjusted dashboard state first');
+          await savePortableDashboardState({download:false,requireServer:true,quiet:true,reason:'weekly-call-output'});
+        } catch (error) {
+          showToast(error instanceof Error ? error.message : 'Dashboard state could not be saved');
+          return;
+        }
+      }
       const panel = document.getElementById('referenceUpdatePanel');
       clearTimeout(updatePollTimer);
       panel.dataset.group = group;
@@ -7445,13 +7049,16 @@ function regionalDashboardHtmlV2(bundle: DashboardBundle): string {
     document.getElementById('clearBalanceFocusBtn')?.addEventListener('click', clearBalanceFocus);
     document.getElementById('newTabBtn').addEventListener('click', () => { writeStateUrl(); window.open(location.href, '_blank', 'noopener'); });
     document.getElementById('downloadBtn').addEventListener('click', () => state.sheet === 'crude' ? downloadBlob(D.product.key + '_' + state.frequency + '_crude_forecast.csv','text/csv',toCsv(currentCrudeRowsForExport())) : state.sheet === 'outages' ? downloadBlob(D.product.key + '_crude_outages.csv','text/csv',toCsv(currentOutageRowsForExport())) : downloadBlob(D.product.key + '_' + state.frequency + '_balance_statement.csv','text/csv',toCsv(currentBalanceRowsForExport())));
-    document.getElementById('jsonBtn').addEventListener('click', () => downloadBlob(D.product.key + '_regional_balance_view.json','application/json',JSON.stringify({product:D.product,generatedAt:D.generatedAt,state,workbookSettings:{...workbookSettings,crudeOutages:outageEntries},chartScenarios,chartScenarioDraft,assumptionLedger:assumptionLedgerRows(),regionalBalance:D.regionalBalance,crudeRuns:D.crudeRuns,kplerGuides:D.kplerGuides,refineryCapacity:D.refineryCapacity,sourceHub:D.sourceHub,optimization:D.optimization}, null, 2)));
+    document.getElementById('jsonBtn').addEventListener('click', async () => { try { await savePortableDashboardState({download:true,reason:'json-export'}); } catch (error) { showToast(error instanceof Error ? error.message : 'Dashboard JSON export failed'); } });
     document.getElementById('htmlBtn').addEventListener('click', () => downloadBlob(D.product.key + '_regional_balance_app.html','text/html','<!doctype html>\\n' + document.documentElement.outerHTML));
     document.getElementById('refreshBtn').addEventListener('click', () => { startDashboardUpdate('all'); });
     document.getElementById('reconcileWeeklyToMonthlyBtn')?.addEventListener('click', toggleExperimentalWeeklyToMonthlyReconcile);
     document.getElementById('reconcileMonthlyToWeeklyBtn')?.addEventListener('click', toggleExperimentalMonthlyToWeeklyReconcile);
     document.getElementById('clearExperimentalBalanceSyncBtn')?.addEventListener('click', clearExperimentalBalanceSyncAdjustments);
-    document.getElementById('saveViewBtn').addEventListener('click', () => { normalizeRenderableState(); const rows = savedViews(); const stamp = new Date().toLocaleString(); const viewLabel = state.sheet === 'charts' ? chartRegionDisplayLabel(state.chartRegion) : balanceRegionDisplayLabel(state.region); rows.push({name:state.frequency+' '+viewLabel+' '+metricByKey(state.metric).label+' | '+stamp,savedAt:new Date().toISOString(),state:{...state}}); localStorage.setItem(STORAGE_KEY, JSON.stringify(rows.slice(-30))); renderSavedViews(); showToast('View saved'); });
+    document.getElementById('saveDashboardBtn').addEventListener('click', async () => { try { await savePortableDashboardState({download:true,reason:'dashboard-save'}); } catch (error) { showToast(error instanceof Error ? error.message : 'Dashboard save failed'); } });
+    document.getElementById('loadDashboardBtn').addEventListener('click', async () => { try { await loadSavedDashboardState(); } catch (error) { showToast(error instanceof Error ? error.message : 'Saved dashboard could not be loaded'); } });
+    document.getElementById('importDashboardBtn').addEventListener('click', () => document.getElementById('importDashboardInput').click());
+    document.getElementById('importDashboardInput').addEventListener('change', async e => { const file = e.target.files?.[0]; e.target.value = ''; if (!file) return; try { await importDashboardFile(file); } catch (error) { showToast(error instanceof Error ? error.message : 'Dashboard JSON import failed'); } });
     document.getElementById('loadViewBtn').addEventListener('click', async () => { const views = savedViews(); const view = views[Number(document.getElementById('savedViewSelect').value)]; if (!view) return; if (await applyViewState(view.state)) showToast('View loaded'); });
     document.getElementById('deleteViewBtn').addEventListener('click', () => { const select = document.getElementById('savedViewSelect'); const index = Number(select.value); const views = savedViews().filter((_, idx) => idx !== index); localStorage.setItem(STORAGE_KEY, JSON.stringify(views)); renderSavedViews(); showToast('View deleted'); });
 	    document.getElementById('resetViewBtn').addEventListener('click', () => { localStorage.removeItem(LAYOUT_STORAGE_KEY); closeChartZoomModal(); state = defaultState(); collapsedGroups = new Set(balanceGroupKeys()); expandedCrudeGroups = new Set(defaultExpandedCrudeGroupKeys()); zoomedCharts.clear(); tableScrollSignatures = {}; saveCollapsedBalanceGroups(); saveExpandedCrudeGroups(); queueRender(); showToast('View reset'); });
@@ -7593,7 +7200,7 @@ function buildProduct(
     },
     generatedAt: new Date().toISOString(),
 	    forecast: {
-	      method: `Monthly balance anchored to a 3-year seasonal average from 2023-2025; weekly EIA path reconciled to monthly values through the saved forecast end date.`,
+	      method: `Monthly balance anchored to a 3-year seasonal average from 2023-2025; forward weekly drivers are held flat at the month value through the saved forecast end date, with exact weekly overrides applied afterward.`,
 	      monthlyThrough: MONTHLY_FORECAST_THROUGH,
 	      weeklyThrough: weeklyForecastThroughDate,
 	      seasonYears: SEASON_YEARS,
@@ -7634,7 +7241,7 @@ function buildProduct(
 
   mkdirSync(config.folder, { recursive: true });
   writeSourceCopies(config, bundle);
-  writeFileSync(join(config.folder, "index.html"), regionalDashboardHtmlV2(bundle));
+  writeFileSync(join(config.folder, "index.html"), regionalDashboardHtml(bundle));
   writeFileSync(
     join(config.folder, "README.md"),
     `# ${config.title}
@@ -7697,17 +7304,18 @@ Local app workflow:
   prior-period change, largest regional draw, and lowest stock-cover region.
 - Heatmap mode shades balance-table cells by row-level magnitude so large
   moves are easier to scan without changing the displayed values.
-- Saved View presets let users save, load, delete, and reset product-specific
-  workbook states in browser storage.
+- Save Dashboard writes a portable product-local dashboard state when the local
+  launcher is running and downloads the same JSON for sharing or re-import.
 - View state is encoded into the URL, so duplicate or manually edited tabs can
   hold independent workbook views.
-- \`CSV\` exports the active balance statement or Crude runs table, \`JSON\`
-  exports the regional balance/crude-runs bundle and view state, and \`HTML\`
+- \`CSV\` exports the active adjusted balance statement or Crude runs table,
+  \`JSON\` exports the exact adjusted portable dashboard state, and \`HTML\`
   exports a standalone copy.
 
 Forecast method: monthly balance anchored to a 3-year seasonal average from
-2023, 2024, and 2025, with weekly EIA forecast values reconciled back to the
-monthly balance through ${DASHBOARD_SETTINGS.forecastEnd}.
+2023, 2024, and 2025. Forward weekly drivers are held flat at the month value
+through ${DASHBOARD_SETTINGS.forecastEnd}; explicit weekly edits then change only
+their selected week and are not recalibrated to a monthly build/draw target.
 `,
   );
   return bundle;

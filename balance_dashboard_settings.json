@@ -46,11 +46,48 @@
         "valueKbd": 33,
         "note": "Manual cell override",
         "updatedAt": "2026-06-01T04:11:55.476Z"
+      },
+      {
+        "frequency": "weekly",
+        "period": "2026-07-17",
+        "regionKey": "padd3",
+        "lineId": "demand",
+        "valueKbd": 900,
+        "note": "Manual cell override",
+        "updatedAt": "2026-07-21T02:52:59.149Z"
+      },
+      {
+        "frequency": "weekly",
+        "period": "2026-07-17",
+        "regionKey": "padd3",
+        "lineId": "exportsEurope",
+        "valueKbd": 330,
+        "note": "Manual cell override",
+        "updatedAt": "2026-07-21T02:53:07.555Z"
       }
     ],
-    "jet": []
+    "jet": [
+      {
+        "frequency": "weekly",
+        "period": "2026-07-17",
+        "regionKey": "padd3",
+        "lineId": "demand",
+        "valueKbd": 190,
+        "note": "Manual cell override",
+        "updatedAt": "2026-07-21T02:53:59.735Z"
+      },
+      {
+        "frequency": "weekly",
+        "period": "2026-07-17",
+        "regionKey": "padd3",
+        "lineId": "exportsEurope",
+        "valueKbd": 5,
+        "note": "Manual cell override",
+        "updatedAt": "2026-07-21T02:54:01.133Z"
+      }
+    ]
   },
   "crudeOutages": [],
   "refineryCapacityAdjustments": [],
-  "updatedAt": "2026-07-12T12:00:00.000Z"
+  "updatedAt": "2026-07-21T02:54:01.141Z"
 }
