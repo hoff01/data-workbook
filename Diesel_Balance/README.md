@@ -58,13 +58,21 @@ Local app workflow:
   prior-period change, largest regional draw, and lowest stock-cover region.
 - Heatmap mode shades balance-table cells by row-level magnitude so large
   moves are easier to scan without changing the displayed values.
-- Save Dashboard writes a portable product-local dashboard state when the local
-  launcher is running and downloads the same JSON for sharing or re-import.
+- Save Dashboard writes `diesel_balance.json` beside the product
+  workbook, regenerates the shared root `outages.json`, and downloads both
+  portable files for sharing or re-import.
+- Named views and the selected startup default persist in product-local
+  `saved_views.json` through the launcher. Each view can also be downloaded as
+  its own JSON and re-imported.
+- Dashboard state and sharing controls start collapsed to keep the balance
+  workspace compact; expand that panel only when saving or importing.
+- The shared `outages.json` can be imported from either product; importing it
+  once updates the common Diesel/Jet outage schedule.
 - View state is encoded into the URL, so duplicate or manually edited tabs can
   hold independent workbook views.
 - `CSV` exports the active adjusted balance statement or Crude runs table,
-  `JSON` exports the exact adjusted portable dashboard state, and `HTML`
-  exports a standalone copy.
+  `JSON` exports the exact adjusted portable balance state plus the shared
+  outage JSON, and `HTML` exports a standalone copy.
 
 Forecast method: monthly balance anchored to a 3-year seasonal average from
 2023, 2024, and 2025. Forward weekly drivers are held flat at the month value

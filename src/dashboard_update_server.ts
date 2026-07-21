@@ -119,6 +119,26 @@ type DashboardStateSnapshot = Record<string, unknown> & {
   fingerprint: string;
 };
 
+type SavedDashboardView = {
+  id: string;
+  name: string;
+  state: Record<string, unknown>;
+  collapsedBalanceGroups: string[];
+  expandedCrudeGroups: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+type SavedDashboardViews = {
+  schema: "us-balances.saved-views";
+  schemaVersion: 1;
+  product: ProductKey;
+  revision: string;
+  updatedAt: string;
+  defaultViewId: string | null;
+  views: SavedDashboardView[];
+};
+
 const SOURCE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ROOT = process.env.US_BALANCES_SHARED_ROOT ? resolve(process.env.US_BALANCES_SHARED_ROOT) : SOURCE_ROOT;
 const HOST = process.env.DASHBOARD_UPDATE_HOST || "127.0.0.1";
@@ -185,9 +205,6 @@ function mimeType(pathname: string): string {
 function writeJson(response: ServerResponse, statusCode: number, payload: unknown): void {
   response.writeHead(statusCode, {
     "content-type": "application/json; charset=utf-8",
-    "access-control-allow-origin": "*",
-    "access-control-allow-methods": "GET,POST,OPTIONS",
-    "access-control-allow-headers": "content-type",
   });
   response.end(JSON.stringify(payload));
 }
@@ -280,7 +297,19 @@ function writeSettings(settings: DashboardSettings): void {
 }
 
 function dashboardStatePath(product: ProductKey): string {
+  return join(
+    dashboardStateRoot,
+    product === "diesel" ? "Diesel_Balance" : "Jet_Balance",
+    `${product}_balance.json`,
+  );
+}
+
+function legacyDashboardStatePath(product: ProductKey): string {
   return join(dashboardStateRoot, product === "diesel" ? "Diesel_Balance" : "Jet_Balance", "dashboard_state.json");
+}
+
+function savedDashboardViewsPath(product: ProductKey): string {
+  return join(dashboardStateRoot, product === "diesel" ? "Diesel_Balance" : "Jet_Balance", "saved_views.json");
 }
 
 function dashboardStateFingerprint(value: Record<string, unknown>): string {
@@ -366,16 +395,118 @@ function normalizeDashboardState(value: unknown, expectedProduct?: ProductKey): 
 
 function readDashboardState(product: ProductKey): DashboardStateSnapshot | null {
   const path = dashboardStatePath(product);
-  if (!existsSync(path)) return null;
-  return normalizeDashboardState(JSON.parse(readFileSync(path, "utf8")), product);
+  const legacyPath = legacyDashboardStatePath(product);
+  const sourcePath = existsSync(path) ? path : existsSync(legacyPath) ? legacyPath : "";
+  if (!sourcePath) return null;
+  const snapshot = normalizeDashboardState(JSON.parse(readFileSync(sourcePath, "utf8")), product);
+  if (sourcePath === legacyPath) writeDashboardState(snapshot);
+  return snapshot;
 }
 
 function writeDashboardState(snapshot: DashboardStateSnapshot): void {
   const path = dashboardStatePath(snapshot.product);
   mkdirSync(dirname(path), { recursive: true });
-  const tempPath = join(dirname(path), `.dashboard_state.${process.pid}.${Date.now()}.tmp`);
+  const tempPath = join(dirname(path), `.${snapshot.product}_balance.${process.pid}.${Date.now()}.tmp`);
   writeFileSync(tempPath, JSON.stringify(snapshot, null, 2) + "\n");
   renameSync(tempPath, path);
+  const legacyPath = legacyDashboardStatePath(snapshot.product);
+  if (legacyPath !== path && existsSync(legacyPath)) unlinkSync(legacyPath);
+}
+
+function isoTimestamp(value: unknown, fallback = new Date().toISOString()): string {
+  const text = String(value || "").trim();
+  return text && Number.isFinite(Date.parse(text)) ? new Date(text).toISOString() : fallback;
+}
+
+function savedDashboardViewId(value: unknown, index: number): string {
+  const text = String(value || "").trim().slice(0, 120);
+  if (text) return text;
+  return `view-${index + 1}`;
+}
+
+function normalizeStringList(value: unknown): string[] {
+  return Array.from(
+    new Set(
+      (Array.isArray(value) ? value : [])
+        .map((entry) => String(entry || "").trim())
+        .filter(Boolean),
+    ),
+  ).slice(0, 100);
+}
+
+function normalizeSavedDashboardViews(value: unknown, expectedProduct: ProductKey): SavedDashboardViews {
+  const input = value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+  if (input.schema !== undefined && input.schema !== "us-balances.saved-views") {
+    throw new Error("unsupported saved views schema");
+  }
+  if (input.schemaVersion !== undefined && Number(input.schemaVersion) !== 1) {
+    throw new Error("unsupported saved views schema version");
+  }
+  if (input.product !== undefined && input.product !== expectedProduct) {
+    throw new Error(`saved views product ${String(input.product)} does not match ${expectedProduct}`);
+  }
+  const fallbackTimestamp = new Date().toISOString();
+  const seen = new Set<string>();
+  const views = (Array.isArray(input.views) ? input.views : [])
+    .map((raw, index): SavedDashboardView | null => {
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+      const row = raw as Record<string, unknown>;
+      const state = row.state;
+      if (!state || typeof state !== "object" || Array.isArray(state)) return null;
+      const id = savedDashboardViewId(row.id, index);
+      if (seen.has(id)) return null;
+      seen.add(id);
+      const createdAt = isoTimestamp(row.createdAt, fallbackTimestamp);
+      return {
+        id,
+        name: String(row.name || `View ${index + 1}`).trim().slice(0, 80) || `View ${index + 1}`,
+        state: state as Record<string, unknown>,
+        collapsedBalanceGroups: normalizeStringList(row.collapsedBalanceGroups),
+        expandedCrudeGroups: normalizeStringList(row.expandedCrudeGroups),
+        createdAt,
+        updatedAt: isoTimestamp(row.updatedAt, createdAt),
+      };
+    })
+    .filter((view): view is SavedDashboardView => view !== null)
+    .slice(-100);
+  const requestedDefault = String(input.defaultViewId || "").trim();
+  const normalized = {
+    schema: "us-balances.saved-views" as const,
+    schemaVersion: 1 as const,
+    product: expectedProduct,
+    defaultViewId: views.some((view) => view.id === requestedDefault) ? requestedDefault : null,
+    views,
+  };
+  return {
+    ...normalized,
+    revision: createHash("sha256").update(JSON.stringify(normalized)).digest("hex").slice(0, 16),
+    updatedAt: isoTimestamp(input.updatedAt, fallbackTimestamp),
+  };
+}
+
+function emptySavedDashboardViews(product: ProductKey): SavedDashboardViews {
+  return normalizeSavedDashboardViews({}, product);
+}
+
+function readSavedDashboardViews(product: ProductKey): SavedDashboardViews {
+  const path = savedDashboardViewsPath(product);
+  if (!existsSync(path)) return emptySavedDashboardViews(product);
+  return normalizeSavedDashboardViews(JSON.parse(readFileSync(path, "utf8")), product);
+}
+
+function writeSavedDashboardViews(value: SavedDashboardViews): SavedDashboardViews {
+  const normalized = normalizeSavedDashboardViews(
+    { ...value, updatedAt: new Date().toISOString() },
+    value.product,
+  );
+  const path = savedDashboardViewsPath(normalized.product);
+  mkdirSync(dirname(path), { recursive: true });
+  const tempPath = join(dirname(path), `.saved_views.${process.pid}.${Date.now()}.tmp`);
+  writeFileSync(tempPath, JSON.stringify(normalized, null, 2) + "\n");
+  renameSync(tempPath, path);
+  return normalized;
 }
 
 function landingPage(): string {
@@ -776,6 +907,44 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
     }
     return;
   }
+  if (pathname === "/api/saved-views" && request.method === "GET") {
+    const requestUrl = new URL(request.url || "/api/saved-views", `http://${HOST}:${PORT}`);
+    const product = parseProduct(requestUrl.searchParams.get("product"));
+    if (!product) {
+      writeJson(response, 400, { error: "saved views require product=diesel or product=jet" });
+      return;
+    }
+    try {
+      writeJson(response, 200, { savedViews: readSavedDashboardViews(product) });
+    } catch (error) {
+      writeJson(response, 500, { error: error instanceof Error ? error.message : "saved views file is invalid" });
+    }
+    return;
+  }
+  if (pathname === "/api/saved-views" && request.method === "POST") {
+    try {
+      const body = JSON.parse(await readBody(request) || "{}") as { product?: unknown; baseRevision?: unknown; savedViews?: unknown };
+      const product = parseProduct(body.product);
+      if (!product) {
+        writeJson(response, 400, { error: "saved views require product=diesel or product=jet" });
+        return;
+      }
+      const requested = normalizeSavedDashboardViews(body.savedViews, product);
+      const current = readSavedDashboardViews(product);
+      if (String(body.baseRevision || "") !== current.revision) {
+        writeJson(response, 409, {
+          error: "Saved views changed in another tab; latest views were loaded. Reapply the change and save again.",
+          savedViews: current,
+        });
+        return;
+      }
+      const savedViews = writeSavedDashboardViews(requested);
+      writeJson(response, 200, { savedViews });
+    } catch (error) {
+      writeJson(response, 400, { error: error instanceof Error ? error.message : "invalid saved views payload" });
+    }
+    return;
+  }
   if (pathname === "/api/dashboard-state" && request.method === "POST") {
     try {
       if (pendingSettingsRebuild) {
@@ -796,7 +965,19 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
         return;
       }
       writeDashboardState(state);
-      writeJson(response, 200, { state, fingerprint: state.fingerprint });
+      const outages = writeSharedOutageExport(
+        outagesExportPath,
+        currentSettings.crudeOutages,
+        currentSettings.updatedAt,
+        state.savedAt,
+      );
+      writeJson(response, 200, {
+        state,
+        fingerprint: state.fingerprint,
+        filename: `${product}_balance.json`,
+        outages,
+        outagesFilename: "outages.json",
+      });
     } catch (error) {
       writeJson(response, 400, { error: error instanceof Error ? error.message : "invalid dashboard state payload" });
     }

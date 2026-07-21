@@ -1347,6 +1347,15 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def locate_dashboard_state_path(source_bundle: Path, product: str) -> Path:
+    product_root = source_bundle.parent.parent
+    current_path = product_root / f"{product}_balance.json"
+    legacy_path = product_root / "dashboard_state.json"
+    if current_path.is_file() or not legacy_path.is_file():
+        return current_path
+    return legacy_path
+
+
 def main() -> int:
     args = parse_args()
     config = load_config(args.config.resolve())
@@ -1383,7 +1392,7 @@ def main() -> int:
             dashboard_state_path = (
                 args.dashboard_state.resolve()
                 if args.dashboard_state
-                else source_bundle.parent.parent / "dashboard_state.json"
+                else locate_dashboard_state_path(source_bundle, product)
             )
             dashboard_state = None
             if not dashboard_state_path.is_file():

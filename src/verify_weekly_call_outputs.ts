@@ -47,8 +47,8 @@ type PortableDashboardState = {
   schemaVersion?: number;
   product?: string;
   fingerprint?: string;
-  settings?: { revision?: string };
-  materialized?: { regionalBalance?: { weekly?: DashboardStateRow[] } };
+  settings?: Record<string, unknown> & { revision?: string };
+  materialized?: { regionalBalance?: { monthly?: DashboardStateRow[]; weekly?: DashboardStateRow[] } };
 };
 
 type WeeklyCallTableRow = { key?: string; values?: Record<string, number | null> };
@@ -75,13 +75,22 @@ type WeeklyCallPayload = {
   };
 };
 
-const PRODUCTS: Array<{ key: ProductKey; weeklyCsv: string }> = [
-  { key: "diesel", weeklyCsv: "eia_weekly/diesel.csv" },
-  { key: "jet", weeklyCsv: "eia_weekly/jet.csv" },
+const PRODUCTS: Array<{ key: ProductKey; weeklyCsv: string; savedState: string }> = [
+  { key: "diesel", weeklyCsv: "eia_weekly/diesel.csv", savedState: "Diesel_Balance/diesel_balance.json" },
+  { key: "jet", weeklyCsv: "eia_weekly/jet.csv", savedState: "Jet_Balance/jet_balance.json" },
 ];
 
 async function readJson<T>(path: string): Promise<T> {
   return JSON.parse(await readFile(path, "utf8")) as T;
+}
+
+async function readOptionalJson<T>(path: string): Promise<T | null> {
+  try {
+    return await readJson<T>(path);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  }
 }
 
 async function latestCsvDate(path: string): Promise<string> {
@@ -172,6 +181,13 @@ async function verifyWeeklyCallArchives(): Promise<string[]> {
     assertEqual(`${config.key} archived dashboard-state fingerprint`, dashboardState.fingerprint ?? "", manifest.dashboard_state_fingerprint);
     assertEqual(`${config.key} embedded dashboard-state fingerprint`, payload.dashboard_state?.fingerprint ?? "", manifest.dashboard_state_fingerprint);
     assertEqual(`${config.key} embedded dashboard-state settings revision`, payload.dashboard_state?.settings?.revision ?? "", dashboardState.settings?.revision ?? "");
+    const currentSavedState = await readOptionalJson<PortableDashboardState>(config.savedState);
+    if (currentSavedState) {
+      assertEqual(`${config.key} current saved-state product`, currentSavedState.product ?? "", config.key);
+      assertEqual(`${config.key} archive settings match current saved state`, JSON.stringify(dashboardState.settings ?? {}), JSON.stringify(currentSavedState.settings ?? {}));
+      assertEqual(`${config.key} archive monthly rows match current saved state`, JSON.stringify(dashboardState.materialized?.regionalBalance?.monthly ?? []), JSON.stringify(currentSavedState.materialized?.regionalBalance?.monthly ?? []));
+      assertEqual(`${config.key} archive weekly rows match current saved state`, JSON.stringify(dashboardState.materialized?.regionalBalance?.weekly ?? []), JSON.stringify(currentSavedState.materialized?.regionalBalance?.weekly ?? []));
+    }
     const stateRows = dashboardState.materialized?.regionalBalance?.weekly ?? [];
     if (!stateRows.length) throw new Error(`${config.key} archived dashboard state contains no materialized weekly rows`);
     const outputPeriods = payload.periods ?? [];

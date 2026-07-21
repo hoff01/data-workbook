@@ -288,6 +288,74 @@ try {
 
   const missingDashboardState = await fetchJson(`${baseUrl}/api/dashboard-state?product=jet`);
   assert.equal(missingDashboardState.response.status, 404);
+  const emptySavedViews = await fetchJson(`${baseUrl}/api/saved-views?product=jet`);
+  assert.equal(emptySavedViews.response.status, 200);
+  assert.equal(emptySavedViews.response.headers.get("access-control-allow-origin"), null);
+  assert.equal(emptySavedViews.body.savedViews.schema, "us-balances.saved-views");
+  assert.equal(emptySavedViews.body.savedViews.product, "jet");
+  assert.match(emptySavedViews.body.savedViews.revision, /^[a-f0-9]{16}$/);
+  assert.equal(emptySavedViews.body.savedViews.defaultViewId, null);
+  assert.deepEqual(emptySavedViews.body.savedViews.views, []);
+  const unsupportedSavedViews = await fetchJson(`${baseUrl}/api/saved-views`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      product: "jet",
+      baseRevision: emptySavedViews.body.savedViews.revision,
+      savedViews: { schema: "us-balances.saved-views", schemaVersion: 2, product: "jet", views: [] },
+    }),
+  });
+  assert.equal(unsupportedSavedViews.response.status, 400);
+  assert.match(unsupportedSavedViews.body.error, /schema version/);
+  const savedView = {
+    id: "jet-weekly-default",
+    name: "Jet weekly default",
+    state: { frequency: "weekly", sheet: "balance", region: "us" },
+    collapsedBalanceGroups: ["padd1", "padd2"],
+    expandedCrudeGroups: ["padd1"],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  const savedViewsWrite = await fetchJson(`${baseUrl}/api/saved-views`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      product: "jet",
+      baseRevision: emptySavedViews.body.savedViews.revision,
+      savedViews: {
+        schema: "us-balances.saved-views",
+        schemaVersion: 1,
+        product: "jet",
+        defaultViewId: savedView.id,
+        views: [savedView],
+      },
+    }),
+  });
+  assert.equal(savedViewsWrite.response.status, 200);
+  assert.equal(savedViewsWrite.body.savedViews.defaultViewId, savedView.id);
+  assert.equal(savedViewsWrite.body.savedViews.views[0].name, savedView.name);
+  assert.notEqual(savedViewsWrite.body.savedViews.revision, emptySavedViews.body.savedViews.revision);
+  const savedViewsPath = join(settingsDir, "Jet_Balance", "saved_views.json");
+  assert.equal(existsSync(savedViewsPath), true);
+  assert.equal(JSON.parse(readFileSync(savedViewsPath, "utf8")).defaultViewId, savedView.id);
+  const staleSavedViewsWrite = await fetchJson(`${baseUrl}/api/saved-views`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      product: "jet",
+      baseRevision: emptySavedViews.body.savedViews.revision,
+      savedViews: { ...savedViewsWrite.body.savedViews, defaultViewId: null },
+    }),
+  });
+  assert.equal(staleSavedViewsWrite.response.status, 409);
+  assert.equal(staleSavedViewsWrite.body.savedViews.revision, savedViewsWrite.body.savedViews.revision);
+  const wrongProductViews = await fetchJson(`${baseUrl}/api/saved-views`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ product: "diesel", baseRevision: "", savedViews: { product: "jet", views: [savedView] } }),
+  });
+  assert.equal(wrongProductViews.response.status, 400);
+  assert.match(wrongProductViews.body.error, /does not match diesel/);
   const currentSettings = await fetchJson(`${baseUrl}/api/settings`);
   const portableState = {
     schema: "us-balances.dashboard-state",
@@ -325,9 +393,16 @@ try {
   assert.equal(savedDashboardState.response.status, 200);
   assert.equal(savedDashboardState.body.state.product, "jet");
   assert.match(savedDashboardState.body.fingerprint, /^[a-f0-9]{64}$/);
-  const savedDashboardStatePath = join(settingsDir, "Jet_Balance", "dashboard_state.json");
+  assert.equal(savedDashboardState.body.filename, "jet_balance.json");
+  assert.equal(savedDashboardState.body.outagesFilename, "outages.json");
+  assert.equal(savedDashboardState.body.outages.generatedAt, savedDashboardState.body.state.savedAt);
+  assert.deepEqual(savedDashboardState.body.outages.sharedProducts, ["diesel", "jet"]);
+  assert.equal(savedDashboardState.body.outages.outageCount, 1);
+  assert.deepEqual(savedDashboardState.body.outages.outages, savedDashboardState.body.state.settings.crudeOutages);
+  const savedDashboardStatePath = join(settingsDir, "Jet_Balance", "jet_balance.json");
   assert.equal(existsSync(savedDashboardStatePath), true);
   assert.equal(JSON.parse(readFileSync(savedDashboardStatePath, "utf8")).fingerprint, savedDashboardState.body.fingerprint);
+  assert.equal(JSON.parse(readFileSync(outagesExportPath, "utf8")).generatedAt, savedDashboardState.body.state.savedAt);
   const loadedDashboardState = await fetchJson(`${baseUrl}/api/dashboard-state?product=jet`);
   assert.equal(loadedDashboardState.response.status, 200);
   assert.equal(loadedDashboardState.body.state.id, portableState.id);
@@ -347,7 +422,8 @@ try {
     body: JSON.stringify({ product: "diesel", state: dieselPortableState }),
   });
   assert.equal(savedDieselState.response.status, 200);
-  const savedDieselStatePath = join(settingsDir, "Diesel_Balance", "dashboard_state.json");
+  assert.equal(savedDieselState.body.filename, "diesel_balance.json");
+  const savedDieselStatePath = join(settingsDir, "Diesel_Balance", "diesel_balance.json");
   assert.equal(existsSync(savedDieselStatePath), true);
 
   const noOpJetSettingsSave = await fetchJson(`${baseUrl}/api/settings`, {

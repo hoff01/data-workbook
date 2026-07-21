@@ -601,6 +601,37 @@ function verifyCrudeRunsRowFormatting(indexHtml: string, config: ProductConfig):
   assertIncludes(`${config.key} crude CSV export preserves blanks`, indexHtml, "out[entry.period] = value === null || value === undefined || !Number.isFinite(numeric) ? '' : round2(numeric);");
 }
 
+function verifyPortableStateAndViews(indexHtml: string, config: ProductConfig): void {
+  assertIncludes(`${config.key} dashboard action labels wrap inside their buttons`, indexHtml, ".quickActionGrid .btn{width:100%;min-height:44px;padding:7px 8px;white-space:normal");
+  assertIncludes(`${config.key} saved view labels wrap inside their buttons`, indexHtml, ".viewPresetActions .btn{padding:6px 7px;min-height:38px;white-space:normal");
+  assertIncludes(`${config.key} dashboard state panel is collapsible`, indexHtml, '<details class="panel disclosurePanel dashboardStatePanel" id="dashboardStatePanel"><summary');
+  assertNotIncludes(`${config.key} dashboard state panel starts collapsed`, indexHtml, 'id="dashboardStatePanel" open');
+  assertIncludes(`${config.key} Save as default control`, indexHtml, 'id="saveDefaultViewBtn"');
+  assertIncludes(`${config.key} Save as default is one-click`, indexHtml, "const entered = asDefault ? (selected?.name || 'Default view') : window.prompt('Name this view', suggested);");
+  assertNotIncludes(`${config.key} Save as default does not open a browser prompt`, indexHtml, "window.prompt(asDefault");
+  assertIncludes(`${config.key} Save view control`, indexHtml, 'id="saveViewBtn"');
+  assertIncludes(`${config.key} per-view JSON control`, indexHtml, 'id="exportViewBtn"');
+  assertIncludes(`${config.key} Clear default control`, indexHtml, 'id="clearDefaultViewBtn"');
+  assertIncludes(`${config.key} product balance filename`, indexHtml, "return D.product.key+'_balance.json';");
+  assertIncludes(`${config.key} dashboard save includes shared outage companion`, indexHtml, "companionFiles:{outages:'outages.json',savedViews:'saved_views.json'}");
+  assertIncludes(`${config.key} dashboard save downloads shared outages`, indexHtml, "downloadBlob('outages.json','application/json'");
+  assertIncludes(`${config.key} portable state embeds shared outage rows`, indexHtml, "crudeOutages:normalizeOutageList(outageEntries)");
+  assertIncludes(`${config.key} portable state embeds reconciliation controls`, indexHtml, "experimentalBalanceSync:normalizeExperimentalBalanceSyncState(experimentalBalanceSyncState)");
+  assertIncludes(`${config.key} offline outage metadata uses settings timestamp`, indexHtml, "snapshot?.settings?.updatedAt");
+  assertIncludes(`${config.key} saved views use the local server`, indexHtml, "fetch(updateBaseUrl() + '/api/saved-views'");
+  assertIncludes(`${config.key} saved views use optimistic revisions`, indexHtml, "body:JSON.stringify({product:D.product.key,baseRevision,savedViews:savedViewsStore})");
+  assertIncludes(`${config.key} legacy saved views migrate once`, indexHtml, "SAVED_VIEWS_MIGRATION_KEY");
+  assertIncludes(`${config.key} saved-view browser cache is best effort`, indexHtml, "function cacheSavedViewsStore(){ try {");
+  assertIncludes(`${config.key} default view loads only without explicit URL state`, indexHtml, "if (defaultView && !hasExplicitViewState()) await applySavedView(defaultView, {toast:false});");
+  assertIncludes(`${config.key} imported JSON accepts portable views`, indexHtml, "if (dashboardViewCandidate(value)) return importPortableView(value);");
+  assertIncludes(`${config.key} imported JSON accepts shared outages`, indexHtml, "if (sharedOutageCandidate(value)) return importSharedOutageTransfer(value);");
+  assertIncludes(`${config.key} shared outage import preserves product adjustments`, indexHtml, "adjustments:currentServerSettings.adjustments?.[D.product.key] || workbookSettings.adjustments");
+  assertIncludes(`${config.key} import surfaces reachable-server failures`, indexHtml, "if (serverContacted) throw error;");
+  assertIncludes(`${config.key} dashboard import confirms shared-state replacement`, indexHtml, "Importing it will replace the shared schedule for both Diesel and Jet. Continue?");
+  assertIncludes(`${config.key} dashboard save surfaces HTTP failures`, indexHtml, "if (requireServer || stateServerContacted) throw error;");
+  assertIncludes(`${config.key} dashboard import rejects future schemas`, indexHtml, "This dashboard state uses an unsupported schema version");
+}
+
 function assignedJson<T>(text: string, marker: string): T {
   const markerIndex = text.indexOf(marker);
   if (markerIndex < 0) throw new Error(`runtime chunk missing marker ${marker}`);
@@ -683,6 +714,7 @@ async function verifyProduct(config: ProductConfig, sharedOutages: SharedOutage[
   verifyCrudeRunsDefaultActivation(indexHtml, config);
   verifyCrudeRunsSectionCleanup(indexHtml, config);
   verifyCrudeRunsRowFormatting(indexHtml, config);
+  verifyPortableStateAndViews(indexHtml, config);
   verifyUsMovementCoverage(config, runtimeBase);
 
   for (const file of runtimeReference.sourceFiles ?? []) {

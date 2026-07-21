@@ -27,7 +27,7 @@ The launcher:
 2. Installs the required plotting package.
 3. Runs the parent balance repository's existing `build:balances` command with
    `BALANCE_WRITE_FULL_BUNDLE=1` to activate its complete source bundle.
-4. Loads the product's saved `dashboard_state.json` and verifies that it belongs
+4. Loads the product's saved `diesel_balance.json` or `jet_balance.json` and verifies that it belongs
    to the product and current settings revision.
 5. Creates a weekly-only JSON containing the latest EIA actual, the next five
    forecast weeks, and the portable dashboard state used for the run.

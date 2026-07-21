@@ -179,13 +179,24 @@ That keeps the latest local Kpler files and still rebuilds the dashboards.
 
 Shared dashboard edits use `balance_dashboard_settings.json` through the local dashboard server.
 
-`Save dashboard` also writes a product-specific `dashboard_state.json` by an
-atomic local save and downloads the same portable JSON. That snapshot contains
-the effective settings and adjustments, scenarios, selected view, and exact
+`Save dashboard` writes `Diesel_Balance/diesel_balance.json` or
+`Jet_Balance/jet_balance.json` by an atomic local save and downloads the same
+portable JSON. The same action regenerates and downloads the shared root
+`outages.json`. The balance snapshot contains the effective settings and
+adjustments, the same shared outage rows, scenarios, selected view, and exact
 adjusted monthly and weekly rows. `Load saved dashboard` restores the local
-product-folder copy; `Import dashboard JSON` restores a copy received from
-another user. Browser storage is retained only as a legacy convenience and is
-not the durable source for these saves.
+product-folder copy; `Import dashboard, view, or outage JSON` restores a copy
+received from another user.
+
+Named views and the selected default are stored in each product folder's
+`saved_views.json` when the launcher is running. `Save view` and
+`Save as default` also download an individual portable view JSON; the import
+button accepts that file. Browser storage is only an offline fallback and is
+not the durable source for launcher-based saves.
+
+The `Dashboard state & sharing` panel starts collapsed so it does not create a
+large empty area beside the balance controls. Expand it when saving, importing,
+or managing views.
 
 Monthly forecast edits are inherited by all forward weekly rows in that month.
 Exports are flat within each forecast month for every PADD. Weekly actual
@@ -194,13 +205,15 @@ exports are calculated by adding the destination rows. Exact weekly edits take
 precedence for that week and are exported without monthly-total recalibration.
 
 The same shared outage schedule is also published as root `outages.json`. Every
-outage save updates it immediately, and every dashboard build or data refresh
-regenerates it. Diesel and Jet therefore expose one canonical outage dataset
+outage save updates it immediately, every dashboard build or data refresh
+regenerates it, and every `Save dashboard` creates it alongside the portable
+balance state. Diesel and Jet therefore expose one canonical outage dataset
 instead of separate product copies. It is available from a running local
 dashboard server at `http://127.0.0.1:8787/outages.json`; downstream users can
 also read the file directly from the checkout. The payload includes its schema
 version, generation and source timestamps, units, outage count, and all outage
-rows.
+rows. Importing this file from either dashboard updates the shared schedule once
+for both products.
 
 - Edits are durable only when the dashboard is opened from `http://127.0.0.1:8787/`.
 - A raw `file://` tab can display the dashboard, but browser-only saves are local to that machine and are not a shared edit channel.

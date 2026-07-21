@@ -17,17 +17,27 @@ weekly overrides.
 
 ## Transfer one exact dashboard state
 
-`Save dashboard` creates and downloads a portable JSON snapshot. It also saves
-the same snapshot beside the matching product workbook when the dashboard is
+`Save dashboard` creates and downloads a portable balance snapshot plus the
+shared outage snapshot. It also saves both files locally when the dashboard is
 opened through its launcher.
 
-- Diesel: `Diesel_Balance/dashboard_state.json`
-- Jet: `Jet_Balance/dashboard_state.json`
+- Diesel: `Diesel_Balance/diesel_balance.json`
+- Jet: `Jet_Balance/jet_balance.json`
+- Shared Diesel/Jet outages: `outages.json`
 
-Send the JSON file with the repository or matching product folder. The
-recipient opens the matching dashboard through its launcher, clicks
-`Import dashboard JSON`, and selects the file. A Diesel state intentionally
-cannot be loaded into Jet, or vice versa.
+Send the product balance JSON and `outages.json` together. The recipient opens
+the matching dashboard through its launcher, clicks
+`Import dashboard, view, or outage JSON`, and imports the product balance file.
+The balance file already embeds that outage schedule for an exact one-file
+dashboard transfer. The recipient can also import `outages.json` by itself from
+either dashboard to update the shared Diesel/Jet outage schedule once. A Diesel
+state intentionally cannot be loaded into Jet, or vice versa.
+
+`Save view` downloads one selected view as JSON and persists all named views in
+the product folder's `saved_views.json`. `Save as default` does the same and
+marks that view as the startup default. Send the individual view JSON for a
+single view, or copy `saved_views.json` with the product folder to transfer the
+complete named-view collection and its default.
 
 The latest weekly-call archive also contains the exact state used to render its
 JSON and images:

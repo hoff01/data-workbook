@@ -19,6 +19,10 @@ _not_pushed_junk/
 vendor/headroom/
 Diesel_Balance/dashboard_state.json
 Jet_Balance/dashboard_state.json
+Diesel_Balance/diesel_balance.json
+Jet_Balance/jet_balance.json
+Diesel_Balance/saved_views.json
+Jet_Balance/saved_views.json
 **/.matplotlib-cache/
 plan.me
 email_recipients.txt

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 
@@ -17,6 +18,18 @@ if SPEC is None or SPEC.loader is None:
     raise RuntimeError(f"Unable to load {MODULE_PATH}")
 weekly_images = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(weekly_images)
+
+with TemporaryDirectory() as temporary_directory:
+    product_root = Path(temporary_directory) / "Diesel_Balance"
+    source_bundle = product_root / "data" / "diesel_balance_bundle.json"
+    source_bundle.parent.mkdir(parents=True)
+    current_state = product_root / "diesel_balance.json"
+    legacy_state = product_root / "dashboard_state.json"
+    assert weekly_images.locate_dashboard_state_path(source_bundle, "diesel") == current_state
+    legacy_state.write_text("{}\n", encoding="utf-8")
+    assert weekly_images.locate_dashboard_state_path(source_bundle, "diesel") == legacy_state
+    current_state.write_text("{}\n", encoding="utf-8")
+    assert weekly_images.locate_dashboard_state_path(source_bundle, "diesel") == current_state
 
 
 def point(period: str, status: str, region: str, *, exports: float, balance: float) -> dict[str, Any]:

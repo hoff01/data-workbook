@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "updated_at": "2026-07-20T22:59:53-04:00",
+  "updated_at": "2026-07-20T23:56:03-04:00",
   "weeks": [
     {
       "actual_week_ending": "2026-07-10",
@@ -14,7 +14,7 @@
         "diesel_forecast_week_1.png",
         "diesel_forecast_week_2.png"
       ],
-      "generated_at": "2026-07-20T22:59:52-04:00"
+      "generated_at": "2026-07-20T23:55:58-04:00"
     },
     {
       "actual_week_ending": "2026-07-10",
@@ -28,7 +28,7 @@
         "jet_forecast_week_1.png",
         "jet_forecast_week_2.png"
       ],
-      "generated_at": "2026-07-20T22:59:24-04:00"
+      "generated_at": "2026-07-20T23:56:02-04:00"
     },
     {
       "actual_week_ending": "2026-07-03",
