@@ -22,7 +22,7 @@ import { writeSharedOutageExport } from "./shared_outages.js";
 import { updateDataFingerprint, type UpdateGroup } from "./update_data_fingerprint.js";
 
 type JobStatus = "running" | "succeeded" | "partial" | "failed";
-type DashboardJobGroup = UpdateGroup | "weekly-call-outputs";
+type DashboardJobGroup = UpdateGroup | "weekly-call-outputs" | "dashboard-html-output";
 type RunnerLockGroup = DashboardJobGroup | "settings-rebuild";
 type UpdateResult = "updated" | "current" | "saved";
 type ProductKey = "diesel" | "jet";
@@ -156,6 +156,9 @@ const settingsRebuildScript = process.env.US_BALANCES_SETTINGS_REBUILD_SCRIPT
 const weeklyCallOutputScript = process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT
   ? resolve(process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT)
   : join(ROOT, "weekly_call_outputs", "generate_weekly_images.py");
+const dashboardHtmlOutputScript = process.env.US_BALANCES_DASHBOARD_HTML_OUTPUT_SCRIPT
+  ? resolve(process.env.US_BALANCES_DASHBOARD_HTML_OUTPUT_SCRIPT)
+  : join(ROOT, "weekly_call_outputs", "export_dashboard_html.py");
 const validGroups = new Set<DashboardJobGroup>([
   "weekly",
   "monthly",
@@ -163,6 +166,7 @@ const validGroups = new Set<DashboardJobGroup>([
   "all",
   "power-dfo",
   "weekly-call-outputs",
+  "dashboard-html-output",
 ]);
 const maxLines = 600;
 const settingsPath = process.env.US_BALANCES_SETTINGS_PATH
@@ -735,25 +739,29 @@ function releaseRunnerLock(lock: RunnerLock | null): void {
 function startJob(group: DashboardJobGroup, product: ProductKey | null = null): Job {
   if (currentProcess && currentJob?.status === "running") return currentJob;
   const savesWeeklyCallOutputs = group === "weekly-call-outputs";
-  const outputProduct = savesWeeklyCallOutputs ? product : null;
-  if (savesWeeklyCallOutputs && !outputProduct) {
-    throw new Error("Weekly call outputs require product=diesel or product=jet.");
+  const savesDashboardHtmlOutput = group === "dashboard-html-output";
+  const savesProductOutput = savesWeeklyCallOutputs || savesDashboardHtmlOutput;
+  const outputProduct = savesProductOutput ? product : null;
+  if (savesProductOutput && !outputProduct) {
+    throw new Error("Dashboard outputs require product=diesel or product=jet.");
   }
-  const dashboardState = savesWeeklyCallOutputs && outputProduct ? readDashboardState(outputProduct) : null;
-  if (savesWeeklyCallOutputs && !dashboardState) {
-    throw new Error("Save the dashboard state before creating weekly call outputs.");
+  const dashboardState = savesProductOutput && outputProduct ? readDashboardState(outputProduct) : null;
+  if (savesProductOutput && !dashboardState) {
+    throw new Error("Save the dashboard state before creating dashboard outputs.");
   }
   if (dashboardState) {
     if (!dashboardStateMatchesSettings(dashboardState, readSettings())) {
       throw new Error("The saved dashboard state is older than the current workbook settings. Save the dashboard again.");
     }
   }
-  const updateGroup: UpdateGroup | null = group === "weekly-call-outputs" ? null : group;
+  const updateGroup: UpdateGroup | null = savesProductOutput ? null : group;
   const dataFingerprintBefore = updateGroup ? updateDataFingerprint(ROOT, updateGroup) : null;
   const lock = acquireRunnerLock(group);
   const updateScript = join(ROOT, "src", "update_pipeline.ts");
   const invocation = savesWeeklyCallOutputs
     ? { command: pythonCommand, args: [weeklyCallOutputScript, "--product", outputProduct as ProductKey, "--dashboard-state", dashboardStatePath(outputProduct as ProductKey)] }
+    : savesDashboardHtmlOutput
+      ? { command: pythonCommand, args: [dashboardHtmlOutputScript, "--product", outputProduct as ProductKey, "--dashboard-state", dashboardStatePath(outputProduct as ProductKey)] }
     : tsxCli
       ? { command: nodeCommand, args: [tsxCli, updateScript, group] }
       : tsxCommand && !(process.platform === "win32" && /\.(?:cmd|bat)$/i.test(tsxCommand))
@@ -799,14 +807,14 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
   currentProcess = child;
   job.pid = child.pid ?? null;
   let finalized = false;
-  let pipelineStarted = savesWeeklyCallOutputs;
+  let pipelineStarted = savesProductOutput;
   let hasWarnings = false;
   let outputProbeTail = "";
   const recordOutput = (stream: "stdout" | "stderr", chunk: Buffer): void => {
     const text = chunk.toString("utf8");
     const probe = outputProbeTail + text;
     if (!pipelineStarted && probe.includes(`[update] group=${group} `)) pipelineStarted = true;
-    if (!savesWeeklyCallOutputs && /\[update\] step \d+\/\d+ (?:skipped|warning):/.test(probe)) hasWarnings = true;
+    if (!savesProductOutput && /\[update\] step \d+\/\d+ (?:skipped|warning):/.test(probe)) hasWarnings = true;
     outputProbeTail = probe.slice(-256);
     appendJobLine(job, stream, text);
   };
@@ -839,7 +847,7 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
     if (silentNoop) {
       job.dataChanged = null;
       job.result = null;
-    } else if (code === 0 && savesWeeklyCallOutputs) {
+    } else if (code === 0 && savesProductOutput) {
       job.dataChanged = true;
       job.result = "saved";
     } else if (code === 0 && updateGroup && dataFingerprintBefore !== null) {
@@ -855,7 +863,9 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
       ? "Update process exited without reporting pipeline startup; no update steps were confirmed. Reopen the dashboard with the current launcher and retry."
       : code === 0
       ? job.result === "saved"
-        ? `${outputProduct === "jet" ? "Jet" : "Diesel"} weekly table and bar charts were saved to weekly_call_outputs/outputs in the latest actual-week archive.`
+        ? savesDashboardHtmlOutput
+          ? `${outputProduct === "jet" ? "Jet" : "Diesel"} portable dashboard HTML was saved to weekly_call_outputs/outputs in the latest actual-week archive.`
+          : `${outputProduct === "jet" ? "Jet" : "Diesel"} weekly table and bar charts were saved to weekly_call_outputs/outputs in the latest actual-week archive.`
         : job.result === null
           ? "Refresh completed and the workbooks were rebuilt, but the source change comparison was unavailable."
           : hasWarnings
@@ -1116,12 +1126,12 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
     }
     if (!group) {
       writeJson(response, 400, {
-        error: "group must be weekly, monthly, other, all, power-dfo, or weekly-call-outputs",
+        error: "group must be weekly, monthly, other, all, power-dfo, weekly-call-outputs, or dashboard-html-output",
       });
       return;
     }
-    if (group === "weekly-call-outputs" && !product) {
-      writeJson(response, 400, { error: "weekly-call-outputs requires product=diesel or product=jet" });
+    if ((group === "weekly-call-outputs" || group === "dashboard-html-output") && !product) {
+      writeJson(response, 400, { error: `${group} requires product=diesel or product=jet` });
       return;
     }
     const alreadyRunning = currentJob?.status === "running";

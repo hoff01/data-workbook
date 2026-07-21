@@ -1261,6 +1261,16 @@ def find_archive_payload(
 
 
 def update_output_catalog(output_root: Path) -> Path:
+    catalog_path = output_root / "index.json"
+    try:
+        prior_catalog = load_json(catalog_path) if catalog_path.is_file() else {}
+    except ExportError:
+        prior_catalog = {}
+    prior_entries = {
+        (str(entry.get("product", "")), str(entry.get("folder", ""))): entry
+        for entry in prior_catalog.get("weeks", [])
+        if isinstance(entry, dict)
+    }
     entries: list[dict[str, Any]] = []
     for archive_dir in sorted(output_root.iterdir(), reverse=True):
         if not archive_dir.is_dir():
@@ -1289,8 +1299,7 @@ def update_output_catalog(output_root: Path) -> Path:
                 ]
                 if (archive_dir / name).is_file()
             ]
-            entries.append(
-                {
+            entry = {
                     "actual_week_ending": payload["periods"][0]["week_ending"],
                     "product": product,
                     "folder": archive_dir.name,
@@ -1300,13 +1309,18 @@ def update_output_catalog(output_root: Path) -> Path:
                     "bar_chart_images": bar_chart_images,
                     "generated_at": payload.get("generated_at"),
                 }
-            )
-    catalog_path = output_root / "index.json"
+            prior_entry = prior_entries.get((product, archive_dir.name), {})
+            for key in ("dashboard_html", "dashboard_html_manifest"):
+                if prior_entry.get(key) and (archive_dir / str(prior_entry[key])).is_file():
+                    entry[key] = prior_entry[key]
+            entries.append(entry)
     catalog = {
         "schema_version": 4,
         "updated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "weeks": entries,
     }
+    if isinstance(prior_catalog.get("portable_dashboards"), dict):
+        catalog["portable_dashboards"] = prior_catalog["portable_dashboards"]
     catalog_path.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
     return catalog_path
 

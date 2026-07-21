@@ -37,6 +37,28 @@ The launcher:
 New intermediate full-bundle files are removed after the weekly JSON is
 created. The dashboard does not load or depend on this package.
 
+## Portable dashboard HTML
+
+The dashboard toolbar's **Export HTML** button first captures the exact active
+view and saves its portable dashboard state through the local runner. The
+runner then calls `export_dashboard_html.py`, which embeds the normal HTML,
+base runtime, weekly data, crude data, Power DFO data, reference data,
+adjustments, outages, scenarios, and view controls into one transferable file.
+
+For Diesel, the export is written to both:
+
+```text
+outputs/<latest-actual-week>/diesel_export_dashboard.html
+outputs/diesel_export_dashboard.html
+```
+
+Jet uses `jet_export_dashboard.html`. The dated copy stays with the weekly
+archive and the root copy is the latest easy-to-find version. The recipient can
+open the HTML directly in a browser without the repository or runner. Refresh
+and server-backed persistence are disabled inside the portable snapshot, while
+the dashboard, charts, filters, local adjustments, JSON/CSV downloads, and
+chart image exports remain available.
+
 ## Weekly output repository
 
 Every EIA actual week has its own self-contained folder:
@@ -44,7 +66,10 @@ Every EIA actual week has its own self-contained folder:
 ```text
 outputs/
   index.json
+  diesel_export_dashboard.html
   2026-07-03/
+    diesel_export_dashboard.html
+    diesel_export_dashboard.manifest.json
     diesel_dashboard_state.json
     diesel_weekly_stats.json
     diesel_weekly_balance_table.png

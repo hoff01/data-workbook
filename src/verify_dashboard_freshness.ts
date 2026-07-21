@@ -334,7 +334,7 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} weekly image save status is product-specific`, indexHtml, "Saved — '+productLabel+' weekly table and bar charts ready");
   assertIncludes(`${config.key} weekly call output path is explicit`, indexHtml, "weekly_call_outputs/outputs");
   assertIncludes(`${config.key} weekly call output steps include all bar charts`, indexHtml, "Render latest EIA Actuals and first two Forecast bar charts");
-  assertIncludes(`${config.key} weekly image save does not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(workbookProductLabel(lastUpdateJob.product)+' weekly table and bar charts saved in weekly_call_outputs/outputs');");
+  assertIncludes(`${config.key} saved outputs do not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(lastUpdateJob.group === 'dashboard-html-output'");
   assertIncludes(`${config.key} changed-data update log is explicit`, indexHtml, "UPDATED — NEW DATA");
   assertIncludes(`${config.key} unchanged-data refresh log is explicit`, indexHtml, "REFRESHED — DATA UNCHANGED");
   assertIncludes(`${config.key} partial update status is explicit`, indexHtml, "Updated with warnings");
@@ -345,7 +345,7 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} reload loops are blocked per browser tab`, indexHtml, "const UPDATE_RELOAD_SESSION_KEY = 'us-balances:update-reloaded';");
   assertIncludes(`${config.key} button-started updates are observed across tabs`, indexHtml, "observedRunningUpdateJobId = lastUpdateJob.id");
   assertIncludes(`${config.key} landing-page updates reload open workbook tabs`, indexHtml, "Refresh completed; loading the latest dashboard data");
-  assertIncludes(`${config.key} every workbook tab polls for button refresh completion`, indexHtml, "      pollUpdateStatus();");
+  assertIncludes(`${config.key} live workbook tabs poll for button refresh completion`, indexHtml, "if (!IS_STANDALONE_DASHBOARD) pollUpdateStatus();");
   assertIncludes(`${config.key} idle refresh message is button-only`, indexHtml, "No refresh is running. Choose a refresh button above to begin; each data refresh rebuilds and verifies both dashboards.");
   assertIncludes(`${config.key} refresh readiness blocks early clicks`, indexHtml, "if (!refreshToolsReady) { showToast('Refresh tools are still being prepared. Try the button again when Ready.'); return; }");
   assertNotIncludes(`${config.key} old launcher auto-refresh message removed`, indexHtml, "A normal launcher click starts a forced Complete refresh");
@@ -636,6 +636,15 @@ function verifyPortableStateAndViews(indexHtml: string, config: ProductConfig): 
   assertIncludes(`${config.key} dashboard import confirms shared-state replacement`, indexHtml, "Importing it will replace the shared schedule for both Diesel and Jet. Continue?");
   assertIncludes(`${config.key} dashboard save surfaces HTTP failures`, indexHtml, "if (requireServer || stateServerContacted) throw error;");
   assertIncludes(`${config.key} dashboard import rejects future schemas`, indexHtml, "This dashboard state uses an unsupported schema version");
+  assertIncludes(`${config.key} standalone HTML export control`, indexHtml, "dashboardHtmlButton.textContent = 'Export HTML'");
+  assertIncludes(`${config.key} standalone HTML export starts the Python-backed job`, indexHtml, "startDashboardUpdate('dashboard-html-output')");
+  assertIncludes(`${config.key} standalone HTML captures exact state first`, indexHtml, "reason:group === 'dashboard-html-output' ? 'dashboard-html-output' : 'weekly-call-output'");
+  assertIncludes(`${config.key} standalone runtime marker`, indexHtml, "const IS_STANDALONE_DASHBOARD = Boolean(window.__BALANCE_STANDALONE__");
+  assertIncludes(`${config.key} standalone state application`, indexHtml, "applyStandaloneDashboardState(STANDALONE_DASHBOARD_STATE)");
+  assertIncludes(`${config.key} standalone view avoids browser persistence`, indexHtml, "applyViewState(snapshot.view?.state || {}, {persist:false})");
+  assertIncludes(`${config.key} standalone refresh is disabled`, indexHtml, "if (IS_STANDALONE_DASHBOARD) return false;");
+  assertIncludes(`${config.key} standalone JSON saves avoid the local server`, indexHtml, "if (!IS_STANDALONE_DASHBOARD) {");
+  assertIncludes(`${config.key} standalone JSON imports stay isolated`, indexHtml, "Dashboard JSON loaded in this portable snapshot");
 }
 
 function assignedJson<T>(text: string, marker: string): T {
@@ -769,8 +778,10 @@ assertIncludes("runner promotes skipped steps to warnings", updateServerSource, 
 assertIncludes("runner accepts the weekly call output job", updateServerSource, '"weekly-call-outputs"');
 assertIncludes("runner saves weekly call outputs with the configured Python runtime", updateServerSource, "args: [weeklyCallOutputScript");
 assertIncludes("runner reports weekly call outputs as saved", updateServerSource, 'job.result = "saved";');
-assertIncludes("runner requires a weekly call output product", updateServerSource, 'weekly-call-outputs requires product=diesel or product=jet');
+assertIncludes("runner requires an output product", updateServerSource, 'requires product=diesel or product=jet');
 assertIncludes("runner forwards the selected product to the generator", updateServerSource, '"--product", outputProduct');
+assertIncludes("runner accepts the dashboard HTML output job", updateServerSource, '"dashboard-html-output"');
+assertIncludes("runner invokes the Python dashboard HTML exporter", updateServerSource, "args: [dashboardHtmlOutputScript");
 assertNotIncludes("runner no longer emits misleading raw child status", updateServerSource, "finished status=");
 
 const sharedOutages = await verifySharedOutageExport();

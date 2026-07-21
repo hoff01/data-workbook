@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
@@ -176,5 +177,22 @@ assert payload["source"]["dashboard_state_fingerprint"] == "synthetic-fingerprin
 assert p2_production["values"][periods[1]] == 1237.9, "weekly output must use dashboard half-up rounding"
 assert p2_utilization["values"][periods[1]] == 92.1, "utilization must match dashboard half-up rounding"
 assert p2_yield["values"][periods[1]] == 32.1, "formatter must prefer the saved materialized yield"
+
+with TemporaryDirectory() as temporary_directory:
+    output_root = Path(temporary_directory) / "outputs"
+    output_root.mkdir()
+    portable = {
+        "diesel": {
+            "actual_week_ending": periods[0],
+            "latest_html": "diesel_export_dashboard.html",
+        }
+    }
+    (output_root / "index.json").write_text(
+        json.dumps({"schema_version": 4, "weeks": [], "portable_dashboards": portable}),
+        encoding="utf-8",
+    )
+    weekly_images.update_output_catalog(output_root)
+    refreshed_catalog = json.loads((output_root / "index.json").read_text(encoding="utf-8"))
+    assert refreshed_catalog["portable_dashboards"] == portable, "weekly refresh must preserve standalone HTML catalog entries"
 
 print("weekly dashboard-state contract ok")

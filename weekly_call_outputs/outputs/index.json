@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "updated_at": "2026-07-20T23:56:03-04:00",
+  "updated_at": "2026-07-21T01:20:37-04:00",
   "weeks": [
     {
       "actual_week_ending": "2026-07-10",
@@ -14,7 +14,9 @@
         "diesel_forecast_week_1.png",
         "diesel_forecast_week_2.png"
       ],
-      "generated_at": "2026-07-20T23:55:58-04:00"
+      "generated_at": "2026-07-20T23:55:58-04:00",
+      "dashboard_html": "diesel_export_dashboard.html",
+      "dashboard_html_manifest": "diesel_export_dashboard.manifest.json"
     },
     {
       "actual_week_ending": "2026-07-10",
@@ -28,7 +30,9 @@
         "jet_forecast_week_1.png",
         "jet_forecast_week_2.png"
       ],
-      "generated_at": "2026-07-20T23:56:02-04:00"
+      "generated_at": "2026-07-20T23:56:02-04:00",
+      "dashboard_html": "jet_export_dashboard.html",
+      "dashboard_html_manifest": "jet_export_dashboard.manifest.json"
     },
     {
       "actual_week_ending": "2026-07-03",
@@ -58,5 +62,23 @@
       ],
       "generated_at": "2026-07-20T22:26:14-04:00"
     }
-  ]
+  ],
+  "portable_dashboards": {
+    "diesel": {
+      "actual_week_ending": "2026-07-10",
+      "latest_html": "diesel_export_dashboard.html",
+      "archive_html": "2026-07-10/diesel_export_dashboard.html",
+      "manifest": "2026-07-10/diesel_export_dashboard.manifest.json",
+      "dashboard_state_fingerprint": "9c3537329a7adaf4b08dec88e04f26b9a277decde2398b1099150051876c4fcc",
+      "generated_at": "2026-07-21T01:14:38-04:00"
+    },
+    "jet": {
+      "actual_week_ending": "2026-07-10",
+      "latest_html": "jet_export_dashboard.html",
+      "archive_html": "2026-07-10/jet_export_dashboard.html",
+      "manifest": "2026-07-10/jet_export_dashboard.manifest.json",
+      "dashboard_state_fingerprint": "30b7a37ba5fc59da90af0d5c5f784f44b29cdca0ab6e8b57cdf72d39ef69f0d3",
+      "generated_at": "2026-07-21T01:20:37-04:00"
+    }
+  }
 }

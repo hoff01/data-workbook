@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "product": "jet",
+  "generated_at": "2026-07-21T01:20:37-04:00",
+  "actual_week_ending": "2026-07-10",
+  "dashboard_state": "/Users/alexhoffmann/US_Balances/Jet_Balance/jet_balance.json",
+  "dashboard_state_fingerprint": "30b7a37ba5fc59da90af0d5c5f784f44b29cdca0ab6e8b57cdf72d39ef69f0d3",
+  "view": {
+    "frequency": "monthly",
+    "region": "us",
+    "chartRegion": "us",
+    "metric": "balanceKbd",
+    "crudeRegion": "padd1",
+    "sheet": "balance",
+    "showLegends": true,
+    "showForecast": true,
+    "showRegionTitles": true,
+    "showFourWeekAverage": false,
+    "showPriorYear": true,
+    "showCurrentYear": true,
+    "showNextYearForecast": true,
+    "weeklyForecastWeeks": 18,
+    "bandYears": [
+      2025,
+      2024,
+      2023,
+      2022,
+      2019
+    ],
+    "historyYears": [],
+    "labelWidth": 360,
+    "labelSize": 11,
+    "periodWindow": "smart",
+    "balanceSearch": "",
+    "balanceFocus": "all",
+    "reconcileMonth": "2026-05"
+  },
+  "archive_html": "jet_export_dashboard.html",
+  "latest_html": "jet_export_dashboard.html",
+  "size_bytes": 11436711,
+  "sha256": "3e6b4e4f976e7cc612197eb25af4f0fa422eb157b86b9d68e20f828f56bcf700",
+  "standalone": true
+}

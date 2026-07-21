@@ -90,6 +90,7 @@ const child = spawn(process.execPath, ["--import", "tsx", "src/dashboard_update_
     US_BALANCES_REFRESH_READY_FILE: readyFile,
     US_BALANCES_TSX_CLI: join(ROOT, "scripts", "fake_update_cli.mjs"),
     US_BALANCES_WEEKLY_OUTPUT_SCRIPT: join(ROOT, "scripts", "fake_update_cli.mjs"),
+    US_BALANCES_DASHBOARD_HTML_OUTPUT_SCRIPT: join(ROOT, "scripts", "fake_update_cli.mjs"),
     US_BALANCES_FAKE_NO_START_FILE: silentNoopFile,
     US_BALANCES_FAKE_UPDATE_DELAY_MS: "250",
     US_BALANCES_SETTINGS_PATH: settingsPath,
@@ -503,6 +504,20 @@ try {
   assert.equal(weeklyOutputsJob.result, "saved");
   assert.equal(weeklyOutputsJob.dataChanged, true);
   assert.match(weeklyOutputsJob.lines.join("\n"), /Jet weekly table and bar charts were saved/);
+
+  const dashboardHtmlStarted = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "dashboard-html-output", product: "jet" }),
+  });
+  assert.equal(dashboardHtmlStarted.response.status, 202);
+  assert.equal(dashboardHtmlStarted.body.job.group, "dashboard-html-output");
+  assert.equal(dashboardHtmlStarted.body.job.product, "jet");
+  assert.deepEqual(dashboardHtmlStarted.body.job.args.slice(-4), ["--product", "jet", "--dashboard-state", savedDashboardStatePath]);
+  const dashboardHtmlJob = await waitForTerminalJob(baseUrl);
+  assert.equal(dashboardHtmlJob.status, "succeeded");
+  assert.equal(dashboardHtmlJob.result, "saved");
+  assert.match(dashboardHtmlJob.lines.join("\n"), /Jet portable dashboard HTML was saved/);
 
   writeFileSync(silentNoopFile, "trigger\n");
   const silentNoopStarted = await fetchJson(`${baseUrl}/api/update/start`, {
