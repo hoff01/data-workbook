@@ -6914,7 +6914,8 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
         const response = await fetch(updateBaseUrl() + '/api/update/start', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({group,force:true,product:D.product?.key})});
         runnerReached = true;
         const payload = await response.json();
-        if (!response.ok && response.status !== 409) throw new Error(payload.error || 'refresh failed to start');
+        const activeConflict = response.status === 409 && payload.job?.status === 'running';
+        if (!response.ok && !activeConflict) throw new Error(payload.error || 'refresh failed to start');
         updateApiAvailable = true;
         lastUpdateJob = payload.job || null;
         activeUpdateStartedByTab = response.status === 202 && lastUpdateJob ? lastUpdateJob.id : '';
@@ -6922,7 +6923,7 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
         renderReferenceUpdates();
         scheduleUpdatePoll(1200);
         const startedMessage = group === 'weekly-call-outputs' ? workbookProductLabel()+' weekly table and bar charts save started' : group === 'dashboard-html-output' ? workbookProductLabel()+' dashboard HTML export started' : updateGroupMeta(group).label+' refresh started';
-        showToast(response.status === 409 ? 'Refresh already running' : startedMessage);
+        showToast(activeConflict ? 'Refresh already running' : startedMessage);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Runner unavailable';
         updateApiAvailable = runnerReached;

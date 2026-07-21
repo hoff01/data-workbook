@@ -142,7 +142,7 @@
     </header>
     <section class="balanceToolbar" id="balanceOptions">
       <div class="balanceToolbarMain">
-        <div class="panel pad"><div class="caption">Balance options</div><div class="chiprow"><span class="chip">Actual headers: blue</span><span class="chip">Forecast headers: yellow</span><span class="chip">Forecast starts 2026-05</span><span class="chip">Last pull 7/21/2026, 1:14:32 AM</span></div></div>
+        <div class="panel pad"><div class="caption">Balance options</div><div class="chiprow"><span class="chip">Actual headers: blue</span><span class="chip">Forecast headers: yellow</span><span class="chip">Forecast starts 2026-05</span><span class="chip">Last pull 7/21/2026, 9:26:31 AM</span></div></div>
         <section class="controlbar balanceControlbar" id="balanceControls">
           <div class="panel pad"><div class="caption">View</div><div class="seg"><button class="toggle active" data-frequency="monthly" type="button">Monthly</button><button class="toggle" data-frequency="weekly" type="button">Weekly</button></div></div>
           <div class="panel pad"><div class="caption">Period focus</div><select id="periodWindowSelect" class="select" aria-label="Period window"><option value="smart">Smart window</option><option value="latest">Latest actual</option><option value="forecast">Forecast runway</option><option value="full">Full history</option></select><div class="periodActionGrid"><button class="btn" id="jumpLatestActualBtn" type="button">Latest actual</button><button class="btn" id="jumpFirstForecastBtn" type="button">First forecast</button></div></div>
@@ -151,7 +151,7 @@
       <details class="panel disclosurePanel dashboardStatePanel" id="dashboardStatePanel"><summary class="disclosureSummary"><div><div class="caption">Dashboard state &amp; sharing</div><span class="small">Save, import, or manage views</span></div></summary><div class="disclosureBody pad"><div class="quickActionGrid"><button class="btn primary full" id="refreshBtn" type="button">Refresh dashboard</button><button class="btn primary full" id="saveDashboardBtn" type="button">Save dashboard</button><button class="btn full" id="saveDefaultViewBtn" type="button">Save as default</button><button class="btn full" id="loadDashboardBtn" type="button">Load saved dashboard</button><button class="btn full wide" id="importDashboardBtn" type="button">Import dashboard, view, or outage JSON</button><input id="importDashboardInput" type="file" accept="application/json,.json" hidden></div><div class="viewPresetGrid"><select id="savedViewSelect" class="select" aria-label="Saved views"></select><div class="viewPresetActions"><button class="btn" id="saveViewBtn" type="button">Save view</button><button class="btn" id="loadViewBtn" type="button">Load view</button><button class="btn" id="exportViewBtn" type="button">View JSON</button><button class="btn" id="deleteViewBtn" type="button">Delete view</button><button class="btn" id="clearDefaultViewBtn" type="button">Clear default</button><button class="btn" id="resetViewBtn" type="button">Reset</button></div></div><p class="small" style="margin:10px 0 0">Save dashboard writes <code>jet_balance.json</code> plus the shared <code>outages.json</code>. Saved views persist in <code>saved_views.json</code> when the launcher is running.</p></div></details>
     </section>
     <section class="options" id="chartOptions" hidden>
-	      <div class="panel pad"><div class="caption">Chart options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip" id="showForecastChip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><label class="chip" id="fourWeekAverageChip"><input id="showFourWeekAverage" type="checkbox">4-week avg</label><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull 7/21/2026, 1:14:32 AM</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Historical band years</div><div class="chiprow" id="historyChips"></div></div>
+	      <div class="panel pad"><div class="caption">Chart options</div><div class="chiprow"><label class="chip"><input id="showLegends" type="checkbox" checked>Show legends</label><label class="chip" id="showForecastChip"><input id="showForecast" type="checkbox" checked>Show forecast</label><label class="chip"><input id="showRegionTitles" type="checkbox" checked>Show region in chart titles</label><label class="chip" id="fourWeekAverageChip"><input id="showFourWeekAverage" type="checkbox">4-week avg</label><button class="chip bandChipButton" id="bandPickerBtn" type="button">Band '19, '22-'25 only</button><span class="chip">Last pull 7/21/2026, 9:26:31 AM</span></div><div class="chiprow" id="bandYearPicker" hidden style="margin-top:8px"></div><div class="caption" style="margin-top:14px">Historical band years</div><div class="chiprow" id="historyChips"></div></div>
       <div class="panel pad"><div class="caption">Chart workspace</div><p class="small">Use chart cards for zoom, export, copy, and saved-forecast overlays. Imports and exports save raw kbd adjustments; operating utilization ex-planned saves as a net-capacity utilization target.</p></div>
     </section>
     <section class="controlbar" id="chartControls" hidden>
@@ -170,7 +170,7 @@
   <section class="chartScenarioWorkbench" id="outageCollisionModal" hidden></section>
   <section class="chartZoomModal" id="chartZoomModal" hidden></section>
   <div class="toast" id="toast"></div>
-  <script src="data/jet_balance_runtime_base.js?v=2026-07-21T05%3A14%3A32.852Z"></script>
+  <script src="data/jet_balance_runtime_base.js?v=2026-07-21T13%3A26%3A31.917Z"></script>
   <script>
     const D = window.BALANCE_DATA || {};
     const STANDALONE_DASHBOARD_STATE = window.__BALANCE_STANDALONE_STATE__ || null;
@@ -3446,7 +3446,8 @@
         const response = await fetch(updateBaseUrl() + '/api/update/start', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({group,force:true,product:D.product?.key})});
         runnerReached = true;
         const payload = await response.json();
-        if (!response.ok && response.status !== 409) throw new Error(payload.error || 'refresh failed to start');
+        const activeConflict = response.status === 409 && payload.job?.status === 'running';
+        if (!response.ok && !activeConflict) throw new Error(payload.error || 'refresh failed to start');
         updateApiAvailable = true;
         lastUpdateJob = payload.job || null;
         activeUpdateStartedByTab = response.status === 202 && lastUpdateJob ? lastUpdateJob.id : '';
@@ -3454,7 +3455,7 @@
         renderReferenceUpdates();
         scheduleUpdatePoll(1200);
         const startedMessage = group === 'weekly-call-outputs' ? workbookProductLabel()+' weekly table and bar charts save started' : group === 'dashboard-html-output' ? workbookProductLabel()+' dashboard HTML export started' : updateGroupMeta(group).label+' refresh started';
-        showToast(response.status === 409 ? 'Refresh already running' : startedMessage);
+        showToast(activeConflict ? 'Refresh already running' : startedMessage);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Runner unavailable';
         updateApiAvailable = runnerReached;

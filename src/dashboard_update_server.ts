@@ -8,10 +8,12 @@ import {
   renameSync,
   statSync,
   unlinkSync,
+  futimesSync,
   writeFileSync,
   type Stats,
 } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { hostname } from "node:os";
 import { dirname, extname, join, normalize, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -48,6 +50,19 @@ type Job = {
 type RunnerLock = {
   fd: number;
   path: string;
+  id: string;
+  heartbeat: NodeJS.Timeout | null;
+};
+
+type RunnerLockMetadata = {
+  schemaVersion?: number;
+  lockId?: string;
+  heartbeat?: boolean;
+  group?: string;
+  hostname?: string;
+  pid?: number;
+  root?: string;
+  startedAt?: string;
 };
 
 type BalanceAdjustment = {
@@ -178,8 +193,13 @@ const dashboardStateRoot = process.env.US_BALANCES_DASHBOARD_STATE_ROOT
 const outagesExportPath = process.env.US_BALANCES_OUTAGES_PATH
   ? resolve(ROOT, process.env.US_BALANCES_OUTAGES_PATH)
   : join(dirname(settingsPath), "outages.json");
-const runnerLockPath = join(ROOT, "logs", "update_runner.lock");
-const runnerLockStaleMs = 12 * 60 * 60 * 1000;
+const runnerLockPath = process.env.US_BALANCES_RUNNER_LOCK_PATH
+  ? resolve(ROOT, process.env.US_BALANCES_RUNNER_LOCK_PATH)
+  : join(ROOT, "logs", "update_runner.lock");
+const runnerLockLegacyStaleMs = 12 * 60 * 60 * 1000;
+const runnerLockHeartbeatStaleMs = 2 * 60 * 1000;
+const runnerLockHeartbeatMs = Math.max(25, Number(process.env.US_BALANCES_RUNNER_LOCK_HEARTBEAT_MS || 15 * 1000));
+const runnerHostname = hostname().trim().toLowerCase();
 const refreshReadyFile = String(process.env.US_BALANCES_REFRESH_READY_FILE || "").trim();
 
 let currentProcess: ReturnType<typeof spawn> | null = null;
@@ -565,9 +585,10 @@ buttons.forEach(button => button.addEventListener('click', async () => {
   try {
     const response = await fetch('/api/update/start', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ group, force:true }) });
     const payload = await response.json();
-    if (!response.ok && response.status !== 409) throw new Error(payload.error || 'refresh failed to start');
+    const activeConflict = response.status === 409 && payload.job?.status === 'running';
+    if (!response.ok && !activeConflict) throw new Error(payload.error || 'refresh failed to start');
     setStatus(payload.job);
-    pollTimer = window.setTimeout(refreshStatus, response.status === 409 ? 1000 : 1500);
+    pollTimer = window.setTimeout(refreshStatus, activeConflict ? 1000 : 1500);
   } catch (error) {
     statusEl.textContent = 'Refresh not started';
     statusEl.className = 'runnerStatus failed';
@@ -600,24 +621,119 @@ function parseProduct(value: unknown): ProductKey | null {
   return value === "diesel" || value === "jet" ? value : null;
 }
 
+function readRunnerLockMetadata(): RunnerLockMetadata | null {
+  try {
+    const value = JSON.parse(readFileSync(runnerLockPath, "utf8")) as RunnerLockMetadata;
+    return value && typeof value === "object" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function runnerProcessAlive(pid: unknown): boolean | null {
+  const numericPid = Number(pid);
+  if (!Number.isInteger(numericPid) || numericPid <= 0) return null;
+  try {
+    process.kill(numericPid, 0);
+    return true;
+  } catch (error) {
+    const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
+    if (code === "ESRCH") return false;
+    if (code === "EPERM") return true;
+    return null;
+  }
+}
+
+function recoverAbandonedRunnerLock(): void {
+  let existing: Stats;
+  try {
+    existing = statSync(runnerLockPath);
+  } catch {
+    return;
+  }
+  const metadata = readRunnerLockMetadata();
+  const ownerHostname = String(metadata?.hostname || "").trim().toLowerCase();
+  const sameHost = Boolean(ownerHostname && runnerHostname && ownerHostname === runnerHostname);
+  const ownedByThisIdleServer = metadata?.pid === process.pid && currentLock === null;
+  const deadSameHostOwner = sameHost && runnerProcessAlive(metadata?.pid) === false;
+  const heartbeatLock = metadata?.schemaVersion === 2 && metadata.heartbeat === true;
+  const staleAfterMs = heartbeatLock ? runnerLockHeartbeatStaleMs : runnerLockLegacyStaleMs;
+  const heartbeatExpired = Date.now() - existing.mtimeMs > staleAfterMs;
+  if (!ownedByThisIdleServer && !deadSameHostOwner && !heartbeatExpired) return;
+  try {
+    const latest = statSync(runnerLockPath);
+    if (latest.mtimeMs !== existing.mtimeMs && !ownedByThisIdleServer && !deadSameHostOwner) return;
+    unlinkSync(runnerLockPath);
+  } catch {
+    // The exclusive open below will report a lock that could not be recovered.
+  }
+}
+
+function runnerLockOwnerText(): string {
+  const metadata = readRunnerLockMetadata();
+  if (!metadata) return "";
+  const details = [
+    metadata.group ? `group=${metadata.group}` : "",
+    metadata.hostname ? `host=${metadata.hostname}` : "",
+    metadata.startedAt ? `started=${metadata.startedAt}` : "",
+  ].filter(Boolean);
+  return details.length ? ` (${details.join(", ")})` : "";
+}
+
+function refreshRunnerLockHeartbeat(lock: RunnerLock): void {
+  try {
+    if (readRunnerLockMetadata()?.lockId !== lock.id) {
+      if (lock.heartbeat) clearInterval(lock.heartbeat);
+      lock.heartbeat = null;
+      return;
+    }
+    const now = new Date();
+    futimesSync(lock.fd, now, now);
+  } catch {
+    // A failed heartbeat is surfaced by the next lock acquisition if ownership was lost.
+  }
+}
+
 function acquireRunnerLock(group: RunnerLockGroup): RunnerLock {
   mkdirSync(dirname(runnerLockPath), { recursive: true });
+  recoverAbandonedRunnerLock();
+  const lockId = createHash("sha256")
+    .update(`${runnerHostname}|${process.pid}|${Date.now()}|${Math.random()}`)
+    .digest("hex")
+    .slice(0, 24);
+  let fd: number | null = null;
   try {
-    const existing = statSync(runnerLockPath);
-    if (Date.now() - existing.mtimeMs > runnerLockStaleMs) unlinkSync(runnerLockPath);
-  } catch {
-    // Missing or inaccessible lock is handled by the exclusive open below.
-  }
-  try {
-    const fd = openSync(runnerLockPath, "wx");
+    fd = openSync(runnerLockPath, "wx");
     writeFileSync(
       fd,
-      JSON.stringify({ group, pid: process.pid, root: ROOT, startedAt: new Date().toISOString() }, null, 2) + "\n",
+      JSON.stringify({
+        schemaVersion: 2,
+        lockId,
+        heartbeat: true,
+        group,
+        hostname: runnerHostname,
+        pid: process.pid,
+        root: ROOT,
+        startedAt: new Date().toISOString(),
+      }, null, 2) + "\n",
     );
-    return { fd, path: runnerLockPath };
+    const lock: RunnerLock = { fd, path: runnerLockPath, id: lockId, heartbeat: null };
+    lock.heartbeat = setInterval(() => refreshRunnerLockHeartbeat(lock), runnerLockHeartbeatMs);
+    lock.heartbeat.unref();
+    return lock;
   } catch (error) {
+    if (fd !== null) {
+      try { closeSync(fd); } catch {}
+      try { unlinkSync(runnerLockPath); } catch {}
+    }
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Another update runner appears to be active. Lock: ${runnerLockPath}. ${message}`);
+    const code = error && typeof error === "object" && "code" in error ? String(error.code) : "";
+    if (fd === null && code === "EEXIST") {
+      throw new Error(
+        `The shared refresh lock is already held${runnerLockOwnerText()}. No new refresh was started. If the other runner closed unexpectedly, retry in two minutes; abandoned current-version locks clear automatically.`,
+      );
+    }
+    throw new Error(`The refresh lock could not be created at ${runnerLockPath}. ${message}`);
   }
 }
 
@@ -723,13 +839,17 @@ async function rebuildForForecastEnd(previous: DashboardSettings, next: Dashboar
 
 function releaseRunnerLock(lock: RunnerLock | null): void {
   if (!lock) return;
+  if (lock.heartbeat) {
+    clearInterval(lock.heartbeat);
+    lock.heartbeat = null;
+  }
   try {
     closeSync(lock.fd);
   } catch {
     // Best effort cleanup.
   }
   try {
-    unlinkSync(lock.path);
+    if (readRunnerLockMetadata()?.lockId === lock.id) unlinkSync(lock.path);
   } catch {
     // Best effort cleanup.
   }
@@ -1074,7 +1194,7 @@ async function handleApi(request: IncomingMessage, response: ServerResponse, pat
           writeJson(response, 200, { settings: publicSettings(readSettings()), rebuilt: true });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          const busy = message.includes("already running") || message.includes("Another update runner appears to be active");
+          const busy = message.includes("already running") || message.includes("shared refresh lock is already held");
           writeJson(response, busy ? 409 : 500, {
             error: message,
             settings: publicSettings(readSettings()),

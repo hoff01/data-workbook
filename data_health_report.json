@@ -1,13 +1,13 @@
 {
   "balances": {
     "diesel": {
-      "generated_at": "2026-07-21T03:56:02.544Z",
+      "generated_at": "2026-07-21T13:26:31.766Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-07-10",
       "path": "Diesel_Balance/manifest.json"
     },
     "jet": {
-      "generated_at": "2026-07-21T03:56:02.699Z",
+      "generated_at": "2026-07-21T13:26:31.917Z",
       "latest_monthly": "2026-04-15",
       "latest_weekly": "2026-07-10",
       "path": "Jet_Balance/manifest.json"
@@ -58,7 +58,7 @@
       "max_allowed_age_days": 14,
       "name": "eia_weekly_freshness",
       "status": "pass",
-      "today": "2026-07-20"
+      "today": "2026-07-21"
     },
     {
       "columns": 232,
@@ -104,7 +104,7 @@
       "max_allowed_age_days": 150,
       "name": "eia_monthly_freshness",
       "status": "pass",
-      "today": "2026-07-20"
+      "today": "2026-07-21"
     },
     {
       "fallback_active": false,
@@ -120,7 +120,7 @@
       "max_allowed_age_days": 7,
       "name": "kpler_freshness",
       "status": "pass",
-      "today": "2026-07-20"
+      "today": "2026-07-21"
     },
     {
       "fallback_active": false,
@@ -136,7 +136,7 @@
       "max_allowed_age_days": 7,
       "name": "kpler_padd1_eia_split_freshness",
       "status": "pass",
-      "today": "2026-07-20"
+      "today": "2026-07-21"
     },
     {
       "current_month": "2026-07",
@@ -194,13 +194,13 @@
       "name": "power_generation_dfo",
       "run_end": "2026-07-14",
       "status": "pass",
-      "today": "2026-07-20"
+      "today": "2026-07-21"
     },
     {
       "generated_day": "2026-07-14",
       "name": "power_generation_dfo_hourly",
       "status": "pass",
-      "today": "2026-07-20"
+      "today": "2026-07-21"
     },
     {
       "crlf_files": [],
@@ -298,7 +298,7 @@
       "rows": 550
     }
   },
-  "generated_at": "2026-07-21T03:56:23.905294+00:00",
+  "generated_at": "2026-07-21T13:27:53.761207+00:00",
   "kpler": {
     "fallback": {},
     "generated_at": "2026-07-14T03:24:23.233809+00:00",
@@ -353,5 +353,5 @@
   "summary": {
     "pass": 24
   },
-  "today": "2026-07-20"
+  "today": "2026-07-21"
 }

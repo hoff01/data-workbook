@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync, rmSync, statSync, utimesSync } from "node:fs";
 import { createServer } from "node:net";
 import { dirname, join, resolve } from "node:path";
-import { tmpdir } from "node:os";
+import { hostname, tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -72,6 +72,7 @@ const settingsPath = join(settingsDir, "balance_dashboard_settings.json");
 const outagesExportPath = join(settingsDir, "outages.json");
 const settingsRebuildLog = join(settingsDir, "rebuild.log");
 const settingsRebuildFailFile = join(settingsDir, "fail-once");
+const runnerLockPath = join(settingsDir, "update_runner.lock");
 writeFileSync(settingsPath, JSON.stringify({
   forecastEnd: "2027-06-01",
   adjustments: { diesel: [], jet: [] },
@@ -95,6 +96,8 @@ const child = spawn(process.execPath, ["--import", "tsx", "src/dashboard_update_
     US_BALANCES_FAKE_UPDATE_DELAY_MS: "250",
     US_BALANCES_SETTINGS_PATH: settingsPath,
     US_BALANCES_DASHBOARD_STATE_ROOT: settingsDir,
+    US_BALANCES_RUNNER_LOCK_PATH: runnerLockPath,
+    US_BALANCES_RUNNER_LOCK_HEARTBEAT_MS: "25",
     US_BALANCES_SETTINGS_REBUILD_SCRIPT: join(ROOT, "scripts", "fake_update_cli.mjs"),
     US_BALANCES_FAKE_SETTINGS_REBUILD_LOG: settingsRebuildLog,
     US_BALANCES_FAKE_SETTINGS_REBUILD_FAIL_FILE: settingsRebuildFailFile,
@@ -472,6 +475,83 @@ try {
     body: JSON.stringify({ product: "jet", state: updatedJetState }),
   });
   assert.equal(resavedJetState.response.status, 200);
+
+  const exitedOwner = spawn(process.execPath, ["-e", ""]);
+  const exitedOwnerPid = exitedOwner.pid;
+  await new Promise((resolveExit, rejectExit) => {
+    exitedOwner.once("error", rejectExit);
+    exitedOwner.once("close", resolveExit);
+  });
+  assert.equal(typeof exitedOwnerPid, "number");
+  writeFileSync(runnerLockPath, JSON.stringify({
+    schemaVersion: 2,
+    lockId: "orphaned-same-host-lock",
+    heartbeat: true,
+    group: "all",
+    hostname: hostname().toLowerCase(),
+    pid: exitedOwnerPid,
+    root: ROOT,
+    startedAt: new Date().toISOString(),
+  }, null, 2));
+  const recoveredOrphanLock = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "monthly", force: true }),
+  });
+  assert.equal(recoveredOrphanLock.response.status, 202, "a dead same-host lock owner must not block refresh startup");
+  assert.equal(recoveredOrphanLock.body.job.status, "running");
+  const lockMtimeBeforeHeartbeat = statSync(runnerLockPath).mtimeMs;
+  await new Promise((resolveWait) => setTimeout(resolveWait, 80));
+  assert.ok(statSync(runnerLockPath).mtimeMs > lockMtimeBeforeHeartbeat, "a running job must heartbeat its shared lock");
+  const activeConflict = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "weekly", force: true }),
+  });
+  assert.equal(activeConflict.response.status, 409);
+  assert.equal(activeConflict.body.job.id, recoveredOrphanLock.body.job.id);
+  assert.equal(activeConflict.body.job.status, "running");
+  const recoveredOrphanJob = await waitForTerminalJob(baseUrl);
+  assert.equal(recoveredOrphanJob.status, "succeeded");
+  assert.equal(existsSync(runnerLockPath), false, "completed jobs must release their heartbeat lock");
+
+  writeFileSync(runnerLockPath, JSON.stringify({
+    schemaVersion: 2,
+    lockId: "other-host-active-lock",
+    heartbeat: true,
+    group: "all",
+    hostname: `other-${hostname().toLowerCase()}`,
+    pid: 12345,
+    root: ROOT,
+    startedAt: new Date().toISOString(),
+  }, null, 2));
+  const externalLockConflict = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "all", force: true }),
+  });
+  assert.equal(externalLockConflict.response.status, 409);
+  assert.notEqual(externalLockConflict.body.job?.status, "running");
+  assert.match(externalLockConflict.body.error, /shared refresh lock is already held/);
+  const blockedForecastByExternalLock = await fetchJson(`${baseUrl}/api/settings`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ forecastEnd: "2027-05-31", baseRevision: changedJetSettings.body.settings.revision }),
+  });
+  assert.equal(blockedForecastByExternalLock.response.status, 409);
+  assert.equal(blockedForecastByExternalLock.body.rebuilt, false);
+  assert.match(blockedForecastByExternalLock.body.error, /shared refresh lock is already held/);
+  const expiredHeartbeatTime = new Date(Date.now() - 3 * 60 * 1000);
+  utimesSync(runnerLockPath, expiredHeartbeatTime, expiredHeartbeatTime);
+  const recoveredExpiredHeartbeat = await fetchJson(`${baseUrl}/api/update/start`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ group: "other", force: true }),
+  });
+  assert.equal(recoveredExpiredHeartbeat.response.status, 202, "an expired heartbeat lock must recover across hosts");
+  const recoveredHeartbeatJob = await waitForTerminalJob(baseUrl);
+  assert.equal(recoveredHeartbeatJob.status, "succeeded");
+  assert.equal(existsSync(runnerLockPath), false);
 
   const dieselOutputsStarted = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",
