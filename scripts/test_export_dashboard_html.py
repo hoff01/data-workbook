@@ -17,11 +17,45 @@ exporter = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(exporter)
 
 
-for product, folder in (("diesel", "Diesel_Balance"), ("jet", "Jet_Balance")):
-    state_path = ROOT / folder / f"{product}_balance.json"
-    snapshot = json.loads(state_path.read_text(encoding="utf-8"))
+def dashboard_state_fixture(product: str) -> dict[str, object]:
+    latest_weekly = "2026-07-10"
+    return {
+        "schema": "us-balances.dashboard-state",
+        "schemaVersion": 1,
+        "id": f"{product}-standalone-export-test",
+        "product": product,
+        "savedAt": "2026-07-15T12:00:00Z",
+        "fingerprint": f"{product}-standalone-export-fingerprint",
+        "provenance": {"latestWeekly": latest_weekly},
+        "settings": {},
+        "view": {
+            "state": {
+                "sheet": "charts",
+                "frequency": "monthly",
+            }
+        },
+        "materialized": {
+            "regionalBalance": {
+                "monthly": [],
+                "weekly": [
+                    {
+                        "period": latest_weekly,
+                        "status": "actual",
+                        "regionKey": "us",
+                    }
+                ],
+            }
+        },
+    }
+
+
+for product in ("diesel", "jet"):
     with TemporaryDirectory() as temporary_directory:
-        output_root = Path(temporary_directory) / "outputs"
+        temporary_root = Path(temporary_directory)
+        state_path = temporary_root / f"{product}_balance.json"
+        snapshot = dashboard_state_fixture(product)
+        state_path.write_text(json.dumps(snapshot, indent=2) + "\n", encoding="utf-8")
+        output_root = temporary_root / "outputs"
         archive_path, latest_path, manifest_path = exporter.write_export(
             product,
             state_path,
