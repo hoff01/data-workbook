@@ -1306,10 +1306,7 @@ function importAdjustmentLinesForUi(runtime, frequency, regionKey) {
   if (product === "diesel" && regionKey === "padd1ab") {
     return frequency === "monthly" ? ["canadaImportsAdjustment", "nonCanadaImportsAdjustment"] : ["importsAdjustment"];
   }
-  if (product === "jet" && regionKey === "padd1") return frequency === "weekly" ? ["importsAdjustment"] : [];
-  const monthlyLowerAtlanticImportGuide = frequency === "monthly" && product === "diesel" && regionKey === "padd1c";
-  const monthlyPadd5ImportAdjustment = frequency === "monthly" && regionKey === "padd5";
-  return frequency === "weekly" || monthlyLowerAtlanticImportGuide || monthlyPadd5ImportAdjustment ? ["importsAdjustment"] : [];
+  return ["importsAdjustment"];
 }
 
 function exportGuideFlowsForUi(runtime, regionKey) {
@@ -1428,6 +1425,7 @@ function assertFormulaInvariants(calc, frequency, rows, label) {
   const failures = [];
   const byKey = indexRows(rows);
   for (const row of rows) {
+    const members = calc.aggregates[row.regionKey];
     const expectedBalance = round2(Number(row.productionKbd || 0) + Number(row.importsKbd || 0) + Number(row.netReceiptsKbd || 0) - Number(row.exportsKbd || 0) - Number(row.demandKbd || 0));
     if (!near(row.balanceKbd, expectedBalance)) {
       failures.push(`${label}: ${frequency} ${row.period} ${row.regionKey} balanceKbd=${row.balanceKbd} expected ${expectedBalance}`);
@@ -1441,12 +1439,14 @@ function assertFormulaInvariants(calc, frequency, rows, label) {
         .sort((a, b) => a.period.localeCompare(b.period))
         .at(-1);
       if (previous) {
-        const expectedStocks = round2(Number(previous.stocksKb || 0) + Number(row.balanceKbd || 0) * periodDays(row.period));
+        const currentMemberRows = members ? members.map((member) => byKey.get(`${row.period}|${member}`)).filter(Boolean) : [];
+        const expectedStocks = members && currentMemberRows.length === members.length
+          ? round2(currentMemberRows.reduce((sum, memberRow) => sum + Number(memberRow.stocksKb || 0), 0))
+          : round2(Number(previous.stocksKb || 0) + Number(row.balanceKbd || 0) * periodDays(row.period));
         const memberCount = calc.aggregates[row.regionKey]?.length || 1;
         if (!near(row.stocksKb, expectedStocks, 0.11 * memberCount)) failures.push(`${label}: ${frequency} ${row.period} ${row.regionKey} stocksKb=${row.stocksKb} expected ${expectedStocks}`);
       }
     }
-    const members = calc.aggregates[row.regionKey];
     if (members) {
       for (const field of SUM_FIELDS) {
         const memberRows = members.map((member) => byKey.get(`${row.period}|${member}`)).filter(Boolean);
@@ -1479,6 +1479,28 @@ function runtimeWithAdjustmentList(runtime, calc, adjustments) {
     next.settings.adjustments = replacementAdjustments(next, calc, adjustment);
   }
   return next;
+}
+
+function validateMissingImportOverrideCompatibility(runtime) {
+  const seedCalc = new Calculator(runtime);
+  const regionKey = seedCalc.baseRegions.includes("padd2") ? "padd2" : seedCalc.baseRegions[0];
+  const point = firstForecastPoint(seedCalc, "monthly", regionKey);
+  if (!point) return { failures: [`missing-import compatibility has no monthly forecast for ${regionKey}`] };
+  const missingRuntime = clone(runtime);
+  const aliases = balanceAdjustmentAliases("importsAdjustment");
+  missingRuntime.settings.adjustments = (missingRuntime.settings?.adjustments || []).filter((row) =>
+    !(row.frequency === "monthly" && row.period === point.period && row.regionKey === regionKey && aliases.includes(normalizeBalanceLineId(row.lineId))),
+  );
+  const missingCalc = new Calculator(missingRuntime);
+  const failures = [];
+  const marker = 321.987;
+  if (missingCalc.balanceAdjustmentValue("monthly", point.period, regionKey, "importsAdjustment") !== null) failures.push("missing import adjustment did not normalize to null");
+  if (!near(missingCalc.applyBalanceAdjustment(marker, "monthly", point.period, regionKey, "importsAdjustment"), marker, 0.0001)) failures.push("missing import adjustment did not preserve the base value");
+  const zeroRuntime = runtimeWithAdjustments(missingRuntime, missingCalc, {frequency:"monthly",period:point.period,regionKey,lineId:"importsAdjustment",valueKbd:0,note:"Synthetic zero-override compatibility check",updatedAt:"2099-01-04T00:00:00.000Z"});
+  const zeroCalc = new Calculator(zeroRuntime);
+  if (!near(zeroCalc.balanceAdjustmentValue("monthly", point.period, regionKey, "importsAdjustment"), 0, 0.0001)) failures.push("explicit zero import adjustment did not remain an override");
+  if (!near(zeroCalc.applyBalanceAdjustment(marker, "monthly", point.period, regionKey, "importsAdjustment"), 0, 0.0001)) failures.push("explicit zero import adjustment did not replace the base value with zero");
+  return { failures };
 }
 
 function runtimeWithoutWeeklyAdjustmentsForMonth(runtime, month) {
@@ -1979,6 +2001,7 @@ function runProduct(product) {
     ...assertFormulaInvariants(baselineCalc, "weekly", baselineCalc.rowsForFrequency("weekly"), `${product.key} baseline`),
   ];
   const summaries = [];
+  failures.push(...validateMissingImportOverrideCompatibility(runtime).failures);
   const outageIsolation = validateOverlappingOutageIsolation(runtime);
   failures.push(...outageIsolation.failures);
   if (outageIsolation.summary) summaries.push(outageIsolation.summary);

@@ -269,12 +269,11 @@ function verifyBalanceSubtotalFormatting(indexHtml: string, config: ProductConfi
 function verifyBalanceSupplySpacing(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} production/import spacer row`, indexHtml, "const productionImportSpacer = productionLines.length ? [{id:'productionImportSpacer',label:'',kind:'divider supplySpacer'}] : [];");
   assertIncludes(`${config.key} spacer is before weekly imports block`, indexHtml, "...productionLines,...productionImportSpacer,...importBlockLines");
-  assertIncludes(`${config.key} weekly imports row precedes override and split Kpler lines`, indexHtml, "const importBlockLines = state.frequency === 'weekly' ? [importsTotalLine,...importLines,...importTotalGuideLines,...importGuideLines] : [...importLines,importsTotalLine,...importTotalGuideLines,...importGuideLines];");
+  assertIncludes(`${config.key} total imports row precedes its override and Kpler guides`, indexHtml, "const importBlockLines = [...componentImportLines,importsTotalLine,...importTotalGuideLines,...kplerImportLines,...importGuideLines];");
   assertIncludes(`${config.key} weekly imports adjustment uses override label`, indexHtml, "label:'Imports Override',kind:'item muted adjustment importOverride'");
   assertIncludes(`${config.key} adjustment rows render generic adjustment label`, indexHtml, "function balanceLineDisplayLabel(line){ return isBalanceAdjustmentLine(line.id) ? 'Adjustment' : line.label; }");
-  assertIncludes(`${config.key} Lower Atlantic monthly imports get override`, indexHtml, "const monthlyLowerAtlanticImportGuide = state.frequency === 'monthly' && D.product?.key === 'diesel' && regionKey === 'padd1c';");
-  assertIncludes(`${config.key} PADD 5 imports get monthly and weekly adjustment`, indexHtml, "const padd5ImportAdjustment = regionKey === 'padd5';");
-  assertIncludes(`${config.key} PADD 5 import adjustment shares period-scoped import row`, indexHtml, "state.frequency === 'weekly' || monthlyLowerAtlanticImportGuide || padd5ImportAdjustment ? [importsOverrideLine()] : []");
+  assertIncludes(`${config.key} weekly base regions keep total import overrides`, indexHtml, "if (state.frequency === 'weekly') return true;");
+  assertIncludes(`${config.key} monthly Jet and non-Northeast Diesel regions get total import overrides`, indexHtml, "return D.product?.key === 'jet' || regionKey !== 'padd1ab';");
   assertIncludes(`${config.key} Northeast Kpler import total is only grey import guide`, indexHtml, "function isKplerTotalImportGuideLine(lineId){ return isKplerGuideLine(lineId) && kplerGuideTargetLineId(lineId) === 'padd1abImports'; }");
   assertIncludes(`${config.key} Northeast Kpler export total is grey`, indexHtml, "function isKplerTotalExportGuideLine(lineId){ return isKplerGuideLine(lineId) && kplerGuideTargetLineId(lineId) === 'padd1abExportsTotal'; }");
   assertIncludes(`${config.key} Kpler total imports use grey guide class`, indexHtml, "kplerImportTotalGuideRow");
@@ -367,19 +366,26 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
 
 function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} charts topbar switches in-place`, indexHtml, "<a class=\"btn\" id=\"chartsSheetBtn\" href=\"?sheet=charts\">Charts</a>");
-  assertIncludes(`${config.key} charts topbar has in-place click handler`, indexHtml, "document.getElementById('chartsSheetBtn').addEventListener('click', async e => { e.preventDefault();");
+  assertIncludes(`${config.key} charts topbar has in-place click handler`, indexHtml, "document.getElementById('chartsSheetBtn').addEventListener('click', async e => {");
+  assertIncludes(`${config.key} charts topbar preserves modifier-key new tabs`, indexHtml, "if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return; e.preventDefault();");
   assertIncludes(`${config.key} chart history minimum`, indexHtml, "const MIN_CHART_HISTORY_YEAR = 2017;");
   assertIncludes(`${config.key} chart band years exclude pre-2017`, indexHtml, "context.years.filter(year => year >= MIN_CHART_HISTORY_YEAR && year < context.currentYear)");
   assertIncludes(`${config.key} chart row filter excludes pre-2017`, indexHtml, "chartRowPeriodYear(row) >= MIN_CHART_HISTORY_YEAR");
   assertIncludes(`${config.key} requested derived chart metrics`, indexHtml, "'periodBuildDrawKb','netLengthKbd'");
   assertIncludes(`${config.key} Yield metric is registered as percent`, indexHtml, "{key:'yieldPct',label:'Yield',unit:'%',digits:1}");
-  assertIncludes(`${config.key} Yield appears in normal chart metrics`, indexHtml, "'demandKbd','productionKbd','yieldPct'");
+  assertIncludes(`${config.key} crude runs, utilization, and CDU maintenance appear in normal chart metrics`, indexHtml, "'demandKbd','productionKbd','crudeRunsKbd','utilizationPct','plannedMaintenanceKbd','totalOfflineKbd','yieldPct'");
+  assertIncludes(`${config.key} main utilization chart is derived from crude runs and capacity`, indexHtml, "if (metricKey === 'utilizationPct') return safePct(point.crudeRunsKbd, point.operableCapacityKbd);");
+  assertIncludes(`${config.key} main total CDU chart combines planned and unplanned crude-run maintenance`, indexHtml, "if (metricKey === 'totalOfflineKbd') return point.plannedMaintenanceKbd === null && point.unplannedMaintenanceKbd === null ? null : Number(point.plannedMaintenanceKbd || 0) + Number(point.unplannedMaintenanceKbd || 0);");
+  assertIncludes(`${config.key} main planned CDU chart uses the crude-run schedule label`, indexHtml, "{key:'plannedMaintenanceKbd',label:'Planned CDU Capacity Offline',unit:'kbd',digits:0}");
+  assertIncludes(`${config.key} main total CDU chart uses the crude-run schedule label`, indexHtml, "{key:'totalOfflineKbd',label:'Total CDU Capacity Offline',unit:'kbd',digits:0}");
   assertIncludes(`${config.key} Yield appears in crude chart metrics`, indexHtml, "...CRUDE_BASE_METRICS,{key:'yieldPct',label:'Yield',unit:'%',digits:1}");
   assertIncludes(`${config.key} crude yield joins product balance rows`, indexHtml, "function crudeChartRowsForRegion(regionKey=state.crudeRegion, frequency=state.frequency)");
   assertIncludes(`${config.key} split PADD 1 Yield combines P1 A/B and P1 C production`, indexHtml, "['padd1ab','padd1c'].forEach(memberKey");
   assertIncludes(`${config.key} requested receipts chart metric`, indexHtml, "'receiptsKbd'");
   assertIncludes(`${config.key} requested PADD3 shipment chart metric`, indexHtml, "'padd3ShipmentsToPadd1Kbd'");
   assertIncludes(`${config.key} Kpler chart metrics registered`, indexHtml, "const KPLER_CHART_METRICS = new Set(['kplerImportsKbd'");
+  assertIncludes(`${config.key} EIA origin-only import charts have a separate visibility registry`, indexHtml, "const EIA_IMPORT_ORIGIN_CHART_METRICS = new Set(['canadaImportsKbd','nonCanadaImportsKbd']);");
+  assertIncludes(`${config.key} Jet and Lower Atlantic suppress only EIA origin import charts`, indexHtml, "if (EIA_IMPORT_ORIGIN_CHART_METRICS.has(metricKey) && (D.product?.key === 'jet' || (D.product?.key === 'diesel' && regionKey === 'padd1c'))) return false;");
   assertIncludes(`${config.key} secondary unit utilization chart metrics registered`, indexHtml, "const SECONDARY_UNIT_UTILIZATION_METRICS = new Set(['catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct']);");
   assertIncludes(`${config.key} secondary unit chart labels`, indexHtml, "label:'Catalytic Cracking Utilization'");
   assertIncludes(`${config.key} coking utilization chart label`, indexHtml, "label:'Coking Utilization'");
@@ -418,6 +424,10 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} chart zoom custom width control`, indexHtml, "data-zoom-width");
   assertIncludes(`${config.key} chart zoom custom height control`, indexHtml, "data-zoom-height");
   assertIncludes(`${config.key} chart zoom custom PNG save`, indexHtml, "function saveZoomChartPng(card)");
+  assertIncludes(`${config.key} all base balance regions expose a total import adjustment except monthly Diesel PADD 1 A/B`, indexHtml, "return D.product?.key === 'jet' || regionKey !== 'padd1ab';");
+  assertIncludes(`${config.key} total import adjustment is inserted beside total imports`, indexHtml, "const importTotalGuideLines = [...(showTotalImportsAdjustment(regionKey) ? [importsOverrideLine()] : [])");
+  assertIncludes(`${config.key} monthly Diesel PADD 1 A/B preserves its component import overrides`, indexHtml, "const componentImportLines = state.frequency === 'monthly' && D.product?.key === 'diesel' && regionKey === 'padd1ab' ? importLines : [];");
+  assertNotIncludes(`${config.key} old selective monthly import adjustment gates are removed`, indexHtml, "monthlyLowerAtlanticImportGuide");
 }
 
 function verifyChartScenarioPropagation(indexHtml: string, config: ProductConfig): void {
@@ -441,7 +451,7 @@ function verifyChartScenarioPropagation(indexHtml: string, config: ProductConfig
 
 function verifyOutageProductionOffline(indexHtml: string, config: ProductConfig): void {
   assertIncludes(`${config.key} outage chart metric registry`, indexHtml, "const OUTAGE_CHART_METRICS = new Set(['knownProductionOfflinePlannedKbd'");
-  assertIncludes(`${config.key} Yield and outage product metrics follow production`, indexHtml, "'productionKbd','yieldPct','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd'");
+  assertIncludes(`${config.key} crude runs, utilization, CDU maintenance, Yield, and outage product metrics follow production`, indexHtml, "'productionKbd','crudeRunsKbd','utilizationPct','plannedMaintenanceKbd','totalOfflineKbd','yieldPct','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd'");
   assertIncludes(`${config.key} crude runs outage unit is atmospheric distillation only`, indexHtml, "const CRUDE_RUN_OUTAGE_UNIT_KEY = 'atmos_distillation';");
   assertIncludes(`${config.key} crude runs reads only atmospheric distillation outage totals`, indexHtml, "addOutageTotals(totals, byRegion[key]?.units?.[CRUDE_RUN_OUTAGE_UNIT_KEY])");
   assertIncludes(`${config.key} empty outage schedules skip date scans`, indexHtml, "if (!days.size) return roundedOutageTotals(totals, range.days);");
@@ -629,6 +639,14 @@ function verifyPortableStateAndViews(indexHtml: string, config: ProductConfig): 
   assertIncludes(`${config.key} legacy saved views migrate once`, indexHtml, "SAVED_VIEWS_MIGRATION_KEY");
   assertIncludes(`${config.key} saved-view browser cache is best effort`, indexHtml, "function cacheSavedViewsStore(){ try {");
   assertIncludes(`${config.key} default view loads only without explicit URL state`, indexHtml, "if (defaultView && !hasExplicitViewState()) await applySavedView(defaultView, {toast:false});");
+  assertIncludes(`${config.key} legacy saved views inherit new state defaults additively`, indexHtml, "const clean = defaultState(); Object.assign(clean, next || {});");
+  assertIncludes(`${config.key} saved views preserve unknown legacy state fields during normalization`, indexHtml, "state:{...row.state}");
+  assertIncludes(`${config.key} paired tab action opens an explicit complementary sheet`, indexHtml, "window.open(pairedTabUrl(), '_blank', 'noopener')");
+  assertIncludes(`${config.key} paired balance URL remains explicit against a saved default`, indexHtml, "params.set('sheet', 'balance');");
+  assertIncludes(`${config.key} storage sync applies the event payload instead of embedded startup settings`, indexHtml, "const stored = storageEventJson(event);");
+  assertIncludes(`${config.key} shared settings events preserve newer outage collections`, indexHtml, "crudeOutages:workbookSettings.crudeOutages,refineryCapacityAdjustments:workbookSettings.refineryCapacityAdjustments");
+  assertIncludes(`${config.key} stale queued storage events are ignored`, indexHtml, "if (localStorage.getItem(event.key) !== event.newValue) return null;");
+  assertIncludes(`${config.key} authoritative settings publish dedicated shared collections first`, indexHtml, "saveWorkbookSettingsLocal({shareCollections:true})");
   assertIncludes(`${config.key} imported JSON accepts portable views`, indexHtml, "if (dashboardViewCandidate(value)) return importPortableView(value);");
   assertIncludes(`${config.key} imported JSON accepts shared outages`, indexHtml, "if (sharedOutageCandidate(value)) return importSharedOutageTransfer(value);");
   assertIncludes(`${config.key} shared outage import preserves product adjustments`, indexHtml, "adjustments:currentServerSettings.adjustments?.[D.product.key] || workbookSettings.adjustments");
