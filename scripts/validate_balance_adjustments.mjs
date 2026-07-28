@@ -1426,6 +1426,10 @@ function assertFormulaInvariants(calc, frequency, rows, label) {
   const byKey = indexRows(rows);
   for (const row of rows) {
     const members = calc.aggregates[row.regionKey];
+    const expectedNetReceipts = round2(Number(row.receiptsKbd || 0) - Number(row.shipmentsKbd || 0));
+    if (!near(row.netReceiptsKbd, expectedNetReceipts)) {
+      failures.push(`${label}: ${frequency} ${row.period} ${row.regionKey} netReceiptsKbd=${row.netReceiptsKbd} expected receipts ${row.receiptsKbd} less shipments ${row.shipmentsKbd}`);
+    }
     const expectedBalance = round2(Number(row.productionKbd || 0) + Number(row.importsKbd || 0) + Number(row.netReceiptsKbd || 0) - Number(row.exportsKbd || 0) - Number(row.demandKbd || 0));
     if (!near(row.balanceKbd, expectedBalance)) {
       failures.push(`${label}: ${frequency} ${row.period} ${row.regionKey} balanceKbd=${row.balanceKbd} expected ${expectedBalance}`);
