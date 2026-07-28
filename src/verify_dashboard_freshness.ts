@@ -204,6 +204,8 @@ function verifyUsMovementCoverage(config: ProductConfig, runtimeBase: RuntimeBas
   const flows = runtimeBase.regionalBalance?.movementFlows ?? [];
   if (flows.length === 0) throw new Error(`${config.key} movement flow coverage is empty`);
   const regions = new Set<string>();
+  const inboundRegions = new Set<string>();
+  const outboundRegions = new Set<string>();
   flows.forEach((flow) => {
     if (!flow.fromRegionKey || !flow.toRegionKey) throw new Error(`${config.key} movement flow has missing endpoint`);
     if (!expected.has(flow.fromRegionKey) || !expected.has(flow.toRegionKey)) {
@@ -211,9 +213,15 @@ function verifyUsMovementCoverage(config: ProductConfig, runtimeBase: RuntimeBas
     }
     regions.add(flow.fromRegionKey);
     regions.add(flow.toRegionKey);
+    outboundRegions.add(flow.fromRegionKey);
+    inboundRegions.add(flow.toRegionKey);
   });
   const missing = expectedRegions.filter((regionKey) => !regions.has(regionKey));
   if (missing.length) throw new Error(`${config.key} movement flow coverage missing ${missing.join(", ")}`);
+  const missingInbound = expectedRegions.filter((regionKey) => !inboundRegions.has(regionKey));
+  if (missingInbound.length) throw new Error(`${config.key} inbound movement flow coverage missing ${missingInbound.join(", ")}`);
+  const missingOutbound = expectedRegions.filter((regionKey) => !outboundRegions.has(regionKey));
+  if (missingOutbound.length) throw new Error(`${config.key} outbound movement flow coverage missing ${missingOutbound.join(", ")}`);
 }
 
 function verifyUsGrossMovementPresentation(indexHtml: string, config: ProductConfig): void {
@@ -382,6 +390,10 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} crude yield joins product balance rows`, indexHtml, "function crudeChartRowsForRegion(regionKey=state.crudeRegion, frequency=state.frequency)");
   assertIncludes(`${config.key} split PADD 1 Yield combines P1 A/B and P1 C production`, indexHtml, "['padd1ab','padd1c'].forEach(memberKey");
   assertIncludes(`${config.key} requested receipts chart metric`, indexHtml, "'receiptsKbd'");
+  assertIncludes(`${config.key} requested PADD receipts and shipments chart metrics`, indexHtml, "'receiptsKbd','shipmentsKbd','netReceiptsKbd'");
+  assertIncludes(`${config.key} shipments chart metric is registered`, indexHtml, "{key:'shipmentsKbd',label:'Shipments',unit:'kbd',digits:0}");
+  assertIncludes(`${config.key} receipts chart uses the adjusted gross movement total`, indexHtml, "if (metricKey === 'receiptsKbd') return pointReceiptTotal(point);");
+  assertIncludes(`${config.key} shipments chart uses the adjusted gross movement total`, indexHtml, "if (metricKey === 'shipmentsKbd') return pointShipmentTotal(point);");
   assertIncludes(`${config.key} requested PADD3 shipment chart metric`, indexHtml, "'padd3ShipmentsToPadd1Kbd'");
   assertIncludes(`${config.key} Kpler chart metrics registered`, indexHtml, "const KPLER_CHART_METRICS = new Set(['kplerImportsKbd'");
   assertIncludes(`${config.key} EIA origin-only import charts have a separate visibility registry`, indexHtml, "const EIA_IMPORT_ORIGIN_CHART_METRICS = new Set(['canadaImportsKbd','nonCanadaImportsKbd']);");
@@ -407,6 +419,7 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} PADD3 shipment chart is PADD3-only`, indexHtml, "if (metricKey === 'padd3ShipmentsToPadd1Kbd' && regionKey !== 'padd3') return false;");
   assertIncludes(`${config.key} chart metric availability is region-specific`, indexHtml, "function orderedChartMetrics(regionKey=state.chartRegion){ return CHART_METRICS.filter(metricKey => chartMetricHasVisibleData(regionKey, metricKey, state.frequency)); }");
   assertIncludes(`${config.key} chart shell signature includes metric and power availability`, indexHtml, "chartMetricsSignature(chartRegions), powerDfoChartsSignature(), localDateText()");
+  assertIncludes(`${config.key} chart caches distinguish product-title state`, indexHtml, "state.showProductTitles ? 'product-titles' : 'no-product-titles'");
   assertIncludes(`${config.key} chart hydration signature includes active scenario preview`, indexHtml, "chartScenarioOverlaySignature(), chartScenarioCalculationSignature(), chartMetricsSignature(chartRegions)");
   assertIncludes(`${config.key} chart hydration uses derived metric rows`, indexHtml, "const rows = chartRowsForMetric(regionKey, metricKey, state.frequency, baseRows);");
   assertIncludes(`${config.key} chart export uses derived metric rows`, indexHtml, "return chartRowsForMetric(regionKey, metricKey, state.frequency).map(row =>");
@@ -641,6 +654,12 @@ function verifyPortableStateAndViews(indexHtml: string, config: ProductConfig): 
   assertIncludes(`${config.key} default view loads only without explicit URL state`, indexHtml, "if (defaultView && !hasExplicitViewState()) await applySavedView(defaultView, {toast:false});");
   assertIncludes(`${config.key} legacy saved views inherit new state defaults additively`, indexHtml, "const clean = defaultState(); Object.assign(clean, next || {});");
   assertIncludes(`${config.key} saved views preserve unknown legacy state fields during normalization`, indexHtml, "state:{...row.state}");
+  assertIncludes(`${config.key} product title toggle is available`, indexHtml, 'id="showProductTitles" type="checkbox"');
+  assertIncludes(`${config.key} product titles default off for legacy views`, indexHtml, "showRegionTitles:true,showProductTitles:false");
+  assertIncludes(`${config.key} product title state is Boolean-normalized`, indexHtml, "clean.showProductTitles = Boolean(clean.showProductTitles);");
+  assertIncludes(`${config.key} product title helper composes chart headings`, indexHtml, "function chartTitleText(metricLabel, regionLabel='', options={})");
+  assertIncludes(`${config.key} paired chart URLs preserve product-title state`, indexHtml, "params.set('pt', state.showProductTitles ? '1' : '0');");
+  assertIncludes(`${config.key} explicit product-title URLs block default-view replacement`, indexHtml, "'ny','pt','ma4'");
   assertIncludes(`${config.key} paired tab action opens an explicit complementary sheet`, indexHtml, "window.open(pairedTabUrl(), '_blank', 'noopener')");
   assertIncludes(`${config.key} paired balance URL remains explicit against a saved default`, indexHtml, "params.set('sheet', 'balance');");
   assertIncludes(`${config.key} storage sync applies the event payload instead of embedded startup settings`, indexHtml, "const stored = storageEventJson(event);");
