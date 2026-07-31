@@ -671,10 +671,37 @@ def merge_eia_outputs(share_outputs: dict[str, str]) -> list[dict[str, Any]]:
     return results
 
 
+def print_merge_results(results: list[dict[str, Any]]) -> None:
+    for result in results:
+        if "latest" in result:
+            print(
+                f"{result['path']} rows={result['rows']} added_columns={result['added_columns']} "
+                f"latest={result['latest']} oldest={result['oldest']} split_sources={len(result['split_source_columns'])}"
+            )
+        else:
+            print(
+                f"{result['path']} rows={result['rows']} added_columns={result['added_columns']} "
+                f"removed_stale_kpler_split_columns={result.get('removed_stale_kpler_split_columns', 0)}"
+            )
+
+
 def run(args: argparse.Namespace) -> int:
     ensure_directories()
     PADD1_SPLIT_DIR.mkdir(parents=True, exist_ok=True)
     PADD1_RAW_DIR.mkdir(parents=True, exist_ok=True)
+    if args.merge_existing_shares:
+        share_outputs = {
+            frequency: str(PADD1_SPLIT_DIR / f"padd1_import_export_shares_{frequency}.csv")
+            for frequency in ["weekly", "monthly"]
+        }
+        missing = [path for path in share_outputs.values() if not Path(path).exists()]
+        if missing:
+            raise RuntimeError(f"missing existing Kpler PADD 1 share outputs: {missing}")
+        merge_results = merge_eia_outputs(share_outputs)
+        print_merge_results(merge_results)
+        print("kpler padd1 reapplied existing shares without a live pull")
+        return 0
+
     config = runtime_config()
     specs = build_padd1_specs()
     if args.preflight:
@@ -743,17 +770,7 @@ def run(args: argparse.Namespace) -> int:
             "eia_merge_results": merge_results,
         },
     )
-    for result in merge_results:
-        if "latest" in result:
-            print(
-                f"{result['path']} rows={result['rows']} added_columns={result['added_columns']} "
-                f"latest={result['latest']} oldest={result['oldest']} split_sources={len(result['split_source_columns'])}"
-            )
-        else:
-            print(
-                f"{result['path']} rows={result['rows']} added_columns={result['added_columns']} "
-                f"removed_stale_kpler_split_columns={result.get('removed_stale_kpler_split_columns', 0)}"
-            )
+    print_merge_results(merge_results)
     print(f"kpler padd1 eia split manifest={PADD1_MANIFEST}")
     return 0
 
@@ -762,6 +779,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Pull Kpler PADD 1 import/export shares and merge them into EIA files.")
     parser.add_argument("--preflight", action="store_true", help="Write the dynamic pull plan without calling Kpler.")
     parser.add_argument("--use-existing-raw", action="store_true", help="Build shares from existing Kpler raw CSVs without calling Kpler.")
+    parser.add_argument(
+        "--merge-existing-shares",
+        action="store_true",
+        help="Reapply packaged PADD 1 share outputs to refreshed EIA files without calling Kpler.",
+    )
     return parser.parse_args(argv)
 
 

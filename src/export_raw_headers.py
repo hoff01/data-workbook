@@ -943,6 +943,20 @@ def monthly_export_padd_categories(product: str) -> dict[str, list[str]]:
     return MONTHLY_EXPORT_PADD_CATEGORIES
 
 
+def is_monthly_flow_total_volume_series(item: dict[str, object], product: str) -> bool:
+    if item.get("f") != "M" or item.get("units") != "Thousand Barrels":
+        return False
+    name = normalized_monthly_name(str(item.get("name", "")))
+    return any(
+        name == f"{padd} {flow} of {product}, Monthly"
+        for flow, padd_categories in {
+            "Exports": monthly_export_padd_categories(product),
+            "Imports": MONTHLY_IMPORT_PADD_CATEGORIES.get(product, {}),
+        }.items()
+        for padd in padd_categories
+    )
+
+
 def monthly_flow_country(name: str, product: str, padd: str, flow: str) -> str | None:
     prefix = f"{padd} {flow} from " if flow == "Imports" else f"{padd} {flow} to "
     suffix = f" of {product}, Monthly"
@@ -1011,12 +1025,18 @@ def add_monthly_country_flow_buckets(
     columns: list[str] = []
     for padd, categories in padd_categories.items():
         total_column = monthly_flow_total_name(padd, product, flow)
+        total_volume_column = total_column.replace("(Thousand Barrels per Day)", "(Thousand Barrels)")
         columns.append(total_column)
         for category in categories:
             columns.append(monthly_flow_category_name(padd, product, flow, category))
 
         for month, row in rows_by_month.items():
-            total = round_daily(totals[padd].get(month, 0.0))
+            live_total_volume = row.get(total_volume_column)
+            total = (
+                monthly_flow_daily_value(month[:7].replace("-", ""), live_total_volume)
+                if live_total_volume not in {None, ""}
+                else round_daily(totals[padd].get(month, 0.0))
+            )
             row[total_column] = total
             named_sum = 0.0
             for category in categories:
@@ -1209,6 +1229,7 @@ def selected_monthly_items_for_products(products: list[str]) -> list[dict[str, o
         if not (
             is_monthly_common_series(name)
             or any(is_monthly_product_series(name, product) for product in products)
+            or any(is_monthly_flow_total_volume_series(item, product) for product in products)
             or (products == GASOLINE_PRODUCTS and is_monthly_gasoline_series(item))
             or is_monthly_annual_capacity_series(name, units)
         ):
