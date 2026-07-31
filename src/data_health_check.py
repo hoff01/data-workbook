@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 
-PRODUCTS = ["diesel", "jet", "gasoline"]
+PRODUCTS = ["diesel", "jet"]
 REPORT_PATH = Path("data_health_report.json")
 PUBLIC_CSV_DIRS = [Path("eia_weekly"), Path("eia_monthly"), Path("padd_1"), Path("eia_capacity"), Path("power_generation_dfo")]
 
