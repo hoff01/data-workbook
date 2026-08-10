@@ -606,7 +606,9 @@ function verifyCrudeRunsRowFormatting(indexHtml: string, config: ProductConfig):
   assertIncludes(`${config.key} capacity ledger shows exact crude override period`, indexHtml, "if (isCrudeCellAdjustment(adj)) return (adj.frequency === 'weekly' ? 'Week ending ' : 'Month ') + adj.period + ' only';");
   assertNotIncludes(`${config.key} crude cell lookup is not month-wide`, indexHtml, "latestRegionalCapacityAdjustment(point.regionKey, crudeAdjustmentTargetLineId(lineId), periodMonthValue(point.period))");
   assertIncludes(`${config.key} settings saves are serialized to avoid revision races`, indexHtml, "let settingsSaveChain = Promise.resolve();");
-  assertIncludes(`${config.key} settings saves survive an immediate reload`, indexHtml, "body:JSON.stringify(settingsPayload(overrides)),keepalive:true");
+  assertIncludes(`${config.key} small settings saves survive an immediate reload`, indexHtml, "const SETTINGS_KEEPALIVE_MAX_BYTES = 60 * 1024;");
+  assertIncludes(`${config.key} large settings saves bypass the browser keepalive body cap`, indexHtml, "body:requestBody,keepalive:new Blob([requestBody]).size <= SETTINGS_KEEPALIVE_MAX_BYTES");
+  assertIncludes(`${config.key} network save failures explain local-only persistence`, indexHtml, "return sharedSaveOfflineMessage(label);");
   assertIncludes(`${config.key} balance cell saves start immediately`, indexHtml, "function queueBalanceAdjustmentsToServer(options=null){ void saveBalanceAdjustmentsToServer(options || {}); }");
   assertIncludes(`${config.key} crude cell saves start immediately`, indexHtml, "function queueCapacityAdjustmentsToServer(){ void saveCapacityAdjustmentsToServer(); }");
   assertIncludes(`${config.key} historical crude outage estimate starts in 2022`, indexHtml, "function useHistoricalCrudeOutageEstimate(period){ return periodMonthValue(period) >= '2022-01'; }");

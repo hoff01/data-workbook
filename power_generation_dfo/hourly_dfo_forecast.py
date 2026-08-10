@@ -10,6 +10,8 @@ import os
 from pathlib import Path
 import statistics
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
@@ -47,6 +49,13 @@ RESPONDENTS = ["MIDA", "NE"]
 FORECAST_HOURS = int(os.environ.get("POWER_DFO_FORECAST_HOURS", "24"))
 WEATHER_DAYS = int(os.environ.get("POWER_DFO_WEATHER_DAYS", "14"))
 NWS_USER_AGENT = os.environ.get("NWS_USER_AGENT", "python-pulls-power-generation-dfo/0.1 alexhoffmann")
+NWS_RETRY_COUNT = max(1, int(os.environ.get("POWER_DFO_NWS_RETRY_COUNT", "4")))
+NWS_RETRY_BACKOFF_SECONDS = max(0.0, float(os.environ.get("POWER_DFO_NWS_RETRY_BACKOFF_SECONDS", "1")))
+NWS_RETRY_MAX_BACKOFF_SECONDS = max(
+    NWS_RETRY_BACKOFF_SECONDS,
+    float(os.environ.get("POWER_DFO_NWS_RETRY_MAX_BACKOFF_SECONDS", "15")),
+)
+NWS_RETRYABLE_HTTP_STATUS = {408, 425, 429, 500, 502, 503, 504}
 
 WEATHER_POINTS = {
     "ct_hartford": ("CT", "Hartford", 41.7658, -72.6734),
@@ -102,8 +111,31 @@ def request_json(url: str, params: list[tuple[str, str | int]], headers: dict[st
 
 def request_json_url(url: str, headers: dict[str, str] | None = None) -> dict:
     request = urllib.request.Request(url, headers=headers or {"Accept": "application/geo+json", "User-Agent": NWS_USER_AGENT})
-    with urllib.request.urlopen(request, timeout=90) as response:
-        return json.loads(response.read().decode("utf-8"))
+    for attempt in range(1, NWS_RETRY_COUNT + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=90) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as error:
+            if error.code not in NWS_RETRYABLE_HTTP_STATUS or attempt >= NWS_RETRY_COUNT:
+                raise
+            retry_after = error.headers.get("Retry-After") if error.headers else None
+        except (urllib.error.URLError, TimeoutError):
+            if attempt >= NWS_RETRY_COUNT:
+                raise
+            retry_after = None
+        delay = min(NWS_RETRY_MAX_BACKOFF_SECONDS, NWS_RETRY_BACKOFF_SECONDS * (2 ** (attempt - 1)))
+        if retry_after:
+            try:
+                delay = min(NWS_RETRY_MAX_BACKOFF_SECONDS, max(delay, float(retry_after)))
+            except ValueError:
+                pass
+        print(
+            f"power_generation_dfo NWS request retry attempt={attempt + 1}/{NWS_RETRY_COUNT} delay={delay:.1f}s url={url}",
+            file=sys.stderr,
+        )
+        if delay > 0:
+            time.sleep(delay)
+    raise RuntimeError(f"NWS request failed without a terminal error: {url}")
 
 
 def fetch_eia_pages(url: str, base_params: list[tuple[str, str | int]], max_rows: int) -> tuple[list[dict[str, str]], list[dict[str, object]]]:
@@ -267,6 +299,8 @@ def fetch_weather_hourly() -> tuple[list[dict[str, object]], list[dict[str, obje
                     "source": "nws_hourly",
                 }
             )
+        if not rows:
+            raise RuntimeError("NWS hourly forecast returned no usable temperature periods")
         source = {
             "state": state,
             "city": city_name,
@@ -274,6 +308,7 @@ def fetch_weather_hourly() -> tuple[list[dict[str, object]], list[dict[str, obje
             "points": f"{lat:.4f},{lon:.4f}",
             "forecast_hourly_url": forecast_url,
             "hourly_rows": len(rows),
+            "status": "ok",
         }
         return city_key, rows, source
 
@@ -285,10 +320,31 @@ def fetch_weather_hourly() -> tuple[list[dict[str, object]], list[dict[str, obje
             for city_key, (state, city_name, lat, lon) in WEATHER_POINTS.items()
         }
         for future in as_completed(futures):
-            city_key, rows, source = future.result()
-            city_rows[city_key] = rows
-            sources.append(source)
+            city_key = futures[future]
+            state, city_name, lat, lon = WEATHER_POINTS[city_key]
+            try:
+                _, rows, source = future.result()
+                city_rows[city_key] = rows
+                sources.append(source)
+            except Exception as error:
+                message = f"{type(error).__name__}: {error}"
+                sources.append(
+                    {
+                        "state": state,
+                        "city": city_name,
+                        "city_key": city_key,
+                        "points": f"{lat:.4f},{lon:.4f}",
+                        "hourly_rows": 0,
+                        "status": "unavailable",
+                        "error": message,
+                    }
+                )
+                print(f"power_generation_dfo NWS city unavailable city={city_key} error={message}", file=sys.stderr)
     sources.sort(key=lambda source: str(source["city_key"]))
+
+    if not city_rows:
+        failures = "; ".join(f"{source['city_key']}: {source.get('error', 'unavailable')}" for source in sources)
+        raise RuntimeError(f"NWS hourly weather unavailable for all configured cities after retries: {failures}")
 
     combined_by_period: dict[str, dict[str, float]] = defaultdict(dict)
     source_by_period: dict[str, str] = {}
@@ -559,6 +615,12 @@ def main() -> int:
         "generated_at": utc_now().isoformat(),
         "forecast_hours": FORECAST_HOURS,
         "weather_days_requested": WEATHER_DAYS,
+        "weather_fetch": {
+            "locations_requested": len(WEATHER_POINTS),
+            "locations_succeeded": sum(source.get("status") == "ok" for source in weather_sources),
+            "locations_unavailable": sum(source.get("status") == "unavailable" for source in weather_sources),
+            "retry_count": NWS_RETRY_COUNT,
+        },
         "dfo_factor": dfo_factor,
         "dfo_factor_source": factor_source,
         "model": model_name,

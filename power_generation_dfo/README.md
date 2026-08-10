@@ -33,6 +33,11 @@ Optional environment variables:
 - `POWER_DFO_TARGET_FACTOR`: override the DFO-per-oil-MWh target; defaults to `1.15`.
 - `POWER_DFO_END_DATE`: override the daily RTO end date in `YYYY-MM-DD`.
 - `POWER_DFO_PAGE_LENGTH`: override API page size; defaults to `5000`.
+- `POWER_DFO_NWS_RETRY_COUNT`: total attempts for transient NWS weather failures; defaults to `4`.
+- `POWER_DFO_NWS_RETRY_BACKOFF_SECONDS`: initial exponential retry delay; defaults to `1` second.
+- `POWER_DFO_NWS_RETRY_MAX_BACKOFF_SECONDS`: maximum retry delay; defaults to `15` seconds.
+
+Transient NWS failures are retried. If one city remains unavailable, the hourly forecast continues with the other configured cities and records the unavailable location in `hourly_forecast_manifest.json`; the run fails only when every configured city is unavailable.
 
 ## Outputs
 
