@@ -9,9 +9,10 @@
   ],
   "xls": {
     "page_url": "https://www.eia.gov/petroleum/supply/weekly/",
-    "keep_latest_weeks": 2,
+    "keep_latest_weeks": 8,
     "notes": [
       "These are the active balance and supply XLS tables currently linked from the WPSR page.",
+      "Keep a rolling eight-week overlap so delayed historical workbooks cannot leave silent weekly gaps.",
       "Do not include discontinued secure links such as psw10.xls or psw13.xls unless EIA makes them publicly available again.",
       "If EIA changes only the workbook file names, update this table list and leave latest_source as xls."
     ],

@@ -1,25 +1,25 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-08-10T15:09:21.142Z",
+  "generatedAt": "2026-08-17T17:31:58.962Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; forward weekly drivers are held flat at the month value through the saved forecast end date, with exact weekly overrides applied afterward.",
   "latestMonthly": "2026-05-15",
-  "latestWeekly": "2026-07-10",
+  "latestWeekly": "2026-08-07",
   "sourceFiles": [
     {
       "role": "eia_monthly",
       "path": "eia_monthly/diesel.csv",
       "rows": 125,
       "checksum": "4d5d68ba6f8bad7406950c9ce2c4eb6e932c8d2ce02ee204d1ff024592f2013f",
-      "modifiedAt": "2026-07-31T16:08:52.623Z"
+      "modifiedAt": "2026-08-17T17:31:52.239Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/diesel.csv",
-      "rows": 550,
-      "checksum": "ffe3da38317188dd574b85978577477b1f731e640b3e1a43e13b134e61e7f1f7",
-      "modifiedAt": "2026-07-31T16:08:52.633Z"
+      "rows": 554,
+      "checksum": "22a6ff6fe551dea05eb834094a3bf090bdc8348eb9988ec0d15b5b728216fa0b",
+      "modifiedAt": "2026-08-17T17:31:52.250Z"
     },
     {
       "role": "kpler_manifest",
@@ -89,7 +89,7 @@
   ],
   "checksums": {
     "eia_monthly": "4d5d68ba6f8bad7406950c9ce2c4eb6e932c8d2ce02ee204d1ff024592f2013f",
-    "eia_weekly": "ffe3da38317188dd574b85978577477b1f731e640b3e1a43e13b134e61e7f1f7",
+    "eia_weekly": "22a6ff6fe551dea05eb834094a3bf090bdc8348eb9988ec0d15b5b728216fa0b",
     "kpler_manifest": "42dab543801314253ce07cb1efdd853c2a421ede92dc562093d911ae53307ef0",
     "kpler_guide_monthly": "c61f713582ab9ad63b4bd8142652fcc67071164e6098e9df21ee50655e5bb293",
     "kpler_guide_weekly": "6fc6d772836103e716424970e1a5f3f300195ee222a9d8bb6e6b269846f24e7d",
@@ -102,14 +102,14 @@
     "refinery_unit_capacity": "1c512baa10fb4e535784225642aaca5bbce86800311a0fc87d25df1075c5d2a8"
   },
   "optimization": {
-    "generatedAt": "2026-08-10T15:09:21.212Z",
+    "generatedAt": "2026-08-17T17:31:59.023Z",
     "runtimePlan": {
-      "baseRows": 6982,
-      "lazyRows": 45060,
+      "baseRows": 6991,
+      "lazyRows": 45092,
       "lazyRowSharePct": 86.6,
-      "basePayloadKb": 1885.5,
-      "weeklyPayloadKb": 2764.7,
-      "crudeWeeklyPayloadKb": 1126.6,
+      "basePayloadKb": 1886.5,
+      "weeklyPayloadKb": 2764.3,
+      "crudeWeeklyPayloadKb": 1134.8,
       "powerDfoPayloadKb": 355.7,
       "referencePayloadKb": 151.4
     },
@@ -117,8 +117,8 @@
       "monthlyRegional": 1242,
       "weeklyRegional": 5364,
       "monthlyCrude": 1000,
-      "weeklyCrude": 4400,
-      "weeklyGuideMonthly": 1152,
+      "weeklyCrude": 4432,
+      "weeklyGuideMonthly": 1161,
       "movementFlows": 26,
       "monthlyMovementFlowRows": 3588,
       "weeklyMovementFlowRows": 15496,
@@ -134,15 +134,15 @@
         "name": "weekly",
         "path": "data/diesel_balance_runtime_weekly.js",
         "rows": 20860,
-        "estimatedKb": 2764.7,
+        "estimatedKb": 2764.3,
         "status": "optimized",
         "reason": "Weekly regional balances and movement flows stay out of the initial workbook payload."
       },
       {
         "name": "crudeWeekly",
         "path": "data/diesel_balance_runtime_crude_weekly.js",
-        "rows": 4400,
-        "estimatedKb": 1126.6,
+        "rows": 4432,
+        "estimatedKb": 1134.8,
         "status": "optimized",
         "reason": "Weekly crude-runs rows load when weekly balance, charts, or the Crude runs sheet needs shared crude context."
       },
@@ -174,7 +174,7 @@
         "key": "shared-crude",
         "label": "Shared crude context",
         "status": "optimized",
-        "detail": "5,400 crude rows are generated once and reused across product workbooks."
+        "detail": "5,432 crude rows are generated once and reused across product workbooks."
       },
       {
         "key": "reference-isolation",
@@ -194,7 +194,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 151.4 KB versus 1885.5 KB estimated base payload."
+        "detail": "Reference payload is 151.4 KB versus 1886.5 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",

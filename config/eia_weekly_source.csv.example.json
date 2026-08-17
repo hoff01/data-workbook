@@ -8,7 +8,7 @@
   ],
   "xls": {
     "page_url": "https://www.eia.gov/petroleum/supply/weekly/",
-    "keep_latest_weeks": 2,
+    "keep_latest_weeks": 8,
     "tables": [
       {
         "id": "PSW01",

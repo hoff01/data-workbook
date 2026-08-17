@@ -1,25 +1,25 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-08-10T15:09:21.292Z",
+  "generatedAt": "2026-08-17T17:31:59.088Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; forward weekly drivers are held flat at the month value through the saved forecast end date, with exact weekly overrides applied afterward.",
   "latestMonthly": "2026-05-15",
-  "latestWeekly": "2026-07-10",
+  "latestWeekly": "2026-08-07",
   "sourceFiles": [
     {
       "role": "eia_monthly",
       "path": "eia_monthly/jet.csv",
       "rows": 125,
       "checksum": "cdcb0d4d81a46d8482945fb489f89b557a51f887a87a13c07a6793841c15c1c9",
-      "modifiedAt": "2026-07-31T16:08:52.642Z"
+      "modifiedAt": "2026-08-17T17:31:52.259Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/jet.csv",
-      "rows": 550,
-      "checksum": "4969a5d71ae876baa18353be573982bde292e50eccb103ee20cc78ac91518068",
-      "modifiedAt": "2026-07-31T16:08:52.651Z"
+      "rows": 554,
+      "checksum": "39ab51254ea53fb492a8090b8033db6e6bf7630586372c2f45796385c4bfbddc",
+      "modifiedAt": "2026-08-17T17:31:52.268Z"
     },
     {
       "role": "kpler_manifest",
@@ -51,21 +51,21 @@
   ],
   "checksums": {
     "eia_monthly": "cdcb0d4d81a46d8482945fb489f89b557a51f887a87a13c07a6793841c15c1c9",
-    "eia_weekly": "4969a5d71ae876baa18353be573982bde292e50eccb103ee20cc78ac91518068",
+    "eia_weekly": "39ab51254ea53fb492a8090b8033db6e6bf7630586372c2f45796385c4bfbddc",
     "kpler_manifest": "42dab543801314253ce07cb1efdd853c2a421ede92dc562093d911ae53307ef0",
     "kpler_guide_monthly": "67e5b051f93db3e6da605e07528f5de7b97ddb1d46ca8ac0891d5b73d9dbcd97",
     "kpler_guide_weekly": "204a19723e856fbc9899f2df1909cbe83a071ef432a7246e5bcd0851419f3556",
     "refinery_unit_capacity": "1c512baa10fb4e535784225642aaca5bbce86800311a0fc87d25df1075c5d2a8"
   },
   "optimization": {
-    "generatedAt": "2026-08-10T15:09:21.333Z",
+    "generatedAt": "2026-08-17T17:31:59.127Z",
     "runtimePlan": {
-      "baseRows": 6440,
-      "lazyRows": 40546,
+      "baseRows": 6448,
+      "lazyRows": 40578,
       "lazyRowSharePct": 86.3,
-      "basePayloadKb": 1759,
-      "weeklyPayloadKb": 2446.8,
-      "crudeWeeklyPayloadKb": 1126.6,
+      "basePayloadKb": 1759.9,
+      "weeklyPayloadKb": 2446.4,
+      "crudeWeeklyPayloadKb": 1134.8,
       "powerDfoPayloadKb": 0.4,
       "referencePayloadKb": 149.5
     },
@@ -73,8 +73,8 @@
       "monthlyRegional": 1104,
       "weeklyRegional": 4768,
       "monthlyCrude": 1000,
-      "weeklyCrude": 4400,
-      "weeklyGuideMonthly": 1024,
+      "weeklyCrude": 4432,
+      "weeklyGuideMonthly": 1032,
       "movementFlows": 24,
       "monthlyMovementFlowRows": 3312,
       "weeklyMovementFlowRows": 14304,
@@ -90,15 +90,15 @@
         "name": "weekly",
         "path": "data/jet_balance_runtime_weekly.js",
         "rows": 19072,
-        "estimatedKb": 2446.8,
+        "estimatedKb": 2446.4,
         "status": "optimized",
         "reason": "Weekly regional balances and movement flows stay out of the initial workbook payload."
       },
       {
         "name": "crudeWeekly",
         "path": "data/jet_balance_runtime_crude_weekly.js",
-        "rows": 4400,
-        "estimatedKb": 1126.6,
+        "rows": 4432,
+        "estimatedKb": 1134.8,
         "status": "optimized",
         "reason": "Weekly crude-runs rows load when weekly balance, charts, or the Crude runs sheet needs shared crude context."
       },
@@ -130,7 +130,7 @@
         "key": "shared-crude",
         "label": "Shared crude context",
         "status": "optimized",
-        "detail": "5,400 crude rows are generated once and reused across product workbooks."
+        "detail": "5,432 crude rows are generated once and reused across product workbooks."
       },
       {
         "key": "reference-isolation",
@@ -150,7 +150,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 149.5 KB versus 1759 KB estimated base payload."
+        "detail": "Reference payload is 149.5 KB versus 1759.9 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",

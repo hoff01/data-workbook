@@ -76,7 +76,7 @@ DEFAULT_WEEKLY_SOURCE_CONFIG = {
     "latest_source": "xls",
     "xls": {
         "page_url": EIA_WPSR_PAGE_URL,
-        "keep_latest_weeks": 2,
+        "keep_latest_weeks": 8,
         "tables": DEFAULT_WPSR_XLS_TABLES,
     },
     "csv": {
@@ -501,7 +501,7 @@ def configured_wpsr_page_url(config: dict[str, Any]) -> str:
 
 
 def configured_keep_latest_weeks(config: dict[str, Any]) -> int:
-    raw = config.get("xls", {}).get("keep_latest_weeks", 2)
+    raw = config.get("xls", {}).get("keep_latest_weeks", 8)
     try:
         value = int(raw)
     except (TypeError, ValueError):
@@ -849,6 +849,24 @@ def dedupe_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(by_key.values(), key=lambda row: (row["week_ending"], row["source_column"], row["period_type"]))
 
 
+def weekly_continuity_breaks(rows: list[dict[str, Any]]) -> list[tuple[str, str, int]]:
+    weeks = sorted({row["week_ending"] for row in rows if row.get("period_type") == "weekly" and row.get("week_ending")})
+    breaks: list[tuple[str, str, int]] = []
+    for previous, current in zip(weeks, weeks[1:]):
+        delta_days = (date.fromisoformat(current) - date.fromisoformat(previous)).days
+        if delta_days != 7:
+            breaks.append((previous, current, delta_days))
+    return breaks
+
+
+def require_weekly_continuity(rows: list[dict[str, Any]]) -> None:
+    breaks = weekly_continuity_breaks(rows)
+    if not breaks:
+        return
+    detail = ", ".join(f"{previous}->{current} ({delta_days} days)" for previous, current, delta_days in breaks[:5])
+    raise ValueError(f"weekly source has missing or irregular week-ending dates: {detail}")
+
+
 def fetch_parse_history(table_id: str, url: str, force_download: bool) -> tuple[list[dict[str, Any]], dict[tuple[str, str], SeriesMeta], dict[str, Any]]:
     workbook_path, source_info = ensure_workbook(table_id, url, force_download)
     rows, series, sheet_inventory = parse_workbook(table_id, workbook_path)
@@ -933,6 +951,7 @@ def main() -> int:
         latest_rows, latest_series, latest_release_date, latest_signature_value, latest_manifest = latest_future.result()
 
     rows = dedupe_rows([*history_rows, *latest_rows])
+    require_weekly_continuity(rows)
     latest_weeks = {row["week_ending"] for row in latest_rows}
     latest_week = max(row["week_ending"] for row in rows if row["period_type"] == "weekly")
     for row in rows:
@@ -960,7 +979,7 @@ def main() -> int:
         "primary_source_format": f"historical_dnav_xls_plus_wpsr_{latest_mode}",
         "transition_policy": (
             "Historical dnav workbooks provide the long history; current WPSR XLS tables provide the default latest "
-            "current/week-ago overlay and win on duplicate week/sourcekey/period_type keys. Switch to the WPSR CSV "
+            "rolling overlap and win on duplicate week/sourcekey/period_type keys. Switch to the WPSR CSV "
             f"overlay later with --latest-source csv or {EIA_WEEKLY_LATEST_SOURCE_ENV}=csv after EIA actually changes dissemination."
         ),
         "latest_source_mode": latest_mode,
@@ -976,6 +995,7 @@ def main() -> int:
         "schema": [{"name": name, "type": str(dtype)} for name, dtype in FIELDS],
         "validation": {
             "no_rows_before_2016": all(row["week_ending"] >= MIN_DATA_WEEK_ISO for row in rows),
+            "weekly_dates_contiguous": True,
             "latest_overlay_rows_present": len(latest_rows) > 0,
             "latest_overlay_uses_sourcekey": all(bool(row["source_column"]) for row in latest_rows),
             "historical_workbook_count": len(history_manifest),
