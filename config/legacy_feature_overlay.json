@@ -34,10 +34,21 @@
     "tests/test_weekly_xls_continuity.py"
   ],
   "preserve_from_target": [
+    ".env.local",
     "balance_dashboard_settings.json",
-    "outages.json",
+    "Diesel_Balance/diesel_balance.json",
     "Diesel_Balance/saved_views.json",
-    "Jet_Balance/saved_views.json",
-    ".env.local"
-  ]
+    "Jet_Balance/jet_balance.json",
+    "Jet_Balance/saved_views.json"
+  ],
+  "preserve_semantic_json": {
+    "outages.json": [
+      "generatedAt"
+    ]
+  },
+  "test_preservation_fixtures": {
+    ".env.local": "LEGACY_OVERLAY_SENTINEL=preserve\n",
+    "Diesel_Balance/diesel_balance.json": "{\"schema\":\"us-balances.dashboard-state\",\"schemaVersion\":1,\"product\":\"diesel\",\"fixture\":\"legacy-projections-and-overrides\"}\n",
+    "Jet_Balance/jet_balance.json": "{\"schema\":\"us-balances.dashboard-state\",\"schemaVersion\":1,\"product\":\"jet\",\"fixture\":\"legacy-projections-and-overrides\"}\n"
+  }
 }

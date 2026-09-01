@@ -63,18 +63,32 @@ copies, not competing implementations.
 
 ## Add the weekly/Kpler/SharePoint feature to an older checkout
 
-This feature is a source-and-config overlay. It does not require replacing the
-older project's EIA datasets, saved adjustments, outages, named views, or local
-credentials. The authoritative file list is
+The transfer is designed for a simple replace-all workflow. The new project
+provides the code and current datasets; the older project provides the saved
+projection state, overrides, and default view. The authoritative file list is
 `config/legacy_feature_overlay.json`.
 
+The older project remains the source of truth because it contains the working
+forecast horizon, manual balance and refinery-capacity adjustments, outages,
+saved scenarios, materialized projections, named views, and weekly forecast
+archives. Before copying the feature files, open the older project through its
+launcher and use **Save dashboard** for each product with projection work that
+must be retained. This materializes the exact state in
+`Diesel_Balance/diesel_balance.json` or `Jet_Balance/jet_balance.json` instead
+of leaving it only in an open browser tab.
+
 1. Back up the older project.
-2. Copy every path under `runtime_files` from the current checkout onto the
-   matching path in the older project, overwriting those listed files only.
-3. Keep every path under `preserve_from_target` from the older project.
-4. Run `npm run build:balances` in the older project so its own Diesel and Jet
-   data are rebuilt with the new generator.
-5. Run the normal dashboard tests and open the dashboard through its launcher.
+2. In the older project, click **Save dashboard** and **Save as default** for
+   each product whose state must be retained.
+3. Copy every old-project path under `preserve_from_target` and
+   `preserve_semantic_json` into the matching path in the new project folder,
+   replacing the new folder's copy when one exists.
+4. The new project folder is now prepared with the old projections and
+   overrides. Copy that entire folder over the other installation and choose
+   replace-all.
+5. Open it through the launcher. The default view loads normally; use **Load
+   saved dashboard** once when the exact saved scenarios/materialized dashboard
+   state also needs to be restored into the live workbook.
 
 Do not copy only `Diesel_Balance/index.html` or only the `Diesel_Balance`
 folder. The page will still open, but the older server/generator does not have
@@ -82,6 +96,9 @@ the matching weekly package and SharePoint implementation; a later save or
 rebuild can overwrite the copied page and reject its dashboard-state checksum.
 
 From the current checkout, `npm run test:legacy-overlay` recreates the
-pre-feature commit in a temporary directory, copies only the manifest's small
-source/config/test overlay, preserves the older datasets, and runs the balance,
-server, SharePoint, Kpler, dashboard, and Windows compatibility gates.
+pre-feature project in a temporary directory, installs the small feature,
+hashes every old user-state path before the copy, and proves the projections,
+overrides, saved dashboard state, and default views remain unchanged after the
+rebuild. The command fails only as a developer safety alarm if future code
+accidentally overwrites that state; the normal copy/replace workflow does not
+intentionally fail.
