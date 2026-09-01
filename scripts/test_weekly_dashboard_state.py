@@ -159,6 +159,7 @@ payload = weekly_images.build_weekly_payload(
 
 assert [row["week_ending"] for row in payload["periods"]] == periods
 assert payload["periods"][1]["highlight"] is True
+assert len(payload["inventory_changes"]["forecasts"]) == 5, "all five weekly forecast inventory charts must be exported"
 p3 = next(region for region in payload["table"]["regions"] if region["key"] == "padd3")
 exports_row = next(row for row in p3["rows"] if row["key"] == "exports")
 net_row = next(row for row in p3["rows"] if row["key"] == "net_kb")
@@ -185,14 +186,26 @@ with TemporaryDirectory() as temporary_directory:
         "diesel": {
             "actual_week_ending": periods[0],
             "latest_html": "diesel_export_dashboard.html",
+            "archive_html": f"{periods[0]}/diesel_export_dashboard.html",
+            "manifest": f"{periods[0]}/diesel_export_dashboard.manifest.json",
         }
     }
     (output_root / "index.json").write_text(
         json.dumps({"schema_version": 4, "weeks": [], "portable_dashboards": portable}),
         encoding="utf-8",
     )
+    archive = output_root / periods[0]
+    archive.mkdir()
+    (archive / "diesel_weekly_stats.json").write_text(
+        json.dumps({"product": {"key": "diesel"}, "periods": [{"week_ending": periods[0]}]}),
+        encoding="utf-8",
+    )
+    (archive / "diesel_export_dashboard.html").write_text("portable", encoding="utf-8")
+    (archive / "diesel_export_dashboard.manifest.json").write_text("{}", encoding="utf-8")
     weekly_images.update_output_catalog(output_root)
     refreshed_catalog = json.loads((output_root / "index.json").read_text(encoding="utf-8"))
     assert refreshed_catalog["portable_dashboards"] == portable, "weekly refresh must preserve standalone HTML catalog entries"
+    assert refreshed_catalog["weeks"][0]["dashboard_html"] == "diesel_export_dashboard.html"
+    assert refreshed_catalog["weeks"][0]["dashboard_html_manifest"] == "diesel_export_dashboard.manifest.json"
 
 print("weekly dashboard-state contract ok")

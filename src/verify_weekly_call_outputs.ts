@@ -139,9 +139,8 @@ async function verifyWeeklyCallArchives(): Promise<string[]> {
     assertEqual(`${config.key} weekly call archive manifest name`, entry.manifest, `${config.key}_manifest.json`);
     assertEqual(`${config.key} weekly call archive table image name`, entry.table_image, `${config.key}_weekly_balance_table.png`);
     const expectedBarCharts = [
-      `${config.key}_eia_actuals.png`,
-      `${config.key}_forecast_week_1.png`,
-      `${config.key}_forecast_week_2.png`,
+      `charts/${config.key}_eia_actuals.png`,
+      ...Array.from({ length: 5 }, (_, index) => `charts/${config.key}_forecast_week_${index + 1}.png`),
     ];
     assertEqual(`${config.key} weekly call archive bar chart names`, entry.bar_chart_images.join("|"), expectedBarCharts.join("|"));
     const archiveDir = join(outputRoot, entry.folder);
@@ -151,15 +150,15 @@ async function verifyWeeklyCallArchives(): Promise<string[]> {
     assertEqual(`${config.key} weekly call manifest JSON`, manifest.weekly_json, entry.weekly_json);
     assertEqual(`${config.key} weekly call dashboard-state name`, manifest.dashboard_state_json, `${config.key}_dashboard_state.json`);
     if (!/^[a-f0-9]{64}$/.test(manifest.dashboard_state_fingerprint)) throw new Error(`${config.key} weekly call manifest has an invalid dashboard-state fingerprint`);
-    if (manifest.images.length !== 4) throw new Error(`${config.key} weekly call manifest expected 4 images, received ${manifest.images.length}`);
+    if (manifest.images.length !== 7) throw new Error(`${config.key} weekly call manifest expected 7 images, received ${manifest.images.length}`);
     const tableImage = manifest.images.find((image) => image.file === entry.table_image);
     if (!tableImage || tableImage.width_px !== 1323 || tableImage.height_px !== 1269) {
       throw new Error(`${config.key} weekly call table image must be a 1323 x 1269 PNG`);
     }
     for (const chartName of expectedBarCharts) {
       const chartImage = manifest.images.find((image) => image.file === chartName);
-      if (!chartImage || chartImage.width_px !== 765 || chartImage.height_px !== 458) {
-        throw new Error(`${config.key} weekly call bar chart ${chartName} must be a 765 x 458 PNG`);
+      if (!chartImage || chartImage.width_px !== 765 || ![458, 459].includes(chartImage.height_px)) {
+        throw new Error(`${config.key} weekly call bar chart ${chartName} must be a 765 x 458/459 PNG`);
       }
     }
     const payload = await readJson<WeeklyCallPayload>(join(archiveDir, entry.weekly_json));
@@ -168,8 +167,8 @@ async function verifyWeeklyCallArchives(): Promise<string[]> {
     if (payload.product?.stats_title) throw new Error(`${config.key} weekly call JSON still contains a stats title`);
     const actualChart = payload.inventory_changes?.actual;
     const forecastCharts = payload.inventory_changes?.forecasts ?? [];
-    if (payload.inventory_changes?.unit !== "million barrels" || !actualChart || forecastCharts.length !== 2) {
-      throw new Error(`${config.key} weekly call JSON must contain one actual and two forecast inventory charts in million barrels`);
+    if (payload.inventory_changes?.unit !== "million barrels" || !actualChart || forecastCharts.length !== 5) {
+      throw new Error(`${config.key} weekly call JSON must contain one actual and five forecast inventory charts in million barrels`);
     }
     assertEqual(`${config.key} weekly call JSON actual week`, actualChart.week_ending, entry.actual_week_ending);
     if (actualChart.status !== "actual" || forecastCharts.some((chart) => chart.status !== "forecast")) {

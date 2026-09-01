@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "product": "diesel",
+  "generated_at": "2026-09-01T00:10:03-04:00",
+  "actual_week_ending": "2026-08-21",
+  "dashboard_state": "/Users/alexhoffmann/US_Balances/Diesel_Balance/diesel_balance.json",
+  "dashboard_state_fingerprint": "95d83f2d4d323c5254bc1ba2bce4e3672bd332934cc6dc4405b02e8c0823689e",
+  "view": {
+    "frequency": "monthly",
+    "region": "us",
+    "chartRegion": "us",
+    "metric": "balanceKbd",
+    "crudeRegion": "padd1",
+    "sheet": "reference",
+    "showLegends": true,
+    "showForecast": true,
+    "showRegionTitles": true,
+    "showFourWeekAverage": false,
+    "showPriorYear": true,
+    "showCurrentYear": true,
+    "showNextYearForecast": true,
+    "weeklyForecastWeeks": 18,
+    "bandYears": [
+      2025,
+      2024,
+      2023,
+      2022,
+      2019
+    ],
+    "historyYears": [],
+    "labelWidth": 360,
+    "labelSize": 11,
+    "periodWindow": "smart",
+    "balanceSearch": "",
+    "balanceFocus": "all",
+    "reconcileMonth": "2026-06"
+  },
+  "archive_html": "diesel_export_dashboard.html",
+  "latest_html": "diesel_export_dashboard.html",
+  "size_bytes": 12960186,
+  "sha256": "93f242de76bc4e4b6ac9b1f96323d1333183785eb192696a3365faeda0c7c66b",
+  "standalone": true
+}

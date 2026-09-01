@@ -170,10 +170,13 @@ const settingsRebuildScript = process.env.US_BALANCES_SETTINGS_REBUILD_SCRIPT
   : "";
 const weeklyCallOutputScript = process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT
   ? resolve(process.env.US_BALANCES_WEEKLY_OUTPUT_SCRIPT)
-  : join(ROOT, "weekly_call_outputs", "generate_weekly_images.py");
+  : join(ROOT, "weekly_call_outputs", "export_weekly_package.py");
 const dashboardHtmlOutputScript = process.env.US_BALANCES_DASHBOARD_HTML_OUTPUT_SCRIPT
   ? resolve(process.env.US_BALANCES_DASHBOARD_HTML_OUTPUT_SCRIPT)
   : join(ROOT, "weekly_call_outputs", "export_dashboard_html.py");
+const weeklyOutputRoot = process.env.US_BALANCES_WEEKLY_OUTPUT_ROOT
+  ? resolve(process.env.US_BALANCES_WEEKLY_OUTPUT_ROOT)
+  : "";
 const validGroups = new Set<DashboardJobGroup>([
   "weekly",
   "monthly",
@@ -550,7 +553,7 @@ function setStatus(job){
   const state = job?.status || 'idle';
   const result = job?.result;
   const productLabel = job?.product === 'jet' ? 'Jet' : job?.product === 'diesel' ? 'Diesel' : '';
-  statusEl.textContent = state === 'idle' && settingsRebuildRunning ? 'Rebuilding forecast horizon…' : state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly table and bar charts saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' refreshed — data unchanged' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' refreshed with warnings — data unchanged' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly table and bar charts' : job.group + ' refresh running';
+  statusEl.textContent = state === 'idle' && settingsRebuildRunning ? 'Rebuilding forecast horizon…' : state === 'idle' && !refreshReady ? 'Preparing refresh tools…' : state === 'idle' ? 'Ready — waiting to refresh' : state === 'succeeded' && result === 'saved' ? productLabel + ' weekly forecast package saved' : state === 'succeeded' && result === 'updated' ? job.group + ' updated — new data loaded' : state === 'succeeded' && result === 'current' ? job.group + ' refreshed — data unchanged' : state === 'succeeded' ? job.group + ' refresh complete' : state === 'partial' && result === 'updated' ? job.group + ' updated with warnings' : state === 'partial' && result === 'current' ? job.group + ' refreshed with warnings — data unchanged' : state === 'partial' ? job.group + ' complete with warnings' : state === 'failed' ? job.group + ' failed' : job.group === 'weekly-call-outputs' ? 'Saving ' + productLabel + ' weekly forecast package' : job.group + ' refresh running';
   statusEl.className = 'runnerStatus ' + (state === 'idle' ? '' : state);
   buttons.forEach(button => button.disabled = state === 'running' || settingsRebuildRunning || !refreshReady);
   logEl.textContent = job?.lines?.length ? job.lines.join('\\n') : settingsRebuildRunning ? 'The forecast horizon is rebuilding and verifying both dashboards. Refresh buttons will unlock when it commits.' : refreshReady ? 'No refresh is running. Choose a refresh button to begin.' : 'First-run setup is installing the local refresh tools. No refresh will start automatically.';
@@ -879,7 +882,7 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
   const lock = acquireRunnerLock(group);
   const updateScript = join(ROOT, "src", "update_pipeline.ts");
   const invocation = savesWeeklyCallOutputs
-    ? { command: pythonCommand, args: [weeklyCallOutputScript, "--product", outputProduct as ProductKey, "--dashboard-state", dashboardStatePath(outputProduct as ProductKey)] }
+    ? { command: pythonCommand, args: [weeklyCallOutputScript, "--product", outputProduct as ProductKey, "--dashboard-state", dashboardStatePath(outputProduct as ProductKey), ...(weeklyOutputRoot ? ["--output-dir", weeklyOutputRoot] : [])] }
     : savesDashboardHtmlOutput
       ? { command: pythonCommand, args: [dashboardHtmlOutputScript, "--product", outputProduct as ProductKey, "--dashboard-state", dashboardStatePath(outputProduct as ProductKey)] }
     : tsxCli
@@ -985,11 +988,11 @@ function startJob(group: DashboardJobGroup, product: ProductKey | null = null): 
       ? job.result === "saved"
         ? savesDashboardHtmlOutput
           ? `${outputProduct === "jet" ? "Jet" : "Diesel"} portable dashboard HTML was saved to weekly_call_outputs/outputs in the latest actual-week archive.`
-          : `${outputProduct === "jet" ? "Jet" : "Diesel"} weekly table and bar charts were saved to weekly_call_outputs/outputs in the latest actual-week archive.`
+          : `${outputProduct === "jet" ? "Jet" : "Diesel"} weekly forecast package and portable dashboard were saved; the configured SharePoint folder is updated when root_path is set.`
         : job.result === null
           ? "Refresh completed and the workbooks were rebuilt, but the source change comparison was unavailable."
           : hasWarnings
-            ? `Refresh completed with warnings; dashboard source data is ${job.dataChanged ? "updated" : "already current"}. Review skipped steps.`
+            ? `Refresh completed with warnings; dashboard source data is ${job.dataChanged ? "updated" : "already current"}. Review warning or skipped steps; Kpler may still reflect the last valid pull.`
             : job.dataChanged
               ? "Refresh completed; new dashboard source data was loaded and the workbooks were rebuilt."
               : "Refresh completed; upstream source data was unchanged, and the workbooks were rebuilt anyway."

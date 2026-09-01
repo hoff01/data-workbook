@@ -190,7 +190,7 @@ def parse_number(value: Any) -> float | None:
 def clean_output_dir(path: Path) -> None:
     path.mkdir(exist_ok=True)
     for child in path.iterdir():
-        if child.name == "cache":
+        if child.name in {"cache", "diesel.csv", "jet.csv", "gasoline.csv"}:
             continue
         if child.is_dir():
             shutil.rmtree(child)

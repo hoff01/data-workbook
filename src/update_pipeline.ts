@@ -13,6 +13,7 @@ type Step = {
   args: string[];
   skipIfEnv?: string;
   skipReason?: string;
+  warningOnFailure?: string;
 };
 
 type StepBranch = {
@@ -108,17 +109,27 @@ function skipIfEnv(step: Step, envName: string, skipReason: string): Step {
   return { ...step, skipIfEnv: envName, skipReason };
 }
 
+function warnOnFailure(step: Step, warning: string): Step {
+  return { ...step, warningOnFailure: warning };
+}
+
 function kplerContextSteps(): Step[] {
   return [
-    skipIfEnv(
-      scriptStep("Kpler flow package", "kpler"),
-      "US_BALANCES_SKIP_KPLER_REFRESH",
-      "using the existing local Kpler outputs because US_BALANCES_SKIP_KPLER_REFRESH is set",
+    warnOnFailure(
+      skipIfEnv(
+        scriptStep("Kpler flow package", "kpler"),
+        "US_BALANCES_SKIP_KPLER_REFRESH",
+        "using the existing local Kpler outputs because US_BALANCES_SKIP_KPLER_REFRESH is set",
+      ),
+      "Kpler API data was not updated; continuing with existing Kpler guides and last valid packaged PADD 1 shares",
     ),
-    skipIfEnv(
-      scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia"),
-      "US_BALANCES_SKIP_KPLER_REFRESH",
-      "using the existing local Kpler PADD 1 split outputs because US_BALANCES_SKIP_KPLER_REFRESH is set",
+    warnOnFailure(
+      skipIfEnv(
+        scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia"),
+        "US_BALANCES_SKIP_KPLER_REFRESH",
+        "using the existing local Kpler PADD 1 split outputs because US_BALANCES_SKIP_KPLER_REFRESH is set",
+      ),
+      "Kpler PADD 1 split was not refreshed; continuing without blocking the dashboard rebuild",
     ),
   ];
 }
@@ -136,7 +147,7 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
     scriptStep("weekly EIA pull", "weekly:raw"),
     scriptStep("weekly export files", "export:weekly:clean"),
     scriptStep("clean public EIA outputs", "clean:eia"),
-    scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia"),
+    ...kplerContextSteps(),
     scriptStep("weekly freshness check", "verify:weekly"),
     scriptStep("rebuild balance dashboards", "build:balances"),
     scriptStep("dashboard freshness check", "verify:dashboard"),
@@ -224,24 +235,31 @@ async function runStep(step: Step, progress: RunProgress, context?: string): Pro
     return 0;
   }
   console.log(`[update] step ${index}/${progress.totalSteps} start: ${label} :: ${commandText(step)}`);
-  await new Promise<void>((resolve, reject) => {
-    const child = spawn(step.command, step.args, {
-      cwd: ROOT,
-      env: { ...process.env, FORCE_COLOR: "0" },
-      stdio: ["ignore", "pipe", "pipe"],
-      windowsHide: true,
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(step.command, step.args, {
+        cwd: ROOT,
+        env: { ...process.env, FORCE_COLOR: "0" },
+        stdio: ["ignore", "pipe", "pipe"],
+        windowsHide: true,
+      });
+      child.stdout.on("data", (chunk: Buffer) => process.stdout.write(chunk));
+      child.stderr.on("data", (chunk: Buffer) => process.stderr.write(chunk));
+      child.on("error", reject);
+      child.on("close", (code, signal) => {
+        if (code === 0) {
+          resolve();
+          return;
+        }
+        reject(new Error(`${step.label} failed with code ${code ?? "n/a"} signal ${signal ?? "n/a"}`));
+      });
     });
-    child.stdout.on("data", (chunk: Buffer) => process.stdout.write(chunk));
-    child.stderr.on("data", (chunk: Buffer) => process.stderr.write(chunk));
-    child.on("error", reject);
-    child.on("close", (code, signal) => {
-      if (code === 0) {
-        resolve();
-        return;
-      }
-      reject(new Error(`${step.label} failed with code ${code ?? "n/a"} signal ${signal ?? "n/a"}`));
-    });
-  });
+  } catch (error) {
+    if (!step.warningOnFailure) throw error;
+    const elapsed = performance.now() - started;
+    console.log(`[update] step ${index}/${progress.totalSteps} warning: ${label} reason=${step.warningOnFailure}; error=${error instanceof Error ? error.message : String(error)} duration=${formatDuration(elapsed)}`);
+    return elapsed;
+  }
   const elapsed = performance.now() - started;
   console.log(`[update] step ${index}/${progress.totalSteps} done: ${label} duration=${formatDuration(elapsed)}`);
   return elapsed;

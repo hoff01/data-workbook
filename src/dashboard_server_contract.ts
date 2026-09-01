@@ -7,11 +7,16 @@ export const DASHBOARD_SERVER_APP_ID = "balance-dashboard-update-server";
 const DASHBOARD_SERVER_BUILD_INPUTS = [
   "src/dashboard_server_contract.ts",
   "src/dashboard_update_server.ts",
+  "src/export_raw_headers.py",
+  "src/kpler_padd1_eia_split.py",
   "src/shared_outages.ts",
   "src/update_data_fingerprint.ts",
   "src/update_pipeline.ts",
   "weekly_call_outputs/generate_weekly_images.py",
+  "weekly_call_outputs/export_weekly_package.py",
+  "weekly_call_outputs/export_dashboard_html.py",
   "weekly_call_outputs/weekly_stats_config.json",
+  "config/sharepoint_weekly_export.json",
 ];
 
 export function dashboardServerBuildId(root: string): string {

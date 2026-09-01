@@ -11,10 +11,10 @@ period build/draw values.
 Double-click `run_weekly_images.bat`.
 
 When the main dashboard is opened with its one-click launcher, the workflow is
-available in either workbook's **Reference** tab. **Save Diesel weekly call
-images** creates the Diesel set, while **Save Jet weekly call images** creates
-the Jet set. Each button first saves the exact current dashboard state into the
-product folder and then runs the formatter from that state. Both buttons run in
+available in either workbook's **Reference** tab. **Save Diesel weekly
+forecast** creates the Diesel package, while **Save Jet weekly forecast**
+creates the Jet package. Each button first saves the exact current dashboard state into the
+product folder, creates the portable static dashboard, and then runs the formatter from that state. Both buttons run in
 the background, use the launcher's user-local Python and Node runtimes, and
 report the product-specific saved or failed status in the Reference panel.
 
@@ -32,7 +32,9 @@ The launcher:
 5. Creates a weekly-only JSON containing the latest EIA actual, the next five
    forecast weeks, and the portable dashboard state used for the run.
 6. Renders the title-free weekly balance table plus the latest EIA Actuals bar
-   chart and the first two Forecast bar charts.
+   chart and all five Forecast bar charts.
+7. Copies the complete latest package to the configured locally synced
+   SharePoint path, overwriting files with the same names.
 
 New intermediate full-bundle files are removed after the weekly JSON is
 created. The dashboard does not load or depend on this package.
@@ -73,9 +75,13 @@ outputs/
     diesel_dashboard_state.json
     diesel_weekly_stats.json
     diesel_weekly_balance_table.png
-    diesel_eia_actuals.png
-    diesel_forecast_week_1.png
-    diesel_forecast_week_2.png
+    charts/
+      diesel_eia_actuals.png
+      diesel_forecast_week_1.png
+      diesel_forecast_week_2.png
+      diesel_forecast_week_3.png
+      diesel_forecast_week_4.png
+      diesel_forecast_week_5.png
     diesel_manifest.json
     jet_dashboard_state.json
     jet_weekly_stats.json
@@ -91,7 +97,40 @@ JSON. Re-running during the same EIA week refreshes that folder. The next actual
 week automatically creates a new folder, preserving prior weeks. Diesel and Jet
 use product-prefixed JSON, manifest, table, and bar-chart names, so running one
 side never overwrites the other. `index.json` is the catalog of every archived
-product/week pair and lists the table plus bar-chart PNGs.
+product/week pair and lists the table plus all six inventory-chart PNGs.
+
+## SharePoint file-path export
+
+Edit `config/sharepoint_weekly_export.json` and put the locally synced
+SharePoint/OneDrive folder in `root_path`. Forward slashes work on Windows and
+avoid JSON backslash escaping, for example:
+
+```json
+{
+  "root_path": "C:/Users/your.name/Organization/Shared Documents/Weekly Balances",
+  "product_folders": {
+    "diesel": "Diesel",
+    "jet": "Jet"
+  },
+  "charts_folder": "charts"
+}
+```
+
+The first weekly save creates both `Diesel` and `Jet` folders. Each product
+folder is a latest-package location containing the portable dashboard HTML,
+weekly JSON, saved dashboard state, table PNG, manifests, and
+`latest_weekly_export.json`; its `charts` folder contains the actual and five
+forecast inventory charts. Re-running the save overwrites files with the same
+names. The normal dated local archive under `weekly_call_outputs/outputs`
+remains available as a separate history.
+
+For managed runners, `US_BALANCES_SHAREPOINT_EXPORT_ROOT` can temporarily
+override `root_path` without editing the JSON file.
+
+The Weekly, Other, and Complete data updates attempt the live Kpler API pull.
+If Kpler authentication or the API fails, the update finishes with a visible
+**Kpler not updated** warning, retains existing Kpler guides, reapplies the last
+valid packaged PADD 1 shares, and still rebuilds the dashboards.
 
 The first table column is the latest actual. The yellow column is the first
 forecast and the remaining four columns are forecast weeks two through five.
@@ -121,8 +160,12 @@ product manifest, making every archived image reproducible.
 
 ## Forecast and adjustment rules
 
-- Weekly actual exports remain the solved/source weekly total. Destination
-  values do not recalculate that actual total.
+- Weekly actual regional exports inherit the adjusted monthly export values,
+  including manual monthly edits.
+- Total U.S. weekly actual exports remain the direct reported weekly value.
+  PADD 3 Other is the residual solver that reconciles the regional rows to that
+  U.S. total, and product supplied is recalculated to preserve the weekly
+  stock-change identity.
 - Forward weekly forecast exports are built from the adjusted monthly forecast.
   PADD 3 is the sum of Latin America, Europe, Africa, and Other; the other PADD
   export rows use their adjusted monthly total.

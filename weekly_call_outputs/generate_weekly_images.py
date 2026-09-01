@@ -4,7 +4,7 @@
 The normal workflow is:
 1. Run the balance repository's existing full-bundle JSON generator.
 2. Build a compact weekly-only JSON contract from that bundle.
-3. Render the table and bar-chart PNGs exclusively from the compact weekly JSON.
+3. Render the table and all six inventory-chart PNGs exclusively from the compact weekly JSON.
 
 The package is intentionally relocatable.  Put ``weekly_call_outputs`` directly
 inside another compatible balance repository and run the Windows launcher.
@@ -39,6 +39,7 @@ from matplotlib.ticker import FuncFormatter, MaxNLocator
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 DEFAULT_CONFIG_PATH = PACKAGE_DIR / "weekly_stats_config.json"
+DEFAULT_SHAREPOINT_CONFIG_PATH = PACKAGE_DIR.parent / "config" / "sharepoint_weekly_export.json"
 
 INK = "#16181d"
 GRID = "#d8dde3"
@@ -104,6 +105,12 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "run_balance_json_builder": True,
     "output_folder": "outputs",
     "format": DEFAULT_FORMAT,
+}
+
+DEFAULT_SHAREPOINT_CONFIG: dict[str, Any] = {
+    "root_path": "",
+    "product_folders": {"diesel": "Diesel", "jet": "Jet"},
+    "charts_folder": "charts",
 }
 
 PRODUCT_LAYOUTS: dict[str, dict[str, Any]] = {
@@ -276,6 +283,33 @@ def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]
 
 def load_config(path: Path) -> dict[str, Any]:
     return deep_merge(DEFAULT_CONFIG, load_json(path) if path.exists() else {})
+
+
+def load_sharepoint_config(path: Path) -> dict[str, Any]:
+    config = deep_merge(
+        DEFAULT_SHAREPOINT_CONFIG,
+        load_json(path) if path.exists() else {},
+    )
+    product_folders = config.get("product_folders")
+    if not isinstance(product_folders, dict):
+        raise ExportError("SharePoint product_folders must be a JSON object.")
+    for product in PRODUCT_LAYOUTS:
+        folder = str(product_folders.get(product, "")).strip()
+        if not folder or folder in {".", ".."} or "/" in folder or "\\" in folder:
+            raise ExportError(
+                f"SharePoint folder for {product} must be one safe folder name."
+            )
+        product_folders[product] = folder
+    charts_folder = str(config.get("charts_folder", "charts")).strip()
+    if (
+        not charts_folder
+        or charts_folder in {".", ".."}
+        or "/" in charts_folder
+        or "\\" in charts_folder
+    ):
+        raise ExportError("SharePoint charts_folder must be one safe folder name.")
+    config["charts_folder"] = charts_folder
+    return config
 
 
 def setting(section: dict[str, Any], key: str) -> float:
@@ -777,7 +811,7 @@ def build_weekly_payload(
         "inventory_changes": {
             "unit": "million barrels",
             "actual": inventory_change(latest_actual),
-            "forecasts": [inventory_change(period) for period in forecast_periods[:2]],
+            "forecasts": [inventory_change(period) for period in forecast_periods],
         },
     }
     if dashboard_state:
@@ -804,8 +838,8 @@ def validate_payload(payload: dict[str, Any]) -> None:
         raise ExportError(f"Expected four table sections; found {len(table_regions)}.")
     actual_chart = payload.get("inventory_changes", {}).get("actual", {})
     forecast_charts = payload.get("inventory_changes", {}).get("forecasts", [])
-    if len(forecast_charts) != 2:
-        raise ExportError("The weekly JSON must contain the first two forecast inventory charts.")
+    if len(forecast_charts) != 5:
+        raise ExportError("The weekly JSON must contain all five forecast inventory charts.")
     for chart in [actual_chart, *forecast_charts]:
         if len(chart.get("labels", [])) != len(chart.get("values_mb", [])):
             raise ExportError(f"Chart labels and values do not align for {chart.get('week_ending')}.")
@@ -1161,12 +1195,14 @@ def render_outputs(
     payload = load_json(payload_path)
     validate_payload(payload)
     product = payload["product"]["key"]
+    charts_dir = output_dir / "charts"
+    charts_dir.mkdir(parents=True, exist_ok=True)
     individual_dir = output_dir / "individual_outputs"
     table_path = output_dir / f"{product}_weekly_balance_table.png"
-    actual_path = output_dir / f"{product}_eia_actuals.png"
+    actual_path = charts_dir / f"{product}_eia_actuals.png"
     forecast_paths = [
-        output_dir / f"{product}_forecast_week_1.png",
-        output_dir / f"{product}_forecast_week_2.png",
+        charts_dir / f"{product}_forecast_week_{index}.png"
+        for index in range(1, len(payload["inventory_changes"]["forecasts"]) + 1)
     ]
 
     obsolete_paths = [
@@ -1186,12 +1222,102 @@ def render_outputs(
     render_inventory_chart(payload["inventory_changes"]["actual"], actual_path, dpi, format_config)
     for chart, path in zip(payload["inventory_changes"]["forecasts"], forecast_paths):
         render_inventory_chart(chart, path, dpi, format_config)
+    for legacy_chart in [actual_path, *forecast_paths[:2]]:
+        atomic_copy_file(legacy_chart, output_dir / legacy_chart.name)
     return [table_path, actual_path, *forecast_paths]
 
 
 def image_dimensions(path: Path) -> tuple[int, int]:
     image = mpimg.imread(path)
     return int(image.shape[1]), int(image.shape[0])
+
+
+def atomic_copy_file(source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(f".{destination.name}.{os.getpid()}.tmp")
+    try:
+        shutil.copy2(source, temporary)
+        os.replace(temporary, destination)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def atomic_write_json(destination: Path, value: dict[str, Any]) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(f".{destination.name}.{os.getpid()}.tmp")
+    try:
+        temporary.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+        os.replace(temporary, destination)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def sharepoint_root(config: dict[str, Any]) -> Path | None:
+    configured = os.environ.get("US_BALANCES_SHAREPOINT_EXPORT_ROOT", "").strip()
+    if not configured:
+        configured = str(config.get("root_path", "")).strip()
+    if not configured:
+        return None
+    expanded = Path(os.path.expandvars(os.path.expanduser(configured)))
+    return expanded if expanded.is_absolute() else (PACKAGE_DIR.parent / expanded).resolve()
+
+
+def publish_sharepoint_export(
+    config_path: Path,
+    product: str,
+    payload_path: Path,
+    manifest_path: Path,
+    images: list[Path],
+) -> Path | None:
+    config = load_sharepoint_config(config_path)
+    root = sharepoint_root(config)
+    if root is None:
+        print(f"SharePoint export skipped: set root_path in {config_path}")
+        return None
+    product_folders = config["product_folders"]
+    for folder in product_folders.values():
+        (root / folder).mkdir(parents=True, exist_ok=True)
+    product_dir = root / product_folders[product]
+    charts_dir = product_dir / config["charts_folder"]
+    charts_dir.mkdir(parents=True, exist_ok=True)
+    table_path = next((path for path in images if path.name.endswith("_weekly_balance_table.png")), None)
+    if table_path is None:
+        raise ExportError("The weekly SharePoint export is missing its balance table image.")
+    state_path = payload_path.parent / f"{product}_dashboard_state.json"
+    root_files = [payload_path, manifest_path, table_path]
+    if state_path.is_file():
+        root_files.append(state_path)
+    dashboard_html_path = payload_path.parent / f"{product}_export_dashboard.html"
+    dashboard_html_manifest_path = dashboard_html_path.with_suffix(".manifest.json")
+    if dashboard_html_path.is_file():
+        root_files.append(dashboard_html_path)
+    if dashboard_html_manifest_path.is_file():
+        root_files.append(dashboard_html_manifest_path)
+    for source in root_files:
+        atomic_copy_file(source, product_dir / source.name)
+    chart_files = [path for path in images if path != table_path]
+    for source in chart_files:
+        atomic_copy_file(source, charts_dir / source.name)
+    payload = load_json(payload_path)
+    actual_week = str(payload.get("periods", [{}])[0].get("week_ending", ""))
+    latest = {
+        "schema_version": 1,
+        "exported_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "actual_week_ending": actual_week,
+        "product": product,
+        "weekly_json": payload_path.name,
+        "dashboard_state_json": state_path.name if state_path.is_file() else None,
+        "table_image": table_path.name,
+        "dashboard_html": dashboard_html_path.name if dashboard_html_path.is_file() else None,
+        "dashboard_html_manifest": dashboard_html_manifest_path.name if dashboard_html_manifest_path.is_file() else None,
+        "charts_folder": config["charts_folder"],
+        "inventory_charts": [path.name for path in chart_files],
+    }
+    atomic_write_json(product_dir / "latest_weekly_export.json", latest)
+    print(f"Published {product.title()} weekly forecast to SharePoint folder: {product_dir}")
+    return product_dir
 
 
 def write_manifest(
@@ -1290,15 +1416,17 @@ def update_output_catalog(output_root: Path) -> Path:
                 if table_path.is_file() or not legacy_table_path.is_file()
                 else legacy_table_path.relative_to(archive_dir).as_posix()
             )
-            bar_chart_images = [
-                name
-                for name in [
-                    f"{product}_eia_actuals.png",
-                    f"{product}_forecast_week_1.png",
-                    f"{product}_forecast_week_2.png",
-                ]
-                if (archive_dir / name).is_file()
-            ]
+            bar_chart_images = []
+            for name in [
+                f"{product}_eia_actuals.png",
+                *[f"{product}_forecast_week_{index}.png" for index in range(1, 6)],
+            ]:
+                chart_path = archive_dir / "charts" / name
+                legacy_path = archive_dir / name
+                if chart_path.is_file():
+                    bar_chart_images.append(chart_path.relative_to(archive_dir).as_posix())
+                elif legacy_path.is_file():
+                    bar_chart_images.append(name)
             entry = {
                     "actual_week_ending": payload["periods"][0]["week_ending"],
                     "product": product,
@@ -1313,6 +1441,18 @@ def update_output_catalog(output_root: Path) -> Path:
             for key in ("dashboard_html", "dashboard_html_manifest"):
                 if prior_entry.get(key) and (archive_dir / str(prior_entry[key])).is_file():
                     entry[key] = prior_entry[key]
+            portable = prior_catalog.get("portable_dashboards", {})
+            portable_entry = portable.get(product, {}) if isinstance(portable, dict) else {}
+            if (
+                isinstance(portable_entry, dict)
+                and portable_entry.get("actual_week_ending") == archive_dir.name
+            ):
+                portable_html = Path(str(portable_entry.get("archive_html", ""))).name
+                portable_manifest = Path(str(portable_entry.get("manifest", ""))).name
+                if portable_html and (archive_dir / portable_html).is_file():
+                    entry["dashboard_html"] = portable_html
+                if portable_manifest and (archive_dir / portable_manifest).is_file():
+                    entry["dashboard_html_manifest"] = portable_manifest
             entries.append(entry)
     catalog = {
         "schema_version": 4,
@@ -1327,9 +1467,15 @@ def update_output_catalog(output_root: Path) -> Path:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate a weekly balance table PNG and three inventory bar-chart PNGs."
+        description="Generate a weekly balance table PNG and six inventory bar-chart PNGs."
     )
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH)
+    parser.add_argument(
+        "--sharepoint-config",
+        type=Path,
+        default=DEFAULT_SHAREPOINT_CONFIG_PATH,
+        help="JSON file containing the locally synced SharePoint root path.",
+    )
     parser.add_argument("--balance-root", type=Path)
     parser.add_argument("--product", choices=["diesel", "jet"])
     parser.add_argument(
@@ -1455,12 +1601,21 @@ def main() -> int:
         if legacy_manifest.get("product") == product:
             legacy_manifest_path.unlink()
     catalog_path = update_output_catalog(output_root)
+    sharepoint_path = publish_sharepoint_export(
+        args.sharepoint_config.resolve(),
+        product,
+        payload_path,
+        manifest_path,
+        images,
+    )
     print("Created images:")
     for image in images:
         width, height = image_dimensions(image)
         print(f"  {image.name} ({width} x {height})")
     print(f"Created manifest: {manifest_path}")
     print(f"Updated weekly archive catalog: {catalog_path}")
+    if sharepoint_path:
+        print(f"Updated SharePoint weekly forecast folder: {sharepoint_path}")
     return 0
 
 

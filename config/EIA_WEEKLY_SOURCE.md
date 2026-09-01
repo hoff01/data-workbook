@@ -58,7 +58,7 @@ Precedence is:
 
 ## Why The Config Is Outside eia_weekly/
 
-The raw weekly pull cleans generated files inside `eia_weekly/` before rebuilding the raw artifact. Keep this source config under `config/` so a normal refresh cannot delete the switch file. Use `npm run weekly` for a standalone safe refresh that rebuilds the raw data, exports the product CSVs, removes temporary raw artifacts, and reapplies the Kpler PADD 1 split columns; use `npm run weekly:raw` only when debugging the raw parser.
+The raw weekly pull cleans generated files inside `eia_weekly/` before rebuilding the raw artifact. Keep this source config under `config/` so a normal refresh cannot delete the switch file. Use `npm run weekly` for a standalone safe refresh that rebuilds the raw data, exports the product CSVs, removes temporary raw artifacts, pulls the complete Kpler flow package, and reapplies the Kpler PADD 1 split columns; use `npm run weekly:raw` only when debugging the raw parser. A failed Kpler API pull is reported as a visible warning and does not block the EIA refresh or dashboard rebuild; the pipeline continues with the existing Kpler guides and reapplies the last valid packaged PADD 1 shares. Set `US_BALANCES_SKIP_KPLER_REFRESH=1` when the live Kpler attempt should be skipped deliberately.
 
 ## Validation After A Switch
 

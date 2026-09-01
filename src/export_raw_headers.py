@@ -1480,6 +1480,46 @@ def read_weekly_value_data(source_columns: list[str]) -> dict[str, list[object]]
     return table.filter(mask).to_pydict()
 
 
+def read_existing_weekly_history(path: Path, series_names: list[str]) -> dict[str, dict[str, str]]:
+    if not path.is_file():
+        return {}
+    names = set(series_names)
+    existing: dict[str, dict[str, str]] = {}
+    with path.open(newline="", encoding="utf-8") as file:
+        for source in csv.DictReader(file):
+            week = str(source.get("week_ending", "")).strip()
+            if not week:
+                continue
+            values = {
+                name: str(source.get(name, "")).strip()
+                for name in names
+                if str(source.get(name, "")).strip()
+            }
+            if values:
+                existing[week] = values
+    return existing
+
+
+def preserve_existing_weekly_gaps(
+    rows_by_week: dict[str, dict[str, str | float | None]],
+    existing: dict[str, dict[str, str]],
+    series_names: list[str],
+) -> int:
+    preserved = 0
+    for week, row in rows_by_week.items():
+        prior = existing.get(week, {})
+        for name in series_names:
+            current = row.get(name)
+            if current is not None and str(current).strip() != "":
+                continue
+            prior_value = prior.get(name, "")
+            if not prior_value:
+                continue
+            row[name] = prior_value
+            preserved += 1
+    return preserved
+
+
 def write_weekly_clean_csv_from_values(filename: str, mappings: list[dict[str, str]], data: dict[str, list[object]]) -> None:
     path = Path("eia_weekly")
     source_columns = [row["source_column"] for row in mappings]
@@ -1509,11 +1549,16 @@ def write_weekly_clean_csv_from_values(filename: str, mappings: list[dict[str, s
             continue
         row[series_name] = value
 
-    with (path / filename).open("w", newline="", encoding="utf-8") as file:
+    output_path = path / filename
+    existing = read_existing_weekly_history(output_path, series_names)
+    preserved = preserve_existing_weekly_gaps(rows_by_week, existing, series_names)
+    with output_path.open("w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(file, fieldnames=columns, lineterminator="\n")
         writer.writeheader()
         for week_ending in sorted(rows_by_week):
             writer.writerow(rows_by_week[week_ending])
+    if preserved:
+        print(f"preserved historical weekly values file={filename} cells={preserved}")
 
 
 def write_weekly_clean_csv(filename: str, mappings: list[dict[str, str]]) -> None:

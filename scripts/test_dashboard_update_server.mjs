@@ -94,6 +94,7 @@ const child = spawn(process.execPath, ["--import", "tsx", "src/dashboard_update_
     US_BALANCES_DASHBOARD_HTML_OUTPUT_SCRIPT: join(ROOT, "scripts", "fake_update_cli.mjs"),
     US_BALANCES_FAKE_NO_START_FILE: silentNoopFile,
     US_BALANCES_FAKE_UPDATE_DELAY_MS: "250",
+    US_BALANCES_FAKE_KPLER_WARNING: "1",
     US_BALANCES_SETTINGS_PATH: settingsPath,
     US_BALANCES_DASHBOARD_STATE_ROOT: settingsDir,
     US_BALANCES_RUNNER_LOCK_PATH: runnerLockPath,
@@ -278,9 +279,14 @@ try {
     routedJobIds.add(routed.body.job.id);
     const routedJob = await waitForTerminalJob(baseUrl);
     assert.equal(routedJob.group, group);
-    assert.equal(routedJob.status, "succeeded");
+    assert.equal(routedJob.status, group === "weekly" ? "partial" : "succeeded");
     assert.equal(routedJob.result, "current");
-    assert.match(routedJob.lines.join("\n"), /source data was unchanged, and the workbooks were rebuilt anyway/);
+    if (group === "weekly") {
+      assert.match(routedJob.lines.join("\n"), /Kpler API data was not updated/);
+      assert.match(routedJob.lines.join("\n"), /Refresh completed with warnings/);
+    } else {
+      assert.match(routedJob.lines.join("\n"), /source data was unchanged, and the workbooks were rebuilt anyway/);
+    }
   }
   const missingWeeklyOutputProduct = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",
@@ -583,7 +589,7 @@ try {
   assert.equal(weeklyOutputsJob.signal, null);
   assert.equal(weeklyOutputsJob.result, "saved");
   assert.equal(weeklyOutputsJob.dataChanged, true);
-  assert.match(weeklyOutputsJob.lines.join("\n"), /Jet weekly table and bar charts were saved/);
+  assert.match(weeklyOutputsJob.lines.join("\n"), /Jet weekly forecast package and portable dashboard were saved/);
 
   const dashboardHtmlStarted = await fetchJson(`${baseUrl}/api/update/start`, {
     method: "POST",

@@ -320,6 +320,10 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} outages tab uses shared data loader`, indexHtml, "outagesSheetBtn').addEventListener('click', async () => { const changed = state.sheet !== 'outages'; try { await ensureDataForState({...state,sheet:'outages'}); }");
   assertIncludes(`${config.key} crude outage launcher uses shared data loader`, indexHtml, "openOutagesFromCrudeBtn').addEventListener('click', async () => { const nextRegion = validBaseCrudeRegion(state.crudeRegion) ? state.crudeRegion : 'padd1'; try { await ensureDataForState({...state,sheet:'outages',crudeRegion:nextRegion}); }");
   assertIncludes(`${config.key} weekly crude charts load product balance and crude contexts`, indexHtml, "if (frequency === 'weekly' && sheet === 'crude') await Promise.all([ensureWeeklyData(), ensureCrudeWeeklyData()]);");
+  assertIncludes(`${config.key} weekly actual exports inherit adjusted monthly buckets`, indexHtml, "function adjustedWeeklyActualBaseline(){ if (adjustedWeeklyActualRowsCache) return adjustedWeeklyActualRowsCache; const rawBuckets = weeklyRawBuckets(); const monthlyBuckets = adjustedMonthlyBuckets();");
+  assertIncludes(`${config.key} weekly actual U.S. exports remain the direct source total`, indexHtml, "const target = Number(rawBucket?.us?.exportsKbd)");
+  assertIncludes(`${config.key} weekly actual exports use PADD 3 Other as solver`, indexHtml, "function reconcileActualWeeklyExports(adjusted, rawBucket)");
+  assertIncludes(`${config.key} weekly actual product supplied is recalculated`, indexHtml, "function recalculateActualWeeklyDemand(point)");
   assertIncludes(`${config.key} balance loads reference context before rendering crude-derived rows`, indexHtml, "if (needsBalanceContext || sheet === 'reference' || sheet === 'outages' || sheet === 'crude') await ensureReferenceData();");
   assertIncludes(`${config.key} frequency switches use shared data loader`, indexHtml, "try { await ensureDataForState({...state,frequency:nextFrequency}); }");
   assertIncludes(`${config.key} refresh button starts the forced full upstream data pull`, indexHtml, "document.getElementById('refreshBtn').addEventListener('click', () => { startDashboardUpdate('all'); });");
@@ -328,17 +332,21 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} changed-data update status is explicit`, indexHtml, "Updated — new data loaded");
   assertIncludes(`${config.key} unchanged-data refresh status is explicit`, indexHtml, "Refreshed — data unchanged");
   const productLabel = config.key === "jet" ? "Jet" : "Diesel";
-  assertIncludes(`${config.key} Reference has product-specific weekly image save button`, indexHtml, `Save ${productLabel} weekly table and bar charts`);
+  assertIncludes(`${config.key} Reference has product-specific weekly forecast save button`, indexHtml, `Save ${productLabel} weekly forecast`);
   assertIncludes(`${config.key} weekly call output request sends active workbook product`, indexHtml, "product:D.product?.key");
-  assertIncludes(`${config.key} weekly image save status is product-specific`, indexHtml, "Saved — '+productLabel+' weekly table and bar charts ready");
+  assertIncludes(`${config.key} weekly forecast save status is product-specific`, indexHtml, "Saved — '+productLabel+' weekly forecast package ready");
   assertIncludes(`${config.key} weekly call output path is explicit`, indexHtml, "weekly_call_outputs/outputs");
-  assertIncludes(`${config.key} weekly call output steps include all bar charts`, indexHtml, "Render latest EIA Actuals and first two Forecast bar charts");
+  assertIncludes(`${config.key} weekly output steps include all inventory charts`, indexHtml, "Render latest actual plus five forecast inventory charts");
+  assertIncludes(`${config.key} weekly output steps include portable HTML`, indexHtml, "Write the portable static dashboard HTML");
+  assertIncludes(`${config.key} weekly output steps include SharePoint overwrite`, indexHtml, "Overwrite the configured SharePoint product folder");
   assertIncludes(`${config.key} saved outputs do not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(lastUpdateJob.group === 'dashboard-html-output'");
   assertIncludes(`${config.key} changed-data update log is explicit`, indexHtml, "UPDATED — NEW DATA");
   assertIncludes(`${config.key} unchanged-data refresh log is explicit`, indexHtml, "REFRESHED — DATA UNCHANGED");
   assertIncludes(`${config.key} partial update status is explicit`, indexHtml, "Updated with warnings");
+  assertIncludes(`${config.key} Kpler warning is surfaced to the user`, indexHtml, "Kpler not updated");
+  assertIncludes(`${config.key} Kpler warning survives refresh completion`, indexHtml, "Kpler was not updated;");
   assertIncludes(`${config.key} partial update log is explicit`, indexHtml, "REFRESH COMPLETE WITH WARNINGS");
-  assertIncludes(`${config.key} changed-data update reload toast is explicit`, indexHtml, "New source data loaded; reloading dashboard");
+  assertIncludes(`${config.key} changed-data update reload toast is explicit`, indexHtml, "New source data loaded;");
   assertIncludes(`${config.key} failed update does not imply fresh data`, indexHtml, "Refresh failed; dashboard data was not reloaded");
   assertIncludes(`${config.key} update completion is shared across workbook tabs`, indexHtml, "const UPDATE_COMPLETION_STORAGE_KEY = 'us-balances:update-complete';");
   assertIncludes(`${config.key} reload loops are blocked per browser tab`, indexHtml, "const UPDATE_RELOAD_SESSION_KEY = 'us-balances:update-reloaded';");
@@ -782,21 +790,28 @@ async function verifySharedOutageExport(): Promise<SharedOutage[]> {
 
 const dashboardBuilderSource = await readFile("src/build_balance_dashboards.ts", "utf8");
 assertIncludes("active dashboard generator remains explicit", dashboardBuilderSource, "function regionalDashboardHtml(");
+assertIncludes("dashboard builder honors the server settings path", dashboardBuilderSource, 'process.env.US_BALANCES_SETTINGS_PATH || "balance_dashboard_settings.json"');
 assertIncludes("dashboard build uses the active generator", dashboardBuilderSource, "regionalDashboardHtml(bundle)");
 assertNotIncludes("unused legacy dashboard generator is removed", dashboardBuilderSource, "function dashboardHtml(");
 assertNotIncludes("versioned legacy regional generator is removed", dashboardBuilderSource, "regionalDashboardHtmlV2");
 
 const updatePipelineSource = await readFile("src/update_pipeline.ts", "utf8");
-assertNotIncludes("Kpler failures are not optional", updatePipelineSource, "continueOnFailure");
-assertNotIncludes("Kpler steps do not use the removed optional wrapper", updatePipelineSource, "optionalStep(");
-assertIncludes("Kpler full flow step remains in the all/other package", updatePipelineSource, 'scriptStep("Kpler flow package", "kpler")');
-assertIncludes("Kpler PADD 1 split remains in the all/other package", updatePipelineSource, 'scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")');
+assertIncludes("Kpler failures become visible non-blocking warnings", updatePipelineSource, "warningOnFailure");
+assertIncludes("Kpler warning names packaged-share continuation", updatePipelineSource, "Kpler API data was not updated; continuing with existing Kpler guides and last valid packaged PADD 1 shares");
+assertIncludes("Kpler full flow step remains configured", updatePipelineSource, 'scriptStep("Kpler flow package", "kpler")');
+assertIncludes("Kpler PADD 1 split remains configured", updatePipelineSource, 'scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")');
+assertIncludes("weekly update runs the full Kpler context branch", updatePipelineSource, "...kplerContextSteps()");
+
+const kplerPadd1Source = await readFile("src/kpler_padd1_eia_split.py", "utf8");
+assertIncludes("PADD 1 Kpler failure reuses packaged shares", kplerPadd1Source, "kpler padd1 live pull was not updated; reapplied the last valid packaged shares");
+assertIncludes("PADD 1 Kpler fallback still merges refreshed EIA", kplerPadd1Source, "merge_eia_outputs(existing_share_outputs)");
 
 const updateServerSource = await readFile("src/dashboard_update_server.ts", "utf8");
 assertIncludes("runner distinguishes partial completion", updateServerSource, 'type JobStatus = "running" | "succeeded" | "partial" | "failed";');
 assertIncludes("runner promotes skipped steps to warnings", updateServerSource, 'hasWarnings ? "partial" : "succeeded"');
 assertIncludes("runner accepts the weekly call output job", updateServerSource, '"weekly-call-outputs"');
 assertIncludes("runner saves weekly call outputs with the configured Python runtime", updateServerSource, "args: [weeklyCallOutputScript");
+assertIncludes("runner weekly output uses the combined static and image package", updateServerSource, 'weekly_call_outputs", "export_weekly_package.py');
 assertIncludes("runner reports weekly call outputs as saved", updateServerSource, 'job.result = "saved";');
 assertIncludes("runner requires an output product", updateServerSource, 'requires product=diesel or product=jet');
 assertIncludes("runner forwards the selected product to the generator", updateServerSource, '"--product", outputProduct');

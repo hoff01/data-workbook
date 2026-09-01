@@ -733,6 +733,18 @@ def run(args: argparse.Namespace) -> int:
         if mode == "eia_fallback":
             raise
         fallback_reason = f"{type(exc).__name__}: {exc}"
+        existing_share_outputs = {
+            frequency: str(PADD1_SPLIT_DIR / f"padd1_import_export_shares_{frequency}.csv")
+            for frequency in ["weekly", "monthly"]
+        }
+        if all(Path(path).is_file() for path in existing_share_outputs.values()):
+            merge_results = merge_eia_outputs(existing_share_outputs)
+            print_merge_results(merge_results)
+            print(
+                "kpler padd1 live pull was not updated; reapplied the last valid packaged shares "
+                f"without blocking the dashboard rebuild: {fallback_reason}"
+            )
+            return 0
         mode = "eia_error_fallback"
         long_rows, pull_status = build_eia_padd1_fallback_long(specs)
         pull_status["kpler_error"] = {
