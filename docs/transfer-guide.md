@@ -60,3 +60,28 @@ tree.
 The Diesel and Jet crude-weekly runtime chunks are intentionally identical
 because both products use the same shared crude-run source. They are generated
 copies, not competing implementations.
+
+## Add the weekly/Kpler/SharePoint feature to an older checkout
+
+This feature is a source-and-config overlay. It does not require replacing the
+older project's EIA datasets, saved adjustments, outages, named views, or local
+credentials. The authoritative file list is
+`config/legacy_feature_overlay.json`.
+
+1. Back up the older project.
+2. Copy every path under `runtime_files` from the current checkout onto the
+   matching path in the older project, overwriting those listed files only.
+3. Keep every path under `preserve_from_target` from the older project.
+4. Run `npm run build:balances` in the older project so its own Diesel and Jet
+   data are rebuilt with the new generator.
+5. Run the normal dashboard tests and open the dashboard through its launcher.
+
+Do not copy only `Diesel_Balance/index.html` or only the `Diesel_Balance`
+folder. The page will still open, but the older server/generator does not have
+the matching weekly package and SharePoint implementation; a later save or
+rebuild can overwrite the copied page and reject its dashboard-state checksum.
+
+From the current checkout, `npm run test:legacy-overlay` recreates the
+pre-feature commit in a temporary directory, copies only the manifest's small
+source/config/test overlay, preserves the older datasets, and runs the balance,
+server, SharePoint, Kpler, dashboard, and Windows compatibility gates.
