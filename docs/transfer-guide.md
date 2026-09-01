@@ -65,8 +65,7 @@ copies, not competing implementations.
 
 The transfer is designed for a simple replace-all workflow. The new project
 provides the code and current datasets; the older project provides the saved
-projection state, overrides, and default view. The authoritative file list is
-`config/legacy_feature_overlay.json`.
+projection state, overrides, and default view.
 
 The older project remains the source of truth because it contains the working
 forecast horizon, manual balance and refinery-capacity adjustments, outages,
@@ -80,9 +79,15 @@ of leaving it only in an open browser tab.
 1. Back up the older project.
 2. In the older project, click **Save dashboard** and **Save as default** for
    each product whose state must be retained.
-3. Copy every old-project path under `preserve_from_target` and
-   `preserve_semantic_json` into the matching path in the new project folder,
-   replacing the new folder's copy when one exists.
+3. Copy these files from the older project into the matching paths in the new
+   project folder, replacing the new folder's copies when they exist:
+   - `balance_dashboard_settings.json`
+   - `outages.json`
+   - `Diesel_Balance/diesel_balance.json`
+   - `Diesel_Balance/saved_views.json`
+   - `Jet_Balance/jet_balance.json` and `Jet_Balance/saved_views.json` when Jet
+     state also needs to move
+   - `.env.local` when the destination should use the same local credentials
 4. The new project folder is now prepared with the old projections and
    overrides. Copy that entire folder over the other installation and choose
    replace-all.
@@ -94,11 +99,3 @@ Do not copy only `Diesel_Balance/index.html` or only the `Diesel_Balance`
 folder. The page will still open, but the older server/generator does not have
 the matching weekly package and SharePoint implementation; a later save or
 rebuild can overwrite the copied page and reject its dashboard-state checksum.
-
-From the current checkout, `npm run test:legacy-overlay` recreates the
-pre-feature project in a temporary directory, installs the small feature,
-hashes every old user-state path before the copy, and proves the projections,
-overrides, saved dashboard state, and default views remain unchanged after the
-rebuild. The command fails only as a developer safety alarm if future code
-accidentally overwrites that state; the normal copy/replace workflow does not
-intentionally fail.
