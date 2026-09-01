@@ -108,8 +108,8 @@ If a browser shows a certificate warning, the URL is wrong for this local runner
    .\Open_Balance_Dashboards.bat
    ```
 3. Once the dashboard reports that refresh tools are ready, start the refresh you need from a button. No refresh starts automatically:
-   - `Weekly` for weekly EIA updates
-   - `Monthly` for monthly EIA updates
+   - `Weekly` for weekly EIA plus the full Kpler flow package and PADD 1 split
+   - `Monthly` for monthly EIA/PET plus the full Kpler flow package and PADD 1 split
    - `Power DFO` for Northeast diesel power-generation context
    - `Other` for supporting exports/context
    - `All`, `Complete`, or the workbook's top `Refresh dashboard` button for a forced full pipeline run
@@ -117,16 +117,19 @@ If a browser shows a certificate warning, the URL is wrong for this local runner
    This writes the exact state into the Diesel or Jet product folder and also
    downloads a portable JSON that another user can restore with `Import
    dashboard JSON`.
-5. To create the weekly call images, open each workbook's `Reference` tab and
-   select its product-specific save button. The button saves the current
-   dashboard state again before formatting, so the JSON, table, and charts all
-   use the same adjustments. Wait for `Saved — Diesel weekly
-   table and bar charts ready` and `Saved — Jet weekly table and bar charts
-   ready`; both dated product packages are written under
-   `weekly_call_outputs\outputs` without overwriting each other. Each set has
-   one portable dashboard-state JSON, one weekly statistics JSON, one
-   title-free table, the latest EIA Actuals bar chart, and the first two
-   Forecast bar charts.
+5. To create the weekly forecast packages, open each workbook's `Reference` tab
+   and select `Save Diesel weekly forecast` or `Save Jet weekly forecast`. The
+   button saves the current dashboard state before formatting, so the static
+   dashboard HTML, JSON, table, and charts all use the same adjustments. Wait
+   for `Saved — Diesel weekly forecast package ready` and `Saved — Jet weekly
+   forecast package ready`; both dated product packages are written under
+   `weekly_call_outputs\outputs` without overwriting each other. Each set has a
+   portable static dashboard, dashboard-state JSON, weekly statistics JSON,
+   title-free table, and six inventory charts: one actual plus five forecasts.
+   When `config\sharepoint_weekly_export.json` contains a locally synced
+   SharePoint file path, the same button creates the configured `Diesel` and
+   `Jet` folders, places the inventory images in each product's `charts` folder,
+   and overwrites files with the same names on every save.
 6. Review `Diesel Balance` and `Jet Balance`.
 7. Commit and push refreshed outputs when the checks pass:
    ```powershell
@@ -166,14 +169,18 @@ optional, on-demand exports and can never block a dashboard refresh, forecast-en
 save, rebuild, or rollback. Use `verify:weekly-call-outputs` when generating or
 auditing the image archive itself.
 
-`npm run update:all` attempts the live Kpler pull. If Kpler credentials are unavailable, use:
+Weekly, Monthly, Other, and Complete attempt the live Kpler pull. A failed pull
+is shown as **Kpler not updated** and the remaining update continues using the
+existing guides and last valid packaged PADD 1 shares. To skip the live attempt
+deliberately, use:
 
 ```powershell
 $env:US_BALANCES_SKIP_KPLER_REFRESH = "1"
-npm run update:all
+npm run update:monthly
 ```
 
-That keeps the latest local Kpler files and still rebuilds the dashboards.
+The same environment switch applies to `update:weekly`, `update:other`, and
+`update:all`; it keeps the latest local Kpler files and still rebuilds the dashboards.
 
 ## Shared Edits And Collaboration
 
@@ -199,10 +206,11 @@ large empty area beside the balance controls. Expand it when saving, importing,
 or managing views.
 
 Monthly forecast edits are inherited by all forward weekly rows in that month.
-Exports are flat within each forecast month for every PADD. Weekly actual
-exports remain the solved/source total, while only forward PADD 3 forecast
-exports are calculated by adding the destination rows. Exact weekly edits take
-precedence for that week and are exported without monthly-total recalibration.
+Adjusted monthly regional exports are also inherited by weekly actual rows in
+that month. Product supplied is recalculated from the weekly balance identity;
+PADD 3 Other is the residual solver; and total U.S. weekly exports remain the
+direct reported actual value. Exact weekly forecast edits take precedence for
+that week and are exported without recalibrating neighboring weeks.
 
 The same shared outage schedule is also published as root `outages.json`. Every
 outage save updates it immediately, every dashboard build or data refresh
@@ -365,10 +373,11 @@ Use this before tomorrow-morning or shared-drive use:
 6. Confirm shared saves do not show the offline/local-only message.
 7. In each workbook, use `Save dashboard`, then import or reload the saved JSON
    once to confirm portable restoration.
-8. In each Reference tab, save the product's weekly call images and confirm the
-   product-specific status, current actual-week folder, one untitled table PNG,
-   three inventory-change bar-chart PNGs, dashboard-state JSON, and manifest for
-   both Diesel and Jet.
+8. In each Reference tab, save the product's weekly forecast package and confirm
+   the product-specific status, current actual-week folder, portable HTML,
+   title-free table PNG, six inventory-chart PNGs, dashboard-state JSON, and
+   manifests for both Diesel and Jet. If a SharePoint root is configured,
+   confirm the `Diesel`, `Jet`, and product-level `charts` folders were updated.
 9. Run:
    ```bash
    npm run typecheck
@@ -377,4 +386,4 @@ Use this before tomorrow-morning or shared-drive use:
    npm run verify:monthly
    npm run trace:dashboard:optimize
    ```
-9. Commit and push to `origin/main`.
+10. Commit and push to `origin/main`.

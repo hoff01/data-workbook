@@ -16,7 +16,7 @@ if (settingsRebuild && process.env.US_BALANCES_FAKE_SETTINGS_REBUILD_FAIL_FILE &
 const suppressStart = Boolean(process.env.US_BALANCES_FAKE_NO_START_FILE && existsSync(process.env.US_BALANCES_FAKE_NO_START_FILE));
 if (updateScript.endsWith("update_pipeline.ts") && !suppressStart) {
   console.log(`[update] group=${updateGroup} steps=1 phases=1 started_at=${new Date().toISOString()}`);
-  if (updateGroup === "weekly" && process.env.US_BALANCES_FAKE_KPLER_WARNING === "1") {
+  if (["weekly", "monthly"].includes(updateGroup) && process.env.US_BALANCES_FAKE_KPLER_WARNING === "1") {
     console.log("[update] step 1/1 warning: Kpler flow package reason=Kpler API data was not updated; continuing with existing Kpler guides and last valid packaged PADD 1 shares");
   }
 }

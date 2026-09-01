@@ -339,6 +339,7 @@ function verifyBalanceCrudeContextLoading(indexHtml: string, config: ProductConf
   assertIncludes(`${config.key} weekly output steps include all inventory charts`, indexHtml, "Render latest actual plus five forecast inventory charts");
   assertIncludes(`${config.key} weekly output steps include portable HTML`, indexHtml, "Write the portable static dashboard HTML");
   assertIncludes(`${config.key} weekly output steps include SharePoint overwrite`, indexHtml, "Overwrite the configured SharePoint product folder");
+  assertIncludes(`${config.key} Monthly update advertises the full Kpler pull`, indexHtml, "'Clean outputs','Kpler flow package','Kpler PADD 1 EIA split','Monthly freshness check'");
   assertIncludes(`${config.key} saved outputs do not trigger dashboard reload`, indexHtml, "if (lastUpdateJob.result === 'saved') { showToast(lastUpdateJob.group === 'dashboard-html-output'");
   assertIncludes(`${config.key} changed-data update log is explicit`, indexHtml, "UPDATED — NEW DATA");
   assertIncludes(`${config.key} unchanged-data refresh log is explicit`, indexHtml, "REFRESHED — DATA UNCHANGED");
@@ -801,6 +802,9 @@ assertIncludes("Kpler warning names packaged-share continuation", updatePipeline
 assertIncludes("Kpler full flow step remains configured", updatePipelineSource, 'scriptStep("Kpler flow package", "kpler")');
 assertIncludes("Kpler PADD 1 split remains configured", updatePipelineSource, 'scriptStep("Kpler PADD 1 EIA split", "kpler:padd1:eia")');
 assertIncludes("weekly update runs the full Kpler context branch", updatePipelineSource, "...kplerContextSteps()");
+const monthlyUpdateSource = updatePipelineSource.slice(updatePipelineSource.indexOf("  monthly: ["), updatePipelineSource.indexOf("  other: ["));
+assertIncludes("monthly update runs the full Kpler context branch", monthlyUpdateSource, "...kplerContextSteps()");
+assertNotIncludes("monthly update does not stop at packaged Kpler shares", monthlyUpdateSource, "--merge-existing-shares");
 
 const kplerPadd1Source = await readFile("src/kpler_padd1_eia_split.py", "utf8");
 assertIncludes("PADD 1 Kpler failure reuses packaged shares", kplerPadd1Source, "kpler padd1 live pull was not updated; reapplied the last valid packaged shares");

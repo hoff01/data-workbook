@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "product": "jet",
-  "generated_at": "2026-09-01T00:10:10-04:00",
+  "generated_at": "2026-09-01T00:25:31-04:00",
   "actual_week_ending": "2026-08-21",
   "dashboard_state": "/Users/alexhoffmann/US_Balances/Jet_Balance/jet_balance.json",
-  "dashboard_state_fingerprint": "3d76f696e00e7932981463f830b25add6bc565debcc482bd4123eee2c48a3f4a",
+  "dashboard_state_fingerprint": "d6d81ebeb61d8c0b4d1a302d2f180bfdf68f2b64612b7c7b5fda9a53281e3b82",
   "view": {
     "frequency": "monthly",
     "region": "us",
@@ -37,7 +37,7 @@
   },
   "archive_html": "jet_export_dashboard.html",
   "latest_html": "jet_export_dashboard.html",
-  "size_bytes": 11480125,
-  "sha256": "7960a77a55c8e5b44363eda5e5ce005b9028ec07b56ffa1c21972b7af743aa10",
+  "size_bytes": 11480992,
+  "sha256": "270079a9504a13401380143bb08a575f4828965045fdf399c35f32b5f471497c",
   "standalone": true
 }

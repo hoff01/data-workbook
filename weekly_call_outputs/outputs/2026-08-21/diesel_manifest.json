@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-01T00:10:05-04:00",
+  "generated_at": "2026-09-01T00:25:26-04:00",
   "actual_week_ending": "2026-08-21",
   "product": "diesel",
   "weekly_json": "diesel_weekly_stats.json",
@@ -87,5 +87,5 @@
     }
   ],
   "dashboard_state_json": "diesel_dashboard_state.json",
-  "dashboard_state_fingerprint": "95d83f2d4d323c5254bc1ba2bce4e3672bd332934cc6dc4405b02e8c0823689e"
+  "dashboard_state_fingerprint": "0a12ea6786135260500b5b3b9c6b49b736af723c9f18533a37d4ee795e817804"
 }

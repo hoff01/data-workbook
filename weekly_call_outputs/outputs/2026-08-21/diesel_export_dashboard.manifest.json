@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "product": "diesel",
-  "generated_at": "2026-09-01T00:10:03-04:00",
+  "generated_at": "2026-09-01T00:25:24-04:00",
   "actual_week_ending": "2026-08-21",
   "dashboard_state": "/Users/alexhoffmann/US_Balances/Diesel_Balance/diesel_balance.json",
-  "dashboard_state_fingerprint": "95d83f2d4d323c5254bc1ba2bce4e3672bd332934cc6dc4405b02e8c0823689e",
+  "dashboard_state_fingerprint": "0a12ea6786135260500b5b3b9c6b49b736af723c9f18533a37d4ee795e817804",
   "view": {
     "frequency": "monthly",
     "region": "us",
@@ -37,7 +37,7 @@
   },
   "archive_html": "diesel_export_dashboard.html",
   "latest_html": "diesel_export_dashboard.html",
-  "size_bytes": 12960186,
-  "sha256": "93f242de76bc4e4b6ac9b1f96323d1333183785eb192696a3365faeda0c7c66b",
+  "size_bytes": 12961025,
+  "sha256": "242daa7faf06050ec81b5dcfa1091b7874c9f009621121f622e8c14cd3ef3f7c",
   "standalone": true
 }

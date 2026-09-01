@@ -127,7 +127,7 @@ remains available as a separate history.
 For managed runners, `US_BALANCES_SHAREPOINT_EXPORT_ROOT` can temporarily
 override `root_path` without editing the JSON file.
 
-The Weekly, Other, and Complete data updates attempt the live Kpler API pull.
+The Weekly, Monthly, Other, and Complete data updates attempt the full live Kpler API pull.
 If Kpler authentication or the API fails, the update finishes with a visible
 **Kpler not updated** warning, retains existing Kpler guides, reapplies the last
 valid packaged PADD 1 shares, and still rebuilds the dashboards.

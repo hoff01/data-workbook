@@ -28,7 +28,13 @@ const weeklyGroup = updatePipelineSource.slice(
   updatePipelineSource.indexOf("  weekly: ["),
   updatePipelineSource.indexOf("  monthly: ["),
 );
+const monthlyGroup = updatePipelineSource.slice(
+  updatePipelineSource.indexOf("  monthly: ["),
+  updatePipelineSource.indexOf("  other: ["),
+);
 assert.match(weeklyGroup, /\.\.\.kplerContextSteps\(\)/, "weekly updates must run the full Kpler package and PADD 1 split");
+assert.match(monthlyGroup, /\.\.\.kplerContextSteps\(\)/, "monthly updates must run the full Kpler package and PADD 1 split");
+assert.doesNotMatch(monthlyGroup, /--merge-existing-shares/, "monthly must attempt live Kpler before using the failure fallback");
 assert.match(updatePipelineSource, /warningOnFailure/, "Kpler failures must become visible non-blocking update warnings");
 assert.match(updatePipelineSource, /Kpler API data was not updated; continuing with existing Kpler guides and last valid packaged PADD 1 shares/);
 const standaloneWeeklySource = readFileSync(resolve(ROOT, "src", "run_weekly_pipeline.ts"), "utf8");

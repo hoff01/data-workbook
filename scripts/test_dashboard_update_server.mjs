@@ -279,9 +279,9 @@ try {
     routedJobIds.add(routed.body.job.id);
     const routedJob = await waitForTerminalJob(baseUrl);
     assert.equal(routedJob.group, group);
-    assert.equal(routedJob.status, group === "weekly" ? "partial" : "succeeded");
+    assert.equal(routedJob.status, ["weekly", "monthly"].includes(group) ? "partial" : "succeeded");
     assert.equal(routedJob.result, "current");
-    if (group === "weekly") {
+    if (["weekly", "monthly"].includes(group)) {
       assert.match(routedJob.lines.join("\n"), /Kpler API data was not updated/);
       assert.match(routedJob.lines.join("\n"), /Refresh completed with warnings/);
     } else {
@@ -518,7 +518,8 @@ try {
   assert.equal(activeConflict.body.job.id, recoveredOrphanLock.body.job.id);
   assert.equal(activeConflict.body.job.status, "running");
   const recoveredOrphanJob = await waitForTerminalJob(baseUrl);
-  assert.equal(recoveredOrphanJob.status, "succeeded");
+  assert.equal(recoveredOrphanJob.status, "partial");
+  assert.match(recoveredOrphanJob.lines.join("\n"), /Kpler API data was not updated/);
   assert.equal(existsSync(runnerLockPath), false, "completed jobs must release their heartbeat lock");
 
   writeFileSync(runnerLockPath, JSON.stringify({

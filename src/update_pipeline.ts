@@ -159,7 +159,7 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
     scriptStep("monthly needed bulk series inventory", "export:bulk-series"),
     scriptStep("PADD 1 distillate split", "padd1"),
     scriptStep("clean public EIA outputs", "clean:eia"),
-    pythonStep("Reapply packaged Kpler PADD 1 split", "src/kpler_padd1_eia_split.py", ["--merge-existing-shares"]),
+    ...kplerContextSteps(),
     scriptStep("monthly freshness check", "verify:monthly"),
     scriptStep("rebuild balance dashboards", "build:balances"),
     scriptStep("dashboard freshness check", "verify:dashboard"),
