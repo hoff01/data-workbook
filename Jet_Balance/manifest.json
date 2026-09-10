@@ -1,25 +1,25 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-09-01T04:25:32.226Z",
+  "generatedAt": "2026-09-10T13:34:03.417Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; forward weekly drivers are held flat at the month value through the saved forecast end date, with exact weekly overrides applied afterward.",
   "latestMonthly": "2026-05-15",
-  "latestWeekly": "2026-08-21",
+  "latestWeekly": "2026-08-28",
   "sourceFiles": [
     {
       "role": "eia_monthly",
       "path": "eia_monthly/jet.csv",
       "rows": 125,
       "checksum": "c651c53d0a200913bd4f19d8843808004536f8ec2ace9cd75d7a8332bacf4acf",
-      "modifiedAt": "2026-09-01T04:21:21.693Z"
+      "modifiedAt": "2026-09-10T13:34:02.818Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/jet.csv",
-      "rows": 556,
-      "checksum": "9b1af1fe46d262aaf0a68ec15a760c68973a2cc9947c39ab02c750959180e442",
-      "modifiedAt": "2026-09-01T04:21:21.704Z"
+      "rows": 557,
+      "checksum": "5d7e5ddd01db6d2eb9cbf5d28adff506832775a0f47973f9ef0f798e84038290",
+      "modifiedAt": "2026-09-10T13:34:02.827Z"
     },
     {
       "role": "kpler_manifest",
@@ -51,21 +51,21 @@
   ],
   "checksums": {
     "eia_monthly": "c651c53d0a200913bd4f19d8843808004536f8ec2ace9cd75d7a8332bacf4acf",
-    "eia_weekly": "9b1af1fe46d262aaf0a68ec15a760c68973a2cc9947c39ab02c750959180e442",
+    "eia_weekly": "5d7e5ddd01db6d2eb9cbf5d28adff506832775a0f47973f9ef0f798e84038290",
     "kpler_manifest": "42dab543801314253ce07cb1efdd853c2a421ede92dc562093d911ae53307ef0",
     "kpler_guide_monthly": "67e5b051f93db3e6da605e07528f5de7b97ddb1d46ca8ac0891d5b73d9dbcd97",
     "kpler_guide_weekly": "204a19723e856fbc9899f2df1909cbe83a071ef432a7246e5bcd0851419f3556",
     "refinery_unit_capacity": "1c512baa10fb4e535784225642aaca5bbce86800311a0fc87d25df1075c5d2a8"
   },
   "optimization": {
-    "generatedAt": "2026-09-01T04:25:32.272Z",
+    "generatedAt": "2026-09-10T13:34:03.455Z",
     "runtimePlan": {
       "baseRows": 6448,
-      "lazyRows": 40594,
+      "lazyRows": 40602,
       "lazyRowSharePct": 86.3,
       "basePayloadKb": 1760,
-      "weeklyPayloadKb": 2446.6,
-      "crudeWeeklyPayloadKb": 1138.9,
+      "weeklyPayloadKb": 2446.5,
+      "crudeWeeklyPayloadKb": 1141,
       "powerDfoPayloadKb": 0.4,
       "referencePayloadKb": 149.5
     },
@@ -73,7 +73,7 @@
       "monthlyRegional": 1104,
       "weeklyRegional": 4768,
       "monthlyCrude": 1000,
-      "weeklyCrude": 4448,
+      "weeklyCrude": 4456,
       "weeklyGuideMonthly": 1032,
       "movementFlows": 24,
       "monthlyMovementFlowRows": 3312,
@@ -90,15 +90,15 @@
         "name": "weekly",
         "path": "data/jet_balance_runtime_weekly.js",
         "rows": 19072,
-        "estimatedKb": 2446.6,
+        "estimatedKb": 2446.5,
         "status": "optimized",
         "reason": "Weekly regional balances and movement flows stay out of the initial workbook payload."
       },
       {
         "name": "crudeWeekly",
         "path": "data/jet_balance_runtime_crude_weekly.js",
-        "rows": 4448,
-        "estimatedKb": 1138.9,
+        "rows": 4456,
+        "estimatedKb": 1141,
         "status": "optimized",
         "reason": "Weekly crude-runs rows load when weekly balance, charts, or the Crude runs sheet needs shared crude context."
       },
@@ -130,7 +130,7 @@
         "key": "shared-crude",
         "label": "Shared crude context",
         "status": "optimized",
-        "detail": "5,448 crude rows are generated once and reused across product workbooks."
+        "detail": "5,456 crude rows are generated once and reused across product workbooks."
       },
       {
         "key": "reference-isolation",

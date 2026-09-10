@@ -1,25 +1,25 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-09-01T04:25:32.080Z",
+  "generatedAt": "2026-09-10T13:34:03.258Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; forward weekly drivers are held flat at the month value through the saved forecast end date, with exact weekly overrides applied afterward.",
   "latestMonthly": "2026-05-15",
-  "latestWeekly": "2026-08-21",
+  "latestWeekly": "2026-08-28",
   "sourceFiles": [
     {
       "role": "eia_monthly",
       "path": "eia_monthly/diesel.csv",
       "rows": 125,
       "checksum": "c3d9f7d49a7d894b1f05c2fe5963e647f63c29f8437748b6ec6e4d497ac583fb",
-      "modifiedAt": "2026-09-01T04:21:21.668Z"
+      "modifiedAt": "2026-09-10T13:34:02.800Z"
     },
     {
       "role": "eia_weekly",
       "path": "eia_weekly/diesel.csv",
-      "rows": 556,
-      "checksum": "5b711e1c442c170f29751423827242790dcf88f3e0a72c126bb0d2b4f4bb90d3",
-      "modifiedAt": "2026-09-01T04:21:21.682Z"
+      "rows": 557,
+      "checksum": "299ba980b88ba6159f74bb4a87a7a2d957f6944e5d5d87529c8779280757b5e5",
+      "modifiedAt": "2026-09-10T13:34:02.809Z"
     },
     {
       "role": "kpler_manifest",
@@ -89,7 +89,7 @@
   ],
   "checksums": {
     "eia_monthly": "c3d9f7d49a7d894b1f05c2fe5963e647f63c29f8437748b6ec6e4d497ac583fb",
-    "eia_weekly": "5b711e1c442c170f29751423827242790dcf88f3e0a72c126bb0d2b4f4bb90d3",
+    "eia_weekly": "299ba980b88ba6159f74bb4a87a7a2d957f6944e5d5d87529c8779280757b5e5",
     "kpler_manifest": "42dab543801314253ce07cb1efdd853c2a421ede92dc562093d911ae53307ef0",
     "kpler_guide_monthly": "c61f713582ab9ad63b4bd8142652fcc67071164e6098e9df21ee50655e5bb293",
     "kpler_guide_weekly": "6fc6d772836103e716424970e1a5f3f300195ee222a9d8bb6e6b269846f24e7d",
@@ -102,14 +102,14 @@
     "refinery_unit_capacity": "1c512baa10fb4e535784225642aaca5bbce86800311a0fc87d25df1075c5d2a8"
   },
   "optimization": {
-    "generatedAt": "2026-09-01T04:25:32.140Z",
+    "generatedAt": "2026-09-10T13:34:03.334Z",
     "runtimePlan": {
       "baseRows": 6991,
-      "lazyRows": 45108,
+      "lazyRows": 45116,
       "lazyRowSharePct": 86.6,
       "basePayloadKb": 1886.6,
-      "weeklyPayloadKb": 2764.4,
-      "crudeWeeklyPayloadKb": 1138.9,
+      "weeklyPayloadKb": 2764.3,
+      "crudeWeeklyPayloadKb": 1141,
       "powerDfoPayloadKb": 355.7,
       "referencePayloadKb": 151.4
     },
@@ -117,7 +117,7 @@
       "monthlyRegional": 1242,
       "weeklyRegional": 5364,
       "monthlyCrude": 1000,
-      "weeklyCrude": 4448,
+      "weeklyCrude": 4456,
       "weeklyGuideMonthly": 1161,
       "movementFlows": 26,
       "monthlyMovementFlowRows": 3588,
@@ -134,15 +134,15 @@
         "name": "weekly",
         "path": "data/diesel_balance_runtime_weekly.js",
         "rows": 20860,
-        "estimatedKb": 2764.4,
+        "estimatedKb": 2764.3,
         "status": "optimized",
         "reason": "Weekly regional balances and movement flows stay out of the initial workbook payload."
       },
       {
         "name": "crudeWeekly",
         "path": "data/diesel_balance_runtime_crude_weekly.js",
-        "rows": 4448,
-        "estimatedKb": 1138.9,
+        "rows": 4456,
+        "estimatedKb": 1141,
         "status": "optimized",
         "reason": "Weekly crude-runs rows load when weekly balance, charts, or the Crude runs sheet needs shared crude context."
       },
@@ -174,7 +174,7 @@
         "key": "shared-crude",
         "label": "Shared crude context",
         "status": "optimized",
-        "detail": "5,448 crude rows are generated once and reused across product workbooks."
+        "detail": "5,456 crude rows are generated once and reused across product workbooks."
       },
       {
         "key": "reference-isolation",

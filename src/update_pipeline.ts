@@ -148,7 +148,7 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
     scriptStep("weekly export files", "export:weekly:clean"),
     scriptStep("clean public EIA outputs", "clean:eia"),
     ...kplerContextSteps(),
-    scriptStep("weekly freshness check", "verify:weekly"),
+    scriptStep("weekly local continuity check", "verify:weekly"),
     scriptStep("rebuild balance dashboards", "build:balances"),
     scriptStep("dashboard freshness check", "verify:dashboard"),
   ],
@@ -185,8 +185,8 @@ const GROUP_PHASES: Record<UpdateGroup, Phase[]> = {
     scriptStep("monthly needed bulk series inventory", "export:bulk-series"),
     scriptStep("PADD 1 distillate split", "padd1"),
     scriptStep("clean public EIA outputs", "clean:eia"),
-    parallelPhase("EIA freshness checks", [
-      branch("weekly freshness", [scriptStep("weekly freshness check", "verify:weekly")]),
+    parallelPhase("EIA data checks", [
+      branch("weekly local continuity", [scriptStep("weekly local continuity check", "verify:weekly")]),
       branch("monthly freshness", [scriptStep("monthly freshness check", "verify:monthly")]),
     ]),
     parallelPhase("independent context refreshes", [

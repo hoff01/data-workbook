@@ -89,7 +89,6 @@ requireText("src/dashboard_update_server.ts", "source data was unchanged, and th
 requireText("src/update_pipeline.ts", 'case "bulk:refresh":', "clean-clone update pipeline can download the ignored PET bulk cache");
 requireText("src/update_pipeline.ts", 'branch("monthly PET bulk", [scriptStep("monthly PET bulk source refresh", "bulk:refresh")])', "complete refresh downloads PET bulk data before monthly exports");
 requireText("src/update_pipeline.ts", 'scriptStep("monthly PET bulk source refresh", "bulk:refresh"),\n    scriptStep("monthly export files", "export:monthly")', "monthly refresh downloads PET bulk data before monthly exports");
-requireText("src/verify_weekly_freshness.ts", 'process.env[EIA_WEEKLY_LATEST_SOURCE_ENV]?.trim() || config.latest_source?.trim() || "xls"', "blank weekly source setting falls back to the documented XLS source");
 requireText("src/eia_capacity.py", 'os.environ.get("EIA_CAPACITY_END", "").strip() or date.today().strftime("%Y-%m")', "blank capacity end month uses the current month default");
 requireText("scripts/test_dashboard_update_server.mjs", "a repeated forced refresh must start a new job", "repeated unchanged refresh contract test");
 requireText("scripts/test_dashboard_update_server.mjs", 'const routedGroups = ["weekly", "monthly", "other", "power-dfo"]', "every dashboard refresh group routes to a real update job");

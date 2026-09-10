@@ -15,7 +15,7 @@ Use this file-drop workflow when EIA finally moves away from the XLS tables:
 
 Rollback is the reverse: restore the current XLS config, or set `"latest_source": "xls"` in `config/eia_weekly_source.json`, then run `npm run update:weekly`.
 
-This file-drop path assumes EIA keeps the expected WPSR CSV shape with `stub_1`, `sourcekey`, and current/week-ago date columns. If EIA changes the CSV schema, the parser in `src/weekly_xls.py` and the freshness header reader in `src/verify_weekly_freshness.ts` still need a code update.
+This file-drop path assumes EIA keeps the expected WPSR CSV shape with `stub_1`, `sourcekey`, and current/week-ago date columns. If EIA changes the CSV schema, the parser in `src/weekly_xls.py` still needs a code update.
 
 Do not remove `xls.tables` from the dropped config. Keeping the XLS table list makes rollback a one-line source-mode change instead of a second file recovery step.
 
@@ -41,13 +41,13 @@ Normal operation should use the JSON file. These overrides are for temporary deb
 ```bash
 EIA_WEEKLY_LATEST_SOURCE=csv npm run update:weekly
 EIA_WEEKLY_SOURCE_CONFIG=/path/to/eia_weekly_source.json npm run update:weekly
-EIA_WEEKLY_LATEST_SOURCE=csv EIA_WPSR_CSV_URL=https://example.com/wpsr.csv npm run verify:weekly
-EIA_WEEKLY_LATEST_SOURCE=csv EIA_WPSR_TODAY=2026-06-09 npm run verify:weekly
+EIA_WEEKLY_LATEST_SOURCE=csv EIA_WPSR_CSV_URL=https://example.com/wpsr.csv npm run weekly:raw
+EIA_WEEKLY_LATEST_SOURCE=csv EIA_WPSR_TODAY=2026-06-09 npm run weekly:raw
 npm run weekly -- --latest-source csv
 npm run weekly:raw -- --latest-source csv
 ```
 
-Use the JSON file or `EIA_WEEKLY_LATEST_SOURCE` for full `update:weekly` runs. The `--latest-source` CLI flag applies to `npm run weekly` and `npm run weekly:raw`; it is useful for parser debugging but does not change the separate freshness command.
+Use the JSON file or `EIA_WEEKLY_LATEST_SOURCE` for full `update:weekly` runs. The `--latest-source` CLI flag applies to `npm run weekly` and `npm run weekly:raw`; it is useful for parser debugging.
 
 Precedence is:
 
@@ -73,6 +73,8 @@ npm run typecheck
 Expected success signals:
 
 - `weekly rows=... latest_source=csv` or `latest_source=xls`
-- `weekly freshness ok upstream=...`
+- `weekly local continuity ok ...`
 - `dashboard freshness ok diesel:weekly=... jet:weekly=...`
 - `validation ok`
+
+`npm run verify:weekly` checks the local product CSVs for nonempty weekly dates and seven-day continuity. It does not contact the EIA website or compare against a website publication date. Weekly and complete updates run this local check before rebuilding the dashboards.
