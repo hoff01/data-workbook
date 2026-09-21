@@ -1,7 +1,7 @@
 {
   "product": "diesel",
   "title": "Diesel Balance",
-  "generatedAt": "2026-09-10T13:34:03.258Z",
+  "generatedAt": "2026-09-21T20:25:10.454Z",
   "folder": "Diesel_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; forward weekly drivers are held flat at the month value through the saved forecast end date, with exact weekly overrides applied afterward.",
   "latestMonthly": "2026-05-15",
@@ -102,12 +102,12 @@
     "refinery_unit_capacity": "1c512baa10fb4e535784225642aaca5bbce86800311a0fc87d25df1075c5d2a8"
   },
   "optimization": {
-    "generatedAt": "2026-09-10T13:34:03.334Z",
+    "generatedAt": "2026-09-21T20:25:10.514Z",
     "runtimePlan": {
       "baseRows": 6991,
       "lazyRows": 45116,
       "lazyRowSharePct": 86.6,
-      "basePayloadKb": 1886.6,
+      "basePayloadKb": 2832.2,
       "weeklyPayloadKb": 2764.3,
       "crudeWeeklyPayloadKb": 1141,
       "powerDfoPayloadKb": 355.7,
@@ -194,7 +194,7 @@
         "key": "watch-reference-payload",
         "label": "Watch reference payload growth",
         "priority": "maintain",
-        "detail": "Reference payload is 151.4 KB versus 1886.6 KB estimated base payload."
+        "detail": "Reference payload is 151.4 KB versus 2832.2 KB estimated base payload."
       },
       {
         "key": "keep-weekly-lazy",

@@ -1581,6 +1581,8 @@ def write_weekly_clean_exports() -> None:
 
 
 def export_weekly(*, include_raw_archive: bool = True) -> None:
+    from export_sulfur_stocks import export_sulfur_stocks
+    export_sulfur_stocks("weekly")
     with suppress_native_stderr():
         if include_raw_archive:
             write_weekly_raw_excel_archive()
@@ -1591,6 +1593,8 @@ def export_weekly(*, include_raw_archive: bool = True) -> None:
 
 
 def export_monthly() -> None:
+    from export_sulfur_stocks import export_sulfur_stocks
+    export_sulfur_stocks("monthly", MONTHLY_BULK_SOURCE)
     with suppress_native_stderr():
         write_header_csv("eia_monthly")
         write_monthly_series_csv()
@@ -1599,6 +1603,8 @@ def export_monthly() -> None:
 
 
 def export_all(*, include_weekly_raw_archive: bool = True) -> None:
+    from export_sulfur_stocks import export_sulfur_stocks
+    export_sulfur_stocks("all", MONTHLY_BULK_SOURCE)
     with suppress_native_stderr():
         write_header_csv("eia_monthly")
         if include_weekly_raw_archive:

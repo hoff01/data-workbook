@@ -307,7 +307,13 @@ type DashboardOptimizationDiagnostics = {
   }>;
 };
 
+type SulfurStocksBundle = {
+  monthly: Array<{period: string; regionKey: string; status: "actual"; [key: string]: string | number | null}>;
+  weekly: SulfurStocksBundle["monthly"];
+};
+
 type DashboardBundle = {
+  sulfurStocks?: SulfurStocksBundle;
   product: {
     key: ProductKey;
     title: string;
@@ -432,6 +438,7 @@ type DashboardBundle = {
 type RuntimeLazyChunkName = "weekly" | "crudeWeekly" | "powerDfo" | "reference";
 
 type RuntimeBaseBundle = {
+  sulfurStocks?: SulfurStocksBundle;
   product: DashboardBundle["product"];
   generatedAt: DashboardBundle["generatedAt"];
   forecast: DashboardBundle["forecast"];
@@ -967,6 +974,7 @@ function stripRuntimeRegionNames<T extends { regionName?: string }>(rows: T[]): 
 
 function runtimeBaseBundle(bundle: DashboardBundle): RuntimeBaseBundle {
   return {
+    ...(bundle.sulfurStocks ? { sulfurStocks: bundle.sulfurStocks } : {}),
     product: bundle.product,
     generatedAt: bundle.generatedAt,
     forecast: bundle.forecast,
@@ -3664,6 +3672,7 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
     const DEFAULT_WEEKLY_FORECAST_WEEKS = 18;
     const MAX_WEEKLY_FORECAST_WEEKS = 520;
     const normalizeWeeklyForecastWeeks = value => { const parsed = Math.round(Number(value)); return Number.isFinite(parsed) ? Math.max(0, Math.min(MAX_WEEKLY_FORECAST_WEEKS, parsed)) : DEFAULT_WEEKLY_FORECAST_WEEKS; };
+    const SULFUR_STOCK_METRICS = new Set(['sulfur0To15StocksKb','sulfur15To500StocksKb','sulfurOver500StocksKb','sulfurOver15StocksKb']);
     const METRICS = [
       {key:'balanceKbd',label:'Build/(draw)',unit:'kbd',digits:0},
       {key:'demandKbd',label:'Demand',unit:'kbd',digits:0},
@@ -3694,6 +3703,12 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
       {key:'kplerExportsAfricaKbd',label:'Kpler Exports to Africa',unit:'kbd',digits:0},
       {key:'kplerExportsOtherKbd',label:'Kpler Exports to Other',unit:'kbd',digits:0},
 	      {key:'stocksKb',label:'Stocks',unit:'kb',digits:0},
+      ...(D.product?.key === 'diesel' ? [
+      {key:'sulfur0To15StocksKb',label:'Stocks: 0–15 ppm sulfur (actuals only)',unit:'kb',digits:0},
+      {key:'sulfur15To500StocksKb',label:'Stocks: >15–500 ppm sulfur (actuals only)',unit:'kb',digits:0},
+      {key:'sulfurOver500StocksKb',label:'Stocks: >500 ppm sulfur (actuals only)',unit:'kb',digits:0},
+      {key:'sulfurOver15StocksKb',label:'Stocks: >15–500 + >500 ppm sulfur (actuals only)',unit:'kb',digits:0},
+      ] : []),
 	      {key:'daysForwardCover',label:'Days of Forward Cover',unit:'days',digits:1},
 	      {key:'knownProductionOfflinePlannedKbd',label:'Known '+(D.product?.shortTitle || D.product?.title || 'Product')+' Production Offline (Planned)',unit:'kbd',digits:0},
 	      {key:'knownProductionOfflineUnplannedKbd',label:'Known '+(D.product?.shortTitle || D.product?.title || 'Product')+' Production Offline (Unplanned)',unit:'kbd',digits:0},
@@ -3717,7 +3732,7 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
 		    const CRUDE_BASE_METRICS = D.crudeRuns.metrics || [{key:'crudeRunsKbd',label:'Crude runs',unit:'kbd',digits:0},{key:'operableCapacityKbd',label:'Operable capacity',unit:'kbd',digits:0},{key:'idleCapacityKbd',label:'Idle capacity',unit:'kbd',digits:0},{key:'operatingCapacityKbd',label:'Operating capacity',unit:'kbd',digits:0},{key:'utilizationPct',label:'Operable utilization',unit:'%',digits:1},{key:'operatingUtilizationPct',label:'Operating utilization',unit:'%',digits:1},{key:'exPlannedUtilizationPct',label:'Operating (ex-planned) utilization',unit:'%',digits:1}];
 		    const CRUDE_METRICS = CRUDE_BASE_METRICS.some(metric => metric.key === 'yieldPct') ? CRUDE_BASE_METRICS : [...CRUDE_BASE_METRICS,{key:'yieldPct',label:'Yield',unit:'%',digits:1}];
 		    const OUTAGE_CHART_METRICS = new Set(['knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd','outageCduPlannedOfflineKbd','outageCduUnplannedOfflineKbd','outageCduTotalOfflineKbd','outageFccPlannedOfflineKbd','outageFccUnplannedOfflineKbd','outageFccTotalOfflineKbd','outageCokerPlannedOfflineKbd','outageCokerUnplannedOfflineKbd','outageCokerTotalOfflineKbd','outageHydrocrackingPlannedOfflineKbd','outageHydrocrackingUnplannedOfflineKbd','outageHydrocrackingTotalOfflineKbd']);
-		    const CHART_METRICS = ['balanceKbd','periodBuildDrawKb','netLengthKbd','demandKbd','productionKbd','crudeRunsKbd','utilizationPct','plannedMaintenanceKbd','totalOfflineKbd','yieldPct','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd','importsKbd','canadaImportsKbd','nonCanadaImportsKbd','kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','exportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd','receiptsKbd','netReceiptsKbd','padd3ShipmentsToPadd1Kbd','stocksKb','daysForwardCover','outageCduPlannedOfflineKbd','outageCduUnplannedOfflineKbd','outageCduTotalOfflineKbd','outageFccPlannedOfflineKbd','outageFccUnplannedOfflineKbd','outageFccTotalOfflineKbd','outageCokerPlannedOfflineKbd','outageCokerUnplannedOfflineKbd','outageCokerTotalOfflineKbd','outageHydrocrackingPlannedOfflineKbd','outageHydrocrackingUnplannedOfflineKbd','outageHydrocrackingTotalOfflineKbd','exPlannedUtilizationPct','catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct'];
+		    const CHART_METRICS = ['balanceKbd','periodBuildDrawKb','netLengthKbd','demandKbd','productionKbd','crudeRunsKbd','utilizationPct','plannedMaintenanceKbd','totalOfflineKbd','yieldPct','knownProductionOfflinePlannedKbd','knownProductionOfflineUnplannedKbd','knownProductionOfflineTotalKbd','importsKbd','canadaImportsKbd','nonCanadaImportsKbd','kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','exportsKbd','exportsLatinAmericaKbd','exportsEuropeKbd','exportsAfricaKbd','exportsOtherKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd','receiptsKbd','netReceiptsKbd','padd3ShipmentsToPadd1Kbd','stocksKb',...SULFUR_STOCK_METRICS,'daysForwardCover','outageCduPlannedOfflineKbd','outageCduUnplannedOfflineKbd','outageCduTotalOfflineKbd','outageFccPlannedOfflineKbd','outageFccUnplannedOfflineKbd','outageFccTotalOfflineKbd','outageCokerPlannedOfflineKbd','outageCokerUnplannedOfflineKbd','outageCokerTotalOfflineKbd','outageHydrocrackingPlannedOfflineKbd','outageHydrocrackingUnplannedOfflineKbd','outageHydrocrackingTotalOfflineKbd','exPlannedUtilizationPct','catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct'];
 		    const KPLER_CHART_METRICS = new Set(['kplerImportsKbd','kplerCanadaImportsKbd','kplerNonCanadaImportsKbd','kplerExportsKbd','kplerExportsLatinAmericaKbd','kplerExportsEuropeKbd','kplerExportsAfricaKbd','kplerExportsOtherKbd']);
 		    const EIA_IMPORT_ORIGIN_CHART_METRICS = new Set(['canadaImportsKbd','nonCanadaImportsKbd']);
 		    const SECONDARY_UNIT_UTILIZATION_METRICS = new Set(['catalyticCrackingUtilizationPct','cokingUtilizationPct','hydrocrackingUtilizationPct']);
@@ -5341,7 +5356,7 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
 	    function chartRowPeriodYear(row){ const period = String(row?.period || ''); return chartPeriodYear(period, period.length === 10 ? 'weekly' : 'monthly'); }
 	    function sortedChartRows(rows){ return (Array.isArray(rows) ? rows : []).filter(row => row && row.period && chartRowPeriodYear(row) >= MIN_CHART_HISTORY_YEAR).slice().sort((a,b)=>String(a.period).localeCompare(String(b.period))); }
 	    function chartMetricMonthlyOnly(metricKey){ return SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }
-		    function chartMetricActualOnly(metricKey){ return KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }
+		    function chartMetricActualOnly(metricKey){ return SULFUR_STOCK_METRICS.has(metricKey) || KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }
 	    function completedKplerPeriod(period, frequency=state.frequency){ const today = localDateText(); const key = String(period || '').slice(0, frequency === 'weekly' ? 10 : 7); if (!key) return false; return frequency === 'weekly' ? key < today : key < today.slice(0,7); }
 	    function kplerFlowForChartMetric(regionKey, metricKey){
 	      const maps = {
@@ -5393,6 +5408,7 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
 		      return finiteNumberOrNull(point[metricKey]);
 		    }
 	    function chartRowsForMetric(regionKey, metricKey, frequency=state.frequency, baseRows=null){
+          if (SULFUR_STOCK_METRICS.has(metricKey)) return D.product?.key === 'diesel' ? (D.sulfurStocks?.[frequency] || []).filter(row => row.regionKey === regionKey && row.status === 'actual') : [];
 	      if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return [];
 		      const directKpler = KPLER_CHART_METRICS.has(metricKey);
 		      const outageMetric = OUTAGE_CHART_METRICS.has(metricKey);
@@ -6854,7 +6870,7 @@ function regionalDashboardHtml(bundle: DashboardBundle): string {
     async function copyChartPng(card, metricKey, regionKey){ const blob = await liveChartPngBlob(card); if (navigator.clipboard?.write && window.ClipboardItem) { await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); showToast('Chart PNG copied'); return; } downloadBlob(chartPngFilename('copy', metricKey, regionKey), 'image/png', blob); showToast('Image clipboard unavailable; PNG downloaded'); }
     async function saveChartPng(card, metricKey, regionKey){ const blob = await liveChartPngBlob(card); downloadBlob(chartPngFilename('chart', metricKey, regionKey), 'image/png', blob); showToast('Chart PNG saved'); }
     async function saveZoomChartPng(card){ const title = zoomCardTitle(card); setZoomCardTitle(card, title); const size = zoomExportSize(card); const metricKey = card?.dataset?.chartMetric || card?.dataset?.outageChartMetric || 'chart'; const regionKey = card?.dataset?.chartRegion || card?.dataset?.outageChartRegion || state.chartRegion || state.crudeRegion || 'region'; const blob = await liveChartPngBlob(card, {title,width:size.width,height:size.height}); downloadBlob(chartPngFilename('custom', metricKey, regionKey, title), 'image/png', blob); showToast('Custom PNG saved'); }
-	    function chartRows(metricKey, regionKey=state.chartRegion === CHART_ALL_REGION_KEY ? preferredChartScenarioRegion() : state.chartRegion){ return chartRowsForMetric(regionKey, metricKey, state.frequency).map(row => { const value = Number(row[metricKey]); return {frequency:state.frequency, region:balanceRegionDisplayLabel(regionKey), metric:metricByKey(metricKey).label, period:row.period, status:row.status, value:Number.isFinite(value) ? round2(value) : NaN}; }); }
+	    function chartRows(metricKey, regionKey=state.chartRegion === CHART_ALL_REGION_KEY ? preferredChartScenarioRegion() : state.chartRegion){ return chartRowsForMetric(regionKey, metricKey, state.frequency).map(row => { const value = SULFUR_STOCK_METRICS.has(metricKey) ? finiteNumberOrNull(row[metricKey]) : Number(row[metricKey]); return {frequency:state.frequency, region:balanceRegionDisplayLabel(regionKey), metric:metricByKey(metricKey).label, period:row.period, status:row.status, value:Number.isFinite(value) ? round2(value) : NaN}; }); }
     function crudeChartRows(metricKey){ const regionKey = activeCrudeRegionKey(); return regionKey ? crudeChartRowsForRegion(regionKey).map(row => { const value = Number(row[metricKey]); return {frequency:state.frequency, region:crudeRegionDisplayLabel(regionKey), metric:crudeMetricByKey(metricKey).label, period:row.period, status:row.status, value:Number.isFinite(value) ? round2(value) : NaN}; }) : []; }
     function statusLabel(status){ return String(status || 'missing').replace('_',' '); }
     function sourceStatusDot(status){ return '<span class="sourceDot '+esc(status)+'"></span>'; }
@@ -7304,6 +7320,8 @@ function buildProduct(
   const kpler = productKplerStatus(config, kplerManifest);
 
   const bundle: DashboardBundle = {
+    ...(config.key === "diesel" && fileExists("eia_monthly/distillate_sulfur_stocks.json")
+      ? { sulfurStocks: JSON.parse(readFileSync("eia_monthly/distillate_sulfur_stocks.json", "utf8")) as SulfurStocksBundle } : {}),
     product: {
       key: config.key,
       title: config.title,
