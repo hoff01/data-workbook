@@ -1,7 +1,7 @@
 {
   "product": "jet",
   "title": "Jet Balance",
-  "generatedAt": "2026-09-22T01:03:50.122Z",
+  "generatedAt": "2026-09-22T01:48:30.952Z",
   "folder": "Jet_Balance",
   "forecastMethod": "Monthly balance anchored to a 3-year seasonal average from 2023-2025; forward weekly drivers are held flat at the month value through the saved forecast end date, with exact weekly overrides applied afterward.",
   "latestMonthly": "2026-06-15",
@@ -58,7 +58,7 @@
     "refinery_unit_capacity": "318f3bd415c832e4c6a8a922b36f24816d8c61d2570b176de09b4f1635827c4d"
   },
   "optimization": {
-    "generatedAt": "2026-09-22T01:03:50.161Z",
+    "generatedAt": "2026-09-22T01:48:30.992Z",
     "runtimePlan": {
       "baseRows": 6464,
       "lazyRows": 40618,

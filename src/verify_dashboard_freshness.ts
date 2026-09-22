@@ -404,7 +404,7 @@ function verifyChartTabExpansion(indexHtml: string, config: ProductConfig): void
   assertIncludes(`${config.key} percent scale preserves real negative observations`, indexHtml, "const hasNegativePercent = Boolean(options.percent && valid.some(value => value < 0));");
   assertIncludes(`${config.key} percent chart axis labels include percent sign`, indexHtml, "const axisValueLabel = value => metric.unit === '%' ? fmt(value, metric.digits) + '%' : fmt(value, outageAxisDigits);");
   assertIncludes(`${config.key} Kpler periods are completed only`, indexHtml, "function completedKplerPeriod(period, frequency=state.frequency)");
-  assertIncludes(`${config.key} actual-only chart metric registry excludes forecast-capable outages`, indexHtml, "function chartMetricActualOnly(metricKey){ return SULFUR_STOCK_METRICS.has(metricKey) || KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }");
+  assertIncludes(`${config.key} actual-only chart metric registry excludes forecast-capable outages`, indexHtml, "function chartMetricActualOnly(metricKey){ return DISTILLATE_SPLIT_METRICS.has(metricKey) || KPLER_CHART_METRICS.has(metricKey) || SECONDARY_UNIT_UTILIZATION_METRICS.has(metricKey); }");
   assertIncludes(`${config.key} secondary unit charts are monthly-only`, indexHtml, "if (chartMetricMonthlyOnly(metricKey) && frequency !== 'monthly') return [];");
   assertIncludes(`${config.key} Kpler charts disable forecast path`, indexHtml, "const nextYearPath = !actualOnly && state.showNextYearForecast && state.showForecast");
   assertIncludes(`${config.key} Kpler legend disables forecast`, indexHtml, "if (!actualOnly && state.showNextYearForecast && nextYearForecast && state.showForecast && available.has(nextYearForecast))");
