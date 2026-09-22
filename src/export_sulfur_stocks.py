@@ -44,6 +44,11 @@ def chart_rows(values):
             for metric in METRICS:
                 parts = [values[period].get((member, metric)) for member in members]
                 row[metric] = sum(parts) if all(value is not None for value in parts) else None
+                if region == 'padd1ab' and row[metric] is None:
+                    total = values[period].get(('padd1', metric))
+                    lower_atlantic = values[period].get(('padd1c', metric))
+                    if total is not None and lower_atlantic is not None:
+                        row[metric] = total - lower_atlantic
             low, high = row[METRICS[1]], row[METRICS[2]]
             row['sulfurOver15StocksKb'] = low + high if low is not None and high is not None else None
             if any(row[metric] is not None for metric in METRICS):
@@ -53,7 +58,7 @@ def chart_rows(values):
 
 def export_sulfur_stocks(mode='all', bulk_path=None):
     result = json.loads(OUTPUT.read_text()) if OUTPUT.exists() else {'monthly': [], 'weekly': [], 'sources': {}}
-    result['note'] = 'Actual EIA ending stocks only, thousand barrels. PADD 1A+B sums reported A and B; missing components remain gaps. Combined >15 ppm sums >15–500 and >500 ppm. No forecasts.'
+    result['note'] = 'Actual EIA ending stocks only, thousand barrels. PADD 1A+B sums reported A and B, falling back to reported PADD 1 minus PADD 1C when a component is missing; unavailable residual inputs remain gaps. Combined >15 ppm sums >15–500 and >500 ppm. No forecasts.'
     if mode in ('monthly', 'all') and bulk_path and Path(bulk_path).exists():
         values, sources = {}, {}
         with ZipFile(bulk_path) as archive:

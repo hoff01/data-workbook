@@ -25,6 +25,20 @@ class SulfurStocksTests(unittest.TestCase):
         self.assertIsNone(ab['sulfurOver15StocksKb'])
         self.assertEqual(ab['status'], 'actual')
 
+    def test_northeast_actual_residual_fallback(self):
+        values = {(region, metric): amount for region, amount in
+                  [('padd1a', 2), ('padd1b', 5), ('padd1', 12), ('padd1c', 3)]
+                  for metric in METRICS}
+        del values[('padd1a', METRICS[2])]
+        ab = next(r for r in chart_rows({'2026-05': values}) if r['regionKey'] == 'padd1ab')
+        self.assertEqual(ab[METRICS[0]], 7)  # Direct A+B remains authoritative.
+        self.assertEqual(ab[METRICS[2]], 9)  # Missing A: total PADD 1 minus C.
+        self.assertEqual(ab['sulfurOver15StocksKb'], 16)
+        self.assertEqual(ab['status'], 'actual')
+        del values[('padd1', METRICS[2])]
+        ab = next(r for r in chart_rows({'2026-05': values}) if r['regionKey'] == 'padd1ab')
+        self.assertIsNone(ab[METRICS[2]])
+
     def test_suppressed_is_not_zero(self):
         for value in [None, '', '--', 'NA', 'W', float('nan')]:
             self.assertIsNone(number(value))
