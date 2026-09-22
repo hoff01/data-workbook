@@ -807,6 +807,9 @@ def validate_final_dir(name: str) -> None:
     path = Path(name)
     actual = {child.name for child in path.iterdir() if child.name not in {".DS_Store", "cache"}}
     expected = EXPECTED_FILES[name]
+    # Optional chart-only payload; older installations may not have it yet.
+    if name == "eia_monthly" and "distillate_sulfur_stocks.json" in actual:
+        expected = expected | {"distillate_sulfur_stocks.json"}
     if actual != expected:
         raise RuntimeError(f"{name} has unexpected final files; extra={sorted(actual - expected)} missing={sorted(expected - actual)}")
     for filename in ["diesel.csv", "jet.csv", "gasoline.csv"]:

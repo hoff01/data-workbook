@@ -199,3 +199,7 @@ period_month,fuel2002,fuel_name,total_consumption,total_consumption_units,state_
 2026-03-01,RFO,Residual Fuel Oil,27282.000000,barrels,12
 2026-04-01,DFO,Distillate Fuel Oil,104976.000000,barrels,14
 2026-04-01,RFO,Residual Fuel Oil,22461.000000,barrels,12
+2026-05-01,DFO,Distillate Fuel Oil,278189.000000,barrels,14
+2026-05-01,RFO,Residual Fuel Oil,13647.000000,barrels,12
+2026-06-01,DFO,Distillate Fuel Oil,153892.000000,barrels,14
+2026-06-01,RFO,Residual Fuel Oil,60971.000000,barrels,12

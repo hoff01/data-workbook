@@ -4,7 +4,7 @@
   "eia_monthly_rows": 202272,
   "end_month": "2026-09",
   "forward_fill": "Annual EIA downstream charge capacity values are assigned to every month in their source year and carried forward until a newer annual value exists.",
-  "generated_at": "2026-09-01T04:03:55.667050+00:00",
+  "generated_at": "2026-09-22T01:01:55.951993+00:00",
   "high_level_monthly_rows": 94815,
   "high_level_wide_rows": 129,
   "manual_forward_fill": "Rows in eia_capacity/manual_capacity.csv are forward-filled monthly from period_month or source_year and override EIA rows with the same period_month and series_id.",
@@ -26,9 +26,9 @@
   },
   "pipeline_name": "eia_downstream_charge_capacity",
   "raw_zip": {
-    "bytes": 54849392,
+    "bytes": 55368803,
     "path": "eia_capacity/raw/PET_capacity_bulk.zip",
-    "sha256": "bb27200883a33f897488bc766490830f1a088957d38be0170d3cccb699273731"
+    "sha256": "a0ce3005bee89cf074f13531e7c524062b585637bd5fd62aa22fdd79d271495d"
   },
   "series_count": 1568,
   "source_url": "https://api.eia.gov/bulk/PET.zip",

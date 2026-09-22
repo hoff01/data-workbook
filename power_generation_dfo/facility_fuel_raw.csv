@@ -106458,3 +106458,865 @@ DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-04,59717,Framingham State U
 DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-04,59717,Framingham State University Plant,IC,MA,Massachusetts,7,barrels
 DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-04,61890,NRG Chalk Point CT,ALL,MD,Maryland,1580,barrels
 DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-04,61890,NRG Chalk Point CT,GT,MD,Maryland,1580,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,568,Bridgeport Station,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,568,Bridgeport Station,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,568,Bridgeport Station,CT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,589,J C McNeil,ALL,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,589,J C McNeil,ST,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,594,Indian River Generating Station,ALL,DE,Delaware,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,594,Indian River Generating Station,GT,DE,Delaware,2,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,594,Indian River Generating Station,ALL,DE,Delaware,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,594,Indian River Generating Station,GT,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,602,Brandon Shores,ALL,MD,Maryland,2537,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,602,Brandon Shores,ST,MD,Maryland,2537,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1507,William F Wyman Hybrid,ALL,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1507,William F Wyman Hybrid,ST,ME,Maine,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,1507,William F Wyman Hybrid,ALL,ME,Maine,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,1507,William F Wyman Hybrid,ST,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1554,Herbert A Wagner,ALL,MD,Maryland,176885,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1554,Herbert A Wagner,GT,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1554,Herbert A Wagner,ST,MD,Maryland,176885,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1556,Perryman,ALL,MD,Maryland,21548,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1556,Perryman,GT,MD,Maryland,21548,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1571,Chalk Point Power,ALL,MD,Maryland,12770,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1571,Chalk Point Power,GT,MD,Maryland,12770,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1571,Chalk Point Power,ST,MD,Maryland,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,1571,Chalk Point Power,ALL,MD,Maryland,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,1571,Chalk Point Power,ST,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1572,Dickerson Power,ALL,MD,Maryland,1928,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1572,Dickerson Power,GT,MD,Maryland,1928,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1573,Morgantown Generating Plant,ALL,MD,Maryland,7780,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1573,Morgantown Generating Plant,GT,MD,Maryland,7780,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1580,Easton,ALL,MD,Maryland,394,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1580,Easton,IC,MD,Maryland,394,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1595,Kendall Square Station,ALL,MA,Massachusetts,457,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1595,Kendall Square Station,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1595,Kendall Square Station,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1595,Kendall Square Station,GT,MA,Massachusetts,457,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,1595,Kendall Square Station,ALL,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,1595,Kendall Square Station,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1599,Canal,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1599,Canal,GT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,1599,Canal,ST,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,1599,Canal,ALL,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,1599,Canal,ST,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2364,Merrimack,ALL,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2364,Merrimack,ST,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2364,Merrimack,ALL,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2364,Merrimack,GT,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2367,Schiller,ALL,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2367,Schiller,ST,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2367,Schiller,ALL,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2367,Schiller,ST,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2406,Linden Generating Station,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2406,Linden Generating Station,CA,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2406,Linden Generating Station,CT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2406,Linden Generating Station,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2410,PSEG Salem Generating Station,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2410,PSEG Salem Generating Station,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2411,Sewaren,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2411,Sewaren,CA,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2411,Sewaren,CT,NJ,New Jersey,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2411,Sewaren,ALL,NJ,New Jersey,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2411,Sewaren,CT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2434,Howard Down,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2434,Howard Down,GT,NJ,New Jersey,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2434,Howard Down,ALL,NJ,New Jersey,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2434,Howard Down,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2493,East River,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2493,East River,GT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2493,East River,ST,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2493,East River,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2493,East River,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2500,Ravenswood,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2500,Ravenswood,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2500,Ravenswood,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2500,Ravenswood,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2511,E F Barrett,ALL,NY,New York,2145,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2511,E F Barrett,GT,NY,New York,2145,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2511,E F Barrett,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2511,E F Barrett,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2516,Northport,ALL,NY,New York,4,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2516,Northport,GT,NY,New York,4,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2516,Northport,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2516,Northport,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2517,Port Jefferson,ALL,NY,New York,294,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,2517,Port Jefferson,GT,NY,New York,294,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2517,Port Jefferson,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2517,Port Jefferson,ST,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2594,Oswego Harbor Power,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2594,Oswego Harbor Power,ST,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2625,Bowline Point,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,2625,Bowline Point,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3118,Conemaugh,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3118,Conemaugh,IC,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3130,Seward (PA),ALL,PA,Pennsylvania,1019,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3130,Seward (PA),ST,PA,Pennsylvania,1019,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3131,Shawville,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3131,Shawville,IC,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3131,Shawville,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3136,Keystone,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3136,Keystone,IC,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3136,Keystone,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3140,Brunner Island,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3140,Brunner Island,IC,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3140,Brunner Island,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3148,TalenEnergy Martins Creek,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3148,TalenEnergy Martins Creek,ST,PA,Pennsylvania,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,3148,TalenEnergy Martins Creek,ALL,PA,Pennsylvania,596,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,3148,TalenEnergy Martins Creek,ST,PA,Pennsylvania,596,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3149,TalenEnergy Montour,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3149,TalenEnergy Montour,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3236,Manchester Street,ALL,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3236,Manchester Street,CA,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3236,Manchester Street,CT,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3708,Ascutney,ALL,VT,Vermont,373,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3708,Ascutney,GT,VT,Vermont,373,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3734,Berlin 5,ALL,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3734,Berlin 5,GT,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3737,Essex Junction 19,ALL,VT,Vermont,25,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3737,Essex Junction 19,IC,VT,Vermont,25,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3775,Clinch River,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3775,Clinch River,ST,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3797,Chesterfield,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3797,Chesterfield,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3797,Chesterfield,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3804,Possum Point,ALL,VA,Virginia,11222,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3804,Possum Point,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3804,Possum Point,CT,VA,Virginia,9730,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3804,Possum Point,GT,VA,Virginia,1492,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3935,John E Amos,ALL,WV,West Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3935,John E Amos,ST,WV,West Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3948,Mitchell (WV),ALL,WV,West Virginia,14311,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3948,Mitchell (WV),ST,WV,West Virginia,14311,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3954,Mt Storm,ALL,WV,West Virginia,4536,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,3954,Mt Storm,ST,WV,West Virginia,4536,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,4257,Easton 2,ALL,MD,Maryland,445,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,4257,Easton 2,GT,MD,Maryland,127,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,4257,Easton 2,IC,MD,Maryland,318,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,4257,Easton 2,ALL,MD,Maryland,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,4257,Easton 2,IC,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6081,Stony Brook,ALL,MA,Massachusetts,670,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6081,Stony Brook,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6081,Stony Brook,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6081,Stony Brook,GT,MA,Massachusetts,670,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6081,Stony Brook,IC,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6264,Mountaineer,ALL,WV,West Virginia,1432,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6264,Mountaineer,ST,WV,West Virginia,1432,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6567,Block Island,ALL,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6567,Block Island,IC,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6635,A L Pierce,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,6635,A L Pierce,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7153,Hay Road,ALL,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7153,Hay Road,CA,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7153,Hay Road,CT,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7213,Clover,ALL,VA,Virginia,1636,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7213,Clover,ST,VA,Virginia,1636,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7397,Falling Spring,ALL,PA,Pennsylvania,3,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7397,Falling Spring,IC,PA,Pennsylvania,3,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7839,Ladysmith,ALL,VA,Virginia,1844,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7839,Ladysmith,GT,VA,Virginia,1844,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7962,Warren F Sam Beasley Generation Station,ALL,DE,Delaware,147,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,7962,Warren F Sam Beasley Generation Station,GT,DE,Delaware,147,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,8002,Newington,ALL,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,8002,Newington,ST,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,8002,Newington,ALL,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,8002,Newington,ST,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,8006,Roseton Generating Facility,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,8006,Roseton Generating Facility,ST,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,8006,Roseton Generating Facility,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,8006,Roseton Generating Facility,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10017,WestRock-West Point Mill,ALL,VA,Virginia,43,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10017,WestRock-West Point Mill,ST,VA,Virginia,43,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,10017,WestRock-West Point Mill,ALL,VA,Virginia,84,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,10017,WestRock-West Point Mill,ST,VA,Virginia,84,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10025,"RED-Rochester, LLC",ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10025,"RED-Rochester, LLC",ST,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,10025,"RED-Rochester, LLC",ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,10025,"RED-Rochester, LLC",ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10029,General Electric Aircraft Engines,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10029,General Electric Aircraft Engines,ST,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,10029,General Electric Aircraft Engines,ALL,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,10029,General Electric Aircraft Engines,ST,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10030,Energy Center Dover,ALL,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10030,Energy Center Dover,GT,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10058,"Wabtec U.S Rail, Grove City Engine Plant",ALL,PA,Pennsylvania,2158,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10058,"Wabtec U.S Rail, Grove City Engine Plant",IC,PA,Pennsylvania,2158,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10108,Hampton Facility,ALL,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10108,Hampton Facility,GT,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10122,CIP II/AR Bridgewater Holdings - NJCOE,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10122,CIP II/AR Bridgewater Holdings - NJCOE,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10123,Hoffmann LaRoche,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10123,Hoffmann LaRoche,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10129,Indiana University of Pennsylvania,ALL,PA,Pennsylvania,39,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10129,Indiana University of Pennsylvania,IC,PA,Pennsylvania,39,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10224,Merck Rahway Power Plant,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10224,Merck Rahway Power Plant,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10435,Camden Resource Recovery Facility,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10435,Camden Resource Recovery Facility,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10495,Rumford Cogeneration,ALL,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10495,Rumford Cogeneration,ST,ME,Maine,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,10495,Rumford Cogeneration,ALL,ME,Maine,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,10495,Rumford Cogeneration,ST,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10521,Lederle Laboratories,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10521,Lederle Laboratories,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10521,Lederle Laboratories,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10567,Algonquin Windsor Locks,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10567,Algonquin Windsor Locks,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10567,Algonquin Windsor Locks,CT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10633,Hopewell Cogeneration,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10633,Hopewell Cogeneration,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10633,Hopewell Cogeneration,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10642,Covanta Hempstead,ALL,NY,New York,1963,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10642,Covanta Hempstead,ST,NY,New York,1963,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10643,Covanta Essex Company,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10643,Covanta Essex Company,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10646,Covanta Southeastern Connecticut Company,ALL,CT,Connecticut,482,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10646,Covanta Southeastern Connecticut Company,ST,CT,Connecticut,482,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10693,Eastern Correctional Institute,ALL,MD,Maryland,4,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10693,Eastern Correctional Institute,IC,MD,Maryland,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10693,Eastern Correctional Institute,ST,MD,Maryland,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10823,Deer Island Treatment Plant,ALL,MA,Massachusetts,161,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10823,Deer Island Treatment Plant,GT,MA,Massachusetts,37,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,10823,Deer Island Treatment Plant,ST,MA,Massachusetts,124,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50002,Pittsfield Generating LP,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50002,Pittsfield Generating LP,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50002,Pittsfield Generating LP,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50006,Linden Cogen Plant,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50006,Linden Cogen Plant,CA,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50006,Linden Cogen Plant,CT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50051,Eagle Point Energy Center,ALL,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50051,Eagle Point Energy Center,ST,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50094,"Vicinity Energy Trenton, L.P.",ALL,NJ,New Jersey,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50094,"Vicinity Energy Trenton, L.P.",IC,NJ,New Jersey,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50215,York County Resource Recovery,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50215,York County Resource Recovery,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50243,Bucksport Generation LLC,ALL,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50243,Bucksport Generation LLC,GT,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50290,SEMASS Resource Recovery,ALL,MA,Massachusetts,106,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50290,SEMASS Resource Recovery,ST,MA,Massachusetts,106,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50397,Pixelle Specialty Solutions LLC - Spring,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50397,Pixelle Specialty Solutions LLC - Spring,ST,PA,Pennsylvania,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,50397,Pixelle Specialty Solutions LLC - Spring,ALL,PA,Pennsylvania,2600,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,50397,Pixelle Specialty Solutions LLC - Spring,ST,PA,Pennsylvania,2600,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50406,Somerset Plant,ALL,ME,Maine,55,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50406,Somerset Plant,ST,ME,Maine,55,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,50406,Somerset Plant,ALL,ME,Maine,2944,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,50406,Somerset Plant,ST,ME,Maine,2944,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50411,Rutgers Biomedical and Health Cogen,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50411,Rutgers Biomedical and Health Cogen,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50472,Reworld Niagara I,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50472,Reworld Niagara I,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50479,Georgia-Pacific Big Island,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50479,Georgia-Pacific Big Island,ST,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50628,Paulsboro Refinery,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50628,Paulsboro Refinery,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50649,Reworld Babylon Inc,ALL,NY,New York,247,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50649,Reworld Babylon Inc,ST,NY,New York,247,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50661,Covanta Haverhill,ALL,MA,Massachusetts,52,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50661,Covanta Haverhill,ST,MA,Massachusetts,52,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50813,Hopewell Mill,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50813,Hopewell Mill,ST,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,50813,Hopewell Mill,ALL,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,50813,Hopewell Mill,ST,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50900,Covington Facility,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,50900,Covington Facility,ST,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,50900,Covington Facility,ALL,VA,Virginia,1051,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,50900,Covington Facility,ST,VA,Virginia,1051,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,51038,MacArthur Waste to Energy Facility,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,51038,MacArthur Waste to Energy Facility,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,52019,Doswell Energy Center,ALL,VA,Virginia,20,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,52019,Doswell Energy Center,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,52019,Doswell Energy Center,CT,VA,Virginia,15,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,52019,Doswell Energy Center,GT,VA,Virginia,5,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,52024,Rhode Island Hospital,ALL,RI,Rhode Island,243,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,52024,Rhode Island Hospital,ST,RI,Rhode Island,243,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,52089,Celanese Acetate LLC,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,52089,Celanese Acetate LLC,ST,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,52152,International Paper Franklin Mill,ALL,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,52152,International Paper Franklin Mill,ST,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54099,Ticonderoga Mill,ALL,NY,New York,1841,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54099,Ticonderoga Mill,ST,NY,New York,1841,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54225,Gillette SBMC,ALL,MA,Massachusetts,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54225,Gillette SBMC,GT,MA,Massachusetts,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54225,Gillette SBMC,IC,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54225,Gillette SBMC,ST,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54225,Gillette SBMC,ALL,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54225,Gillette SBMC,GT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54228,Erving Paper Mills,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54228,Erving Paper Mills,GT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54236,Pfizer Groton Plant,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54236,Pfizer Groton Plant,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54236,Pfizer Groton Plant,ST,CT,Connecticut,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54236,Pfizer Groton Plant,ALL,CT,Connecticut,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54236,Pfizer Groton Plant,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54333,Bucknell University,ALL,PA,Pennsylvania,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54333,Bucknell University,CA,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54333,Bucknell University,CT,PA,Pennsylvania,2,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54409,Dartmouth College Heating Plant,ALL,NH,New Hampshire,4288,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54409,Dartmouth College Heating Plant,ST,NH,New Hampshire,4288,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54569,Bayville Central Facility,ALL,NJ,New Jersey,8,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54569,Bayville Central Facility,IC,NJ,New Jersey,8,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54605,Pratt & Whitney,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54605,Pratt & Whitney,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54625,Reworld Plymouth LLC,ALL,PA,Pennsylvania,819,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54625,Reworld Plymouth LLC,ST,PA,Pennsylvania,819,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54634,St Nicholas Cogen Project,ALL,PA,Pennsylvania,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54634,St Nicholas Cogen Project,ST,PA,Pennsylvania,2,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54795,Domino Sugar Baltimore,ALL,MD,Maryland,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,54795,Domino Sugar Baltimore,ST,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54829,Bristol Myers Squibb New Brunswick,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54829,Bristol Myers Squibb New Brunswick,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54829,Bristol Myers Squibb New Brunswick,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54832,Brandywine Power Facility,ALL,MD,Maryland,9,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54832,Brandywine Power Facility,CA,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54832,Brandywine Power Facility,CT,MD,Maryland,9,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54914,Brooklyn Navy Yard Cogeneration,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54914,Brooklyn Navy Yard Cogeneration,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,54914,Brooklyn Navy Yard Cogeneration,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55079,Millennium Power,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55079,Millennium Power,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55079,Millennium Power,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55317,Fore River Generating Station,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55317,Fore River Generating Station,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55317,Fore River Generating Station,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55347,Armstrong,ALL,PA,Pennsylvania,290,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55347,Armstrong,GT,PA,Pennsylvania,290,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55349,Pleasants Energy LLC,ALL,WV,West Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55349,Pleasants Energy LLC,GT,WV,West Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55375,Astoria Energy,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55375,Astoria Energy,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55375,Astoria Energy,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55381,Commonwealth Chesapeake,ALL,VA,Virginia,5757,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55381,Commonwealth Chesapeake,GT,VA,Virginia,5757,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55405,Athens Generating Plant,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55405,Athens Generating Plant,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55405,Athens Generating Plant,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55439,Tenaska Virginia Generating Station,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55439,Tenaska Virginia Generating Station,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55439,Tenaska Virginia Generating Station,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55524,York Energy Center,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55524,York Energy Center,CA,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55524,York Energy Center,CT,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55661,Newington Energy Center,ALL,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55661,Newington Energy Center,CA,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55661,Newington Energy Center,CT,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55690,Bethlehem Power Plant,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55690,Bethlehem Power Plant,CA,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55690,Bethlehem Power Plant,CT,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55710,Allegheny Energy Units 3 4 & 5,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55710,Allegheny Energy Units 3 4 & 5,CA,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55710,Allegheny Energy Units 3 4 & 5,CT,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55997,Orchard Park,ALL,PA,Pennsylvania,56,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,55997,Orchard Park,IC,PA,Pennsylvania,56,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56047,CPV Towantic Energy Center,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56047,CPV Towantic Energy Center,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56047,CPV Towantic Energy Center,CT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56196,Zeltmann,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56196,Zeltmann,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56196,Zeltmann,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56234,Caithness Long Island Energy Center,ALL,NY,New York,230,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56234,Caithness Long Island Energy Center,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56234,Caithness Long Island Energy Center,CT,NY,New York,230,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56259,Empire Generating Co LLC,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56259,Empire Generating Co LLC,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56259,Empire Generating Co LLC,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56288,Salem Water Plant,ALL,VA,Virginia,31,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56288,Salem Water Plant,IC,VA,Virginia,31,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56289,Salem Street Dept,ALL,VA,Virginia,37,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56289,Salem Street Dept,IC,VA,Virginia,37,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56785,Virginia Tech Power Plant,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56785,Virginia Tech Power Plant,ST,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56798,Kleen Energy Systems,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56798,Kleen Energy Systems,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56798,Kleen Energy Systems,CT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56807,Bear Garden,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56807,Bear Garden,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56807,Bear Garden,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56808,Virginia City Hybrid Energy Center,ALL,VA,Virginia,614,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56808,Virginia City Hybrid Energy Center,ST,VA,Virginia,614,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56940,CPV Valley Energy Center,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56940,CPV Valley Energy Center,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56940,CPV Valley Energy Center,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56964,Bayonne Energy Center,ALL,NJ,New Jersey,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,56964,Bayonne Energy Center,GT,NJ,New Jersey,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57349,Garrison Energy Center LLC,ALL,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57349,Garrison Energy Center LLC,CA,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57349,Garrison Energy Center LLC,CT,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57599,"Fort Hill 1, 2, 3 & 4",ALL,CT,Connecticut,217,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57599,"Fort Hill 1, 2, 3 & 4",IC,CT,Connecticut,217,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57605,Water Treatment 1 & 2,ALL,CT,Connecticut,69,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57605,Water Treatment 1 & 2,IC,CT,Connecticut,69,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57624,Norwich WWTP,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57624,Norwich WWTP,IC,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57664,Astoria Energy II,ALL,NY,New York,46,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57664,Astoria Energy II,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57664,Astoria Energy II,CT,NY,New York,46,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57788,US GSA Heating and Transmission,ALL,DC,District of Columbia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57788,US GSA Heating and Transmission,GT,DC,District of Columbia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57804,Middlebury College,ALL,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,57804,Middlebury College,ST,VT,Vermont,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,57804,Middlebury College,ALL,VT,Vermont,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-05,57804,Middlebury College,ST,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58153,Eastern Maine Medical Center,ALL,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58153,Eastern Maine Medical Center,GT,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58159,UCONN Cogen Facility,ALL,CT,Connecticut,44,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58159,UCONN Cogen Facility,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58159,UCONN Cogen Facility,CT,CT,Connecticut,44,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58180,UNH 7.9 MW Plant,ALL,NH,New Hampshire,9,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58180,UNH 7.9 MW Plant,GT,NH,New Hampshire,9,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58184,Rand Whitney CHP Plant,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58184,Rand Whitney CHP Plant,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58194,West Campus Steam Plant,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58194,West Campus Steam Plant,GT,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58194,West Campus Steam Plant,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58195,East Campus Steam Plant,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58195,East Campus Steam Plant,GT,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58207,Central Utility Plant at White Oak,ALL,MD,Maryland,11,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58207,Central Utility Plant at White Oak,CA,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58207,Central Utility Plant at White Oak,CT,MD,Maryland,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58207,Central Utility Plant at White Oak,GT,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58207,Central Utility Plant at White Oak,IC,MD,Maryland,9,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58584,Princeton University Cogeneration,ALL,NJ,New Jersey,3,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,58584,Princeton University Cogeneration,GT,NJ,New Jersey,3,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,59415,Backus Microgrid Project,ALL,CT,Connecticut,194,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,59415,Backus Microgrid Project,IC,CT,Connecticut,194,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,59717,Framingham State University Plant,ALL,MA,Massachusetts,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,59717,Framingham State University Plant,IC,MA,Massachusetts,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,61890,NRG Chalk Point CT,ALL,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-05,61890,NRG Chalk Point CT,GT,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,568,Bridgeport Station,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,568,Bridgeport Station,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,568,Bridgeport Station,CT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,589,J C McNeil,ALL,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,589,J C McNeil,ST,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,594,Indian River Generating Station,ALL,DE,Delaware,275,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,594,Indian River Generating Station,GT,DE,Delaware,275,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,594,Indian River Generating Station,ALL,DE,Delaware,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,594,Indian River Generating Station,GT,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,602,Brandon Shores,ALL,MD,Maryland,2810,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,602,Brandon Shores,ST,MD,Maryland,2810,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1507,William F Wyman Hybrid,ALL,ME,Maine,105,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1507,William F Wyman Hybrid,ST,ME,Maine,105,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,1507,William F Wyman Hybrid,ALL,ME,Maine,8275,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,1507,William F Wyman Hybrid,ST,ME,Maine,8275,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1554,Herbert A Wagner,ALL,MD,Maryland,40747,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1554,Herbert A Wagner,GT,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1554,Herbert A Wagner,ST,MD,Maryland,40747,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1556,Perryman,ALL,MD,Maryland,14390,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1556,Perryman,GT,MD,Maryland,14390,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1571,Chalk Point Power,ALL,MD,Maryland,7618,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1571,Chalk Point Power,GT,MD,Maryland,7618,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1571,Chalk Point Power,ST,MD,Maryland,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,1571,Chalk Point Power,ALL,MD,Maryland,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,1571,Chalk Point Power,ST,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1572,Dickerson Power,ALL,MD,Maryland,3948,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1572,Dickerson Power,GT,MD,Maryland,3948,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1573,Morgantown Generating Plant,ALL,MD,Maryland,9451,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1573,Morgantown Generating Plant,GT,MD,Maryland,9451,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1580,Easton,ALL,MD,Maryland,230,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1580,Easton,IC,MD,Maryland,230,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1595,Kendall Square Station,ALL,MA,Massachusetts,173,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1595,Kendall Square Station,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1595,Kendall Square Station,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1595,Kendall Square Station,GT,MA,Massachusetts,173,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,1595,Kendall Square Station,ALL,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,1595,Kendall Square Station,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1599,Canal,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1599,Canal,GT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,1599,Canal,ST,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,1599,Canal,ALL,MA,Massachusetts,7118,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,1599,Canal,ST,MA,Massachusetts,7118,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2364,Merrimack,ALL,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2364,Merrimack,ST,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2364,Merrimack,ALL,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2364,Merrimack,GT,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2367,Schiller,ALL,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2367,Schiller,GT,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2367,Schiller,ALL,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2367,Schiller,GT,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2406,Linden Generating Station,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2406,Linden Generating Station,CA,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2406,Linden Generating Station,CT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2406,Linden Generating Station,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2410,PSEG Salem Generating Station,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2410,PSEG Salem Generating Station,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2411,Sewaren,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2411,Sewaren,CA,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2411,Sewaren,CT,NJ,New Jersey,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2411,Sewaren,ALL,NJ,New Jersey,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2411,Sewaren,CT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2434,Howard Down,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2434,Howard Down,GT,NJ,New Jersey,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2434,Howard Down,ALL,NJ,New Jersey,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2434,Howard Down,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2493,East River,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2493,East River,GT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2493,East River,ST,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2493,East River,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2493,East River,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2500,Ravenswood,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2500,Ravenswood,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2500,Ravenswood,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2500,Ravenswood,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2511,E F Barrett,ALL,NY,New York,189,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2511,E F Barrett,GT,NY,New York,189,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2511,E F Barrett,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2511,E F Barrett,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2516,Northport,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2516,Northport,GT,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2516,Northport,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2516,Northport,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2517,Port Jefferson,ALL,NY,New York,64,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,2517,Port Jefferson,GT,NY,New York,64,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2517,Port Jefferson,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2517,Port Jefferson,ST,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2594,Oswego Harbor Power,ALL,NY,New York,23959,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2594,Oswego Harbor Power,ST,NY,New York,23959,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2625,Bowline Point,ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,2625,Bowline Point,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3118,Conemaugh,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3118,Conemaugh,IC,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3130,Seward (PA),ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3130,Seward (PA),ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3131,Shawville,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3131,Shawville,IC,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3131,Shawville,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3136,Keystone,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3136,Keystone,IC,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3136,Keystone,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3140,Brunner Island,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3140,Brunner Island,IC,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3140,Brunner Island,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3148,TalenEnergy Martins Creek,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3148,TalenEnergy Martins Creek,ST,PA,Pennsylvania,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,3148,TalenEnergy Martins Creek,ALL,PA,Pennsylvania,1567,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,3148,TalenEnergy Martins Creek,ST,PA,Pennsylvania,1567,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3149,TalenEnergy Montour,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3149,TalenEnergy Montour,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3236,Manchester Street,ALL,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3236,Manchester Street,CA,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3236,Manchester Street,CT,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3708,Ascutney,ALL,VT,Vermont,56,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3708,Ascutney,GT,VT,Vermont,56,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3734,Berlin 5,ALL,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3734,Berlin 5,GT,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3737,Essex Junction 19,ALL,VT,Vermont,8,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3737,Essex Junction 19,IC,VT,Vermont,8,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3775,Clinch River,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3775,Clinch River,ST,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3797,Chesterfield,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3797,Chesterfield,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3797,Chesterfield,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3804,Possum Point,ALL,VA,Virginia,5739,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3804,Possum Point,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3804,Possum Point,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3804,Possum Point,GT,VA,Virginia,5739,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3935,John E Amos,ALL,WV,West Virginia,7973,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3935,John E Amos,ST,WV,West Virginia,7973,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3943,FirstEnergy Fort Martin Power Station,ALL,WV,West Virginia,8972,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3943,FirstEnergy Fort Martin Power Station,ST,WV,West Virginia,8972,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3948,Mitchell (WV),ALL,WV,West Virginia,12686,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3948,Mitchell (WV),ST,WV,West Virginia,12686,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3954,Mt Storm,ALL,WV,West Virginia,2803,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,3954,Mt Storm,ST,WV,West Virginia,2803,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,4257,Easton 2,ALL,MD,Maryland,355,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,4257,Easton 2,GT,MD,Maryland,94,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,4257,Easton 2,IC,MD,Maryland,261,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,4257,Easton 2,ALL,MD,Maryland,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,4257,Easton 2,IC,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6081,Stony Brook,ALL,MA,Massachusetts,791,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6081,Stony Brook,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6081,Stony Brook,CT,MA,Massachusetts,37,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6081,Stony Brook,GT,MA,Massachusetts,754,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6081,Stony Brook,IC,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6156,New Haven Steam,ALL,CT,Connecticut,587,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6156,New Haven Steam,ST,CT,Connecticut,587,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,6156,New Haven Steam,ALL,CT,Connecticut,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,6156,New Haven Steam,ST,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6264,Mountaineer,ALL,WV,West Virginia,5035,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6264,Mountaineer,ST,WV,West Virginia,5035,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6567,Block Island,ALL,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6567,Block Island,IC,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6635,A L Pierce,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,6635,A L Pierce,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7153,Hay Road,ALL,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7153,Hay Road,CA,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7153,Hay Road,CT,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7213,Clover,ALL,VA,Virginia,810,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7213,Clover,ST,VA,Virginia,810,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7397,Falling Spring,ALL,PA,Pennsylvania,21,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7397,Falling Spring,IC,PA,Pennsylvania,21,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7839,Ladysmith,ALL,VA,Virginia,11391,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7839,Ladysmith,GT,VA,Virginia,11391,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7962,Warren F Sam Beasley Generation Station,ALL,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,7962,Warren F Sam Beasley Generation Station,GT,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,8002,Newington,ALL,NH,New Hampshire,22,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,8002,Newington,ST,NH,New Hampshire,22,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,8002,Newington,ALL,NH,New Hampshire,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,8002,Newington,ST,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,8006,Roseton Generating Facility,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,8006,Roseton Generating Facility,ST,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,8006,Roseton Generating Facility,ALL,NY,New York,28,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,8006,Roseton Generating Facility,ST,NY,New York,28,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10017,WestRock-West Point Mill,ALL,VA,Virginia,52,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10017,WestRock-West Point Mill,ST,VA,Virginia,52,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,10017,WestRock-West Point Mill,ALL,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,10017,WestRock-West Point Mill,ST,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10025,"RED-Rochester, LLC",ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10025,"RED-Rochester, LLC",ST,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,10025,"RED-Rochester, LLC",ALL,NY,New York,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,10025,"RED-Rochester, LLC",ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10029,General Electric Aircraft Engines,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10029,General Electric Aircraft Engines,ST,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,10029,General Electric Aircraft Engines,ALL,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,10029,General Electric Aircraft Engines,ST,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10030,Energy Center Dover,ALL,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10030,Energy Center Dover,GT,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10058,"Wabtec U.S Rail, Grove City Engine Plant",ALL,PA,Pennsylvania,2610,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10058,"Wabtec U.S Rail, Grove City Engine Plant",IC,PA,Pennsylvania,2610,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10108,Hampton Facility,ALL,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10108,Hampton Facility,GT,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10122,CIP II/AR Bridgewater Holdings - NJCOE,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10122,CIP II/AR Bridgewater Holdings - NJCOE,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10123,Hoffmann LaRoche,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10123,Hoffmann LaRoche,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10129,Indiana University of Pennsylvania,ALL,PA,Pennsylvania,37,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10129,Indiana University of Pennsylvania,IC,PA,Pennsylvania,37,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10224,Merck Rahway Power Plant,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10224,Merck Rahway Power Plant,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10435,Camden Resource Recovery Facility,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10435,Camden Resource Recovery Facility,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10495,Rumford Cogeneration,ALL,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10495,Rumford Cogeneration,ST,ME,Maine,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,10495,Rumford Cogeneration,ALL,ME,Maine,900,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,10495,Rumford Cogeneration,ST,ME,Maine,900,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10521,Lederle Laboratories,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10521,Lederle Laboratories,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10521,Lederle Laboratories,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10567,Algonquin Windsor Locks,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10567,Algonquin Windsor Locks,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10567,Algonquin Windsor Locks,CT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10633,Hopewell Cogeneration,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10633,Hopewell Cogeneration,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10633,Hopewell Cogeneration,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10642,Covanta Hempstead,ALL,NY,New York,551,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10642,Covanta Hempstead,ST,NY,New York,551,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10643,Covanta Essex Company,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10643,Covanta Essex Company,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10646,Covanta Southeastern Connecticut Company,ALL,CT,Connecticut,558,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10646,Covanta Southeastern Connecticut Company,ST,CT,Connecticut,558,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10693,Eastern Correctional Institute,ALL,MD,Maryland,20,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10693,Eastern Correctional Institute,IC,MD,Maryland,10,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10693,Eastern Correctional Institute,ST,MD,Maryland,10,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10823,Deer Island Treatment Plant,ALL,MA,Massachusetts,548,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10823,Deer Island Treatment Plant,GT,MA,Massachusetts,119,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,10823,Deer Island Treatment Plant,ST,MA,Massachusetts,429,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50002,Pittsfield Generating LP,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50002,Pittsfield Generating LP,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50002,Pittsfield Generating LP,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50006,Linden Cogen Plant,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50006,Linden Cogen Plant,CA,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50006,Linden Cogen Plant,CT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50051,Eagle Point Energy Center,ALL,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50051,Eagle Point Energy Center,ST,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50094,"Vicinity Energy Trenton, L.P.",ALL,NJ,New Jersey,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50094,"Vicinity Energy Trenton, L.P.",IC,NJ,New Jersey,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50215,York County Resource Recovery,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50215,York County Resource Recovery,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50243,Bucksport Generation LLC,ALL,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50243,Bucksport Generation LLC,GT,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50290,SEMASS Resource Recovery,ALL,MA,Massachusetts,10,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50290,SEMASS Resource Recovery,ST,MA,Massachusetts,10,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50397,Pixelle Specialty Solutions LLC - Spring,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50397,Pixelle Specialty Solutions LLC - Spring,ST,PA,Pennsylvania,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50397,Pixelle Specialty Solutions LLC - Spring,ALL,PA,Pennsylvania,1198,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50397,Pixelle Specialty Solutions LLC - Spring,ST,PA,Pennsylvania,1198,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50406,Somerset Plant,ALL,ME,Maine,32,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50406,Somerset Plant,ST,ME,Maine,32,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50406,Somerset Plant,ALL,ME,Maine,438,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50406,Somerset Plant,ST,ME,Maine,438,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50411,Rutgers Biomedical and Health Cogen,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50411,Rutgers Biomedical and Health Cogen,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50472,Reworld Niagara I,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50472,Reworld Niagara I,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50479,Georgia-Pacific Big Island,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50479,Georgia-Pacific Big Island,ST,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50621,Central Power Plant,ALL,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50621,Central Power Plant,GT,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50621,Central Power Plant,ST,RI,Rhode Island,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50621,Central Power Plant,ALL,RI,Rhode Island,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50621,Central Power Plant,GT,RI,Rhode Island,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50628,Paulsboro Refinery,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50628,Paulsboro Refinery,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50649,Reworld Babylon Inc,ALL,NY,New York,262,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50649,Reworld Babylon Inc,ST,NY,New York,262,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50661,Covanta Haverhill,ALL,MA,Massachusetts,138,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50661,Covanta Haverhill,ST,MA,Massachusetts,138,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50813,Hopewell Mill,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50813,Hopewell Mill,ST,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50813,Hopewell Mill,ALL,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50813,Hopewell Mill,ST,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50900,Covington Facility,ALL,VA,Virginia,83,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,50900,Covington Facility,ST,VA,Virginia,83,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50900,Covington Facility,ALL,VA,Virginia,13916,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,50900,Covington Facility,ST,VA,Virginia,13916,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,51038,MacArthur Waste to Energy Facility,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,51038,MacArthur Waste to Energy Facility,ST,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,52019,Doswell Energy Center,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,52019,Doswell Energy Center,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,52019,Doswell Energy Center,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,52019,Doswell Energy Center,GT,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,52024,Rhode Island Hospital,ALL,RI,Rhode Island,25,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,52024,Rhode Island Hospital,ST,RI,Rhode Island,25,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,52089,Celanese Acetate LLC,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,52089,Celanese Acetate LLC,ST,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,52152,International Paper Franklin Mill,ALL,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,52152,International Paper Franklin Mill,ST,VA,Virginia,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54099,Ticonderoga Mill,ALL,NY,New York,410,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54099,Ticonderoga Mill,ST,NY,New York,410,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54225,Gillette SBMC,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54225,Gillette SBMC,GT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54225,Gillette SBMC,IC,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54225,Gillette SBMC,ST,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54225,Gillette SBMC,ALL,MA,Massachusetts,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54225,Gillette SBMC,GT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54228,Erving Paper Mills,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54228,Erving Paper Mills,GT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54236,Pfizer Groton Plant,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54236,Pfizer Groton Plant,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54236,Pfizer Groton Plant,ST,CT,Connecticut,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54236,Pfizer Groton Plant,ALL,CT,Connecticut,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54236,Pfizer Groton Plant,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54333,Bucknell University,ALL,PA,Pennsylvania,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54333,Bucknell University,CA,PA,Pennsylvania,1,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54333,Bucknell University,CT,PA,Pennsylvania,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54409,Dartmouth College Heating Plant,ALL,NH,New Hampshire,3137,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54409,Dartmouth College Heating Plant,ST,NH,New Hampshire,3137,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54569,Bayville Central Facility,ALL,NJ,New Jersey,24,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54569,Bayville Central Facility,IC,NJ,New Jersey,24,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54605,Pratt & Whitney,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54605,Pratt & Whitney,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54625,Reworld Plymouth LLC,ALL,PA,Pennsylvania,1137,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54625,Reworld Plymouth LLC,ST,PA,Pennsylvania,1137,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54634,St Nicholas Cogen Project,ALL,PA,Pennsylvania,413,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54634,St Nicholas Cogen Project,ST,PA,Pennsylvania,413,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54795,Domino Sugar Baltimore,ALL,MD,Maryland,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,54795,Domino Sugar Baltimore,ST,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54829,Bristol Myers Squibb New Brunswick,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54829,Bristol Myers Squibb New Brunswick,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54829,Bristol Myers Squibb New Brunswick,ST,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54914,Brooklyn Navy Yard Cogeneration,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54914,Brooklyn Navy Yard Cogeneration,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,54914,Brooklyn Navy Yard Cogeneration,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55079,Millennium Power,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55079,Millennium Power,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55079,Millennium Power,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55317,Fore River Generating Station,ALL,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55317,Fore River Generating Station,CA,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55317,Fore River Generating Station,CT,MA,Massachusetts,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55347,Armstrong,ALL,PA,Pennsylvania,271,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55347,Armstrong,GT,PA,Pennsylvania,271,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55349,Pleasants Energy LLC,ALL,WV,West Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55349,Pleasants Energy LLC,GT,WV,West Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55375,Astoria Energy,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55375,Astoria Energy,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55375,Astoria Energy,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55381,Commonwealth Chesapeake,ALL,VA,Virginia,3738,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55381,Commonwealth Chesapeake,GT,VA,Virginia,3738,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55405,Athens Generating Plant,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55405,Athens Generating Plant,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55405,Athens Generating Plant,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55439,Tenaska Virginia Generating Station,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55439,Tenaska Virginia Generating Station,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55439,Tenaska Virginia Generating Station,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55524,York Energy Center,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55524,York Energy Center,CA,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55524,York Energy Center,CT,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55661,Newington Energy Center,ALL,NH,New Hampshire,14,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55661,Newington Energy Center,CA,NH,New Hampshire,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55661,Newington Energy Center,CT,NH,New Hampshire,14,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55690,Bethlehem Power Plant,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55690,Bethlehem Power Plant,CA,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55690,Bethlehem Power Plant,CT,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55710,Allegheny Energy Units 3 4 & 5,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55710,Allegheny Energy Units 3 4 & 5,CA,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55710,Allegheny Energy Units 3 4 & 5,CT,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55997,Orchard Park,ALL,PA,Pennsylvania,502,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,55997,Orchard Park,IC,PA,Pennsylvania,502,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56047,CPV Towantic Energy Center,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56047,CPV Towantic Energy Center,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56047,CPV Towantic Energy Center,CT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56196,Zeltmann,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56196,Zeltmann,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56196,Zeltmann,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56234,Caithness Long Island Energy Center,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56234,Caithness Long Island Energy Center,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56234,Caithness Long Island Energy Center,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56259,Empire Generating Co LLC,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56259,Empire Generating Co LLC,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56259,Empire Generating Co LLC,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56288,Salem Water Plant,ALL,VA,Virginia,38,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56288,Salem Water Plant,IC,VA,Virginia,38,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56289,Salem Street Dept,ALL,VA,Virginia,35,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56289,Salem Street Dept,IC,VA,Virginia,35,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56785,Virginia Tech Power Plant,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56785,Virginia Tech Power Plant,ST,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56798,Kleen Energy Systems,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56798,Kleen Energy Systems,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56798,Kleen Energy Systems,CT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56807,Bear Garden,ALL,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56807,Bear Garden,CA,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56807,Bear Garden,CT,VA,Virginia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56808,Virginia City Hybrid Energy Center,ALL,VA,Virginia,885,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56808,Virginia City Hybrid Energy Center,ST,VA,Virginia,885,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56940,CPV Valley Energy Center,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56940,CPV Valley Energy Center,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56940,CPV Valley Energy Center,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56964,Bayonne Energy Center,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,56964,Bayonne Energy Center,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57349,Garrison Energy Center LLC,ALL,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57349,Garrison Energy Center LLC,CA,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57349,Garrison Energy Center LLC,CT,DE,Delaware,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57599,"Fort Hill 1, 2, 3 & 4",ALL,CT,Connecticut,86,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57599,"Fort Hill 1, 2, 3 & 4",IC,CT,Connecticut,86,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57605,Water Treatment 1 & 2,ALL,CT,Connecticut,37,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57605,Water Treatment 1 & 2,IC,CT,Connecticut,37,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57624,Norwich WWTP,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57624,Norwich WWTP,IC,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57664,Astoria Energy II,ALL,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57664,Astoria Energy II,CA,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57664,Astoria Energy II,CT,NY,New York,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57788,US GSA Heating and Transmission,ALL,DC,District of Columbia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57788,US GSA Heating and Transmission,GT,DC,District of Columbia,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57804,Middlebury College,ALL,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,57804,Middlebury College,ST,VT,Vermont,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,57804,Middlebury College,ALL,VT,Vermont,0,barrels
+RFO,Residual Fuel Oil,RFO,Residual Fuel Oil,2026-06,57804,Middlebury College,ST,VT,Vermont,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58153,Eastern Maine Medical Center,ALL,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58153,Eastern Maine Medical Center,GT,ME,Maine,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58159,UCONN Cogen Facility,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58159,UCONN Cogen Facility,CA,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58159,UCONN Cogen Facility,CT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58180,UNH 7.9 MW Plant,ALL,NH,New Hampshire,151,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58180,UNH 7.9 MW Plant,GT,NH,New Hampshire,151,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58184,Rand Whitney CHP Plant,ALL,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58184,Rand Whitney CHP Plant,GT,CT,Connecticut,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58194,West Campus Steam Plant,ALL,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58194,West Campus Steam Plant,GT,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58194,West Campus Steam Plant,ST,PA,Pennsylvania,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58195,East Campus Steam Plant,ALL,PA,Pennsylvania,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58195,East Campus Steam Plant,GT,PA,Pennsylvania,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58207,Central Utility Plant at White Oak,ALL,MD,Maryland,71,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58207,Central Utility Plant at White Oak,CA,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58207,Central Utility Plant at White Oak,CT,MD,Maryland,2,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58207,Central Utility Plant at White Oak,GT,MD,Maryland,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58207,Central Utility Plant at White Oak,IC,MD,Maryland,69,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58584,Princeton University Cogeneration,ALL,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,58584,Princeton University Cogeneration,GT,NJ,New Jersey,0,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,59415,Backus Microgrid Project,ALL,CT,Connecticut,132,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,59415,Backus Microgrid Project,IC,CT,Connecticut,132,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,59717,Framingham State University Plant,ALL,MA,Massachusetts,8,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,59717,Framingham State University Plant,IC,MA,Massachusetts,8,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,61890,NRG Chalk Point CT,ALL,MD,Maryland,4195,barrels
+DFO,Distillate Fuel Oil,DFO,Distillate Fuel Oil,2026-06,61890,NRG Chalk Point CT,GT,MD,Maryland,4195,barrels

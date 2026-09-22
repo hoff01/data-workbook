@@ -1,88 +1,88 @@
 {
   "balances": {
     "diesel": {
-      "generated_at": "2026-09-01T04:22:29.858Z",
-      "latest_monthly": "2026-05-15",
-      "latest_weekly": "2026-08-21",
+      "generated_at": "2026-09-22T01:03:49.972Z",
+      "latest_monthly": "2026-06-15",
+      "latest_weekly": "2026-09-11",
       "path": "Diesel_Balance/manifest.json"
     },
     "jet": {
-      "generated_at": "2026-09-01T04:22:29.998Z",
-      "latest_monthly": "2026-05-15",
-      "latest_weekly": "2026-08-21",
+      "generated_at": "2026-09-22T01:03:50.122Z",
+      "latest_monthly": "2026-06-15",
+      "latest_weekly": "2026-09-11",
       "path": "Jet_Balance/manifest.json"
     }
   },
   "checks": [
     {
-      "columns": 53,
+      "columns": 49,
       "exists": true,
-      "max_date": "2026-08-21",
+      "max_date": "2026-09-11",
       "min_date": "2016-01-01",
       "name": "eia_weekly_diesel",
       "path": "eia_weekly/diesel.csv",
-      "rows": 556,
+      "rows": 559,
       "status": "pass"
     },
     {
-      "columns": 49,
+      "columns": 45,
       "exists": true,
-      "max_date": "2026-08-21",
+      "max_date": "2026-09-11",
       "min_date": "2016-01-01",
       "name": "eia_weekly_jet",
       "path": "eia_weekly/jet.csv",
-      "rows": 556,
+      "rows": 559,
       "status": "pass"
     },
     {
       "latest_by_product": {
-        "diesel": "2026-08-21",
-        "jet": "2026-08-21"
+        "diesel": "2026-09-11",
+        "jet": "2026-09-11"
       },
       "name": "eia_weekly_latest_aligned",
       "status": "pass"
     },
     {
-      "latest": "2026-08-21",
+      "latest": "2026-09-11",
       "max_allowed_age_days": 14,
       "name": "eia_weekly_freshness",
       "status": "pass",
-      "today": "2026-09-01"
+      "today": "2026-09-21"
     },
     {
-      "columns": 232,
+      "columns": 220,
       "exists": true,
-      "max_date": "2026-05-15",
+      "max_date": "2026-06-15",
       "min_date": "2016-01-15",
       "name": "eia_monthly_diesel",
       "path": "eia_monthly/diesel.csv",
-      "rows": 125,
+      "rows": 126,
       "status": "pass"
     },
     {
-      "columns": 225,
+      "columns": 213,
       "exists": true,
-      "max_date": "2026-05-15",
+      "max_date": "2026-06-15",
       "min_date": "2016-01-15",
       "name": "eia_monthly_jet",
       "path": "eia_monthly/jet.csv",
-      "rows": 125,
+      "rows": 126,
       "status": "pass"
     },
     {
       "latest_by_product": {
-        "diesel": "2026-05-15",
-        "jet": "2026-05-15"
+        "diesel": "2026-06-15",
+        "jet": "2026-06-15"
       },
       "name": "eia_monthly_latest_aligned",
       "status": "pass"
     },
     {
-      "latest": "2026-05-15",
+      "latest": "2026-06-15",
       "max_allowed_age_days": 150,
       "name": "eia_monthly_freshness",
       "status": "pass",
-      "today": "2026-09-01"
+      "today": "2026-09-21"
     },
     {
       "fallback_active": false,
@@ -98,7 +98,7 @@
       "max_allowed_age_days": 7,
       "name": "kpler_freshness",
       "status": "warn",
-      "today": "2026-09-01"
+      "today": "2026-09-21"
     },
     {
       "fallback_active": false,
@@ -114,7 +114,7 @@
       "max_allowed_age_days": 7,
       "name": "kpler_padd1_eia_split_freshness",
       "status": "warn",
-      "today": "2026-09-01"
+      "today": "2026-09-21"
     },
     {
       "current_month": "2026-09",
@@ -153,32 +153,32 @@
       "template": "eia_capacity/manual_capacity_template.csv"
     },
     {
-      "balance_monthly": "2026-05-15",
-      "balance_weekly": "2026-08-21",
-      "eia_monthly": "2026-05-15",
-      "eia_weekly": "2026-08-21",
+      "balance_monthly": "2026-06-15",
+      "balance_weekly": "2026-09-11",
+      "eia_monthly": "2026-06-15",
+      "eia_weekly": "2026-09-11",
       "name": "diesel_balance_latest",
       "status": "pass"
     },
     {
-      "balance_monthly": "2026-05-15",
-      "balance_weekly": "2026-08-21",
-      "eia_monthly": "2026-05-15",
-      "eia_weekly": "2026-08-21",
+      "balance_monthly": "2026-06-15",
+      "balance_weekly": "2026-09-11",
+      "eia_monthly": "2026-06-15",
+      "eia_weekly": "2026-09-11",
       "name": "jet_balance_latest",
       "status": "pass"
     },
     {
       "name": "power_generation_dfo",
-      "run_end": "2026-07-14",
-      "status": "warn",
-      "today": "2026-09-01"
+      "run_end": "2026-09-22",
+      "status": "pass",
+      "today": "2026-09-21"
     },
     {
-      "generated_day": "2026-07-14",
+      "generated_day": "2026-09-22",
       "name": "power_generation_dfo_hourly",
-      "status": "warn",
-      "today": "2026-09-01"
+      "status": "pass",
+      "today": "2026-09-21"
     },
     {
       "crlf_files": [],
@@ -193,7 +193,7 @@
     "eia_monthly_rows": 202272,
     "end_month": "2026-09",
     "forward_fill": "Annual EIA downstream charge capacity values are assigned to every month in their source year and carried forward until a newer annual value exists.",
-    "generated_at": "2026-09-01T04:03:55.667050+00:00",
+    "generated_at": "2026-09-22T01:01:55.951993+00:00",
     "high_level_monthly_rows": 94815,
     "high_level_wide_rows": 129,
     "manual_forward_fill": "Rows in eia_capacity/manual_capacity.csv are forward-filled monthly from period_month or source_year and override EIA rows with the same period_month and series_id.",
@@ -215,9 +215,9 @@
     },
     "pipeline_name": "eia_downstream_charge_capacity",
     "raw_zip": {
-      "bytes": 54849392,
+      "bytes": 55368803,
       "path": "eia_capacity/raw/PET_capacity_bulk.zip",
-      "sha256": "bb27200883a33f897488bc766490830f1a088957d38be0170d3cccb699273731"
+      "sha256": "a0ce3005bee89cf074f13531e7c524062b585637bd5fd62aa22fdd79d271495d"
     },
     "series_count": 1568,
     "source_url": "https://api.eia.gov/bulk/PET.zip",
@@ -226,41 +226,41 @@
   },
   "eia_monthly": {
     "diesel": {
-      "columns": 232,
+      "columns": 220,
       "exists": true,
-      "max_date": "2026-05-15",
+      "max_date": "2026-06-15",
       "min_date": "2016-01-15",
       "path": "eia_monthly/diesel.csv",
-      "rows": 125
+      "rows": 126
     },
     "jet": {
-      "columns": 225,
+      "columns": 213,
       "exists": true,
-      "max_date": "2026-05-15",
+      "max_date": "2026-06-15",
       "min_date": "2016-01-15",
       "path": "eia_monthly/jet.csv",
-      "rows": 125
+      "rows": 126
     }
   },
   "eia_weekly": {
     "diesel": {
-      "columns": 53,
-      "exists": true,
-      "max_date": "2026-08-21",
-      "min_date": "2016-01-01",
-      "path": "eia_weekly/diesel.csv",
-      "rows": 556
-    },
-    "jet": {
       "columns": 49,
       "exists": true,
-      "max_date": "2026-08-21",
+      "max_date": "2026-09-11",
+      "min_date": "2016-01-01",
+      "path": "eia_weekly/diesel.csv",
+      "rows": 559
+    },
+    "jet": {
+      "columns": 45,
+      "exists": true,
+      "max_date": "2026-09-11",
       "min_date": "2016-01-01",
       "path": "eia_weekly/jet.csv",
-      "rows": 556
+      "rows": 559
     }
   },
-  "generated_at": "2026-09-01T04:24:54.394825+00:00",
+  "generated_at": "2026-09-22T01:03:50.228907+00:00",
   "kpler": {
     "fallback": {},
     "generated_at": "2026-07-14T03:24:23.233809+00:00",
@@ -281,27 +281,27 @@
     "rows": 12668
   },
   "power_generation_dfo": {
-    "generated_at": "2026-07-14T03:25:24.532736+00:00",
+    "generated_at": "2026-09-22T01:02:46.157461+00:00",
     "path": "power_generation_dfo/manifest.json",
     "row_counts": {
       "annual_factors": 7,
-      "calibration_months": 100,
-      "daily_2026_estimates": 193,
-      "daily_estimates": 2704,
-      "daily_generation": 2704,
-      "facility_raw": 106459,
-      "monthly_estimates": 91,
-      "monthly_facility": 200,
-      "rto_raw": 5294
+      "calibration_months": 102,
+      "daily_2026_estimates": 263,
+      "daily_estimates": 2774,
+      "daily_generation": 2774,
+      "facility_raw": 107321,
+      "monthly_estimates": 93,
+      "monthly_facility": 204,
+      "rto_raw": 5407
     },
-    "run_end": "2026-07-14"
+    "run_end": "2026-09-22"
   },
   "power_generation_dfo_hourly": {
-    "generated_at": "2026-07-14T03:26:16.687352+00:00",
+    "generated_at": "2026-09-22T01:03:06.403978+00:00",
     "path": "power_generation_dfo/hourly_forecast_manifest.json",
     "row_counts": {
       "forecast_rows": 24,
-      "model_input": 10821,
+      "model_input": 10907,
       "oil_raw": 20000,
       "region_raw": 40000,
       "weather_rows": 336
@@ -313,8 +313,8 @@
   },
   "status": "pass",
   "summary": {
-    "pass": 18,
-    "warn": 4
+    "pass": 20,
+    "warn": 2
   },
-  "today": "2026-09-01"
+  "today": "2026-09-21"
 }

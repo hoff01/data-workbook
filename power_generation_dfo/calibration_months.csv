@@ -99,3 +99,5 @@ month_start,year,padd1_dfo_consumption,padd1_ne_oil_mwh,dfo_consumption_per_oil_
 2026-02-01,2026,1673530.000000,1185685.000000,1.411445704382,0.89371840,true,
 2026-03-01,2026,115081.000000,276225.000000,0.416620508643,0.89524420,false,outside_top_20_target_factor_correlation_selection
 2026-04-01,2026,104976.000000,420283.000000,0.249774556668,0.89414283,false,outside_top_20_target_factor_correlation_selection
+2026-05-01,2026,278189.000000,446900.000000,0.622486014768,0.89289996,false,outside_top_20_target_factor_correlation_selection
+2026-06-01,2026,153892.000000,495893.000000,0.310333075885,0.89956030,false,outside_top_20_target_factor_correlation_selection
